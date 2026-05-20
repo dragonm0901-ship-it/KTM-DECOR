@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="100%" height="100%">
+  <!-- Background with dark premium gradient -->
+  <defs>
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#090a0f" />
+      <stop offset="50%" stop-color="#121420" />
+      <stop offset="100%" stop-color="#1a1c2e" />
+    </linearGradient>
+    <linearGradient id="glow-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ff007f" />
+      <stop offset="50%" stop-color="#7928ca" />
+      <stop offset="100%" stop-color="#00dfd8" />
+    </linearGradient>
+    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255, 255, 255, 0.02)" stroke-width="1" />
+    </pattern>
+  </defs>
+  
+  <rect width="100%" height="100%" fill="url(#bg-grad)" />
+  <rect width="100%" height="100%" fill="url(#grid)" />
+  
+  <!-- Subtle ambient glow in the center -->
+  <circle cx="200" cy="230" r="100" fill="#7928ca" opacity="0.1" filter="blur(50px)" />
+  
+  <!-- Inner border -->
+  <rect x="20" y="20" width="360" height="460" rx="4" fill="none" stroke="rgba(255, 255, 255, 0.05)" stroke-width="1" />
+  
+  <!-- Camera/Placeholder Icon -->
+  <g transform="translate(160, 190)" stroke="url(#glow-grad)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.7">
+    <path d="M23 19a6 6 0 1 0-12 0" />
+    <rect x="5" y="9" width="70" height="50" rx="5" />
+    <circle cx="40" cy="34" r="14" />
+    <path d="M57 9l-3-5H26l-3 5" />
+  </g>
+
+  <!-- Typography -->
+  <text x="200" y="350" text-anchor="middle" font-family="'Outfit', 'Inter', sans-serif" font-weight="900" font-size="14" letter-spacing="4" fill="#ffffff" opacity="0.95">KTM DECOR</text>
+  <text x="200" y="375" text-anchor="middle" font-family="'Outfit', 'Inter', sans-serif" font-weight="700" font-size="10" letter-spacing="3" fill="url(#glow-grad)" opacity="0.8">IMAGE PLACEHOLDER</text>
+  <text x="200" y="405" text-anchor="middle" font-family="monospace" font-size="9" fill="rgba(255,255,255,0.25)">IMAGE UPLOAD PENDING</text>
+</svg>

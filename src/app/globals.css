@@ -1,0 +1,482 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@property --c5-x1 { syntax: '<percentage>'; inherits: false; initial-value: 10%; }
+@property --c5-y1 { syntax: '<percentage>'; inherits: false; initial-value: 10%; }
+@property --c5-x2 { syntax: '<percentage>'; inherits: false; initial-value: 90%; }
+@property --c5-y2 { syntax: '<percentage>'; inherits: false; initial-value: 10%; }
+@property --c5-x3 { syntax: '<percentage>'; inherits: false; initial-value: 10%; }
+@property --c5-y3 { syntax: '<percentage>'; inherits: false; initial-value: 90%; }
+@property --c5-x4 { syntax: '<percentage>'; inherits: false; initial-value: 90%; }
+@property --c5-y4 { syntax: '<percentage>'; inherits: false; initial-value: 90%; }
+@property --c5-x5 { syntax: '<percentage>'; inherits: false; initial-value: 50%; }
+@property --c5-y5 { syntax: '<percentage>'; inherits: false; initial-value: 50%; }
+@property --c5-s1 { syntax: '<percentage>'; inherits: false; initial-value: 55%; }
+@property --c5-s2 { syntax: '<percentage>'; inherits: false; initial-value: 55%; }
+@property --c5-s3 { syntax: '<percentage>'; inherits: false; initial-value: 55%; }
+@property --c5-s4 { syntax: '<percentage>'; inherits: false; initial-value: 55%; }
+@property --c5-s5 { syntax: '<percentage>'; inherits: false; initial-value: 65%; }
+
+.c5-animated-gradient {
+  background-color: #fe914c;
+  background-image:
+    radial-gradient(circle at var(--c5-x1) var(--c5-y1), #ffb885 0px, transparent var(--c5-s1)),
+    radial-gradient(circle at var(--c5-x2) var(--c5-y2), #ff6a00 0px, transparent var(--c5-s2)),
+    radial-gradient(circle at var(--c5-x3) var(--c5-y3), #ff8c00 0px, transparent var(--c5-s3)),
+    radial-gradient(circle at var(--c5-x4) var(--c5-y4), #ff7300 0px, transparent var(--c5-s4)),
+    radial-gradient(circle at var(--c5-x5) var(--c5-y5), #ff5100 0px, transparent var(--c5-s5));
+  animation:
+    c5-blob1 5s ease-in-out infinite,
+    c5-blob2 6s ease-in-out infinite,
+    c5-blob3 5.5s ease-in-out infinite,
+    c5-blob4 6.5s ease-in-out infinite,
+    c5-blob5 4s ease-in-out infinite,
+    c5-size1 3.5s ease-in-out infinite,
+    c5-size2 4.2s ease-in-out infinite,
+    c5-size3 3.8s ease-in-out infinite,
+    c5-size4 4.6s ease-in-out infinite,
+    c5-size5 3s ease-in-out infinite;
+}
+
+@keyframes c5-blob1 {
+  0%,100% { --c5-x1: 5%;  --c5-y1: 5%;  }
+  25%     { --c5-x1: 45%; --c5-y1: 20%; }
+  50%     { --c5-x1: 30%; --c5-y1: 55%; }
+  75%     { --c5-x1: 0%;  --c5-y1: 30%; }
+}
+@keyframes c5-blob2 {
+  0%,100% { --c5-x2: 95%; --c5-y2: 5%;  }
+  33%     { --c5-x2: 55%; --c5-y2: 35%; }
+  66%     { --c5-x2: 80%; --c5-y2: 65%; }
+}
+@keyframes c5-blob3 {
+  0%,100% { --c5-x3: 5%;  --c5-y3: 95%; }
+  40%     { --c5-x3: 45%; --c5-y3: 65%; }
+  70%     { --c5-x3: 25%; --c5-y3: 100%; }
+}
+@keyframes c5-blob4 {
+  0%,100% { --c5-x4: 95%; --c5-y4: 95%; }
+  30%     { --c5-x4: 60%; --c5-y4: 70%; }
+  60%     { --c5-x4: 100%; --c5-y4: 50%; }
+}
+@keyframes c5-blob5 {
+  0%,100% { --c5-x5: 50%; --c5-y5: 50%; }
+  25%     { --c5-x5: 70%; --c5-y5: 30%; }
+  50%     { --c5-x5: 40%; --c5-y5: 70%; }
+  75%     { --c5-x5: 30%; --c5-y5: 40%; }
+}
+
+@keyframes c5-size1 { 0%,100% { --c5-s1: 45%; } 50% { --c5-s1: 80%; } }
+@keyframes c5-size2 { 0%,100% { --c5-s2: 45%; } 50% { --c5-s2: 85%; } }
+@keyframes c5-size3 { 0%,100% { --c5-s3: 45%; } 50% { --c5-s3: 78%; } }
+@keyframes c5-size4 { 0%,100% { --c5-s4: 45%; } 50% { --c5-s4: 82%; } }
+@keyframes c5-size5 { 0%,100% { --c5-s5: 50%; } 50% { --c5-s5: 85%; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .c5-animated-gradient { animation: none; }
+}
+/* ─── Design Tokens ─────────────────────────────────────── */
+:root {
+  --background: #F2F2F2;
+  --card: #FFFFFF;
+  --foreground: #000000;
+  --muted: #666666;
+  --border: rgba(0, 0, 0, 0.08);
+  --accent: #FE914C;
+  --accent-light: #FFA46A;
+  --accent-dark: #E2752D;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-display: "Outfit", system-ui, -apple-system, sans-serif;
+
+  /* Radius Tokens - Strict 4px as requested */
+  --radius-lg: 4px;
+  --radius-md: 4px;
+  --radius-sm: 4px;
+
+  /* Fluid spacing */
+  --space-xs: clamp(0.25rem, 0.5vw, 0.5rem);
+  --space-sm: clamp(0.5rem, 1vw, 1rem);
+  --space-md: clamp(1rem, 2vw, 2rem);
+  --space-lg: clamp(2rem, 4vw, 4rem);
+  --space-xl: clamp(4rem, 8vw, 8rem);
+
+  /* Easing */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* Header height */
+  --header-height: 80px;
+}
+
+.dark {
+  --background: #050505;
+  --card: #0F0F0F;
+  --foreground: #F2F2F2;
+  --muted: #A1A1AA;
+  --border: rgba(255, 255, 255, 0.1);
+}
+
+/* ─── View Transition ───────────────────────────────────── */
+
+[data-magicui-theme-vt="active"]::view-transition-old(root) {
+  animation: none;
+  z-index: -1;
+}
+
+[data-magicui-theme-vt="active"]::view-transition-new(root) {
+  animation: none;
+  z-index: 1;
+}
+
+/* ─── Base Styles ───────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+h1, h2, h3, h4, h5, h6, .font-display {
+  font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  transition: background-color 0.5s var(--ease-out-expo),
+              color 0.3s var(--ease-out-expo);
+}
+
+::selection {
+  background: var(--foreground);
+  color: var(--background);
+}
+
+/* ─── Scrollbar ─────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+}
+
+/* ─── Preloader Lock ────────────────────────────────────── */
+html.is-loading {
+  overflow: hidden;
+}
+
+html.is-loading #header-logo {
+  opacity: 0;
+  pointer-events: none;
+}
+
+html.is-loading body {
+  overflow: hidden;
+}
+
+/* Solid cover behind the preloader — blocks ALL page content from showing */
+html.is-loading body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #F2F2F2;
+  z-index: 9998;
+}
+
+.dark.is-loading body::before {
+  background: #050505;
+}
+
+/* ─── Text Split Mask ───────────────────────────────────── */
+.line-mask {
+  overflow: hidden;
+  display: block;
+}
+
+.line-mask > span,
+.line-mask > div {
+  display: block;
+  will-change: transform;
+}
+
+/* ─── Magnetic Button ───────────────────────────────────── */
+.magnetic-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  will-change: transform;
+  transition: transform 0.3s var(--ease-out-expo);
+}
+
+.magnetic-btn::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: inherit;
+  z-index: -1;
+}
+
+/* ─── Image Reveal ──────────────────────────────────────── */
+.img-reveal {
+  overflow: hidden;
+  position: relative;
+}
+
+.img-reveal img,
+.img-reveal video {
+  transition: transform 0.8s var(--ease-out-expo);
+}
+
+.img-reveal:hover img,
+.img-reveal:hover video {
+  transform: scale(1.05);
+}
+
+/* ─── Utilities ─────────────────────────────────────────── */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .gpu {
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+  }
+
+  .mask-edges-x {
+    -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+  }
+  
+  .mask-edges-y {
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+    mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+  }
+}
+
+/* ─── Smooth Link Underline ─────────────────────────────── */
+.link-underline {
+  position: relative;
+  text-decoration: none;
+}
+
+.link-underline::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s var(--ease-out-expo);
+}
+
+.link-underline:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Marquee Hover Control */
+.marquee-container:hover .animate-marquee-x,
+.marquee-container:hover .animate-marquee-x-reverse {
+  animation-play-state: paused;
+}
+
+/* No Scrollbar */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+html {
+  view-transition-name: root;
+}
+
+/* GPU-Accelerated Laser Sheen Shimmer Animation */
+@keyframes laser-sheen {
+  0% {
+    transform: translateX(-150%) skewX(-12deg);
+  }
+  30% {
+    transform: translateX(150%) skewX(-12deg);
+  }
+  100% {
+    transform: translateX(150%) skewX(-12deg);
+  }
+}
+
+.animate-laser-sheen {
+  animation: laser-sheen 4.5s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+  will-change: transform;
+}
+
+/* CNC Blueprint Drafting Grid Pattern - Standard Base Layer */
+/* Mobile First: smaller, delicate 1.2px dots */
+.bg-cnc-grid {
+  background-image: radial-gradient(circle, rgba(254, 145, 76, 0.38) 1.2px, transparent 1.2px);
+  background-size: 24px 24px;
+}
+
+/* Hover Highlight Layer - Disabled on Mobile by default */
+.bg-cnc-grid-hover {
+  display: none;
+}
+
+/* Subpixel Mouse-Tracking Radial Mask - Disabled on Mobile by default */
+.grid-hover-layer {
+  display: none;
+}
+
+/* Desktop Polish & Interactive Overlays */
+@media (min-width: 1024px) {
+  /* Scale up base grid dots to 2px for desktop viewports */
+  .bg-cnc-grid {
+    background-image: radial-gradient(circle, rgba(254, 145, 76, 0.38) 2px, transparent 2px);
+  }
+
+  /* Enable hover highlight grid layer on desktop */
+  .bg-cnc-grid-hover {
+    display: block;
+    background-image: radial-gradient(circle, rgba(254, 145, 76, 0.95) 3.5px, transparent 3.5px);
+    background-size: 24px 24px;
+  }
+
+  /* Activate active cursor tracking radial mask */
+  .grid-hover-layer {
+    display: block;
+    mask-image: radial-gradient(
+      circle 180px at var(--grid-mouse-x, -9999px) var(--grid-mouse-y, -9999px),
+      black 20%,
+      transparent 100%
+    );
+    -webkit-mask-image: radial-gradient(
+      circle 180px at var(--grid-mouse-x, -9999px) var(--grid-mouse-y, -9999px),
+      black 20%,
+      transparent 100%
+    );
+    opacity: var(--grid-hover-opacity, 0);
+    transition: opacity 0.4s ease;
+  }
+}
+
+/* GPU-Accelerated Dotted Grid Breathing Pulse */
+@keyframes pulse-dots {
+  0% {
+    transform: scale(0.97);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.03);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.97);
+    opacity: 0.8;
+  }
+}
+
+.animate-pulse-dots {
+  animation: pulse-dots 6s ease-in-out infinite;
+  will-change: transform, opacity;
+  transform-origin: center center;
+}
+
+/* ─── E-Commerce Animations & Transitions ───────────────── */
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes scale-up {
+  from {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-scale-up {
+  animation: scale-up 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Custom social hover colors & gradients for nav menu */
+.hover-instagram {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.hover-instagram:hover {
+  background: linear-gradient(45deg, #FFD600 0%, #FF7A00 35%, #FF0069 65%, #D300C5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hover-facebook {
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+.hover-facebook:hover {
+  color: #1877F2 !important;
+}
+
+.hover-tiktok {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.hover-tiktok:hover {
+  background: linear-gradient(to right, #000000 0%, #fe2c55 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Footer social links hover states */
+.footer-social-fb:hover {
+  background-color: #1877F2 !important;
+  border-color: #1877F2 !important;
+  color: #ffffff !important;
+}
+
+.footer-social-ig:hover {
+  background: linear-gradient(45deg, #ffd600 0%, #ff7a00 35%, #ff0069 65%, #d300c5 100%) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+}
+
+.footer-social-tt:hover {
+  background-color: #000000 !important;
+  border-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+.footer-social-tt:hover svg {
+  filter: drop-shadow(-1.5px -0.5px 0 #00f2ea) drop-shadow(1.5px 0.5px 0 #fe2c55) !important;
+}
