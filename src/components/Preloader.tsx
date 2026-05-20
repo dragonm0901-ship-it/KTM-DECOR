@@ -91,9 +91,21 @@ export default function Preloader() {
   useEffect(() => {
     if (!isDone) return;
 
+    // ── Safety timeout: if the exit animation stalls (mobile GPU hiccups,
+    //    Lenis conflict, etc.) we MUST unlock the page within 6 seconds.
+    const safetyTimer = setTimeout(() => {
+      document.documentElement.classList.remove("is-loading");
+      if (logoWrapperRef.current) {
+        gsap.set(logoWrapperRef.current, { opacity: 0 });
+      }
+      setIsHidden(true);
+      preloaderHasRun = true;
+    }, 6000);
+
     const tl = gsap.timeline({
       delay: 0.2,
       onComplete: () => {
+        clearTimeout(safetyTimer);
         // Hide preloader logo instantly when unmounting the preloader
         if (logoWrapperRef.current) {
           gsap.set(logoWrapperRef.current, { opacity: 0 });
@@ -106,22 +118,48 @@ export default function Preloader() {
 
     const headerLogo = document.getElementById("header-logo");
 
-    if (headerLogo && preloaderImgRef.current && logoWrapperRef.current) {
-      // Calculate viewport coordinates for the flight path using the exact image bounds
+    if (headerLogo && logoWrapperRef.current) {
+      // ── Measure both elements in viewport coordinates ──
       const headerRect = headerLogo.getBoundingClientRect();
-      const preloaderRect = preloaderImgRef.current.getBoundingClientRect();
 
-      // Find the viewport center points for both images
+      // Use the logo WRAPPER rect (the element we actually animate),
+      // NOT the inner clipped img. The wrapper includes the pop scale (1.05)
+      // applied by the completion animation, which GSAP accounts for
+      // automatically when we set a new `scale` target.
+      const wrapperRect = logoWrapperRef.current.getBoundingClientRect();
+
+      // Get the active zoom factor. Under CSS zoom, `translate` values must be
+      // divided by the zoom factor because transforms are applied in the zoomed coordinate space,
+      // whereas getBoundingClientRect() returns physical screen coordinates.
+      const getZoom = () => {
+        if (typeof window === "undefined") return 1;
+        const htmlStyle = window.getComputedStyle(document.documentElement);
+        const zoomVal = htmlStyle.zoom;
+        if (zoomVal) {
+          const parsed = parseFloat(zoomVal);
+          if (!isNaN(parsed)) return parsed;
+        }
+        return window.innerWidth >= 1024 ? 0.8 : 1;
+      };
+      const zoom = getZoom();
+
+      // Find the viewport center points for both elements
       const headerCenterX = headerRect.left + headerRect.width / 2;
       const headerCenterY = headerRect.top + headerRect.height / 2;
 
-      const preloaderCenterX = preloaderRect.left + preloaderRect.width / 2;
-      const preloaderCenterY = preloaderRect.top + preloaderRect.height / 2;
+      const wrapperCenterX = wrapperRect.left + wrapperRect.width / 2;
+      const wrapperCenterY = wrapperRect.top + wrapperRect.height / 2;
 
-      // Compute translation delta offsets and scale factor based on image drawing widths
-      const deltaX = headerCenterX - preloaderCenterX;
-      const deltaY = headerCenterY - preloaderCenterY;
-      const scale = headerRect.width / preloaderRect.width;
+      // Compute translation delta offsets adjusted for the CSS zoom factor
+      const deltaX = (headerCenterX - wrapperCenterX) / zoom;
+      const deltaY = (headerCenterY - wrapperCenterY) / zoom;
+
+      // Get the un-transformed (natural) wrapper size to compute scale correctly.
+      // The wrapper is currently at scale 1.05 from the pop effect, so the
+      // actual CSS width is wrapperRect.width / 1.05.
+      const currentScale = gsap.getProperty(logoWrapperRef.current, "scaleX") as number || 1;
+      const naturalWidth = wrapperRect.width / currentScale;
+      const scale = headerRect.height / (naturalWidth); // match height since logo is square container
 
       // 1. Fade out percentages
       tl.to(percentageRef.current, {
@@ -192,7 +230,10 @@ export default function Preloader() {
       "<"
     );
 
-    return () => { tl.kill(); };
+    return () => {
+      clearTimeout(safetyTimer);
+      tl.kill();
+    };
   }, [isDone]);
 
   // Don't render anything if session already loaded
