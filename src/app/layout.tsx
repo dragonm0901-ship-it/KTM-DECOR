@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -38,6 +38,12 @@ export const metadata: Metadata = {
       "Looking for the best custom LED neon signs, 3D acrylic letters, and premium light boards in Kathmandu, Nepal? KTM Decor crafts high-quality, affordable business signage and home decor.",
     type: "website",
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({
