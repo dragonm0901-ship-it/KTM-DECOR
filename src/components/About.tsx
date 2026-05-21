@@ -119,7 +119,6 @@ export default function About() {
                 ? 'grayscale opacity-30 contrast-[1.1]' 
                 : 'grayscale opacity-45'
             }`}
-            priority
           />
           {/* Soft uniform overlay to ensure optimal contrast and premium integration */}
           <div className="absolute inset-0 bg-background/5 dark:bg-background/10 transition-colors duration-500" />
@@ -216,7 +215,6 @@ export default function About() {
                 alt={item.title}
                 fill
                 className="object-cover object-center grayscale contrast-[1.1]"
-                priority={idx === 0}
               />
             </div>
           ))}

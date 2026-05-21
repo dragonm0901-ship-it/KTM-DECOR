@@ -139,7 +139,6 @@ export default function BeforeAfter() {
                     src={activeData.afterImage}
                     alt="Final Illuminated Neon Sign"
                     fill
-                    priority
                     className="object-cover pointer-events-none"
                     sizes="(max-width: 1024px) 100vw, 1200px"
                   />
@@ -153,7 +152,6 @@ export default function BeforeAfter() {
                       src={activeData.beforeImage}
                       alt="Initial Design Draft Sketch"
                       fill
-                      priority
                       className="object-cover pointer-events-none"
                       sizes="(max-width: 1024px) 100vw, 1200px"
                     />

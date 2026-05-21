@@ -8,12 +8,13 @@ import gsap from "gsap";
 let preloaderHasRun = false;
 
 export default function Preloader() {
-  const [count, setCount] = useState(0);
   const [isDone, setIsDone] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
   const [shouldSkip, setShouldSkip] = useState<boolean>(preloaderHasRun);
   const containerRef = useRef<HTMLDivElement>(null);
   const percentageRef = useRef<HTMLDivElement>(null);
+  const percentageTextRef = useRef<HTMLSpanElement>(null);
+  const progressBarFillRef = useRef<HTMLDivElement>(null);
   const lineTopRef = useRef<HTMLDivElement>(null);
   const lineBotRef = useRef<HTMLDivElement>(null);
 
@@ -37,13 +38,17 @@ export default function Preloader() {
     gsap.set(coloredLogoRef.current, { clipPath: "inset(0 100% 0 0)" });
     gsap.set(laserRef.current, { left: "0%", opacity: 0 });
 
+    const isMobileViewport = typeof window !== "undefined" && window.innerWidth < 1024;
+    const scanDuration = isMobileViewport ? 0.75 : 1.5;
+    const popDuration = isMobileViewport ? 0.2 : 0.4;
+
     // Start animation sequence
     const tl = gsap.timeline({
       onComplete: () => {
         // Pop effect when complete
         gsap.to(logoWrapperRef.current, {
           scale: 1.05,
-          duration: 0.4,
+          duration: popDuration,
           ease: "elastic.out(1, 0.5)",
           onComplete: () => setIsDone(true)
         });
@@ -53,19 +58,24 @@ export default function Preloader() {
     // Fade in the logo wrapper and laser
     tl.fromTo(logoWrapperRef.current,
       { scale: 0.9, opacity: 0 },
-      { scale: 1, opacity: 1, duration: 0.5, ease: "power3.out" }
+      { scale: 1, opacity: 1, duration: isMobileViewport ? 0.3 : 0.5, ease: "power3.out" }
     );
-    tl.to(laserRef.current, { opacity: 1, duration: 0.15 }, "-=0.25");
+    tl.to(laserRef.current, { opacity: 1, duration: isMobileViewport ? 0.08 : 0.15 }, "-=0.25");
 
     // Laser scan animation
     const obj = { val: 0 };
     tl.to(obj, {
       val: 100,
-      duration: 1.5,
+      duration: scanDuration,
       ease: "power2.inOut",
       onUpdate: () => {
         const progress = Math.round(obj.val);
-        setCount(progress);
+        if (percentageTextRef.current) {
+          percentageTextRef.current.innerText = `${progress}%`;
+        }
+        if (progressBarFillRef.current) {
+          progressBarFillRef.current.style.width = `${progress}%`;
+        }
 
         if (coloredLogoRef.current) {
           gsap.set(coloredLogoRef.current, { clipPath: `inset(0 ${100 - obj.val}% 0 0)` });
@@ -81,7 +91,7 @@ export default function Preloader() {
       opacity: 0,
       scaleY: 1.2,
       filter: "brightness(2)",
-      duration: 0.2,
+      duration: isMobileViewport ? 0.1 : 0.2,
       ease: "power2.out",
     });
 
@@ -91,8 +101,13 @@ export default function Preloader() {
   useEffect(() => {
     if (!isDone) return;
 
+    const isMobileViewport = typeof window !== "undefined" && window.innerWidth < 1024;
+    const flightDuration = isMobileViewport ? 0.45 : 0.85;
+    const panelDuration = isMobileViewport ? 0.45 : 0.7;
+
     // ── Safety timeout: if the exit animation stalls (mobile GPU hiccups,
     //    Lenis conflict, etc.) we MUST unlock the page within 6 seconds.
+    const safetyTimeout = isMobileViewport ? 3000 : 6000;
     const safetyTimer = setTimeout(() => {
       document.documentElement.classList.remove("is-loading");
       if (logoWrapperRef.current) {
@@ -100,10 +115,10 @@ export default function Preloader() {
       }
       setIsHidden(true);
       preloaderHasRun = true;
-    }, 6000);
+    }, safetyTimeout);
 
     const tl = gsap.timeline({
-      delay: 0.2,
+      delay: isMobileViewport ? 0.1 : 0.2,
       onComplete: () => {
         clearTimeout(safetyTimer);
         // Hide preloader logo instantly when unmounting the preloader
@@ -165,7 +180,7 @@ export default function Preloader() {
       tl.to(percentageRef.current, {
         opacity: 0,
         scale: 0.8,
-        duration: 0.35,
+        duration: isMobileViewport ? 0.2 : 0.35,
         ease: "power2.out",
       });
 
@@ -174,9 +189,9 @@ export default function Preloader() {
         x: deltaX,
         y: deltaY,
         scale: scale,
-        duration: 0.85,
+        duration: flightDuration,
         ease: "power3.inOut",
-      }, "-=0.2");
+      }, isMobileViewport ? "-=0.1" : "-=0.2");
 
       // 3. Swap opacity at the exact moment of arrival
       tl.add(() => {
@@ -215,7 +230,7 @@ export default function Preloader() {
       lineTopRef.current,
       {
         yPercent: -100,
-        duration: 0.7,
+        duration: panelDuration,
         ease: "expo.inOut",
       }
     );
@@ -224,7 +239,7 @@ export default function Preloader() {
       lineBotRef.current,
       {
         yPercent: 100,
-        duration: 0.7,
+        duration: panelDuration,
         ease: "expo.inOut",
       },
       "<"
@@ -305,13 +320,14 @@ export default function Preloader() {
         </div>
 
         <div ref={percentageRef} className="flex flex-col items-center">
-          <span className="text-3xl md:text-5xl font-bold tracking-tighter tabular-nums text-foreground">
-            {count}%
+          <span ref={percentageTextRef} className="text-3xl md:text-5xl font-bold tracking-tighter tabular-nums text-foreground">
+            0%
           </span>
           <div className="w-40 h-1 bg-foreground/10 mt-4 overflow-hidden rounded-full">
             <div
+              ref={progressBarFillRef}
               className="h-full bg-accent transition-all duration-100 ease-linear"
-              style={{ width: `${count}%` }}
+              style={{ width: "0%" }}
             />
           </div>
         </div>

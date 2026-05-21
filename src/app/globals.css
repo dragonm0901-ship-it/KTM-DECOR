@@ -518,3 +518,19 @@ html {
 .footer-social-tt:hover svg {
   filter: drop-shadow(-1.5px -0.5px 0 #00f2ea) drop-shadow(1.5px 0.5px 0 #fe2c55) !important;
 }
+
+/* GPU-Accelerated Mobile-only Marquee */
+@keyframes marquee-mobile {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-33.3333%, 0, 0);
+  }
+}
+
+.animate-marquee-mobile {
+  animation: marquee-mobile var(--marquee-duration, 15s) linear infinite;
+  will-change: transform;
+  transform: translateZ(0);
+}

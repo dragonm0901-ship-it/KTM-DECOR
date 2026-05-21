@@ -153,9 +153,10 @@ export async function POST(request: Request) {
       );
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const rawApiKey = process.env.GEMINI_API_KEY;
+    const apiKey = rawApiKey ? rawApiKey.trim().replace(/^["']|["']$/g, "") : undefined;
 
-    // If no API key is configured, fallback to the smart keyword-based local responder
+    // If no API key is configured or is empty, fallback to the smart keyword-based local responder
     if (!apiKey) {
       const fallbackReply = getLocalFallbackResponse(message);
       return NextResponse.json({ reply: fallbackReply });

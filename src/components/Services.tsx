@@ -89,7 +89,6 @@ export default function Services() {
             alt="KTM DECOR Workshop"
             fill
             className="object-cover object-center grayscale contrast-[1.1] transition-all duration-500 scale-[0.92]"
-            priority
           />
         </div>
         {/* Subtle uniform overlay for contrast - bound to section limits */}

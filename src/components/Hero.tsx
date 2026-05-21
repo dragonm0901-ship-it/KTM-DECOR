@@ -58,8 +58,10 @@ export default function Hero() {
       };
     }
 
-    window.addEventListener("resize", updateRects);
-    window.addEventListener("scroll", updateRects);
+    if (window.innerWidth >= 1024) {
+      window.addEventListener("resize", updateRects);
+      window.addEventListener("scroll", updateRects);
+    }
 
     const triggerEntrance = () => {
       ctx = gsap.context(() => {

@@ -38,8 +38,7 @@ export default function GlobalCart() {
 
       if (!pillRect) return;
 
-      const isMobile = window.innerWidth < 640;
-      const finalWidth = isMobile ? "100%" : "480px";
+      const finalWidth = window.innerWidth >= 1024 ? "600px" : (window.innerWidth >= 640 ? "480px" : "100%");
 
       // 1. Instantly fade out the real header pill navbar to prevent double layer overlap
       gsap.to(pillElement, {
@@ -51,6 +50,7 @@ export default function GlobalCart() {
       // Set initial state matching the exact shape/size of the header's pill navbar!
       gsap.set(drawerRef.current, {
         top: pillRect.top,
+        bottom: "auto",
         right: window.innerWidth - pillRect.right,
         width: pillRect.width,
         height: pillRect.height,
@@ -60,7 +60,7 @@ export default function GlobalCart() {
         boxShadow: "0 10px 30px -10px rgba(0, 0, 0, 0.3)",
         opacity: 1,
         position: "fixed",
-        zIndex: 100,
+        zIndex: 150,
         overflow: "hidden"
       });
 
@@ -80,9 +80,10 @@ export default function GlobalCart() {
       // 3. Expand pill rectangle smoothly to the full height cart drawer
       tl.to(drawerRef.current, {
         top: 0,
+        bottom: 0,
         right: 0,
         width: finalWidth,
-        height: "100vh",
+        height: "100%",
         borderRadius: "0px",
         borderWidth: "0px",
         duration: 0.95,
@@ -132,6 +133,7 @@ export default function GlobalCart() {
     // 3. Morph/Collapse the full-size drawer back into the header's pill navbar coordinates!
     tl.to(drawerRef.current, {
       top: pillRect.top,
+      bottom: "auto",
       right: window.innerWidth - pillRect.right,
       width: pillRect.width,
       height: pillRect.height,
@@ -344,7 +346,7 @@ ${itemsText}
       {/* Cart Drawer */}
       <div 
         ref={drawerRef}
-        className={`fixed top-0 right-0 h-screen w-full sm:w-[480px] bg-white dark:bg-zinc-950 border-l border-border z-[150] shadow-2xl flex-col transition-colors duration-500 text-foreground ${
+        className={`fixed top-0 bottom-0 right-0 w-full sm:w-[480px] lg:w-[600px] bg-white dark:bg-zinc-950 border-l border-border z-[150] shadow-2xl flex-col transition-colors duration-500 text-foreground ${
           isCartOpen ? "flex" : "hidden"
         }`}
       >

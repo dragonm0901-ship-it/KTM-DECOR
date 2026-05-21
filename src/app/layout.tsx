@@ -22,6 +22,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://ktmdecor.com"),
   title: "KTM DECOR | Custom LED Neon Signs & 3D Light Boards in Nepal",
   description:
     "Looking for the best custom LED neon signs, 3D acrylic letters, and premium light boards in Nepal? KTM Decor crafts high-quality, affordable business signage and home decor.",
@@ -37,6 +38,21 @@ export const metadata: Metadata = {
     description:
       "Looking for the best custom LED neon signs, 3D acrylic letters, and premium light boards in Kathmandu, Nepal? KTM Decor crafts high-quality, affordable business signage and home decor.",
     type: "website",
+    images: [
+      {
+        url: "/images/ktm-decor-og.png",
+        width: 1200,
+        height: 1200,
+        alt: "KTM DECOR | Custom LED Neon Signs & 3D Light Boards in Nepal",
+      }
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "KTM DECOR | Custom LED Neon Signs & 3D Light Boards in Nepal",
+    description:
+      "Looking for the best custom LED neon signs, 3D acrylic letters, and premium light boards in Nepal? KTM Decor crafts high-quality, affordable business signage and home decor.",
+    images: ["/images/ktm-decor-og.png"],
   },
 };
 
