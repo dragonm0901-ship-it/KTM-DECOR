@@ -92,7 +92,7 @@ export default function Shop() {
   }, []);
 
   return (
-    <section ref={sectionRef} id="shop" className="py-32 px-6 md:px-12 bg-card rounded-[4px] my-20 text-foreground">
+    <section ref={sectionRef} id="shop" className="py-32 px-6 md:px-12 bg-card rounded-[4px] mb-20 text-foreground">
       <div className="max-w-7xl mx-auto">
         {/* Label */}
         <span className="inline-flex items-center gap-2 px-4 py-1.5 text-[10px] font-bold tracking-[0.2em] uppercase border border-border rounded-[4px] mb-10">

@@ -1,7 +1,6 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useScroll, useTransform } from "motion/react";
+import { motion } from "motion/react";
 import Link from "next/link";
 
 const Facebook = (props: any) => (
@@ -23,16 +22,6 @@ const TikTok = (props: any) => (
 );
 
 export default function Footer() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "end start"]
-  });
-
-  // Map from [0, 1] to [-50, 150]
-  const y = useTransform(scrollYProgress, [0, 1], [-50, 150]);
-
   const socialLinks = [
     { icon: Facebook, href: "https://www.facebook.com/people/KTM-Decor/61556839814576/#", hoverClass: "footer-social-fb" },
     { icon: Instagram, href: "https://www.instagram.com/ktmdecor/", hoverClass: "footer-social-ig" },
@@ -41,18 +30,21 @@ export default function Footer() {
 
   return (
     <div className="bg-[#f8f9fa] dark:bg-black transition-colors duration-500 w-full flex flex-col font-sans relative z-10">
-      {/* Top Spacer Section */}
-      <div className="h-[15vh] md:h-[10vh] bg-[#FDFDFD] dark:bg-black transition-colors duration-500"></div>
-
-      {/* Main Parallax Container */}
+      {/* Main Container */}
       <div 
-        ref={containerRef}
-        className="relative w-full h-screen bg-cover bg-center overflow-hidden"
-        style={{ backgroundImage: 'url("https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260430_115327_3f256636-9e63-4885-8d0b-09317dc2b0a5.png&w=1280&q=85")' }}
+        className="relative w-full overflow-hidden bg-[#FE914C] py-12 md:py-20 px-4 md:px-8"
       >
+        {/* CNC Dot Grid Overlay - White Dots */}
+        <div 
+          className="absolute inset-0 opacity-[0.35] pointer-events-none"
+          style={{
+            backgroundImage: 'radial-gradient(circle, rgba(255, 255, 255, 0.8) 1.5px, transparent 1.5px)',
+            backgroundSize: '24px 24px'
+          }}
+        />
         
-        {/* Top-Aligned Footer Card */}
-        <div className="absolute top-0 w-full pt-6 md:pt-12 px-4 md:px-8 z-30">
+        {/* Footer Card */}
+        <div className="relative w-full z-30">
           <motion.div 
             initial={{ opacity: 0, y: -20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -133,19 +125,6 @@ export default function Footer() {
             </div>
           </motion.div>
         </div>
-
-        {/* Background Truck Parallax Layer */}
-        <motion.div 
-          className="absolute inset-x-0 bottom-0 h-full pointer-events-none z-20"
-          style={{ y }}
-        >
-          <img 
-            src="https://roof-wish-40038865.figma.site/_components/v2/f31fd17907ce60745d45e83a61d44fd3810d5f25/truck_1.8c4bff83.png" 
-            alt="" 
-            className="w-full h-full object-contain object-bottom origin-bottom scale-[2.5] -translate-y-4 sm:scale-110 sm:translate-y-0 md:scale-[2.0] lg:scale-105"
-          />
-        </motion.div>
-
       </div>
     </div>
   );

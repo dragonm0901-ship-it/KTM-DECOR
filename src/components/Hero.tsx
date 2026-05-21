@@ -21,8 +21,45 @@ export default function Hero() {
   const featuresRef = useRef<HTMLUListElement>(null);
   const collageRef = useRef<HTMLDivElement>(null);
 
+  const sectionRectRef = useRef<DOMRect | null>(null);
+  const collageRectRef = useRef<DOMRect | null>(null);
+  const quickToRef = useRef<{
+    x1: Function; y1: Function;
+    x2: Function; y2: Function;
+    x3: Function; y3: Function;
+    xb1: Function; yb1: Function;
+    xb2: Function; yb2: Function;
+  } | null>(null);
+
+  const updateRects = () => {
+    if (sectionRef.current) {
+      sectionRectRef.current = sectionRef.current.getBoundingClientRect();
+    }
+    if (collageRef.current) {
+      collageRectRef.current = collageRef.current.getBoundingClientRect();
+    }
+  };
+
   useEffect(() => {
     let ctx: gsap.Context;
+
+    if (window.innerWidth >= 1024) {
+      quickToRef.current = {
+        x1: gsap.quickTo(".parallax-layer-1", "x", { duration: 0.8, ease: "power2.out" }),
+        y1: gsap.quickTo(".parallax-layer-1", "y", { duration: 0.8, ease: "power2.out" }),
+        x2: gsap.quickTo(".parallax-layer-2", "x", { duration: 0.8, ease: "power2.out" }),
+        y2: gsap.quickTo(".parallax-layer-2", "y", { duration: 0.8, ease: "power2.out" }),
+        x3: gsap.quickTo(".parallax-layer-3", "x", { duration: 0.8, ease: "power2.out" }),
+        y3: gsap.quickTo(".parallax-layer-3", "y", { duration: 0.8, ease: "power2.out" }),
+        xb1: gsap.quickTo(".parallax-layer-badge-1", "x", { duration: 0.8, ease: "power2.out" }),
+        yb1: gsap.quickTo(".parallax-layer-badge-1", "y", { duration: 0.8, ease: "power2.out" }),
+        xb2: gsap.quickTo(".parallax-layer-badge-2", "x", { duration: 0.8, ease: "power2.out" }),
+        yb2: gsap.quickTo(".parallax-layer-badge-2", "y", { duration: 0.8, ease: "power2.out" }),
+      };
+    }
+
+    window.addEventListener("resize", updateRects);
+    window.addEventListener("scroll", updateRects);
 
     const triggerEntrance = () => {
       ctx = gsap.context(() => {
@@ -137,6 +174,8 @@ export default function Hero() {
 
     return () => {
       observer.disconnect();
+      window.removeEventListener("resize", updateRects);
+      window.removeEventListener("scroll", updateRects);
       if (ctx) ctx.revert();
     };
   }, []);
@@ -144,11 +183,15 @@ export default function Hero() {
   const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
     const { clientX, clientY } = e;
 
+    if (!sectionRectRef.current || !collageRectRef.current) {
+      updateRects();
+    }
+
     // 1. Active Grid Hover Tracking (tracks relative to Section container)
-    if (sectionRef.current) {
-      const rect = sectionRef.current.getBoundingClientRect();
-      const relativeX = clientX - rect.left;
-      const relativeY = clientY - rect.top;
+    const sectionRect = sectionRectRef.current;
+    if (sectionRect && sectionRef.current) {
+      const relativeX = clientX - sectionRect.left;
+      const relativeY = clientY - sectionRect.top;
       
       sectionRef.current.style.setProperty("--grid-mouse-x", `${relativeX}px`);
       sectionRef.current.style.setProperty("--grid-mouse-y", `${relativeY}px`);
@@ -156,20 +199,29 @@ export default function Hero() {
     }
 
     // 2. Parallax Collage Card Shifts (Desktop Only)
-    if (!collageRef.current || window.innerWidth < 1024) return;
+    if (window.innerWidth < 1024) return;
     
-    const { width, height, left, top } = collageRef.current.getBoundingClientRect();
-    
-    // Calculate cursor coordinate relative to the center of the collage container
-    const x = (clientX - (left + width / 2)) / (width / 2); // -1 to 1
-    const y = (clientY - (top + height / 2)) / (height / 2); // -1 to 1
-    
-    // Smoothly animate individual layers with independent depth ratios using GSAP
-    gsap.to(".parallax-layer-1", { x: x * 6, y: y * 6, duration: 0.8, ease: "power2.out" }); // Main card
-    gsap.to(".parallax-layer-2", { x: -x * 10, y: -y * 10, duration: 0.8, ease: "power2.out" }); // Left secondary card
-    gsap.to(".parallax-layer-3", { x: x * 12, y: y * 12, duration: 0.8, ease: "power2.out" }); // Small top card
-    gsap.to(".parallax-layer-badge-1", { x: -x * 15, y: -y * 15, duration: 0.8, ease: "power2.out" }); // Badge 1
-    gsap.to(".parallax-layer-badge-2", { x: x * 18, y: y * 18, duration: 0.8, ease: "power2.out" }); // Badge 2
+    const collageRect = collageRectRef.current;
+    if (collageRect) {
+      const { width, height, left, top } = collageRect;
+      
+      // Calculate cursor coordinate relative to the center of the collage container
+      const x = (clientX - (left + width / 2)) / (width / 2); // -1 to 1
+      const y = (clientY - (top + height / 2)) / (height / 2); // -1 to 1
+      
+      if (quickToRef.current) {
+        quickToRef.current.x1(x * 6);
+        quickToRef.current.y1(y * 6);
+        quickToRef.current.x2(-x * 10);
+        quickToRef.current.y2(-y * 10);
+        quickToRef.current.x3(x * 12);
+        quickToRef.current.y3(y * 12);
+        quickToRef.current.xb1(-x * 15);
+        quickToRef.current.yb1(-y * 15);
+        quickToRef.current.xb2(x * 18);
+        quickToRef.current.yb2(y * 18);
+      }
+    }
   };
 
   const handleMouseLeave = () => {
@@ -179,13 +231,18 @@ export default function Hero() {
     }
 
     if (window.innerWidth < 1024) return;
-    gsap.to([
-      ".parallax-layer-1",
-      ".parallax-layer-2",
-      ".parallax-layer-3",
-      ".parallax-layer-badge-1",
-      ".parallax-layer-badge-2"
-    ], { x: 0, y: 0, duration: 0.8, ease: "power2.out" });
+    if (quickToRef.current) {
+      quickToRef.current.x1(0);
+      quickToRef.current.y1(0);
+      quickToRef.current.x2(0);
+      quickToRef.current.y2(0);
+      quickToRef.current.x3(0);
+      quickToRef.current.y3(0);
+      quickToRef.current.xb1(0);
+      quickToRef.current.yb1(0);
+      quickToRef.current.xb2(0);
+      quickToRef.current.yb2(0);
+    }
   };
 
   return (
@@ -277,10 +334,10 @@ export default function Hero() {
           </div>
 
           {/* ── Image Collage ── */}
-          <div ref={collageRef} className="order-2 lg:order-2 lg:col-span-5 relative min-h-[460px] md:min-h-[640px] lg:min-h-[720px]">
+          <div ref={collageRef} className="order-2 lg:order-2 lg:col-span-5 relative min-h-[320px] md:min-h-[640px] lg:min-h-[720px]">
 
             {/* Main large card */}
-            <div className="hero-card parallax-layer-1 absolute top-0 right-[-22%] md:right-[-20%] w-[90%] md:w-[88%] aspect-[3/4] rounded-[4px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.15)] border border-neutral-200/50 z-10 opacity-0">
+            <div className="hero-card parallax-layer-1 absolute top-0 right-[-5%] md:right-[-20%] w-[63%] lg:w-[90%] md:w-[88%] aspect-[3/4] rounded-[4px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.15)] border border-neutral-200/50 z-10 opacity-0">
               <Image
                 src="/hero-images/hero3.jpeg"
                 alt="Custom neon sign installation"
@@ -292,7 +349,7 @@ export default function Hero() {
             </div>
 
             {/* Secondary floating card - left */}
-            <div className="hero-card parallax-layer-2 absolute bottom-4 left-0 w-[72%] md:w-[68%] aspect-[4/3] rounded-[4px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-neutral-200/50 z-20 opacity-0">
+            <div className="hero-card parallax-layer-2 absolute bottom-4 left-[8%] md:left-0 w-[50%] lg:w-[72%] md:w-[68%] aspect-[4/3] rounded-[4px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-neutral-200/50 z-20 opacity-0">
               <Image
                 src="/hero-images/hero2.jpeg"
                 alt="LED signage craftsmanship"
@@ -304,7 +361,7 @@ export default function Hero() {
             </div>
 
             {/* Small accent card - top left */}
-            <div className="hero-card parallax-layer-3 absolute top-[15%] left-[-12%] md:left-[-10%] w-[50%] md:w-[46%] aspect-square rounded-[4px] overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.1)] border border-neutral-200/50 z-30 opacity-0">
+            <div className="hero-card parallax-layer-3 absolute top-[15%] left-[-2%] md:left-[-10%] w-[35%] lg:w-[50%] md:w-[46%] aspect-square rounded-[4px] overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.1)] border border-neutral-200/50 z-30 opacity-0">
               <Image
                 src="/hero-images/hero1.jpeg"
                 alt="Illuminated decor detail"
@@ -315,13 +372,13 @@ export default function Hero() {
             </div>
 
             {/* Floating data badge */}
-            <div className="hero-card parallax-layer-badge-1 absolute top-[8%] left-[20%] md:left-[22%] z-40 bg-card rounded-[2px] md:rounded-[4px] shadow-[0_6px_15px_rgba(0,0,0,0.15)] md:shadow-[0_12px_35px_rgba(0,0,0,0.15)] border border-border px-3 py-2 md:px-5 md:py-3.5 opacity-0 text-foreground">
+            <div className="hero-card parallax-layer-badge-1 absolute top-[8%] left-[20%] md:left-[22%] z-40 bg-card rounded-[2px] md:rounded-[4px] shadow-[0_6px_15px_rgba(0,0,0,0.15)] md:shadow-[0_12px_35px_rgba(0,0,0,0.15)] border border-border px-3 py-2 md:px-5 md:py-3.5 opacity-0 text-foreground scale-95 md:scale-100">
               <p className="text-[7px] md:text-[10px] font-bold text-muted uppercase tracking-wider mb-0 md:mb-0.5">Projects Delivered</p>
               <p className="text-sm md:text-2xl font-black tracking-tight text-foreground">500+</p>
             </div>
 
             {/* Floating rating badge */}
-            <div className="hero-card parallax-layer-badge-2 absolute bottom-[20%] left-[62%] md:left-[58%] z-40 bg-card rounded-[2px] md:rounded-[4px] shadow-[0_6px_15px_rgba(0,0,0,0.15)] md:shadow-[0_12px_35px_rgba(0,0,0,0.15)] border border-border px-3 py-2 md:px-5 md:py-3.5 opacity-0 text-foreground">
+            <div className="hero-card parallax-layer-badge-2 absolute bottom-[20%] left-[62%] md:left-[58%] z-40 bg-card rounded-[2px] md:rounded-[4px] shadow-[0_6px_15px_rgba(0,0,0,0.15)] md:shadow-[0_12px_35px_rgba(0,0,0,0.15)] border border-border px-3 py-2 md:px-5 md:py-3.5 opacity-0 text-foreground scale-95 md:scale-100">
               <p className="text-[7px] md:text-[10px] font-bold text-muted uppercase tracking-wider mb-0 md:mb-0.5">Client Rating</p>
               <div className="flex items-center gap-1 md:gap-1.5">
                 <span className="text-sm md:text-2xl font-black tracking-tight text-foreground">4.9</span>

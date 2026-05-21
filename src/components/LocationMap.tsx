@@ -40,13 +40,18 @@ export default function LocationMap() {
               height="100%" 
               style={{ 
                 border: 0, 
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
                 filter: "grayscale(100%) invert(92%) contrast(83%)",
                 mixBlendMode: "lighten" // Helps integrate it cleanly over the dark backdrop
               }} 
               allowFullScreen={false} 
               loading="lazy" 
               referrerPolicy="no-referrer-when-downgrade"
-              className="absolute inset-0 w-full h-full z-10 transition-opacity duration-1000"
+              className="z-10 transition-opacity duration-1000"
             ></iframe>
 
             {/* Interactive Overlay to prevent accidental scrolling while navigating the page, 
@@ -56,7 +61,7 @@ export default function LocationMap() {
 
           {/* Location details card - Flows below map on mobile, absolute overlay on desktop */}
           <div className="relative md:absolute md:bottom-10 md:left-10 w-full md:w-auto bg-black/95 md:bg-black/90 backdrop-blur-md border-x border-b md:border-t border-white/10 p-6 md:p-6 rounded-b-[4px] md:rounded-[4px] z-30">
-            <div className="flex flex-col sm:flex-row gap-6 md:gap-8 items-start sm:items-center">
+            <div className="flex flex-row gap-6 md:gap-8 items-center justify-between">
               <div>
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center text-accent">
@@ -79,7 +84,7 @@ export default function LocationMap() {
               </div>
 
               {/* QR Code Section */}
-              <div className="flex flex-col items-center justify-center pt-6 border-t border-white/10 sm:pt-0 sm:border-t-0 sm:border-l sm:pl-8 sm:ml-2">
+              <div className="flex flex-col items-center justify-center border-l border-white/10 pl-6 md:pl-8 ml-2 flex-shrink-0">
                 <div className="w-20 h-20 bg-white p-1 rounded-[4px] mb-3 relative overflow-hidden">
                   <img 
                     src="/qr-code.png" 

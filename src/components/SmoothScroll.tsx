@@ -15,29 +15,36 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
     const isTouchDevice =
       "ontouchstart" in window || navigator.maxTouchPoints > 0;
 
+    if (isTouchDevice) {
+      return;
+    }
+
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: "vertical",
       gestureOrientation: "vertical",
-      smoothWheel: !isTouchDevice, // disable on touch — use native scroll
+      smoothWheel: true,
       wheelMultiplier: 1,
-      touchMultiplier: isTouchDevice ? 0 : 2, // disable touch hijacking on mobile
     });
 
-    lenis.on("scroll", ScrollTrigger.update);
+    const updateScrollTrigger = () => {
+      ScrollTrigger.update();
+    };
 
-    gsap.ticker.add((time) => {
+    lenis.on("scroll", updateScrollTrigger);
+
+    const updateTicker = (time: number) => {
       lenis.raf(time * 1000);
-    });
+    };
+
+    gsap.ticker.add(updateTicker);
 
     gsap.ticker.lagSmoothing(0);
 
     return () => {
       lenis.destroy();
-      gsap.ticker.remove((time) => {
-        lenis.raf(time * 1000);
-      });
+      gsap.ticker.remove(updateTicker);
     };
   }, []);
 

@@ -133,11 +133,46 @@
 
 /* ─── Base Styles ───────────────────────────────────────── */
 html {
-  zoom: 0.8;
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
   -moz-text-size-adjust: 100%;
   text-size-adjust: 100%;
+}
+
+@media (min-width: 1024px) {
+  html {
+    zoom: 0.8;
+  }
+}
+
+/* Lenis Scroll Smoothness Overrides */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
+/* GPU acceleration for marquee tracks */
+.animate-marquee-x,
+.animate-marquee-x-reverse {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 h1, h2, h3, h4, h5, h6, .font-display {
