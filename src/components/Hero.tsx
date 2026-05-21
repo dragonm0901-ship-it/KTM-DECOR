@@ -94,6 +94,18 @@ export default function Hero() {
           tl.fromTo(".hero-card", { y: 60, opacity: 0, scale: 0.92 }, { y: 0, opacity: 1, scale: 1, duration: 0.9, stagger: 0.12, ease: "power3.out" }, "-=0.8");
         });
 
+        mm.add("(max-width: 1023px)", () => {
+          const tl = gsap.timeline();
+
+          // Instantly show ambient background glows
+          gsap.set(".neon-glow-accent", { opacity: 0.35 });
+
+          // Quick reveal animations for mobile layout
+          tl.fromTo(badgeRef.current, { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" })
+            .fromTo(".hero-subtext-mobile", { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, "-=0.35")
+            .fromTo(".hero-card", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, stagger: 0.08, ease: "power2.out" }, "-=0.4");
+        });
+
       }, sectionRef);
     };
 

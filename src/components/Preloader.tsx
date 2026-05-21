@@ -33,9 +33,18 @@ export default function Preloader() {
 
     const isMobileViewport = typeof window !== "undefined" && window.innerWidth < 1024;
 
+    // Start a safety timer immediately to guarantee page is unlocked after 3.5s on mobile or 6s on desktop
+    const safetyDuration = isMobileViewport ? 3500 : 6000;
+    const safetyTimer = setTimeout(() => {
+      document.documentElement.classList.remove("is-loading");
+      setIsHidden(true);
+      preloaderHasRun = true;
+    }, safetyDuration);
 
     // Ensure refs are available
-    if (!coloredLogoRef.current || !laserRef.current || !logoWrapperRef.current) return;
+    if (!coloredLogoRef.current || !laserRef.current || !logoWrapperRef.current) {
+      return () => clearTimeout(safetyTimer);
+    }
 
     // Initial state
     gsap.set(coloredLogoRef.current, { clipPath: "inset(0 100% 0 0)" });
@@ -97,7 +106,10 @@ export default function Preloader() {
       ease: "power2.out",
     });
 
-    return () => { tl.kill(); };
+    return () => {
+      tl.kill();
+      clearTimeout(safetyTimer);
+    };
   }, []);
 
   useEffect(() => {

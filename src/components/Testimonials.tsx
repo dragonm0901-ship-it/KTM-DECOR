@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Star } from "@/components/ui/solar-icons";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -47,6 +47,7 @@ const testimonials = [
 export default function Testimonials() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
+  const [isInView, setIsInView] = useState(false);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -66,7 +67,21 @@ export default function Testimonials() {
         }
       );
     }, sectionRef);
-    return () => ctx.revert();
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { threshold: 0.02 }
+    );
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => {
+      ctx.revert();
+      observer.disconnect();
+    };
   }, []);
 
   const renderCard = (t: typeof testimonials[0], i: number) => {
@@ -137,7 +152,7 @@ export default function Testimonials() {
         <div className="absolute inset-y-0 right-0 w-16 md:w-48 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
 
         {/* Top Row: Left to Right */}
-        <div className="flex w-fit animate-marquee-x-reverse hover:[animation-play-state:paused]">
+        <div className={`flex w-fit animate-marquee-x-reverse hover:[animation-play-state:paused] ${!isInView ? "[animation-play-state:paused]" : ""}`}>
           <div className="flex gap-3 md:gap-6 px-1.5 md:px-3">
             {testimonials.map((t, i) => renderCard(t, i))}
           </div>
@@ -147,7 +162,7 @@ export default function Testimonials() {
         </div>
 
         {/* Bottom Row: Right to Left */}
-        <div className="flex w-fit animate-marquee-x hover:[animation-play-state:paused]">
+        <div className={`flex w-fit animate-marquee-x hover:[animation-play-state:paused] ${!isInView ? "[animation-play-state:paused]" : ""}`}>
           <div className="flex gap-3 md:gap-6 px-1.5 md:px-3">
             {[...testimonials].reverse().map((t, i) => renderCard(t, i + 20))}
           </div>
