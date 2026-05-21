@@ -223,7 +223,7 @@ export default function Header() {
         {/* Background Image: Grayscale & 30% Opacity */}
         <div className="absolute inset-0 z-0 select-none pointer-events-none">
           <Image
-            src="/images/nav-bg.jpg"
+            src="/images/nav-bg.webp"
             alt="Menu Background"
             fill
             className={`object-cover object-center grayscale opacity-30 transition-transform duration-[2000ms] ease-out ${

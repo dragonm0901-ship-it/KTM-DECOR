@@ -13,27 +13,27 @@ const expertise = [
   {
     title: "Neon Artistry",
     description: "Hand-crafted LED neon that captures the soul of your brand.",
-    image: "/images/neon-taso.jpg"
+    image: "/images/neon-taso.webp"
   },
   {
     title: "Dimensional Signs",
     description: "3D letters and logos that command attention from every angle.",
-    image: "/images/dimensional-ktm.jpg"
+    image: "/images/dimensional-ktm.webp"
   },
   {
     title: "Name Plates",
     description: "Premium custom name plates and office signs that add a sophisticated touch to any space.",
-    image: "/images/name-plates.jpg"
+    image: "/images/name-plates.webp"
   },
   {
     title: "Laser Precision",
     description: "Intricate CNC engraving and metal cutting with sub-millimeter detail.",
-    image: "/images/laser-cnc.jpg"
+    image: "/images/laser-cnc.webp"
   },
   {
     title: "Architectural Craft",
     description: "Sleek acrylic and wooden sign fabrications designed to last.",
-    image: "/images/workshop.jpg"
+    image: "/images/workshop.webp"
   }
 ];
 
@@ -111,7 +111,7 @@ export default function About() {
         {/* Background Image of Patan Durbar Square */}
         <div className="absolute inset-0 z-0 pointer-events-none select-none transition-all duration-1000">
           <Image
-            src="/images/about-hero.jpg"
+            src="/images/about-hero.webp"
             alt="Patan Durbar Square Background"
             fill
             className={`object-cover object-center transition-all duration-1000 ${
@@ -145,7 +145,7 @@ export default function About() {
           {/* Image Column */}
           <div className="relative aspect-[4/5] rounded-[4px] overflow-hidden bg-foreground/5 shadow-lg group">
              <Image 
-              src="/images/kishor.jpg" 
+              src="/images/kishor.webp" 
               alt="Founder Kishor G.C." 
               fill 
               className={`object-cover transition-all duration-700 ${

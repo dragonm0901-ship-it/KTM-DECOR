@@ -36,7 +36,7 @@ export default function HowItWorks() {
       {/* Premium Laser-Process Background Image at 50% Opacity (Extended top and bottom to eliminate high-DPI subpixel rounding gaps) */}
       <div className="absolute top-[-8px] bottom-[-8px] left-0 right-0 z-0 opacity-50 pointer-events-none select-none">
         <Image
-          src="/images/laser-cnc.jpg"
+          src="/images/laser-cnc.webp"
           alt="KTM DECOR Laser Cutting"
           fill
           className="object-cover object-center grayscale contrast-[1.1] transition-all duration-500"

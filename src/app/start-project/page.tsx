@@ -236,7 +236,7 @@ Thank you so much!`;
       category: "Neon Signs",
       subCategory: signStyle,
       price: 0, // Quote-based
-      image: capturedImage || "/images/hero-01.jpg",
+      image: capturedImage || "/images/hero-01.webp",
       description: `Custom ${signStyle} configured in the KTM DECOR Design Studio. Backing material: ${materialText}, dimensions: ${sizeText}.`,
       dimensions: sizeText,
       specs: [

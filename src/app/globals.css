@@ -22,22 +22,33 @@
 .c5-animated-gradient {
   background-color: #fe914c;
   background-image:
-    radial-gradient(circle at var(--c5-x1) var(--c5-y1), #ffb885 0px, transparent var(--c5-s1)),
-    radial-gradient(circle at var(--c5-x2) var(--c5-y2), #ff6a00 0px, transparent var(--c5-s2)),
-    radial-gradient(circle at var(--c5-x3) var(--c5-y3), #ff8c00 0px, transparent var(--c5-s3)),
-    radial-gradient(circle at var(--c5-x4) var(--c5-y4), #ff7300 0px, transparent var(--c5-s4)),
-    radial-gradient(circle at var(--c5-x5) var(--c5-y5), #ff5100 0px, transparent var(--c5-s5));
-  animation:
-    c5-blob1 5s ease-in-out infinite,
-    c5-blob2 6s ease-in-out infinite,
-    c5-blob3 5.5s ease-in-out infinite,
-    c5-blob4 6.5s ease-in-out infinite,
-    c5-blob5 4s ease-in-out infinite,
-    c5-size1 3.5s ease-in-out infinite,
-    c5-size2 4.2s ease-in-out infinite,
-    c5-size3 3.8s ease-in-out infinite,
-    c5-size4 4.6s ease-in-out infinite,
-    c5-size5 3s ease-in-out infinite;
+    radial-gradient(circle at 10% 10%, #ffb885 0px, transparent 55%),
+    radial-gradient(circle at 90% 10%, #ff6a00 0px, transparent 55%),
+    radial-gradient(circle at 10% 90%, #ff8c00 0px, transparent 55%),
+    radial-gradient(circle at 90% 90%, #ff7300 0px, transparent 55%),
+    radial-gradient(circle at 50% 50%, #ff5100 0px, transparent 65%);
+}
+
+@media (min-width: 1024px) {
+  .c5-animated-gradient {
+    background-image:
+      radial-gradient(circle at var(--c5-x1) var(--c5-y1), #ffb885 0px, transparent var(--c5-s1)),
+      radial-gradient(circle at var(--c5-x2) var(--c5-y2), #ff6a00 0px, transparent var(--c5-s2)),
+      radial-gradient(circle at var(--c5-x3) var(--c5-y3), #ff8c00 0px, transparent var(--c5-s3)),
+      radial-gradient(circle at var(--c5-x4) var(--c5-y4), #ff7300 0px, transparent var(--c5-s4)),
+      radial-gradient(circle at var(--c5-x5) var(--c5-y5), #ff5100 0px, transparent var(--c5-s5));
+    animation:
+      c5-blob1 5s ease-in-out infinite,
+      c5-blob2 6s ease-in-out infinite,
+      c5-blob3 5.5s ease-in-out infinite,
+      c5-blob4 6.5s ease-in-out infinite,
+      c5-blob5 4s ease-in-out infinite,
+      c5-size1 3.5s ease-in-out infinite,
+      c5-size2 4.2s ease-in-out infinite,
+      c5-size3 3.8s ease-in-out infinite,
+      c5-size4 4.6s ease-in-out infinite,
+      c5-size5 3s ease-in-out infinite;
+  }
 }
 
 @keyframes c5-blob1 {
@@ -214,35 +225,33 @@ body {
 }
 
 /* ─── Preloader Lock ────────────────────────────────────── */
-@media (min-width: 1024px) {
-  html.is-loading {
-    overflow: hidden;
-  }
+html.is-loading {
+  overflow: hidden;
+}
 
-  html.is-loading #header-logo {
-    opacity: 0;
-    pointer-events: none;
-  }
+html.is-loading #header-logo {
+  opacity: 0;
+  pointer-events: none;
+}
 
-  html.is-loading body {
-    overflow: hidden;
-  }
+html.is-loading body {
+  overflow: hidden;
+}
 
-  /* Solid cover behind the preloader — blocks ALL page content from showing */
-  html.is-loading body::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: #F2F2F2;
-    z-index: 9998;
-  }
+/* Solid cover behind the preloader — blocks ALL page content from showing */
+html.is-loading body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #F2F2F2;
+  z-index: 9998;
+}
 
-  .dark.is-loading body::before {
-    background: #050505;
-  }
+.dark.is-loading body::before {
+  background: #050505;
 }
 
 /* Defer rendering of off-screen components (LCP / INP optimization) */
@@ -452,10 +461,12 @@ html {
   }
 }
 
-.animate-pulse-dots {
-  animation: pulse-dots 6s ease-in-out infinite;
-  will-change: transform, opacity;
-  transform-origin: center center;
+@media (min-width: 1024px) {
+  .animate-pulse-dots {
+    animation: pulse-dots 6s ease-in-out infinite;
+    will-change: transform, opacity;
+    transform-origin: center center;
+  }
 }
 
 /* ─── E-Commerce Animations & Transitions ───────────────── */

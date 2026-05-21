@@ -19,16 +19,16 @@ const cases: CaseData[] = [
     title: "Urban Wolf Studio",
     description:
       "Witness the translation of a high-precision polygonal vector art sketch into a dual-intensity neon masterwork. Every node and angle of the original line sketch is CNC-profiled on a premium solid acrylic backing and hand-fitted with glowing LED strips.",
-    beforeImage: "/images/laser-cnc.jpg",
-    afterImage: "/images/neon-taso.jpg",
+    beforeImage: "/images/laser-cnc.webp",
+    afterImage: "/images/neon-taso.webp",
   },
   {
     category: "Storefront Signage",
     title: "CRAFT Coffee Roasters",
     description:
       "From a cozy hand-drawn vintage logo sketch to an elegant, high-profile physical storefront sign. Engineered with water-resistant warm amber and soft white LED neon to withstand exterior outdoor conditions while delivering a cozy, inviting street glow.",
-    beforeImage: "/images/workshop.jpg",
-    afterImage: "/images/light-boards-nivati.jpg",
+    beforeImage: "/images/workshop.webp",
+    afterImage: "/images/light-boards-nivati.webp",
   },
 ];
 

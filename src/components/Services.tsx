@@ -85,7 +85,7 @@ export default function Services() {
         {/* Premium Workshop Background Image */}
         <div className="absolute -inset-[5%] z-0 opacity-65 pointer-events-none select-none overflow-hidden">
           <Image
-            src="/images/workshop.jpg"
+            src="/images/workshop.webp"
             alt="KTM DECOR Workshop"
             fill
             className="object-cover object-center grayscale contrast-[1.1] transition-all duration-500 scale-[0.92]"
@@ -127,10 +127,10 @@ export default function Services() {
               <>
                 <Image
                   src={[
-                    "/images/neon-momo.jpg",
-                    "/images/light-boards-nivati.jpg",
-                    "/images/3d-letters-salt.jpg",
-                    "/images/custom-decor-collage.jpg"
+                    "/images/neon-momo.webp",
+                    "/images/light-boards-nivati.webp",
+                    "/images/3d-letters-salt.webp",
+                    "/images/custom-decor-collage.webp"
                   ][i]}
                   alt={service.title}
                   fill

@@ -289,7 +289,7 @@ export default function Hero() {
             {/* Main large card */}
             <div className="hero-card parallax-layer-1 absolute top-0 right-[-5%] md:right-[-20%] w-[63%] lg:w-[90%] md:w-[88%] aspect-[3/4] rounded-[4px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.15)] border border-neutral-200/50 z-10 opacity-0">
               <Image
-                src="/hero-images/hero3.jpeg"
+                src="/hero-images/hero3.webp"
                 alt="Custom neon sign installation"
                 fill
                 className="object-cover"
@@ -301,7 +301,7 @@ export default function Hero() {
             {/* Secondary floating card - left */}
             <div className="hero-card parallax-layer-2 absolute bottom-4 left-[8%] md:left-0 w-[50%] lg:w-[72%] md:w-[68%] aspect-[4/3] rounded-[4px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-neutral-200/50 z-20 opacity-0">
               <Image
-                src="/hero-images/hero2.jpeg"
+                src="/hero-images/hero2.webp"
                 alt="LED signage craftsmanship"
                 fill
                 className="object-cover"
@@ -313,7 +313,7 @@ export default function Hero() {
             {/* Small accent card - top left */}
             <div className="hero-card parallax-layer-3 absolute top-[15%] left-[-2%] md:left-[-10%] w-[35%] lg:w-[50%] md:w-[46%] aspect-square rounded-[4px] overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.1)] border border-neutral-200/50 z-30 opacity-0">
               <Image
-                src="/hero-images/hero1.jpeg"
+                src="/hero-images/hero1.webp"
                 alt="Illuminated decor detail"
                 fill
                 className="object-cover"
