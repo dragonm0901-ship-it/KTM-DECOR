@@ -24,6 +24,16 @@ export default function Preloader() {
   const preloaderImgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
+    const isMobileViewport = typeof window !== "undefined" && window.innerWidth < 1024;
+    if (isMobileViewport) {
+      setShouldSkip(true);
+      setIsDone(true);
+      setIsHidden(true);
+      preloaderHasRun = true;
+      document.documentElement.classList.remove("is-loading");
+      return;
+    }
+
     if (shouldSkip) {
       document.documentElement.classList.remove("is-loading");
       return;
@@ -37,8 +47,6 @@ export default function Preloader() {
     // Initial state
     gsap.set(coloredLogoRef.current, { clipPath: "inset(0 100% 0 0)" });
     gsap.set(laserRef.current, { left: "0%", opacity: 0 });
-
-    const isMobileViewport = typeof window !== "undefined" && window.innerWidth < 1024;
     // Dramatically speed up mobile preloader to avoid blocking time
     const scanDuration = isMobileViewport ? 0.35 : 1.5;
     const popDuration = isMobileViewport ? 0.15 : 0.4;
@@ -104,9 +112,15 @@ export default function Preloader() {
     if (!isDone) return;
 
     const isMobileViewport = typeof window !== "undefined" && window.innerWidth < 1024;
+    if (isMobileViewport) {
+      document.documentElement.classList.remove("is-loading");
+      setIsHidden(true);
+      return;
+    }
+
     // Speed up flight animations so the user can interact with the site faster
-    const flightDuration = isMobileViewport ? 0.2 : 0.85;
-    const panelDuration = isMobileViewport ? 0.25 : 0.7;
+    const flightDuration = 0.85;
+    const panelDuration = 0.7;
 
     // ── Safety timeout: if the exit animation stalls (mobile GPU hiccups,
     //    Lenis conflict, etc.) we MUST unlock the page within 6 seconds.
@@ -260,7 +274,7 @@ export default function Preloader() {
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center"
+      className="fixed inset-0 z-[9999] hidden lg:flex flex-col items-center justify-center"
       style={{ pointerEvents: isDone ? "none" : "auto" }}
     >
       {/* Two half-panels — using inline style for guaranteed solid color */}

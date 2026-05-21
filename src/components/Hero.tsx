@@ -94,18 +94,6 @@ export default function Hero() {
           tl.fromTo(".hero-card", { y: 60, opacity: 0, scale: 0.92 }, { y: 0, opacity: 1, scale: 1, duration: 0.9, stagger: 0.12, ease: "power3.out" }, "-=0.8");
         });
 
-        mm.add("(max-width: 1023px)", () => {
-          const tl = gsap.timeline();
-          
-          // Simplified Mobile Animation
-          tl.to(".neon-glow-accent", { opacity: 0.8, duration: 1, ease: "power2.out" });
-          tl.fromTo(badgeRef.current, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, "-=0.5");
-          tl.fromTo(".hero-line", { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, stagger: 0.1, ease: "power2.out" }, "-=0.2");
-          tl.fromTo(".hero-subtext-mobile", { opacity: 0 }, { opacity: 1, duration: 0.5 }, "-=0.2");
-          // On mobile, just fade in cards and CTAs at once to save GPU operations
-          tl.fromTo([".hero-card", ctaRef.current, ".hero-feature"], { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.6, stagger: 0.05, ease: "power2.out" }, "-=0.2");
-        });
-
       }, sectionRef);
     };
 

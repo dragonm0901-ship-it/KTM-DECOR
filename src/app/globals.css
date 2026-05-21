@@ -214,33 +214,52 @@ body {
 }
 
 /* ─── Preloader Lock ────────────────────────────────────── */
-html.is-loading {
-  overflow: hidden;
+@media (min-width: 1024px) {
+  html.is-loading {
+    overflow: hidden;
+  }
+
+  html.is-loading #header-logo {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  html.is-loading body {
+    overflow: hidden;
+  }
+
+  /* Solid cover behind the preloader — blocks ALL page content from showing */
+  html.is-loading body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #F2F2F2;
+    z-index: 9998;
+  }
+
+  .dark.is-loading body::before {
+    background: #050505;
+  }
 }
 
-html.is-loading #header-logo {
-  opacity: 0;
-  pointer-events: none;
+/* Defer rendering of off-screen components (LCP / INP optimization) */
+.content-visibility-auto {
+  content-visibility: auto;
 }
 
-html.is-loading body {
-  overflow: hidden;
-}
-
-/* Solid cover behind the preloader — blocks ALL page content from showing */
-html.is-loading body::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: #F2F2F2;
-  z-index: 9998;
-}
-
-.dark.is-loading body::before {
-  background: #050505;
+/* Prevent initial hidden state/flashing of hero content on mobile viewports */
+@media (max-width: 1023px) {
+  #hero .opacity-0,
+  #hero .hero-card,
+  #hero .hero-feature,
+  #hero .neon-glow-accent,
+  #hero .hero-subtext-mobile {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 
 /* ─── Text Split Mask ───────────────────────────────────── */

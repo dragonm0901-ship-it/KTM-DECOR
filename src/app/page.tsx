@@ -17,14 +17,38 @@ export default function Home() {
       <Preloader />
       <main>
         <Hero />
-        <About />
-        <Services />
-        <Shop />
-        <HowItWorks />
-        <BeforeAfter />
-        <Testimonials />
-        <CtaFaq />
-        <LocationMap />
+        
+        <div className="content-visibility-auto" style={{ containIntrinsicSize: "auto 1200px" }}>
+          <About />
+        </div>
+        
+        <div className="content-visibility-auto" style={{ containIntrinsicSize: "auto 800px" }}>
+          <Services />
+        </div>
+        
+        <div className="content-visibility-auto" style={{ containIntrinsicSize: "auto 800px" }}>
+          <Shop />
+        </div>
+        
+        <div className="content-visibility-auto" style={{ containIntrinsicSize: "auto 600px" }}>
+          <HowItWorks />
+        </div>
+        
+        <div className="content-visibility-auto" style={{ containIntrinsicSize: "auto 800px" }}>
+          <BeforeAfter />
+        </div>
+        
+        <div className="content-visibility-auto" style={{ containIntrinsicSize: "auto 600px" }}>
+          <Testimonials />
+        </div>
+        
+        <div className="content-visibility-auto" style={{ containIntrinsicSize: "auto 800px" }}>
+          <CtaFaq />
+        </div>
+        
+        <div className="content-visibility-auto" style={{ containIntrinsicSize: "auto 500px" }}>
+          <LocationMap />
+        </div>
       </main>
     </>
   );
