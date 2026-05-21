@@ -109,7 +109,7 @@ export default function ShopPage() {
   };
 
   return (
-    <div className="min-h-screen pt-44 pb-20 px-6 md:px-12 bg-background text-foreground">
+    <div className="min-h-screen pt-28 md:pt-36 lg:pt-44 pb-20 px-6 md:px-12 bg-background text-foreground">
       <div className="max-w-[1400px] mx-auto">
         
         {/* ── HEADER ROW ── */}
@@ -379,38 +379,44 @@ export default function ShopPage() {
 
             {filteredProducts.length > 0 ? (
               <>
-                <div ref={gridRef} className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div ref={gridRef} className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
                   {filteredProducts.slice(0, visibleCount).map((product) => (
-                    <div key={product.id} className="shop-card group flex flex-col justify-between h-full bg-card/15 rounded-[4px] border border-transparent hover:border-border/30 hover:bg-card/40 transition-all p-3.5">
+                    <div key={product.id} className="shop-card group flex flex-col justify-between h-full bg-card/15 rounded-[4px] border border-transparent hover:border-border/30 hover:bg-card/40 transition-all p-2 sm:p-3.5">
                       
                       {/* Image Stage wrapper */}
-                      <div className="relative aspect-[4/5] rounded-[4px] overflow-hidden bg-card border border-border/80 mb-3.5 z-10">
+                      <Link href={`/shop/${product.id}`} className="relative aspect-[4/5] rounded-[4px] overflow-hidden bg-card border border-border/80 mb-3.5 z-10 block">
                         <Image 
                           src={product.image} 
                           alt={product.name}
                           fill
-                          className="object-cover transition-transform duration-700 group-hover:scale-105"
+                          className="object-cover transition-transform duration-700 lg:group-hover:scale-105"
                         />
                         
                         {/* Real-time Hover Drawer Actions overlays */}
-                        <div className="absolute inset-0 z-20 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-1.5 p-1.5">
-                          <Link 
-                            href={`/shop/${product.id}`}
+                        <div 
+                          className="absolute inset-0 z-20 bg-black/45 opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300 hidden lg:flex items-center justify-center gap-1.5 p-1.5"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div 
                             className="px-3 py-2.5 bg-white hover:bg-neutral-100 text-black rounded-[4px] flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider hover:scale-105 active:scale-95 transition-all truncate"
                             title="View Product Details"
                           >
                             <ShoppingBag className="w-3.5 h-3.5 text-accent flex-shrink-0" />
                             <span>Details</span>
-                          </Link>
+                          </div>
                           <button 
-                            onClick={() => addToCart(product, 1)}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              addToCart(product, 1);
+                            }}
                             className="p-2.5 bg-accent text-white rounded-[4px] flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-lg shadow-accent/20 flex-shrink-0"
                             title="Quick Add to Cart"
                           >
                             <Plus className="w-4 h-4" />
                           </button>
                         </div>
-                      </div>
+                      </Link>
 
                       {/* Technical details block */}
                       <div className="space-y-1">
@@ -486,7 +492,7 @@ export default function ShopPage() {
       {isSidebarOpen && (
         <div className="fixed inset-0 z-[100] lg:hidden">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsSidebarOpen(false)} />
-          <div className="absolute right-0 top-0 bottom-0 w-80 bg-background p-8 flex flex-col justify-between shadow-2xl animate-slide-in">
+          <div className="absolute right-0 top-0 bottom-0 w-[85%] max-w-[320px] bg-background p-6 sm:p-8 flex flex-col justify-between shadow-2xl animate-slide-in">
             
             <div className="flex items-center justify-between mb-8 border-b border-border/40 pb-4">
               <h2 className="text-xl font-black tracking-tighter uppercase flex items-center gap-2">

@@ -106,7 +106,7 @@ export default function About() {
     <section ref={containerRef} id="about" className="relative overflow-hidden bg-background text-foreground">
       {/* 1. Founder Story */}
       <div 
-        className="founder-section relative py-32 px-6 md:px-12 overflow-hidden transition-all duration-700"
+        className="founder-section relative py-20 md:py-32 px-4 sm:px-6 md:px-12 overflow-hidden transition-all duration-700"
       >
         {/* Background Image of Patan Durbar Square */}
         <div className="absolute inset-0 z-0 pointer-events-none select-none transition-all duration-1000">
@@ -125,10 +125,10 @@ export default function About() {
           {/* Top/bottom vertical fade to guarantee seamless color transition between sections */}
           <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background transition-colors duration-500" />
         </div>
-
+ 
         {/* Content Card container */}
         <div 
-          className={`relative z-10 max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center rounded-[4px] shadow-2xl border p-8 md:p-16 lg:p-20 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          className={`relative z-10 max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-16 lg:gap-24 items-center rounded-[4px] shadow-2xl border p-5 sm:p-8 md:p-16 lg:p-20 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
             hoveredPart === 'content'
               ? 'bg-white dark:bg-black border-accent/25 shadow-[0_30px_70px_-15px_rgba(254,145,76,0.15)] scale-[1.015]' 
               : 'bg-card/92 dark:bg-card/85 backdrop-blur-md border-border/60 scale-[1.0]'
@@ -198,7 +198,7 @@ export default function About() {
       </div>
 
       {/* 2. What We Do (Our Craft) */}
-      <div className="relative py-32 px-6 md:px-12 overflow-hidden">
+      <div className="relative py-20 md:py-32 px-4 sm:px-6 md:px-12 overflow-hidden">
         {/* Cinematic Background Collage - Hidden on Mobile, Active on Desktop */}
         <div className="hidden md:block absolute inset-0 z-0 pointer-events-none select-none">
           {expertise.map((item, idx) => (
@@ -240,7 +240,7 @@ export default function About() {
 
 
       {/* Stats (Minimal Footer of About) */}
-      <div className="py-24 px-6 md:px-12 border-t border-border">
+      <div className="py-16 md:py-24 px-4 sm:px-6 md:px-12 border-t border-border">
         <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
            {[
              { label: "Projects", val: 500, suffix: "+" },

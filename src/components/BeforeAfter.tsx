@@ -123,7 +123,7 @@ export default function BeforeAfter() {
               ref={containerRef}
               onMouseDown={handleMouseDown}
               onTouchStart={handleTouchStart}
-              className="relative w-full aspect-[4/3] md:aspect-[16/9] select-none rounded-[4px] overflow-hidden border border-border shadow-[0_20px_50px_rgba(0,0,0,0.12)] cursor-ew-resize bg-neutral-900 group"
+              className="relative w-full aspect-[4/3] md:aspect-[16/9] select-none rounded-[4px] overflow-hidden border border-border shadow-[0_20px_50px_rgba(0,0,0,0.12)] cursor-ew-resize bg-neutral-900 group touch-none"
             >
               <AnimatePresence mode="wait">
                 <motion.div

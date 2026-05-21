@@ -94,26 +94,26 @@ export default function Testimonials() {
     }
 
     return (
-      <div key={i} className={`flex-shrink-0 w-[260px] md:w-[420px] ${bgClass} border p-5 md:p-8 rounded-[4px] transition-colors group/card`}>
-        <div className="flex gap-1 mb-4 md:mb-6">
+      <div key={i} className={`flex-shrink-0 w-[180px] md:w-[420px] ${bgClass} border p-3.5 md:p-8 rounded-[4px] transition-colors group/card`}>
+        <div className="flex gap-1 mb-2.5 md:mb-6">
           {[...Array(5)].map((_, idx) => (
             <Star 
               key={idx} 
-              className={`w-3.5 h-3.5 md:w-4 md:h-4 ${starClass} transition-transform group-hover/card:scale-110 duration-300`} 
+              className={`w-2.5 h-2.5 md:w-4 md:h-4 ${starClass} transition-transform group-hover/card:scale-110 duration-300`} 
               style={{ transitionDelay: `${idx * 100}ms` }}
             />
           ))}
         </div>
-        <p className={`${textClass} text-sm md:text-lg leading-relaxed mb-5 md:mb-8`}>
+        <p className={`${textClass} text-xs md:text-lg leading-relaxed mb-3 md:mb-8`}>
           "{t.content}"
         </p>
-        <div className="flex items-center gap-3 md:gap-4">
-          <div className={`w-9 h-9 md:w-12 md:h-12 rounded-full flex items-center justify-center font-bold text-sm md:text-lg shrink-0 ${avatarBgClass}`}>
+        <div className="flex items-center gap-2 md:gap-4">
+          <div className={`w-6 h-6 md:w-12 md:h-12 rounded-full flex items-center justify-center font-bold text-[10px] md:text-lg shrink-0 ${avatarBgClass}`}>
             {t.name.charAt(0)}
           </div>
           <div>
-            <p className={`font-bold text-xs md:text-sm uppercase tracking-widest ${nameClass}`}>{t.name}</p>
-            <p className={`text-[10px] md:text-xs font-medium ${roleClass}`}>{t.role}</p>
+            <p className={`font-bold text-[9px] md:text-sm uppercase tracking-widest ${nameClass}`}>{t.name}</p>
+            <p className={`text-[8px] md:text-xs font-medium ${roleClass}`}>{t.role}</p>
           </div>
         </div>
       </div>
@@ -121,8 +121,8 @@ export default function Testimonials() {
   };
 
   return (
-    <section ref={sectionRef} className="py-32 overflow-hidden bg-background">
-      <div ref={headerRef} className="max-w-7xl mx-auto px-6 mb-20 text-center md:text-left">
+    <section ref={sectionRef} className="py-20 md:py-32 overflow-hidden bg-background">
+      <div ref={headerRef} className="max-w-7xl mx-auto px-6 mb-10 md:mb-20 text-center md:text-left">
         <h2 className="text-[clamp(2.5rem,5vw,4rem)] font-extrabold leading-[0.9] tracking-[-0.04em] text-foreground mb-6">
           Client <span className="text-accent">Stories</span>.
         </h2>
@@ -131,27 +131,27 @@ export default function Testimonials() {
         </p>
       </div>
 
-      <div className="flex flex-col gap-4 md:gap-6 marquee-container relative">
+      <div className="flex flex-col gap-3 md:gap-6 marquee-container relative">
         {/* Fade gradients for smooth entering/exiting effect */}
-        <div className="absolute inset-y-0 left-0 w-24 md:w-48 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
-        <div className="absolute inset-y-0 right-0 w-24 md:w-48 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+        <div className="absolute inset-y-0 left-0 w-16 md:w-48 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+        <div className="absolute inset-y-0 right-0 w-16 md:w-48 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
 
         {/* Top Row: Left to Right */}
         <div className="flex w-fit animate-marquee-x-reverse hover:[animation-play-state:paused]">
-          <div className="flex gap-4 md:gap-6 px-2 md:px-3">
+          <div className="flex gap-3 md:gap-6 px-1.5 md:px-3">
             {testimonials.map((t, i) => renderCard(t, i))}
           </div>
-          <div className="flex gap-4 md:gap-6 px-2 md:px-3">
+          <div className="flex gap-3 md:gap-6 px-1.5 md:px-3">
             {testimonials.map((t, i) => renderCard(t, i + 10))}
           </div>
         </div>
 
         {/* Bottom Row: Right to Left */}
         <div className="flex w-fit animate-marquee-x hover:[animation-play-state:paused]">
-          <div className="flex gap-4 md:gap-6 px-2 md:px-3">
+          <div className="flex gap-3 md:gap-6 px-1.5 md:px-3">
             {[...testimonials].reverse().map((t, i) => renderCard(t, i + 20))}
           </div>
-          <div className="flex gap-4 md:gap-6 px-2 md:px-3">
+          <div className="flex gap-3 md:gap-6 px-1.5 md:px-3">
             {[...testimonials].reverse().map((t, i) => renderCard(t, i + 30))}
           </div>
         </div>

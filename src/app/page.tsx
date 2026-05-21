@@ -1,15 +1,13 @@
 import Preloader from "@/components/Preloader";
 import Hero from "@/components/Hero";
-import dynamic from "next/dynamic";
-
-const About = dynamic(() => import("@/components/About"));
-const Services = dynamic(() => import("@/components/Services"));
-const Shop = dynamic(() => import("@/components/Shop"));
-const HowItWorks = dynamic(() => import("@/components/HowItWorks"));
-const BeforeAfter = dynamic(() => import("@/components/BeforeAfter"));
-const Testimonials = dynamic(() => import("@/components/Testimonials"));
-const CtaFaq = dynamic(() => import("@/components/CtaFaq"));
-const LocationMap = dynamic(() => import("@/components/LocationMap"));
+import About from "@/components/About";
+import Services from "@/components/Services";
+import Shop from "@/components/Shop";
+import HowItWorks from "@/components/HowItWorks";
+import BeforeAfter from "@/components/BeforeAfter";
+import Testimonials from "@/components/Testimonials";
+import CtaFaq from "@/components/CtaFaq";
+import LocationMap from "@/components/LocationMap";
 
 export default function Home() {
   return (

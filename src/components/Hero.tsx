@@ -131,6 +131,7 @@ export default function Hero() {
   }, []);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    if (window.innerWidth < 1024) return;
     const { clientX, clientY } = e;
 
     if (!sectionRectRef.current || !collageRectRef.current) {
@@ -149,8 +150,6 @@ export default function Hero() {
     }
 
     // 2. Parallax Collage Card Shifts (Desktop Only)
-    if (window.innerWidth < 1024) return;
-    
     const collageRect = collageRectRef.current;
     if (collageRect) {
       const { width, height, left, top } = collageRect;
@@ -175,12 +174,13 @@ export default function Hero() {
   };
 
   const handleMouseLeave = () => {
+    if (window.innerWidth < 1024) return;
+
     // Reset Grid Hover Highlight opacity
     if (sectionRef.current) {
       sectionRef.current.style.setProperty("--grid-hover-opacity", "0");
     }
 
-    if (window.innerWidth < 1024) return;
     if (quickToRef.current) {
       quickToRef.current.x1(0);
       quickToRef.current.y1(0);

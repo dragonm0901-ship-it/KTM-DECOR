@@ -33,74 +33,151 @@ export default function GlobalCart() {
   // GSAP Morph-Expansion Animation
   useEffect(() => {
     if (isCartOpen) {
-      const pillElement = document.getElementById("header-pill-nav");
-      const pillRect = pillElement ? pillElement.getBoundingClientRect() : null;
-
-      if (!pillRect) return;
-
       const finalWidth = window.innerWidth >= 1024 ? "600px" : (window.innerWidth >= 640 ? "480px" : "100%");
 
-      // 1. Instantly fade out the real header pill navbar to prevent double layer overlap
-      gsap.to(pillElement, {
-        opacity: 0,
-        duration: 0.15,
-        ease: "power2.out"
-      });
+      if (window.innerWidth < 1024) {
+        // Mobile layout: Simple, hardware-accelerated translateX slide-in
+        gsap.set(drawerRef.current, {
+          x: "100%",
+          top: 0,
+          bottom: 0,
+          right: 0,
+          width: finalWidth,
+          height: "100%",
+          borderRadius: "0px",
+          borderWidth: "0px",
+          opacity: 1,
+          position: "fixed",
+          zIndex: 150,
+          overflow: "hidden"
+        });
 
-      // Set initial state matching the exact shape/size of the header's pill navbar!
-      gsap.set(drawerRef.current, {
-        top: pillRect.top,
-        bottom: "auto",
-        right: window.innerWidth - pillRect.right,
-        width: pillRect.width,
-        height: pillRect.height,
-        borderRadius: "4px",
-        borderWidth: "1px",
-        borderColor: "var(--border)",
-        boxShadow: "0 10px 30px -10px rgba(0, 0, 0, 0.3)",
-        opacity: 1,
-        position: "fixed",
-        zIndex: 150,
-        overflow: "hidden"
-      });
+        gsap.set(contentRef.current, { opacity: 0, y: 15 });
+        gsap.set(backdropRef.current, { opacity: 0 });
 
-      // Clear layout classes initially, reset content and backdrop visibility
-      gsap.set(contentRef.current, { opacity: 0, y: 30 });
-      gsap.set(backdropRef.current, { opacity: 0 });
+        const tl = gsap.timeline();
 
-      const tl = gsap.timeline();
+        // Fade in backdrop
+        tl.to(backdropRef.current, {
+          opacity: 1,
+          duration: 0.4,
+          ease: "power2.out"
+        }, 0);
 
-      // 2. Fade in backdrop overlay
-      tl.to(backdropRef.current, {
-        opacity: 1,
-        duration: 0.6,
-        ease: "power2.out"
-      }, 0);
+        // Slide in drawer
+        tl.to(drawerRef.current, {
+          x: "0%",
+          duration: 0.4,
+          ease: "power3.out"
+        }, 0);
 
-      // 3. Expand pill rectangle smoothly to the full height cart drawer
-      tl.to(drawerRef.current, {
-        top: 0,
-        bottom: 0,
-        right: 0,
-        width: finalWidth,
-        height: "100%",
-        borderRadius: "0px",
-        borderWidth: "0px",
-        duration: 0.95,
-        ease: "expo.out"
-      }, 0);
+        // Fade/rise content
+        tl.to(contentRef.current, {
+          opacity: 1,
+          y: 0,
+          duration: 0.3,
+          ease: "power2.out"
+        }, 0.15);
+      } else {
+        // Desktop layout: Morph-Expansion from the header's pill navbar
+        const pillElement = document.getElementById("header-pill-nav");
+        const pillRect = pillElement ? pillElement.getBoundingClientRect() : null;
 
-      // 4. Fade in cart drawer contents with a subtle stagger/rising animation
-      tl.to(contentRef.current, {
-        opacity: 1,
-        y: 0,
-        duration: 0.7,
-        ease: "power3.out"
-      }, 0.35);
+        if (!pillRect) return;
+
+        // Instantly fade out the real header pill navbar to prevent double layer overlap
+        gsap.to(pillElement, {
+          opacity: 0,
+          duration: 0.15,
+          ease: "power2.out"
+        });
+
+        // Set initial state matching the exact shape/size of the header's pill navbar!
+        gsap.set(drawerRef.current, {
+          x: 0, // Reset any translation from mobile view
+          top: pillRect.top,
+          bottom: "auto",
+          right: window.innerWidth - pillRect.right,
+          width: pillRect.width,
+          height: pillRect.height,
+          borderRadius: "4px",
+          borderWidth: "1px",
+          borderColor: "var(--border)",
+          boxShadow: "0 10px 30px -10px rgba(0, 0, 0, 0.3)",
+          opacity: 1,
+          position: "fixed",
+          zIndex: 150,
+          overflow: "hidden"
+        });
+
+        // Clear layout classes initially, reset content and backdrop visibility
+        gsap.set(contentRef.current, { opacity: 0, y: 30 });
+        gsap.set(backdropRef.current, { opacity: 0 });
+
+        const tl = gsap.timeline();
+
+        // Fade in backdrop overlay
+        tl.to(backdropRef.current, {
+          opacity: 1,
+          duration: 0.6,
+          ease: "power2.out"
+        }, 0);
+
+        // Expand pill rectangle smoothly to the full height cart drawer
+        tl.to(drawerRef.current, {
+          top: 0,
+          bottom: 0,
+          right: 0,
+          width: finalWidth,
+          height: "100%",
+          borderRadius: "0px",
+          borderWidth: "0px",
+          duration: 0.95,
+          ease: "expo.out"
+        }, 0);
+
+        // Fade in cart drawer contents with a subtle stagger/rising animation
+        tl.to(contentRef.current, {
+          opacity: 1,
+          y: 0,
+          duration: 0.7,
+          ease: "power3.out"
+        }, 0.35);
+      }
     }
   }, [isCartOpen]);
 
   const handleCloseWithAnimation = () => {
+    if (window.innerWidth < 1024) {
+      // Mobile layout close: Slide-out using translateX
+      const tl = gsap.timeline({
+        onComplete: () => {
+          setIsCartOpen(false);
+        }
+      });
+
+      tl.to(contentRef.current, {
+        opacity: 0,
+        y: 15,
+        duration: 0.25,
+        ease: "power2.in"
+      }, 0);
+
+      tl.to(backdropRef.current, {
+        opacity: 0,
+        duration: 0.35,
+        ease: "power2.in"
+      }, 0.05);
+
+      tl.to(drawerRef.current, {
+        x: "100%",
+        duration: 0.35,
+        ease: "power3.in"
+      }, 0.05);
+      
+      return;
+    }
+
     const pillElement = document.getElementById("header-pill-nav");
     const pillRect = pillElement ? pillElement.getBoundingClientRect() : null;
 

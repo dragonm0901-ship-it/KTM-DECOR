@@ -36,7 +36,7 @@ export default function ProductDetailClient() {
 
   if (!product) {
     return (
-      <div className="min-h-screen pt-44 pb-20 px-6 md:px-12 bg-background text-foreground flex flex-col items-center justify-center text-center">
+      <div className="min-h-screen pt-28 md:pt-36 lg:pt-44 pb-20 px-6 md:px-12 bg-background text-foreground flex flex-col items-center justify-center text-center">
         <Package className="w-16 h-16 text-muted mb-4 animate-pulse" />
         <h1 className="text-2xl font-black uppercase tracking-tighter mb-2">Product Not Found</h1>
         <p className="text-muted text-sm mb-6 max-w-sm">The product you are looking for does not exist or has been removed from our catalog.</p>
@@ -97,7 +97,7 @@ export default function ProductDetailClient() {
   };
 
   return (
-    <div className="min-h-screen pt-44 pb-20 px-6 md:px-12 bg-background text-foreground">
+    <div className="min-h-screen pt-28 md:pt-36 lg:pt-44 pb-20 px-6 md:px-12 bg-background text-foreground">
       <div className="max-w-[1200px] mx-auto">
         
         {/* Breadcrumb Navigation */}
@@ -234,12 +234,12 @@ export default function ProductDetailClient() {
             <h2 className="text-xl sm:text-2xl font-black uppercase tracking-widest text-foreground mb-8 flex items-center gap-2">
               <Star className="w-5 h-5 text-accent animate-pulse fill-accent" /> Suggested Products
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
               {suggestions.map((p) => (
                 <Link
                   key={p.id}
                   href={`/shop/${p.id}`}
-                  className="group flex flex-col justify-between h-full bg-card/15 rounded-[4px] border border-transparent hover:border-border/30 hover:bg-card/40 transition-all p-3"
+                  className="group flex flex-col justify-between h-full bg-card/15 rounded-[4px] border border-transparent hover:border-border/30 hover:bg-card/40 transition-all p-2 sm:p-3"
                 >
                   {/* Image */}
                   <div className="relative aspect-[4/5] rounded-[4px] overflow-hidden bg-card border border-border/80 mb-3">
@@ -247,7 +247,7 @@ export default function ProductDetailClient() {
                       src={p.image}
                       alt={p.name}
                       fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      className="object-cover transition-transform duration-700 lg:group-hover:scale-105"
                     />
                   </div>
                   

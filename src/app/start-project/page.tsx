@@ -420,7 +420,7 @@ Thank you so much!`;
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground pt-36 md:pt-44 pb-16 flex flex-col items-center">
+    <div className="min-h-screen bg-background text-foreground pt-24 md:pt-36 lg:pt-44 pb-16 flex flex-col items-center">
       
       {/* ── Header Title Row ── */}
       <div className="w-full max-w-[1400px] px-6 md:px-12 mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

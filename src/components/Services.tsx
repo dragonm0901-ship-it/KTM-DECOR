@@ -43,6 +43,8 @@ export default function Services() {
   const cardsRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
+    if (typeof window === "undefined" || window.innerWidth < 1024) return;
+
     // Initial configuration
     gsap.set(".card-0", { y: "0%", scale: 1, rotation: 0, opacity: 1 });
     gsap.set([".card-1", ".card-2", ".card-3"], { y: "150%", scale: 1, rotation: 0, opacity: 0 });
@@ -77,10 +79,10 @@ export default function Services() {
   }, { scope: containerRef });
 
   return (
-    <div ref={containerRef} className="relative w-full h-[500vh]">
+    <div ref={containerRef} className="relative w-full lg:h-[500vh] h-auto">
       <section 
         id="services" 
-        className="sticky top-0 h-[100dvh] lg:h-[125vh] w-full flex flex-col items-center justify-end pb-12 md:justify-center md:pb-0 py-4 md:py-6 px-6 md:px-12 overflow-hidden bg-background text-foreground"
+        className="relative lg:sticky lg:top-0 h-auto lg:h-[125vh] w-full flex flex-col items-center justify-start lg:justify-center py-20 lg:py-6 px-6 md:px-12 overflow-hidden bg-background text-foreground"
       >
         {/* Premium Workshop Background Image */}
         <div className="absolute -inset-[5%] z-0 opacity-65 pointer-events-none select-none overflow-hidden">
@@ -98,8 +100,8 @@ export default function Services() {
           className="absolute inset-0 z-0 bg-[linear-gradient(to_bottom,_var(--background)_0%,_transparent_15%,_transparent_85%,_var(--card)_100%)] transition-colors duration-500 pointer-events-none" 
         />
 
-        {/* Top Center Header (Absolute to prevent pushing cards out of viewport) */}
-        <div className="absolute top-20 md:top-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center text-center w-full max-w-3xl px-6 select-text">
+        {/* Top Center Header (Absolute on desktop, relative on mobile to prevent pushing cards out of viewport) */}
+        <div className="relative left-0 translate-x-0 mb-8 w-full max-w-3xl px-6 select-text flex flex-col items-center text-center lg:absolute lg:top-8 lg:left-1/2 lg:-translate-x-1/2 lg:mb-0">
           <span className="inline-flex items-center gap-2 px-4 py-1.5 text-[10px] font-black tracking-[0.25em] uppercase border border-accent/20 rounded-[4px] mb-3 text-white bg-accent">
             The Craft
           </span>
@@ -111,12 +113,12 @@ export default function Services() {
         {/* Stacking Cards Track (Larger, wider, and 15% taller cards offset from absolute header) */}
         <div 
           ref={cardsRef}
-          className="relative w-full max-w-[1120px] h-[51vh] md:h-[70vh] lg:h-[75vh] max-h-[900px] flex items-center justify-center shrink-0 mt-0 md:mt-24 lg:mt-28"
+          className="relative w-full max-w-[1120px] lg:h-[75vh] flex flex-col lg:block gap-4 sm:gap-8 mt-6 lg:mt-28 lg:max-h-[900px] shrink-0"
         >
           {servicesData.map((service, i) => (
             <div
               key={i}
-              className={`service-card card-${i} absolute top-0 left-0 w-full h-full rounded-[4px] p-6 sm:p-8 md:p-12 lg:p-16 flex flex-col justify-between shadow-[0_20px_50px_rgba(0,0,0,0.3)] select-none pointer-events-auto`}
+              className={`service-card card-${i} relative lg:absolute lg:top-0 lg:left-0 w-full h-[320px] sm:h-[450px] lg:h-full rounded-[4px] p-5 sm:p-8 md:p-12 lg:p-16 flex flex-col justify-between shadow-[0_20px_50px_rgba(0,0,0,0.3)] select-none pointer-events-auto`}
               style={{
                 zIndex: 10 + i,
                 transformStyle: "preserve-3d",

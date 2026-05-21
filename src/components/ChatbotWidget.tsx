@@ -109,7 +109,7 @@ export default function ChatbotWidget() {
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const chatEndRef = useRef<HTMLDivElement>(null);
+  const chatLogsRef = useRef<HTMLDivElement>(null);
 
   // Observe the documentElement class to hide during preloader active state
   useEffect(() => {
@@ -140,7 +140,12 @@ export default function ChatbotWidget() {
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (chatLogsRef.current) {
+      chatLogsRef.current.scrollTo({
+        top: chatLogsRef.current.scrollHeight,
+        behavior: "smooth"
+      });
+    }
   }, [messages, isLoading]);
 
   const handleSend = async (text: string) => {
@@ -269,6 +274,7 @@ export default function ChatbotWidget() {
 
           {/* Chat Logs (Separately Scrollable & overscroll-contained to prevent parent scrolling) */}
           <div
+            ref={chatLogsRef}
             data-lenis-prevent
             className="flex-1 p-3 sm:p-4 overflow-y-auto overscroll-contain space-y-3 sm:space-y-4 scrollbar-thin scrollbar-thumb-border bg-gradient-to-b from-black/20 to-zinc-900/20 dark:from-zinc-950/20 dark:to-black/20 relative"
             style={{
@@ -307,7 +313,7 @@ export default function ChatbotWidget() {
               </div>
             )}
 
-            <div ref={chatEndRef} />
+
           </div>
 
           {/* Branded Suggestions (Lenis prevented scroll container) */}

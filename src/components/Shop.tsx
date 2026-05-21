@@ -121,7 +121,7 @@ export default function Shop() {
               className="portfolio-card group relative aspect-square sm:aspect-[4/5] rounded-[4px] overflow-hidden cursor-pointer border border-border opacity-0 bg-background block"
             >
               {/* Image BG */}
-              <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-105">
+              <div className="absolute inset-0 transition-transform duration-700 lg:group-hover:scale-105">
                 <Image
                   src={project.image}
                   alt={project.name}
@@ -131,13 +131,13 @@ export default function Shop() {
               </div>
 
               {/* Hover color gradient glow */}
-              <div className={`absolute inset-0 bg-gradient-to-t ${getCategoryGradient(project.category)} opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10`} />
+              <div className={`absolute inset-0 bg-gradient-to-t ${getCategoryGradient(project.category)} opacity-0 lg:group-hover:opacity-100 transition-opacity duration-500 z-10`} />
 
               {/* Dark overlay for typography contrast */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-500 z-10" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-500 z-10" />
 
               {/* Info — always visible on mobile (compact), hover-reveal on desktop */}
-              <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-5 sm:translate-y-6 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100 transition-all duration-500 z-20">
+              <div className="absolute bottom-0 left-0 right-0 p-3 lg:p-5 lg:translate-y-6 lg:opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100 transition-all duration-500 z-20">
                 <span className="text-[8px] sm:text-[9px] font-bold tracking-[0.2em] uppercase text-white/65 block mb-0.5 sm:mb-1.5">
                   {project.category}
                 </span>

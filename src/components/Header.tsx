@@ -11,12 +11,12 @@ import gsap from "gsap";
 import AnnouncementBar from "./AnnouncementBar";
 
 const navLinks = [
-  { label: "About", href: "#about" },
-  { label: "Services", href: "#services" },
+  { label: "About", href: "/#about" },
+  { label: "Services", href: "/#services" },
   { label: "Shop", href: "/shop" },
-  { label: "Process", href: "#process" },
-  { label: "FAQ", href: "#faq" },
-  { label: "Contact", href: "#contact" },
+  { label: "Process", href: "/#process" },
+  { label: "FAQ", href: "/#faq" },
+  { label: "Contact", href: "/#contact" },
 ];
 
 const legalLinks = [

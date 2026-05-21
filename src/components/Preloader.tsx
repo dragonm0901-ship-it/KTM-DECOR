@@ -40,8 +40,8 @@ export default function Preloader() {
     // Initial state
     gsap.set(coloredLogoRef.current, { clipPath: "inset(0 100% 0 0)" });
     gsap.set(laserRef.current, { left: "0%", opacity: 0 });
-    const scanDuration = isMobileViewport ? 1.0 : 1.5;
-    const popDuration = isMobileViewport ? 0.25 : 0.4;
+    const scanDuration = isMobileViewport ? 0.8 : 1.5;
+    const popDuration = isMobileViewport ? 0.2 : 0.4;
 
     // Start animation sequence
     const tl = gsap.timeline({
@@ -106,8 +106,8 @@ export default function Preloader() {
     const isMobileViewport = typeof window !== "undefined" && window.innerWidth < 1024;
 
     // Speed up flight animations so the user can interact with the site faster
-    const flightDuration = isMobileViewport ? 0.6 : 0.85;
-    const panelDuration = isMobileViewport ? 0.5 : 0.7;
+    const flightDuration = isMobileViewport ? 0.45 : 0.85;
+    const panelDuration = isMobileViewport ? 0.4 : 0.7;
 
     // ── Safety timeout: if the exit animation stalls (mobile GPU hiccups,
     //    Lenis conflict, etc.) we MUST unlock the page within 6 seconds.
