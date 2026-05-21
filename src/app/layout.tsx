@@ -6,8 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CookieConsent from "@/components/CookieConsent";
 import SmoothScroll from "@/components/SmoothScroll";
-import ChatbotWidget from "@/components/ChatbotWidget";
-import GlobalCart from "@/components/GlobalCart";
+import { ClientProviders } from "@/components/ClientProviders";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -76,8 +75,7 @@ export default function RootLayout({
             {children}
             <Footer />
             <CookieConsent />
-            <ChatbotWidget />
-            <GlobalCart />
+            <ClientProviders />
           </SmoothScroll>
         </ThemeProvider>
       </body>

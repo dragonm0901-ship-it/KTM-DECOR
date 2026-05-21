@@ -65,86 +65,46 @@ export default function Hero() {
 
     const triggerEntrance = () => {
       ctx = gsap.context(() => {
-        const tl = gsap.timeline();
+        let mm = gsap.matchMedia();
 
-        // 1. Neon Ignition Sequence ( cathode double-blink effect )
-        const ignite = gsap.timeline();
-        ignite.to(".neon-glow-accent", { opacity: 0.15, duration: 0.05 })
-              .to(".neon-glow-accent", { opacity: 0.05, duration: 0.04 })
-              .to(".neon-glow-accent", { opacity: 0.55, duration: 0.08 })
-              .to(".neon-glow-accent", { opacity: 0.1, duration: 0.06 })
-              .to(".neon-glow-accent", { opacity: 1, duration: 0.15 })
-              .to(".neon-glow-accent", { opacity: 0.3, duration: 0.1 })
-              .to(".neon-glow-accent", { opacity: 1, duration: 0.8, ease: "power2.out" });
+        mm.add("(min-width: 1024px)", () => {
+          const tl = gsap.timeline();
 
+          // 1. Neon Ignition Sequence
+          const ignite = gsap.timeline();
+          ignite.to(".neon-glow-accent", { opacity: 0.15, duration: 0.05 })
+                .to(".neon-glow-accent", { opacity: 0.05, duration: 0.04 })
+                .to(".neon-glow-accent", { opacity: 0.55, duration: 0.08 })
+                .to(".neon-glow-accent", { opacity: 0.1, duration: 0.06 })
+                .to(".neon-glow-accent", { opacity: 1, duration: 0.15 })
+                .to(".neon-glow-accent", { opacity: 0.3, duration: 0.1 })
+                .to(".neon-glow-accent", { opacity: 1, duration: 0.8, ease: "power2.out" });
 
+          // Badge
+          tl.fromTo(badgeRef.current, { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" });
+          // Title lines
+          tl.fromTo(".hero-line", { y: "100%", opacity: 0 }, { y: "0%", opacity: 1, duration: 1, stagger: 0.1, ease: "expo.out" }, "-=0.3");
+          // Subtext
+          tl.fromTo([subtextRef.current, ".hero-subtext-mobile"], { y: 25, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" }, "-=0.6");
+          // CTAs
+          tl.fromTo(ctaRef.current, { y: 25, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" }, "-=0.5");
+          // Features
+          tl.fromTo(".hero-feature", { x: -15, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, stagger: 0.08, ease: "power2.out" }, "-=0.4");
+          // Cards
+          tl.fromTo(".hero-card", { y: 60, opacity: 0, scale: 0.92 }, { y: 0, opacity: 1, scale: 1, duration: 0.9, stagger: 0.12, ease: "power3.out" }, "-=0.8");
+        });
 
-        // 2. Main content entrance
-        // Badge
-        tl.fromTo(
-          badgeRef.current,
-          { y: 20, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }
-        );
-
-        // Title lines rise
-        tl.fromTo(
-          ".hero-line",
-          { y: "100%", opacity: 0 },
-          {
-            y: "0%",
-            opacity: 1,
-            duration: 1,
-            stagger: 0.1,
-            ease: "expo.out",
-          },
-          "-=0.3"
-        );
-
-        // Subtext (Animates both desktop and mobile instances)
-        tl.fromTo(
-          [subtextRef.current, ".hero-subtext-mobile"],
-          { y: 25, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" },
-          "-=0.6"
-        );
-
-        // CTAs
-        tl.fromTo(
-          ctaRef.current,
-          { y: 25, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" },
-          "-=0.5"
-        );
-
-        // Feature bullets stagger
-        tl.fromTo(
-          ".hero-feature",
-          { x: -15, opacity: 0 },
-          {
-            x: 0,
-            opacity: 1,
-            duration: 0.5,
-            stagger: 0.08,
-            ease: "power2.out",
-          },
-          "-=0.4"
-        );
-
-        // Floating image cards
-        tl.fromTo(
-          ".hero-card",
-          { y: 60, opacity: 0, scale: 0.92 },
-          {
-            y: 0,
-            opacity: 1,
-            scale: 1,
-            duration: 0.9,
-            stagger: 0.12,
-            ease: "power3.out",
-          },
-          "-=0.8"
-        );
+        mm.add("(max-width: 1023px)", () => {
+          const tl = gsap.timeline();
+          
+          // Simplified Mobile Animation
+          tl.to(".neon-glow-accent", { opacity: 0.8, duration: 1, ease: "power2.out" });
+          tl.fromTo(badgeRef.current, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, "-=0.5");
+          tl.fromTo(".hero-line", { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, stagger: 0.1, ease: "power2.out" }, "-=0.2");
+          tl.fromTo(".hero-subtext-mobile", { opacity: 0 }, { opacity: 1, duration: 0.5 }, "-=0.2");
+          // On mobile, just fade in cards and CTAs at once to save GPU operations
+          tl.fromTo([".hero-card", ctaRef.current, ".hero-feature"], { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.6, stagger: 0.05, ease: "power2.out" }, "-=0.2");
+        });
 
       }, sectionRef);
     };

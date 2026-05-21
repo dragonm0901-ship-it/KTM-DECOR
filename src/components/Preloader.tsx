@@ -39,8 +39,9 @@ export default function Preloader() {
     gsap.set(laserRef.current, { left: "0%", opacity: 0 });
 
     const isMobileViewport = typeof window !== "undefined" && window.innerWidth < 1024;
-    const scanDuration = isMobileViewport ? 0.75 : 1.5;
-    const popDuration = isMobileViewport ? 0.2 : 0.4;
+    // Dramatically speed up mobile preloader to avoid blocking time
+    const scanDuration = isMobileViewport ? 0.35 : 1.5;
+    const popDuration = isMobileViewport ? 0.15 : 0.4;
 
     // Start animation sequence
     const tl = gsap.timeline({
@@ -58,9 +59,9 @@ export default function Preloader() {
     // Fade in the logo wrapper and laser
     tl.fromTo(logoWrapperRef.current,
       { scale: 0.9, opacity: 0 },
-      { scale: 1, opacity: 1, duration: isMobileViewport ? 0.3 : 0.5, ease: "power3.out" }
+      { scale: 1, opacity: 1, duration: isMobileViewport ? 0.2 : 0.5, ease: "power3.out" }
     );
-    tl.to(laserRef.current, { opacity: 1, duration: isMobileViewport ? 0.08 : 0.15 }, "-=0.25");
+    tl.to(laserRef.current, { opacity: 1, duration: isMobileViewport ? 0.05 : 0.15 }, "-=0.25");
 
     // Laser scan animation
     const obj = { val: 0 };
@@ -90,7 +91,8 @@ export default function Preloader() {
     tl.to(laserRef.current, {
       opacity: 0,
       scaleY: 1.2,
-      filter: "brightness(2)",
+      // Remove heavy filter on mobile to save GPU cycles
+      filter: isMobileViewport ? "none" : "brightness(2)",
       duration: isMobileViewport ? 0.1 : 0.2,
       ease: "power2.out",
     });
@@ -102,8 +104,9 @@ export default function Preloader() {
     if (!isDone) return;
 
     const isMobileViewport = typeof window !== "undefined" && window.innerWidth < 1024;
-    const flightDuration = isMobileViewport ? 0.45 : 0.85;
-    const panelDuration = isMobileViewport ? 0.45 : 0.7;
+    // Speed up flight animations so the user can interact with the site faster
+    const flightDuration = isMobileViewport ? 0.2 : 0.85;
+    const panelDuration = isMobileViewport ? 0.25 : 0.7;
 
     // ── Safety timeout: if the exit animation stalls (mobile GPU hiccups,
     //    Lenis conflict, etc.) we MUST unlock the page within 6 seconds.
