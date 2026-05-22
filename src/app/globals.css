@@ -254,14 +254,6 @@ html.is-loading body::before {
   background: #050505;
 }
 
-/* Defer rendering of off-screen components (LCP / INP optimization) on desktop viewports only */
-@media (min-width: 1024px) {
-  @supports (content-visibility: auto) {
-    .content-visibility-auto {
-      content-visibility: auto;
-    }
-  }
-}
 
 /* Prevent initial hidden state/flashing of hero content on mobile viewports */
 @media (max-width: 1023px) {
