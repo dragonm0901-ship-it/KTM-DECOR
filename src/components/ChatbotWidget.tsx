@@ -247,7 +247,7 @@ export default function ChatbotWidget() {
 
       {/* 2. Premium Professional Glassmorphic Chat Box */}
       {isOpen && (
-        <div className="w-[300px] sm:w-[360px] h-[420px] sm:h-[480px] max-h-[75vh] sm:max-h-[82vh] max-w-[92vw] bg-black/80 dark:bg-zinc-950/80 backdrop-blur-xl border border-white/10 dark:border-white/5 rounded-[4px] shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 duration-300 text-white transition-all duration-500">
+        <div className="w-[300px] sm:w-[360px] h-[420px] sm:h-[480px] max-h-[75vh] sm:max-h-[82vh] max-w-[92vw] bg-black/80 dark:bg-zinc-950/80 backdrop-blur-md border border-white/10 dark:border-white/5 rounded-[4px] shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 duration-300 text-white transition-all duration-500">
           {/* Header */}
           <div className="border-b border-white/10 px-3.5 py-3 flex items-center justify-between bg-white/5">
             <div className="flex items-center gap-2.5">

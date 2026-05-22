@@ -41,74 +41,80 @@ export default function Preloader() {
       preloaderHasRun = true;
     }, safetyDuration);
 
-    // Ensure refs are available
-    if (!coloredLogoRef.current || !laserRef.current || !logoWrapperRef.current) {
-      return () => clearTimeout(safetyTimer);
+    let tl: gsap.core.Timeline | null = null;
+
+    // Only run animation if refs are available
+    if (coloredLogoRef.current && laserRef.current && logoWrapperRef.current) {
+      // Initial state
+      gsap.set(coloredLogoRef.current, { clipPath: "inset(0 100% 0 0)" });
+      gsap.set(laserRef.current, { left: "0%", opacity: 0 });
+      const scanDuration = isMobileViewport ? 0.8 : 1.5;
+      const popDuration = isMobileViewport ? 0.2 : 0.4;
+
+      // Start animation sequence
+      tl = gsap.timeline({
+        onComplete: () => {
+          // Pop effect when complete
+          if (logoWrapperRef.current) {
+            gsap.to(logoWrapperRef.current, {
+              scale: 1.05,
+              duration: popDuration,
+              ease: "elastic.out(1, 0.5)",
+              onComplete: () => setIsDone(true)
+            });
+          } else {
+            setIsDone(true);
+          }
+        }
+      });
+
+      // Fade in the logo wrapper and laser
+      tl.fromTo(logoWrapperRef.current,
+        { scale: 0.9, opacity: 0 },
+        { scale: 1, opacity: 1, duration: isMobileViewport ? 0.2 : 0.5, ease: "power3.out" }
+      );
+      tl.to(laserRef.current, { opacity: 1, duration: isMobileViewport ? 0.05 : 0.15 }, "-=0.25");
+
+      // Laser scan animation
+      const obj = { val: 0 };
+      tl.to(obj, {
+        val: 100,
+        duration: scanDuration,
+        ease: "power2.inOut",
+        onUpdate: () => {
+          const progress = Math.round(obj.val);
+          if (percentageTextRef.current) {
+            percentageTextRef.current.innerText = `${progress}%`;
+          }
+          if (progressBarFillRef.current) {
+            progressBarFillRef.current.style.width = `${progress}%`;
+          }
+
+          if (coloredLogoRef.current) {
+            gsap.set(coloredLogoRef.current, { clipPath: `inset(0 ${100 - obj.val}% 0 0)` });
+          }
+          if (laserRef.current) {
+            gsap.set(laserRef.current, { left: `${obj.val}%` });
+          }
+        },
+      });
+
+      // Laser flare before disappearing
+      tl.to(laserRef.current, {
+        opacity: 0,
+        scaleY: 1.2,
+        // Remove heavy filter on mobile to save GPU cycles
+        filter: isMobileViewport ? "none" : "brightness(2)",
+        duration: isMobileViewport ? 0.1 : 0.2,
+        ease: "power2.out",
+      });
     }
 
-    // Initial state
-    gsap.set(coloredLogoRef.current, { clipPath: "inset(0 100% 0 0)" });
-    gsap.set(laserRef.current, { left: "0%", opacity: 0 });
-    const scanDuration = isMobileViewport ? 0.8 : 1.5;
-    const popDuration = isMobileViewport ? 0.2 : 0.4;
-
-    // Start animation sequence
-    const tl = gsap.timeline({
-      onComplete: () => {
-        // Pop effect when complete
-        gsap.to(logoWrapperRef.current, {
-          scale: 1.05,
-          duration: popDuration,
-          ease: "elastic.out(1, 0.5)",
-          onComplete: () => setIsDone(true)
-        });
-      }
-    });
-
-    // Fade in the logo wrapper and laser
-    tl.fromTo(logoWrapperRef.current,
-      { scale: 0.9, opacity: 0 },
-      { scale: 1, opacity: 1, duration: isMobileViewport ? 0.2 : 0.5, ease: "power3.out" }
-    );
-    tl.to(laserRef.current, { opacity: 1, duration: isMobileViewport ? 0.05 : 0.15 }, "-=0.25");
-
-    // Laser scan animation
-    const obj = { val: 0 };
-    tl.to(obj, {
-      val: 100,
-      duration: scanDuration,
-      ease: "power2.inOut",
-      onUpdate: () => {
-        const progress = Math.round(obj.val);
-        if (percentageTextRef.current) {
-          percentageTextRef.current.innerText = `${progress}%`;
-        }
-        if (progressBarFillRef.current) {
-          progressBarFillRef.current.style.width = `${progress}%`;
-        }
-
-        if (coloredLogoRef.current) {
-          gsap.set(coloredLogoRef.current, { clipPath: `inset(0 ${100 - obj.val}% 0 0)` });
-        }
-        if (laserRef.current) {
-          gsap.set(laserRef.current, { left: `${obj.val}%` });
-        }
-      },
-    });
-
-    // Laser flare before disappearing
-    tl.to(laserRef.current, {
-      opacity: 0,
-      scaleY: 1.2,
-      // Remove heavy filter on mobile to save GPU cycles
-      filter: isMobileViewport ? "none" : "brightness(2)",
-      duration: isMobileViewport ? 0.1 : 0.2,
-      ease: "power2.out",
-    });
-
     return () => {
-      tl.kill();
+      if (tl) tl.kill();
       clearTimeout(safetyTimer);
+      // ALWAYS unlock the page when the preloader unmounts!
+      document.documentElement.classList.remove("is-loading");
     };
   }, []);
 
@@ -172,7 +178,11 @@ export default function Preloader() {
         }
         return window.innerWidth >= 1024 ? 0.8 : 1;
       };
-      const zoom = getZoom();
+      
+      let zoom = getZoom();
+      if (isNaN(zoom) || !isFinite(zoom) || zoom <= 0) {
+        zoom = 1;
+      }
 
       // Find the viewport center points for both elements
       const headerCenterX = headerRect.left + headerRect.width / 2;
@@ -182,15 +192,24 @@ export default function Preloader() {
       const wrapperCenterY = wrapperRect.top + wrapperRect.height / 2;
 
       // Compute translation delta offsets adjusted for the CSS zoom factor
-      const deltaX = (headerCenterX - wrapperCenterX) / zoom;
-      const deltaY = (headerCenterY - wrapperCenterY) / zoom;
+      let deltaX = (headerCenterX - wrapperCenterX) / zoom;
+      let deltaY = (headerCenterY - wrapperCenterY) / zoom;
+      if (isNaN(deltaX) || !isFinite(deltaX)) deltaX = 0;
+      if (isNaN(deltaY) || !isFinite(deltaY)) deltaY = 0;
 
       // Get the un-transformed (natural) wrapper size to compute scale correctly.
       // The wrapper is currently at scale 1.05 from the pop effect, so the
       // actual CSS width is wrapperRect.width / 1.05.
       const currentScale = gsap.getProperty(logoWrapperRef.current, "scaleX") as number || 1;
-      const naturalWidth = wrapperRect.width / currentScale;
-      const scale = headerRect.height / (naturalWidth); // match height since logo is square container
+      let naturalWidth = wrapperRect.width / (currentScale || 1);
+      if (isNaN(naturalWidth) || !isFinite(naturalWidth) || naturalWidth <= 0) {
+        naturalWidth = 134; // fallback size for mobile logo container width
+      }
+      
+      let scale = headerRect.height / (naturalWidth || 1);
+      if (isNaN(scale) || !isFinite(scale) || scale <= 0) {
+        scale = 0.15; // default fallback scale
+      }
 
       // 1. Fade out percentages
       tl.to(percentageRef.current, {
@@ -264,6 +283,8 @@ export default function Preloader() {
     return () => {
       clearTimeout(safetyTimer);
       tl.kill();
+      // ALWAYS unlock the page when the preloader unmounts!
+      document.documentElement.classList.remove("is-loading");
     };
   }, [isDone]);
 

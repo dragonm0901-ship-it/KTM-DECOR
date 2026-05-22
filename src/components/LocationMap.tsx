@@ -1,27 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { MapPin } from "lucide-react";
 import Image from "next/image";
 
 export default function LocationMap() {
-  const [mounted, setMounted] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const [showMap, setShowMap] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  const shouldRenderMap = !mounted || !isMobile || showMap;
-
   return (
     <section className="relative w-full bg-background pb-24 md:pb-32 px-6 md:px-12 z-20">
       <div className="max-w-[1320px] mx-auto">
@@ -53,58 +36,25 @@ export default function LocationMap() {
             */}
             <div className="absolute inset-0 bg-black" /> {/* Dark backdrop to prevent white flashes while loading */}
             
-            {shouldRenderMap ? (
-              <iframe 
-                src="https://maps.google.com/maps?q=KTM+Decor+Pvt+Ltd.,+Kathmandu,+Nepal&t=&z=15&ie=UTF8&iwloc=&output=embed" 
-                width="100%" 
-                height="100%" 
-                style={{ 
-                  border: 0, 
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                  filter: "grayscale(100%) invert(92%) contrast(83%)",
-                  mixBlendMode: "lighten" // Helps integrate it cleanly over the dark backdrop
-                }} 
-                allowFullScreen={false} 
-                loading="lazy" 
-                referrerPolicy="no-referrer-when-downgrade"
-                className="z-10 transition-opacity duration-1000"
-              ></iframe>
-            ) : (
-              <div className="absolute inset-0 bg-zinc-950 flex flex-col items-center justify-center p-6 text-center select-none z-10">
-                {/* CNC Grid Pattern Overlay */}
-                <div 
-                  className="absolute inset-0 opacity-[0.12] pointer-events-none"
-                  style={{
-                    backgroundImage: 'radial-gradient(circle, #FE914C 1.5px, transparent 1.5px)',
-                    backgroundSize: '20px 20px'
-                  }}
-                />
-                
-                {/* Glowing neon pin */}
-                <div className="relative mb-4 flex items-center justify-center">
-                  <div className="absolute w-12 h-12 rounded-full bg-[#FE914C]/20 border border-[#FE914C]/30 animate-ping pointer-events-none" />
-                  <div className="relative w-12 h-12 rounded-full bg-[#FE914C]/10 border border-[#FE914C]/25 flex items-center justify-center text-[#FE914C] shadow-[0_0_15px_rgba(254,145,76,0.25)]">
-                    <MapPin className="w-5 h-5 animate-pulse" />
-                  </div>
-                </div>
-                
-                <h3 className="text-white text-xs font-black tracking-[0.2em] uppercase mb-1.5">Interactive Map</h3>
-                <p className="text-white/50 text-[10px] max-w-[220px] leading-relaxed mb-4 uppercase tracking-wider font-semibold">
-                  Tap to explore our workshop location in real-time
-                </p>
-                
-                <button
-                  onClick={() => setShowMap(true)}
-                  className="px-5 py-2.5 bg-[#FE914C] hover:bg-[#FE914C]/90 text-white text-[9px] font-black tracking-[0.2em] uppercase rounded-[4px] shadow-[0_4px_12px_rgba(254,145,76,0.25)] active:scale-[0.97] transition-all duration-200 cursor-pointer"
-                >
-                  Load Interactive Map
-                </button>
-              </div>
-            )}
+            <iframe 
+              src="https://maps.google.com/maps?q=KTM+Decor+Pvt+Ltd.,+Kathmandu,+Nepal&t=&z=15&ie=UTF8&iwloc=&output=embed" 
+              width="100%" 
+              height="100%" 
+              style={{ 
+                border: 0, 
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                filter: "grayscale(100%) invert(92%) contrast(83%)",
+                /* mixBlendMode removed to prevent severe WebKit renderer crashes on iOS */
+              }} 
+              allowFullScreen={false} 
+              loading="lazy" 
+              referrerPolicy="no-referrer-when-downgrade"
+              className="z-10 transition-opacity duration-1000"
+            ></iframe>
 
             {/* Interactive Overlay to prevent accidental scrolling while navigating the page, 
                 clicks through when users actually want to interact. */}

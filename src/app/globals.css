@@ -245,7 +245,7 @@ html.is-loading body::before {
   top: 0;
   left: 0;
   width: 100vw;
-  height: 100vh;
+  height: 100dvh;
   background: #F2F2F2;
   z-index: 9998;
 }
@@ -254,9 +254,13 @@ html.is-loading body::before {
   background: #050505;
 }
 
-/* Defer rendering of off-screen components (LCP / INP optimization) */
-.content-visibility-auto {
-  content-visibility: auto;
+/* Defer rendering of off-screen components (LCP / INP optimization) on desktop viewports only */
+@media (min-width: 1024px) {
+  @supports (content-visibility: auto) {
+    .content-visibility-auto {
+      content-visibility: auto;
+    }
+  }
 }
 
 /* Prevent initial hidden state/flashing of hero content on mobile viewports */

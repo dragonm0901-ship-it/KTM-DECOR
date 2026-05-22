@@ -403,19 +403,19 @@ export default function Hero() {
         <div className="absolute inset-0 bg-cnc-grid-hover grid-hover-layer" />
       </div>
 
-      {/* Volumetric Neon Spotlight Backdrop */}
+      {/* Volumetric Neon Spotlight Backdrop (Optimized with zero-cost radial gradients instead of heavy blur filters) */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
         {/* Layer 1: Flagship KTM Orange Core (pulsing, cathode ignition) */}
-        <div className="neon-glow-accent absolute top-1/4 right-[-10%] w-[600px] h-[600px] bg-accent/[0.08] rounded-full blur-[130px] opacity-0" />
+        <div className="neon-glow-accent absolute top-1/4 right-[-10%] w-[600px] h-[600px] bg-[radial-gradient(circle_at_center,rgba(254,145,76,0.15)_0%,transparent_60%)] rounded-full opacity-0" />
         
         {/* Layer 2: Deep Amber/Warm Scatter (widest range, steady ambient ambient) */}
-        <div className="neon-glow-accent absolute top-[15%] right-[-15%] w-[800px] h-[800px] bg-accent-light/[0.035] rounded-full blur-[160px] opacity-0" />
+        <div className="neon-glow-accent absolute top-[15%] right-[-15%] w-[800px] h-[800px] bg-[radial-gradient(circle_at_center,rgba(255,164,106,0.06)_0%,transparent_65%)] rounded-full opacity-0" />
         
         {/* Layer 3: Chromatic Amethyst split (rich high-end dark studio tint) */}
-        <div className="neon-glow-accent absolute top-[30%] right-[-5%] w-[700px] h-[700px] bg-[#B336FF]/[0.03] rounded-full blur-[140px] opacity-0" />
+        <div className="neon-glow-accent absolute top-[30%] right-[-5%] w-[700px] h-[700px] bg-[radial-gradient(circle_at_center,rgba(179,54,255,0.06)_0%,transparent_65%)] rounded-full opacity-0" />
         
         {/* Layer 4: Bottom Left Fill Orb */}
-        <div className="neon-glow-accent absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-accent/[0.04] rounded-full blur-[110px] opacity-0" />
+        <div className="neon-glow-accent absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-[radial-gradient(circle_at_center,rgba(254,145,76,0.08)_0%,transparent_60%)] rounded-full opacity-0" />
       </div>
     </section>
   );
