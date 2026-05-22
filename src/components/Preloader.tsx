@@ -33,8 +33,8 @@ export default function Preloader() {
 
     const isMobileViewport = typeof window !== "undefined" && window.innerWidth < 1024;
 
-    // Start a safety timer immediately to guarantee page is unlocked after 3.5s on mobile or 6s on desktop
-    const safetyDuration = isMobileViewport ? 3500 : 6000;
+    // Start a safety timer immediately to guarantee page is unlocked after 1.8s on mobile or 6s on desktop
+    const safetyDuration = isMobileViewport ? 1800 : 6000;
     const safetyTimer = setTimeout(() => {
       document.documentElement.classList.remove("is-loading");
       setIsHidden(true);
@@ -122,8 +122,8 @@ export default function Preloader() {
     const panelDuration = isMobileViewport ? 0.4 : 0.7;
 
     // ── Safety timeout: if the exit animation stalls (mobile GPU hiccups,
-    //    Lenis conflict, etc.) we MUST unlock the page within 6 seconds.
-    const safetyTimeout = isMobileViewport ? 3000 : 6000;
+    //    Lenis conflict, etc.) we MUST unlock the page within 1.5s on mobile or 6s on desktop.
+    const safetyTimeout = isMobileViewport ? 1500 : 6000;
     const safetyTimer = setTimeout(() => {
       document.documentElement.classList.remove("is-loading");
       if (logoWrapperRef.current) {

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Outfit } from "next/font/google";
+import { Inter, Outfit, Dancing_Script, Monoton, Montserrat, Playfair_Display, Pacifico } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import Header from "@/components/Header";
@@ -19,6 +19,42 @@ const outfit = Outfit({
   subsets: ["latin"],
   variable: "--font-display",
   display: "swap",
+});
+
+const dancingScript = Dancing_Script({
+  subsets: ["latin"],
+  variable: "--font-dancing-script",
+  display: "swap",
+  weight: ["700"],
+});
+
+const monoton = Monoton({
+  subsets: ["latin"],
+  variable: "--font-monoton",
+  display: "swap",
+  weight: ["400"],
+});
+
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  variable: "--font-montserrat",
+  display: "swap",
+  weight: ["800", "900"],
+});
+
+const playfairDisplay = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair-display",
+  display: "swap",
+  style: ["italic"],
+  weight: ["700"],
+});
+
+const pacifico = Pacifico({
+  subsets: ["latin"],
+  variable: "--font-pacifico",
+  display: "swap",
+  weight: ["400"],
 });
 
 export const metadata: Metadata = {
@@ -69,7 +105,31 @@ export default function RootLayout({
  }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} ${outfit.variable} font-sans`}>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                const removeAttr = () => {
+                  if (document.body && document.body.hasAttribute('data-demoway-document-id')) {
+                    document.body.removeAttribute('data-demoway-document-id');
+                  }
+                };
+                removeAttr();
+                const observer = new MutationObserver((mutations) => {
+                  for (const mutation of mutations) {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'data-demoway-document-id') {
+                      removeAttr();
+                    }
+                  }
+                });
+                observer.observe(document.documentElement, { attributes: true, subtree: true });
+              })();
+            `,
+          }}
+        />
+      </head>
+      <body className={`${inter.variable} ${outfit.variable} ${dancingScript.variable} ${monoton.variable} ${montserrat.variable} ${playfairDisplay.variable} ${pacifico.variable} font-sans`} suppressHydrationWarning>
         <ThemeProvider>
           <SmoothScroll>
             <Header />

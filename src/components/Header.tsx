@@ -226,6 +226,7 @@ export default function Header() {
             src="/images/nav-bg.webp"
             alt="Menu Background"
             fill
+            sizes="100vw"
             className={`object-cover object-center grayscale opacity-30 transition-transform duration-[2000ms] ease-out ${
               menuOpen ? "scale-100" : "scale-105"
             }`}

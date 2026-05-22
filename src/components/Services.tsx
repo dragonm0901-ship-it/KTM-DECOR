@@ -90,6 +90,7 @@ export default function Services() {
             src="/images/workshop.webp"
             alt="KTM DECOR Workshop"
             fill
+            sizes="100vw"
             className="object-cover object-center grayscale contrast-[1.1] transition-all duration-500 scale-[0.92]"
           />
         </div>
@@ -136,6 +137,7 @@ export default function Services() {
                   ][i]}
                   alt={service.title}
                   fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1120px"
                   className={`object-cover rounded-[4px] z-0 ${i === 1 ? "object-[center_15%]" : "object-center"}`}
                 />
                 <div className="absolute inset-0 rounded-[4px] bg-black/55 z-0" />

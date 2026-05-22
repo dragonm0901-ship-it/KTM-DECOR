@@ -119,6 +119,7 @@ export default function ProductDetailClient() {
               src={product.image} 
               alt={product.name}
               fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
               className="object-cover"
               priority
             />
@@ -247,6 +248,7 @@ export default function ProductDetailClient() {
                       src={p.image}
                       alt={p.name}
                       fill
+                      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 300px"
                       className="object-cover transition-transform duration-700 lg:group-hover:scale-105"
                     />
                   </div>

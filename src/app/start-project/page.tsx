@@ -28,12 +28,12 @@ import { Product } from "@/data/shop-data";
 
 // Predefined available Google Fonts
 const AVAILABLE_FONTS = [
-  { id: "Outfit", name: "Modern Sans (Outfit)", url: "https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap", family: "'Outfit', sans-serif" },
-  { id: "Dancing Script", name: "Cursive Script (Dancing Script)", url: "https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap", family: "'Dancing Script', cursive" },
-  { id: "Monoton", name: "Retro Neon (Monoton)", url: "https://fonts.googleapis.com/css2?family=Monoton&display=swap", family: "'Monoton', cursive" },
-  { id: "Montserrat", name: "Extra Bold (Montserrat)", url: "https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&display=swap", family: "'Montserrat', sans-serif" },
-  { id: "Playfair Display", name: "Classic Serif (Playfair Display)", url: "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,700&display=swap", family: "'Playfair Display', serif" },
-  { id: "Pacifico", name: "Vintage Script (Pacifico)", url: "https://fonts.googleapis.com/css2?family=Pacifico&display=swap", family: "'Pacifico', cursive" }
+  { id: "Outfit", name: "Modern Sans (Outfit)", url: "", family: "var(--font-outfit), sans-serif" },
+  { id: "Dancing Script", name: "Cursive Script (Dancing Script)", url: "", family: "var(--font-dancing-script), cursive" },
+  { id: "Monoton", name: "Retro Neon (Monoton)", url: "", family: "var(--font-monoton), cursive" },
+  { id: "Montserrat", name: "Extra Bold (Montserrat)", url: "", family: "var(--font-montserrat), sans-serif" },
+  { id: "Playfair Display", name: "Classic Serif (Playfair Display)", url: "", family: "var(--font-playfair-display), serif" },
+  { id: "Pacifico", name: "Vintage Script (Pacifico)", url: "", family: "var(--font-pacifico), cursive" }
 ];
 
 // Curated Glowing & Extrusion Color Palettes
@@ -108,20 +108,6 @@ export default function CreateDesign() {
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [logoScale, setLogoScale] = useState(1.0);
-
-  // Dynamic Font Injector
-  useEffect(() => {
-    const linkId = `dynamic-font-${selectedFont.id.replace(/\s+/g, "-")}`;
-    let link = document.getElementById(linkId) as HTMLLinkElement;
-    
-    if (!link) {
-      link = document.createElement("link");
-      link.id = linkId;
-      link.rel = "stylesheet";
-      link.href = selectedFont.url;
-      document.head.appendChild(link);
-    }
-  }, [selectedFont]);
 
   // Handle Board Type Switch Defaults
   const handleBoardTypeChange = (type: "neon" | "wood" | "acrylic3d" | "backlit") => {

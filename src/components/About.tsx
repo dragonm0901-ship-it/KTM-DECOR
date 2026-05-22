@@ -114,6 +114,7 @@ export default function About() {
             src="/images/about-hero.webp"
             alt="Patan Durbar Square Background"
             fill
+            sizes="100vw"
             className={`object-cover object-center transition-all duration-1000 ${
               hoveredPart === 'content'
                 ? 'grayscale opacity-30 contrast-[1.1]' 
@@ -148,6 +149,7 @@ export default function About() {
               src="/images/kishor.webp" 
               alt="Founder Kishor G.C." 
               fill 
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 700px"
               className={`object-cover transition-all duration-700 ${
                 hoveredPart === 'content' ? 'scale-105' : 'scale-100'
               } md:grayscale md:group-hover:grayscale-0 md:hover:grayscale-0`}
@@ -214,6 +216,7 @@ export default function About() {
                 src={item.image}
                 alt={item.title}
                 fill
+                sizes="100vw"
                 className="object-cover object-center grayscale contrast-[1.1]"
               />
             </div>

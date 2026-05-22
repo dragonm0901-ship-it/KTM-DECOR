@@ -39,6 +39,7 @@ export default function HowItWorks() {
           src="/images/laser-cnc.webp"
           alt="KTM DECOR Laser Cutting"
           fill
+          sizes="100vw"
           className="object-cover object-center grayscale contrast-[1.1] transition-all duration-500"
         />
         {/* Theme-adaptive blend mask tailored to the bg-background section wrapper */}
