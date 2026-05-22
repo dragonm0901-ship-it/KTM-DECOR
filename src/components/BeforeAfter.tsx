@@ -106,9 +106,9 @@ export default function BeforeAfter() {
 
   return (
     <section id="before-after" className="relative py-24 md:py-32 bg-background text-foreground overflow-hidden border-t border-border">
-      {/* Background Neon Ambient Glows - Softer on White */}
-      <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-accent/5 rounded-full blur-[120px] pointer-events-none z-0" />
-      <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-[350px] h-[350px] bg-accent/[0.02] rounded-full blur-[120px] pointer-events-none z-0" />
+      {/* Background Neon Ambient Glows - Softer on White (Optimized with zero-cost radial gradients instead of heavy blur filters) */}
+      <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-[radial-gradient(circle_at_center,rgba(254,145,76,0.1)_0%,transparent_65%)] rounded-full pointer-events-none z-0" />
+      <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-[350px] h-[350px] bg-[radial-gradient(circle_at_center,rgba(254,145,76,0.04)_0%,transparent_65%)] rounded-full pointer-events-none z-0" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12">
         {/* Section Header */}
