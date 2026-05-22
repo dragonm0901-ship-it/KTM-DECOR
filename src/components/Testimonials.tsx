@@ -52,20 +52,28 @@ export default function Testimonials() {
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
-      gsap.fromTo(
-        headerRef.current,
-        { y: 50, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 1,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 80%",
-          },
-        }
-      );
+      let mm = gsap.matchMedia();
+
+      mm.add("(min-width: 1024px)", () => {
+        gsap.fromTo(
+          headerRef.current,
+          { y: 50, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 1,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top 80%",
+            },
+          }
+        );
+      });
+
+      mm.add("(max-width: 1023px)", () => {
+        gsap.set(headerRef.current, { y: 0, opacity: 1 });
+      });
     }, sectionRef);
 
     const observer = new IntersectionObserver(

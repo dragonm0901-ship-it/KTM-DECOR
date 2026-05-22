@@ -269,7 +269,8 @@ html.is-loading body::before {
   #hero .hero-card,
   #hero .hero-feature,
   #hero .neon-glow-accent,
-  #hero .hero-subtext-mobile {
+  #hero .hero-subtext-mobile,
+  .no-mobile-animate {
     opacity: 1 !important;
     transform: none !important;
   }

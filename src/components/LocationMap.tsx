@@ -25,7 +25,7 @@ export default function LocationMap() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
           viewport={{ once: true }}
-          className="relative w-full rounded-[4px] shadow-2xl bg-card group flex flex-col md:block"
+          className="relative w-full rounded-[4px] shadow-2xl bg-card group flex flex-col md:block no-mobile-animate"
         >
           {/* Map Container */}
           <div className="relative w-full aspect-[4/3] sm:aspect-video md:aspect-[21/9] rounded-t-[4px] md:rounded-[4px] overflow-hidden border border-border">

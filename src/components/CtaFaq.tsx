@@ -42,7 +42,7 @@ export default function CtaFaq() {
       <div className="grid grid-cols-[1.6fr_1fr] gap-8 md:gap-12 items-start max-[900px]:grid-cols-1">
         {/* Left column — Animated Gradient CTA card */}
         <div 
-          className="c5-animated-gradient rounded-[4px] py-20 px-8 sm:px-12 min-h-[60vh] lg:min-h-[70vh] text-white flex flex-col justify-center items-center text-center shadow-2xl"
+          className="c5-animated-gradient rounded-[4px] py-20 px-8 sm:px-12 min-h-[60dvh] lg:min-h-[70dvh] text-white flex flex-col justify-center items-center text-center shadow-2xl"
         >
           <h2 className="text-[clamp(2rem,6vw,4.5rem)] font-extrabold leading-[0.9] tracking-tighter mb-6">
             Ready to Transform<br className="hidden sm:block"/> Your Space?
