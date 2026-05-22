@@ -34,19 +34,26 @@ const cases: CaseData[] = [
 
 export default function BeforeAfter() {
   const [activeCase, setActiveCase] = useState(0);
-  const [sliderPos, setSliderPos] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Use refs instead of state to prevent 60fps React re-renders on mobile during drag
+  const currentPosRef = useRef(50);
+  const clipDivRef = useRef<HTMLDivElement>(null);
+  const handleDivRef = useRef<HTMLDivElement>(null);
 
   const activeData = cases[activeCase];
 
-  // Drag calculation helper
+  // Drag calculation helper - Direct DOM mutation for buttery smooth 60fps
   const handleMove = useCallback((clientX: number) => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || !clipDivRef.current || !handleDivRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
     const x = clientX - rect.left;
     const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
-    setSliderPos(percentage);
+    
+    currentPosRef.current = percentage;
+    clipDivRef.current.style.clipPath = `inset(0 ${100 - percentage}% 0 0)`;
+    handleDivRef.current.style.left = `${percentage}%`;
   }, []);
 
   // Document-level events for seamless dragging when leaving container bounds
@@ -145,8 +152,9 @@ export default function BeforeAfter() {
 
                   {/* Overlaid: Before Image (Draft Sketch) - Clipped */}
                   <div
+                    ref={clipDivRef}
                     className="absolute inset-0 pointer-events-none overflow-hidden"
-                    style={{ clipPath: `inset(0 ${100 - sliderPos}% 0 0)` }}
+                    style={{ clipPath: `inset(0 ${100 - currentPosRef.current}% 0 0)` }}
                   >
                     <Image
                       src={activeData.beforeImage}
@@ -161,8 +169,9 @@ export default function BeforeAfter() {
 
               {/* Glowing Slider Line and Handle */}
               <div
+                ref={handleDivRef}
                 className="absolute top-0 bottom-0 w-[3px] bg-accent -translate-x-1/2 pointer-events-none z-20 shadow-[0_0_15px_#FF8C00,0_0_30px_#FF8C00]"
-                style={{ left: `${sliderPos}%` }}
+                style={{ left: `${currentPosRef.current}%` }}
               >
                 {/* Grab Button */}
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/80 backdrop-blur-md border-2 border-accent text-accent shadow-[0_0_20px_rgba(255,140,0,0.5)] flex items-center justify-center transition-transform duration-150 scale-100 group-hover:scale-105 active:scale-95 z-30 cursor-grab active:cursor-grabbing">
@@ -186,7 +195,11 @@ export default function BeforeAfter() {
                   key={i}
                   onClick={() => {
                     setActiveCase(i);
-                    setSliderPos(50); // reset slider to middle on switch
+                    currentPosRef.current = 50;
+                    if (clipDivRef.current && handleDivRef.current) {
+                      clipDivRef.current.style.clipPath = `inset(0 50% 0 0)`;
+                      handleDivRef.current.style.left = `50%`;
+                    }
                   }}
                   className={`px-5 py-2.5 rounded-[4px] text-[10px] font-bold uppercase tracking-wider transition-all duration-300 border ${
                     i === activeCase

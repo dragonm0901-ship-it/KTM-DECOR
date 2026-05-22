@@ -50,42 +50,55 @@ export default function Shop() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Animate heading on scroll
-      gsap.fromTo(
-        headingRef.current,
-        { y: 80, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 1,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: headingRef.current,
-            start: "top 85%",
-          },
-        }
-      );
+      let mm = gsap.matchMedia();
 
-      // Animate grid cards on scroll
-      if (gridRef.current) {
-        const cards = gridRef.current.querySelectorAll(".portfolio-card");
+      mm.add("(min-width: 1024px)", () => {
+        // Animate heading on scroll
         gsap.fromTo(
-          cards,
-          { y: 30, opacity: 0, scale: 0.95 },
+          headingRef.current,
+          { y: 80, opacity: 0 },
           {
             y: 0,
             opacity: 1,
-            scale: 1,
-            duration: 0.5,
-            stagger: 0.06,
+            duration: 1,
             ease: "power3.out",
             scrollTrigger: {
-              trigger: gridRef.current,
+              trigger: headingRef.current,
               start: "top 85%",
             },
           }
         );
-      }
+
+        // Animate grid cards on scroll
+        if (gridRef.current) {
+          const cards = gridRef.current.querySelectorAll(".portfolio-card");
+          gsap.fromTo(
+            cards,
+            { y: 30, opacity: 0, scale: 0.95 },
+            {
+              y: 0,
+              opacity: 1,
+              scale: 1,
+              duration: 0.5,
+              stagger: 0.06,
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: gridRef.current,
+                start: "top 85%",
+              },
+            }
+          );
+        }
+      });
+
+      mm.add("(max-width: 1023px)", () => {
+        // Fallback to instantly visible static state on mobile
+        gsap.set(headingRef.current, { y: 0, opacity: 1 });
+        if (gridRef.current) {
+          const cards = gridRef.current.querySelectorAll(".portfolio-card");
+          gsap.set(cards, { y: 0, opacity: 1, scale: 1 });
+        }
+      });
     }, sectionRef);
 
     return () => ctx.revert();
