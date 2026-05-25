@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { MessageSquare, PenTool, Wrench, Truck, Plus } from "@/components/ui/solar-icons";
+import { MessageSquare, PenTool, Wrench, Truck, Plus, Settings } from "@/components/ui/solar-icons";
 
 const steps = [
   {
@@ -28,11 +28,17 @@ const steps = [
     description:
       "We deliver and professionally install your finished piece, ensuring it looks perfect and is ready to shine.",
   },
+  {
+    icon: Settings,
+    title: "Repair",
+    description:
+      "We provide comprehensive maintenance and repair services to keep your custom signs looking and functioning like new.",
+  },
 ];
 
 export default function HowItWorks() {
   return (
-    <section id="process" className="py-24 md:py-32 px-6 md:px-12 bg-background rounded-[4px] text-foreground relative overflow-hidden">
+    <section id="process" className="py-24 md:py-32 px-6 md:px-12 bg-background text-foreground relative overflow-hidden">
       {/* Premium Laser-Process Background Image at 50% Opacity (Extended top and bottom to eliminate high-DPI subpixel rounding gaps) */}
       <div className="absolute top-[-8px] bottom-[-8px] left-0 right-0 z-0 opacity-50 pointer-events-none select-none">
         <Image
@@ -49,19 +55,20 @@ export default function HowItWorks() {
       </div>
 
       <div className="max-w-7xl mx-auto relative z-10">
-        {/* Label */}
-        <span className="inline-flex items-center gap-2 px-4 py-1.5 text-[10px] font-bold tracking-[0.2em] uppercase border border-border rounded-[4px] mb-10 bg-background/50 backdrop-blur-sm">
-          How It Works
-        </span>
+        {/* Centered Header */}
+        <div className="flex flex-col items-center justify-center text-center max-w-3xl mx-auto mb-16 md:mb-20">
+          {/* Label */}
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 text-[10px] font-bold tracking-[0.2em] uppercase border border-border rounded-[4px] mb-8 bg-background/50 backdrop-blur-sm">
+            How It Works
+          </span>
 
-        {/* Heading + CTA */}
-        <div className="flex flex-col lg:flex-row justify-between items-start gap-6 mb-16 md:mb-20">
-          <h2 className="text-[clamp(2.5rem,7vw,5.5rem)] font-extrabold leading-[0.9] tracking-tighter">
-            From idea to
-            <br />
-            <span className="text-accent">installation.</span>
+          {/* Heading */}
+          <h2 className="text-[clamp(2.5rem,7vw,5.5rem)] font-extrabold leading-[0.9] tracking-tighter mb-8">
+            From idea to <span className="text-accent">installation.</span>
           </h2>
-          <div className="lg:pt-6">
+          
+          {/* CTA */}
+          <div>
             <a
               href="/start-project"
               className="inline-flex items-center gap-3 px-8 py-4 bg-accent text-white rounded-[4px] text-[10px] font-bold tracking-widest uppercase hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 shadow-lg shadow-accent/20"
@@ -72,14 +79,14 @@ export default function HowItWorks() {
           </div>
         </div>
 
-        {/* 4-Card Spacious Grid Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10">
+        {/* 5-Card Spacious Grid Layout (Centered Bottom Row via 6-col Grid) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8 lg:gap-10">
           {steps.map((step, i) => {
             const StepIcon = step.icon;
             return (
               <div
                 key={i}
-                className="group relative p-8 md:p-10 rounded-[4px] bg-neutral-50/70 dark:bg-neutral-900/40 border border-neutral-200/50 dark:border-white/5 shadow-sm hover:border-accent/40 hover:shadow-xl hover:-translate-y-2 transition-all duration-500 backdrop-blur-sm min-h-[380px] flex flex-col justify-between overflow-hidden"
+                className={`group relative p-8 md:p-10 rounded-[4px] bg-neutral-50/70 dark:bg-neutral-900/40 border border-neutral-200/50 dark:border-white/5 shadow-sm hover:border-accent/40 hover:shadow-xl hover:-translate-y-2 transition-all duration-500 backdrop-blur-sm min-h-[380px] flex flex-col justify-between overflow-hidden lg:col-span-2 ${i === 3 ? "lg:col-start-2" : ""}`}
               >
                 {/* Background decorative neon glow aura */}
                 <div className="absolute -bottom-10 -right-10 w-36 h-36 bg-accent/5 rounded-full blur-2xl group-hover:bg-accent/12 transition-all duration-500 pointer-events-none" />

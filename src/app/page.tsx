@@ -1,5 +1,6 @@
 import Preloader from "@/components/Preloader";
 import Hero from "@/components/Hero";
+import Expertise from "@/components/Expertise";
 import About from "@/components/About";
 import Services from "@/components/Services";
 import Shop from "@/components/Shop";
@@ -15,12 +16,12 @@ export default function Home() {
       <Preloader />
       <main>
         <Hero />
-        
-        <About />
+        <Expertise />
         <Services />
         <Shop />
         <HowItWorks />
         <BeforeAfter />
+        <About />
         <Testimonials />
         <CtaFaq />
         <LocationMap />

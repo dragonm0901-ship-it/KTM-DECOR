@@ -32,7 +32,7 @@ export default function Footer() {
     <div className="bg-[#f8f9fa] dark:bg-black transition-colors duration-500 w-full flex flex-col font-sans relative z-10">
       {/* Main Container */}
       <div 
-        className="relative w-full overflow-hidden bg-[#FE914C] py-12 md:py-20 px-4 md:px-8"
+        className="relative w-full overflow-hidden c5-animated-gradient py-12 md:py-20 px-4 md:px-8"
       >
         {/* CNC Dot Grid Overlay - White Dots */}
         <div 
@@ -50,7 +50,7 @@ export default function Footer() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
             viewport={{ once: true }}
-            className="max-w-7xl mx-auto bg-black/95 dark:bg-white/95 backdrop-blur-sm shadow-xl dark:shadow-2xl border border-white/10 dark:border-gray-200 rounded-[4px] overflow-hidden transition-colors duration-500"
+            className="max-w-7xl mx-auto bg-white/95 dark:bg-black/95 backdrop-blur-sm shadow-xl dark:shadow-2xl border border-gray-200 dark:border-white/10 rounded-[4px] overflow-hidden transition-colors duration-500"
           >
             {/* Top Half */}
             <div className="p-6 md:p-12 flex flex-col gap-10 md:gap-12">
@@ -61,18 +61,18 @@ export default function Footer() {
                   <img
                     src="/logo/ktm%20decor.svg"
                     alt="KTM DECOR"
-                    className="h-full w-auto object-contain transform-gpu invert hue-rotate-180 dark:invert-0 dark:hue-rotate-0 transition-all duration-500"
+                    className="h-full w-auto object-contain transform-gpu dark:invert dark:hue-rotate-180 transition-all duration-500"
                   />
                 </Link>
               </div>
 
               {/* Links Area */}
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-16 w-full pt-8 border-t border-white/10 dark:border-gray-200">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-16 w-full pt-8 border-t border-gray-200 dark:border-white/10">
                 <div className="flex flex-col gap-3 md:gap-4">
-                  <h4 className="uppercase tracking-widest text-[10px] md:text-sm font-bold text-white dark:text-gray-900">Navigation</h4>
+                  <h4 className="uppercase tracking-widest text-[10px] md:text-sm font-bold text-gray-900 dark:text-white">Navigation</h4>
                   <div className="flex flex-col gap-2 md:gap-3">
                     {["About", "Services", "Shop", "Process", "FAQ"].map(link => (
-                      <Link key={link} href={link === "Shop" ? "/shop" : `/#${link.toLowerCase()}`} className="text-gray-400 dark:text-gray-500 text-sm md:text-base font-medium hover:text-orange-500 dark:hover:text-orange-600 transition-colors">
+                      <Link key={link} href={link === "Shop" ? "/shop" : `/#${link.toLowerCase()}`} className="text-gray-500 dark:text-gray-400 text-sm md:text-base font-medium hover:text-orange-600 dark:hover:text-orange-500 transition-colors">
                         {link}
                       </Link>
                     ))}
@@ -80,10 +80,10 @@ export default function Footer() {
                 </div>
                 
                 <div className="flex flex-col gap-3 md:gap-4">
-                  <h4 className="uppercase tracking-widest text-[10px] md:text-sm font-bold text-white dark:text-gray-900">Shop</h4>
+                  <h4 className="uppercase tracking-widest text-[10px] md:text-sm font-bold text-gray-900 dark:text-white">Shop</h4>
                   <div className="flex flex-col gap-2 md:gap-3">
-                    {["Neon Signs", "3D Lettering", "Light Boards", "Custom Decor"].map(cat => (
-                      <Link key={cat} href="/shop" className="text-gray-400 dark:text-gray-500 text-sm md:text-base font-medium hover:text-orange-500 dark:hover:text-orange-600 transition-colors">
+                    {["Neon Signage", "3D Led Signage", "Branding Signage", "Light Boards", "Custom Designs"].map(cat => (
+                      <Link key={cat} href="/shop" className="text-gray-500 dark:text-gray-400 text-sm md:text-base font-medium hover:text-orange-600 dark:hover:text-orange-500 transition-colors">
                         {cat}
                       </Link>
                     ))}
@@ -91,19 +91,19 @@ export default function Footer() {
                 </div>
 
                 <div className="flex flex-col gap-3 md:gap-4 col-span-2 md:col-span-1">
-                  <h4 className="uppercase tracking-widest text-[10px] md:text-sm font-bold text-white dark:text-gray-900">Contact</h4>
+                  <h4 className="uppercase tracking-widest text-[10px] md:text-sm font-bold text-gray-900 dark:text-white">Contact</h4>
                   <div className="flex flex-col gap-2 md:gap-3">
-                    <span className="text-gray-400 dark:text-gray-500 text-sm md:text-base font-medium">Kathmandu, Nepal</span>
-                    <a href="mailto:hello@ktmdecor.com" className="text-gray-400 dark:text-gray-500 text-sm md:text-base font-medium hover:text-orange-500 dark:hover:text-orange-600 transition-colors">hello@ktmdecor.com</a>
-                    <a href="tel:+9771234567" className="text-gray-400 dark:text-gray-500 text-sm md:text-base font-medium hover:text-orange-500 dark:hover:text-orange-600 transition-colors">+977 1 234567</a>
+                    <span className="text-gray-500 dark:text-gray-400 text-sm md:text-base font-medium">Kathmandu, Nepal</span>
+                    <a href="mailto:hello@ktmdecor.com" className="text-gray-500 dark:text-gray-400 text-sm md:text-base font-medium hover:text-orange-600 dark:hover:text-orange-500 transition-colors">hello@ktmdecor.com</a>
+                    <a href="tel:+9771234567" className="text-gray-500 dark:text-gray-400 text-sm md:text-base font-medium hover:text-orange-600 dark:hover:text-orange-500 transition-colors">+977 1 234567</a>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Bottom Bar */}
-            <div className="border-t border-white/10 dark:border-gray-200 bg-black dark:bg-white px-8 py-6 md:px-12 flex flex-col md:flex-row justify-between items-center gap-6 transition-colors duration-500">
-              <span className="text-sm text-gray-400 dark:text-gray-500 font-medium">
+            <div className="border-t border-gray-200 dark:border-white/10 bg-white dark:bg-black px-8 py-6 md:px-12 flex flex-col md:flex-row justify-between items-center gap-6 transition-colors duration-500">
+              <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">
                 © {new Date().getFullYear()} KTM DECOR. All Rights Reserved.
               </span>
               <div className="flex items-center gap-4">
@@ -115,7 +115,7 @@ export default function Footer() {
                       href={social.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`w-10 h-10 rounded-full border border-white/10 dark:border-gray-200 flex items-center justify-center text-gray-400 dark:text-gray-500 transition-all duration-300 ${social.hoverClass}`}
+                      className={`w-10 h-10 rounded-full border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 transition-all duration-300 ${social.hoverClass}`}
                     >
                       <Icon className="w-5 h-5" />
                     </a>

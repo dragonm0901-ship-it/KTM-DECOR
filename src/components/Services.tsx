@@ -85,7 +85,7 @@ export default function Services() {
         className="relative lg:sticky lg:top-0 h-auto lg:h-[125vh] w-full flex flex-col items-center justify-start lg:justify-center py-20 lg:py-6 px-6 md:px-12 overflow-hidden bg-background text-foreground"
       >
         {/* Premium Workshop Background Image */}
-        <div className="absolute -inset-[5%] z-0 opacity-65 pointer-events-none select-none overflow-hidden">
+        <div className="absolute -inset-[5%] z-0 opacity-55 dark:opacity-20 pointer-events-none select-none overflow-hidden transition-opacity duration-500">
           <Image
             src="/images/workshop.webp"
             alt="KTM DECOR Workshop"

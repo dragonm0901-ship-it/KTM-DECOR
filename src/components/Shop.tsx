@@ -105,22 +105,23 @@ export default function Shop() {
   }, []);
 
   return (
-    <section ref={sectionRef} id="shop" className="py-32 px-6 md:px-12 bg-card rounded-[4px] mb-20 text-foreground">
+    <section ref={sectionRef} id="shop" className="relative py-32 px-6 md:px-12 bg-card text-foreground">
       <div className="max-w-7xl mx-auto">
-        {/* Label */}
-        <span className="inline-flex items-center gap-2 px-4 py-1.5 text-[10px] font-bold tracking-[0.2em] uppercase border border-border rounded-[4px] mb-10">
-          Featured Collection
-        </span>
+        {/* Centered Header */}
+        <div className="flex flex-col items-center justify-center text-center max-w-3xl mx-auto mb-16 sm:mb-20">
+          {/* Label */}
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 text-[10px] font-bold tracking-[0.2em] uppercase border border-border rounded-[4px] mb-8">
+            Featured Collection
+          </span>
 
-        {/* Heading */}
-        <h2
-          ref={headingRef}
-          className="text-[clamp(2.5rem,7vw,5.5rem)] font-extrabold leading-[0.9] tracking-tighter mb-12 opacity-0"
-        >
-          Shop our
-          <br />
-          <span className="text-accent">collection.</span>
-        </h2>
+          {/* Heading */}
+          <h2
+            ref={headingRef}
+            className="text-[clamp(2.5rem,7vw,5.5rem)] font-extrabold leading-[0.9] tracking-tighter opacity-0"
+          >
+            Shop our <span className="text-accent">collection.</span>
+          </h2>
+        </div>
 
         {/* Grid — 4-column layout on desktop (showing 8 cards over 2 rows) */}
         <div
@@ -193,6 +194,8 @@ export default function Shop() {
           </Link>
         </div>
       </div>
+      {/* Bottom vertical fade to transition from bg-card to bg-background */}
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent pointer-events-none z-10" />
     </section>
   );
 }

@@ -32,6 +32,8 @@ const config: Config = {
         "marquee-x": "marquee-x 40s linear infinite",
         "marquee-x-reverse": "marquee-x-reverse 40s linear infinite",
         "marquee-y": "marquee-y 40s linear infinite",
+        "ping-small": "pingSmall 1.5s cubic-bezier(0, 0, 0.2, 1) infinite",
+        "badge-blink": "badgeBlink 2s infinite",
       },
       keyframes: {
         spinStep: {
@@ -57,6 +59,13 @@ const config: Config = {
         "marquee-y": {
           "0%": { transform: "translateY(0)" },
           "100%": { transform: "translateY(-50%)" },
+        },
+        pingSmall: {
+          "75%, 100%": { transform: "scale(1.4)", opacity: "0" },
+        },
+        badgeBlink: {
+          "0%, 100%": { transform: "scale(1)" },
+          "50%": { transform: "scale(1.08)" },
         },
       },
       transitionTimingFunction: {

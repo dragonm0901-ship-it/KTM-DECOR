@@ -41,13 +41,22 @@ export default function BeforeAfter() {
   const currentPosRef = useRef(50);
   const clipDivRef = useRef<HTMLDivElement>(null);
   const handleDivRef = useRef<HTMLDivElement>(null);
+  const containerRectRef = useRef<DOMRect | null>(null);
 
   const activeData = cases[activeCase];
 
-  // Drag calculation helper - Direct DOM mutation for buttery smooth 60fps
+  // Set initial styles on mount and reset them on case change
+  useEffect(() => {
+    if (clipDivRef.current && handleDivRef.current) {
+      clipDivRef.current.style.clipPath = `inset(0 ${100 - currentPosRef.current}% 0 0)`;
+      handleDivRef.current.style.left = `${currentPosRef.current}%`;
+    }
+  }, [activeCase]);
+
+  // Drag calculation helper - Direct DOM mutation using cached rect for buttery smooth 60fps
   const handleMove = useCallback((clientX: number) => {
-    if (!containerRef.current || !clipDivRef.current || !handleDivRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
+    if (!containerRectRef.current || !clipDivRef.current || !handleDivRef.current) return;
+    const rect = containerRectRef.current;
     const x = clientX - rect.left;
     const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
     
@@ -69,6 +78,9 @@ export default function BeforeAfter() {
 
     const onTouchMove = (e: TouchEvent) => {
       if (!isDragging || e.touches.length === 0) return;
+      if (e.cancelable) {
+        e.preventDefault(); // Prevents vertical page scroll jitter during horizontal dragging
+      }
       handleMove(e.touches[0].clientX);
     };
 
@@ -79,7 +91,7 @@ export default function BeforeAfter() {
     if (isDragging) {
       document.addEventListener("mousemove", onMouseMove);
       document.addEventListener("mouseup", onMouseUp);
-      document.addEventListener("touchmove", onTouchMove, { passive: true });
+      document.addEventListener("touchmove", onTouchMove, { passive: false });
       document.addEventListener("touchend", onTouchEnd);
     }
 
@@ -93,16 +105,34 @@ export default function BeforeAfter() {
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
+    if (containerRef.current) {
+      containerRectRef.current = containerRef.current.getBoundingClientRect();
+    }
     setIsDragging(true);
-    handleMove(e.clientX);
-  }, [handleMove]);
+    if (containerRectRef.current) {
+      const rect = containerRectRef.current;
+      const x = e.clientX - rect.left;
+      const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+      currentPosRef.current = percentage;
+      if (clipDivRef.current) clipDivRef.current.style.clipPath = `inset(0 ${100 - percentage}% 0 0)`;
+      if (handleDivRef.current) handleDivRef.current.style.left = `${percentage}%`;
+    }
+  }, []);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    setIsDragging(true);
-    if (e.touches.length > 0) {
-      handleMove(e.touches[0].clientX);
+    if (containerRef.current) {
+      containerRectRef.current = containerRef.current.getBoundingClientRect();
     }
-  }, [handleMove]);
+    setIsDragging(true);
+    if (e.touches.length > 0 && containerRectRef.current) {
+      const rect = containerRectRef.current;
+      const x = e.touches[0].clientX - rect.left;
+      const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+      currentPosRef.current = percentage;
+      if (clipDivRef.current) clipDivRef.current.style.clipPath = `inset(0 ${100 - percentage}% 0 0)`;
+      if (handleDivRef.current) handleDivRef.current.style.left = `${percentage}%`;
+    }
+  }, []);
 
   return (
     <section id="before-after" className="relative py-24 md:py-32 bg-background text-foreground overflow-hidden border-t border-border">
@@ -154,7 +184,6 @@ export default function BeforeAfter() {
                   <div
                     ref={clipDivRef}
                     className="absolute inset-0 pointer-events-none overflow-hidden"
-                    style={{ clipPath: `inset(0 ${100 - currentPosRef.current}% 0 0)` }}
                   >
                     <Image
                       src={activeData.beforeImage}
@@ -171,7 +200,6 @@ export default function BeforeAfter() {
               <div
                 ref={handleDivRef}
                 className="absolute top-0 bottom-0 w-[3px] bg-accent -translate-x-1/2 pointer-events-none z-20 shadow-[0_0_15px_#FF8C00,0_0_30px_#FF8C00]"
-                style={{ left: `${currentPosRef.current}%` }}
               >
                 {/* Grab Button */}
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/80 backdrop-blur-md border-2 border-accent text-accent shadow-[0_0_20px_rgba(255,140,0,0.5)] flex items-center justify-center transition-transform duration-150 scale-100 group-hover:scale-105 active:scale-95 z-30 cursor-grab active:cursor-grabbing">
@@ -194,12 +222,8 @@ export default function BeforeAfter() {
                 <button
                   key={i}
                   onClick={() => {
-                    setActiveCase(i);
                     currentPosRef.current = 50;
-                    if (clipDivRef.current && handleDivRef.current) {
-                      clipDivRef.current.style.clipPath = `inset(0 50% 0 0)`;
-                      handleDivRef.current.style.left = `50%`;
-                    }
+                    setActiveCase(i);
                   }}
                   className={`px-5 py-2.5 rounded-[4px] text-[10px] font-bold uppercase tracking-wider transition-all duration-300 border ${
                     i === activeCase

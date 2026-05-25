@@ -5,49 +5,16 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
 import { Quote } from "@/components/ui/solar-icons";
-import CurvedSlider from "@/components/ui/curved-slider";
 
 gsap.registerPlugin(ScrollTrigger);
-
-const expertise = [
-  {
-    title: "Neon Artistry",
-    description: "Hand-crafted LED neon that captures the soul of your brand.",
-    image: "/images/neon-taso.webp"
-  },
-  {
-    title: "Dimensional Signs",
-    description: "3D letters and logos that command attention from every angle.",
-    image: "/images/dimensional-ktm.webp"
-  },
-  {
-    title: "Name Plates",
-    description: "Premium custom name plates and office signs that add a sophisticated touch to any space.",
-    image: "/images/name-plates.webp"
-  },
-  {
-    title: "Laser Precision",
-    description: "Intricate CNC engraving and metal cutting with sub-millimeter detail.",
-    image: "/images/laser-cnc.webp"
-  },
-  {
-    title: "Architectural Craft",
-    description: "Sleek acrylic and wooden sign fabrications designed to last.",
-    image: "/images/workshop.webp"
-  }
-];
-
 
 export default function About() {
   const containerRef = useRef<HTMLElement>(null);
   const [hoveredPart, setHoveredPart] = useState<'content' | 'background' | 'none'>('none');
-  const [activeExpertiseIndex, setActiveExpertiseIndex] = useState(0);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Reveal animations handled below
-
-      // 2. Text Reveal Animations
+      // Text Reveal Animations
       const revealTexts = document.querySelectorAll(".reveal-text");
       revealTexts.forEach((text) => {
         gsap.fromTo(text, 
@@ -65,23 +32,7 @@ export default function About() {
         );
       });
 
-      // 3. Expertise Slider Reveal
-      gsap.fromTo(".expertise-slider-wrapper", 
-        { y: 60, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 1.2,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: ".expertise-slider-wrapper",
-            start: "top 80%",
-          }
-        }
-      );
-
-
-      // 5. Stat Counters
+      // Stat Counters
       const stats = document.querySelectorAll(".stat-number");
       stats.forEach((stat) => {
         const target = parseInt(stat.getAttribute("data-target") || "0");
@@ -109,7 +60,7 @@ export default function About() {
         className="founder-section relative py-20 md:py-32 px-4 sm:px-6 md:px-12 overflow-hidden transition-all duration-700"
       >
         {/* Background Image of Patan Durbar Square */}
-        <div className="absolute inset-0 z-0 pointer-events-none select-none transition-all duration-1000">
+        <div className="absolute inset-0 z-0 pointer-events-none select-none transition-all duration-1000 dark:opacity-40 transition-opacity duration-500">
           <Image
             src="/images/about-hero.webp"
             alt="Patan Durbar Square Background"
@@ -198,49 +149,6 @@ export default function About() {
           </div>
         </div>
       </div>
-
-      {/* 2. What We Do (Our Craft) */}
-      <div className="relative py-20 md:py-32 px-4 sm:px-6 md:px-12 overflow-hidden">
-        {/* Cinematic Background Collage - Hidden on Mobile, Active on Desktop */}
-        <div className="hidden md:block absolute inset-0 z-0 pointer-events-none select-none">
-          {expertise.map((item, idx) => (
-            <div 
-              key={idx} 
-              className={`absolute inset-0 transition-all duration-[1200ms] ease-[cubic-bezier(0.25,1,0.5,1)] ${
-                idx === activeExpertiseIndex 
-                  ? 'opacity-[0.35] dark:opacity-[0.22] scale-[1.03] blur-none' 
-                  : 'opacity-0 scale-[1.0] blur-sm'
-              }`}
-            >
-              <Image
-                src={item.image}
-                alt={item.title}
-                fill
-                sizes="100vw"
-                className="object-cover object-center grayscale contrast-[1.1]"
-              />
-            </div>
-          ))}
-          {/* Soft uniform overlay to ensure optimal contrast */}
-          <div className="absolute inset-0 bg-background/5 dark:bg-background/10 transition-colors duration-500" />
-          {/* Top/bottom vertical fade to guarantee seamless color transition between sections */}
-          <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background transition-colors duration-500" />
-        </div>
-
-        <div className="relative z-10 max-w-7xl mx-auto">
-          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8 mb-20">
-            <div className="max-w-2xl">
-              <span className="inline-block text-[10px] font-bold tracking-[0.3em] uppercase text-accent mb-4">Our Expertise</span>
-              <h3 className="text-3xl md:text-5xl font-extrabold tracking-tighter">Everything we touch <br /> turns to <span className="text-accent">light.</span></h3>
-            </div>
-          </div>
-
-          <div className="expertise-slider-wrapper opacity-0">
-            <CurvedSlider cards={expertise} onActiveIndexChange={setActiveExpertiseIndex} autoPlayInterval={1500} />
-          </div>
-        </div>
-      </div>
-
 
       {/* Stats (Minimal Footer of About) */}
       <div className="py-16 md:py-24 px-4 sm:px-6 md:px-12 border-t border-border">

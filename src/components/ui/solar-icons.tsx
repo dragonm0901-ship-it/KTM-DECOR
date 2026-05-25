@@ -100,3 +100,4 @@ export const TrendingUp = createIcon(SolarChart2);
 export const FileImage = createIcon(SolarFileText);
 export const ChevronLeft = createIcon(SolarAltArrowLeft);
 export const ChevronRight = createIcon(SolarAltArrowRight);
+export const Settings = createIcon(SolarSettings);

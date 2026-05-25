@@ -2,11 +2,14 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { Send, ExternalLink, X, MessageCircle } from "@/components/ui/solar-icons";
+import { Product } from "@/data/shop-data";
+import Image from "next/image";
 
 interface Message {
   role: "user" | "model";
   text: string;
   timestamp: Date;
+  products?: Product[];
 }
 
 // ── Custom SVG Robot Logo (Precision vector conversion of your provided image) ──
@@ -188,6 +191,7 @@ export default function ChatbotWidget() {
         role: "model",
         text: data.reply || "I'm sorry, I encountered a communication issue. Please try again!",
         timestamp: new Date(),
+        products: data.products || [],
       };
 
       setMessages((prev) => [...prev, botMessage]);
@@ -223,26 +227,56 @@ export default function ChatbotWidget() {
   if (!isLoaded) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[9999] font-sans selection:bg-accent/20">
-      {/* 1. Floating Robot Button - Exact Same Logo as used in the chatbox header */}
+    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[9999] font-sans selection:bg-accent/20 flex flex-col items-end gap-3 sm:gap-4">
+      {/* WhatsApp Button */}
       {!isOpen && (
-        <button
-          onClick={() => setIsOpen(true)}
-          className="relative group w-12 h-12 sm:w-14 sm:h-14 aspect-square flex-shrink-0 bg-transparent rounded-full flex items-center justify-center hover:scale-[1.1] active:scale-[0.95] transition-all duration-300 cursor-pointer overflow-visible animate-in fade-in duration-500"
-          aria-label="Open AI Assistant"
-        >
-          {/* Pulsing Neon Glow Ring */}
-          <span className="absolute inset-[-4px] rounded-full bg-[#FE914C]/30 border border-[#FE914C]/50 animate-ping pointer-events-none" />
-
-          {/* Sleek Modern Chat Bubble Badge */}
-          <div className="w-full h-full rounded-full bg-accent text-white flex items-center justify-center shadow-lg shadow-accent/25 transition-transform duration-300 group-hover:scale-105 border border-accent/20">
-            <MessageCircle className="w-5.5 h-5.5 sm:w-6.5 sm:h-6.5 animate-pulse" />
-          </div>
-
-          <span className="hidden sm:inline-block absolute right-16 top-1/2 -translate-y-1/2 bg-card border border-border text-[9px] font-extrabold tracking-widest uppercase px-3.5 py-2 rounded-[4px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap shadow-md">
-            Light up your questions!
+        <div className="flex items-center gap-3 animate-in fade-in duration-500">
+          <span className="hidden sm:flex items-center justify-center bg-[#25D366] text-white border border-[#25D366]/50 text-[9px] font-extrabold tracking-widest uppercase px-3.5 h-[32px] rounded-[4px] opacity-100 animate-badge-blink pointer-events-none whitespace-nowrap shadow-md">
+            Chat on WhatsApp
           </span>
-        </button>
+          <a
+            href="https://wa.me/9779706247439"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="relative group w-12 h-12 sm:w-14 sm:h-14 aspect-square flex-shrink-0 bg-[#25D366] rounded-full flex items-center justify-center hover:scale-[1.1] active:scale-[0.95] transition-all duration-300 cursor-pointer overflow-visible shadow-lg shadow-[#25D366]/30 border border-[#25D366]/20"
+            aria-label="Chat on WhatsApp"
+          >
+            {/* Pulsing Green Glow Ring */}
+            <span className="absolute inset-[-4px] rounded-full bg-[#25D366]/30 border border-[#25D366]/50 animate-ping-small pointer-events-none" />
+
+            {/* WhatsApp Logo */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="w-6 h-6 sm:w-7 sm:h-7 text-white"
+            >
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z" />
+            </svg>
+          </a>
+        </div>
+      )}
+
+      {/* 1. Floating Robot Button */}
+      {!isOpen && (
+        <div className="flex items-center gap-3 animate-in fade-in duration-500">
+          <span className="hidden sm:flex items-center justify-center bg-card border border-border text-[9px] font-extrabold tracking-widest uppercase px-3.5 h-[32px] rounded-[4px] opacity-100 animate-badge-blink pointer-events-none whitespace-nowrap shadow-md">
+            AI Powered Chat
+          </span>
+          <button
+            onClick={() => setIsOpen(true)}
+            className="relative group w-12 h-12 sm:w-14 sm:h-14 aspect-square flex-shrink-0 bg-transparent rounded-full flex items-center justify-center hover:scale-[1.1] active:scale-[0.95] transition-all duration-300 cursor-pointer overflow-visible"
+            aria-label="Open AI Assistant"
+          >
+            {/* Pulsing Neon Glow Ring */}
+            <span className="absolute inset-[-4px] rounded-full bg-[#FE914C]/30 border border-[#FE914C]/50 animate-ping-small pointer-events-none" />
+
+            {/* Sleek Modern Chat Bubble Badge */}
+            <div className="w-full h-full rounded-full bg-accent text-white flex items-center justify-center shadow-lg shadow-accent/25 transition-transform duration-300 group-hover:scale-105 border border-accent/20">
+              <MessageCircle className="w-5.5 h-5.5 sm:w-6.5 sm:h-6.5 animate-pulse" />
+            </div>
+          </button>
+        </div>
       )}
 
       {/* 2. Premium Professional Glassmorphic Chat Box */}
@@ -295,6 +329,42 @@ export default function ChatbotWidget() {
                 >
                   <p className="whitespace-pre-wrap">{msg.text}</p>
                 </div>
+
+                {/* Context-aware Product Recommendations */}
+                {msg.role === "model" && msg.products && msg.products.length > 0 && (
+                  <div className="flex flex-col gap-2 w-full max-w-[85%] mt-1.5">
+                    {msg.products.map((prod) => (
+                      <a
+                        key={prod.id}
+                        href={`/shop/${prod.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2.5 p-1.5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-accent/40 rounded-[4px] w-full transition-all duration-300 hover:scale-[1.01] group"
+                      >
+                        <div className="relative w-10 h-10 rounded-[2px] overflow-hidden bg-white/5 flex-shrink-0">
+                          <Image
+                            src={prod.image}
+                            alt={prod.name}
+                            fill
+                            sizes="40px"
+                            className="object-cover transition-transform duration-500 group-hover:scale-110"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h5 className="text-[9px] font-bold text-white truncate group-hover:text-accent transition-colors duration-300 leading-tight">
+                            {prod.name}
+                          </h5>
+                          <p className="text-[8px] text-accent font-black mt-0.5">
+                            Rs. {prod.price.toLocaleString()}
+                          </p>
+                        </div>
+                        <span className="text-[10px] text-white/40 group-hover:text-accent transition-colors font-bold pr-1">
+                          &rarr;
+                        </span>
+                      </a>
+                    ))}
+                  </div>
+                )}
 
                 <span className="text-[7px] sm:text-[8px] font-extrabold text-white/45 uppercase tracking-widest mt-1 px-1">
                   {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { PRODUCTS, Product } from "@/data/shop-data";
 
 // Comprehensive, expanded KTM DECOR Brand Knowledge Base & System Instruction
 const SYSTEM_INSTRUCTION = `You are "KTM DECOR AI Assistant", a professional and helpful virtual assistant representing KTM DECOR (Kathmandu, Nepal).
@@ -142,6 +143,50 @@ function getLocalFallbackResponse(query: string): string {
   return "Namaste! Welcome to KTM DECOR. We fabricate custom LED Neon Signs (starting NPR 4,500), Backlit Boards, and 3D Metal/Acrylic Letters with free installation inside Kathmandu Valley. How can I light up your space today?";
 }
 
+// Match query keywords to specific categories and return up to 3 products
+function getMatchingProducts(query: string, reply: string): Product[] {
+  const text = (query + " " + reply).toLowerCase();
+  const matched: Product[] = [];
+  
+  const mapping = [
+    { keywords: ["neon", "glowing", "glow", "नियोन"], category: "Neon Sign" },
+    { keywords: ["backlit", "lightbox", "light box", "ब्याकलिट"], category: "Acrylic Backlit Signage" },
+    { keywords: ["3d signage", "3d letter", "lettering", "halo", "metal letter", "acrylic letter", "३डी"], category: "3D Signage" },
+    { keywords: ["2d board", "menu board", "directory", "directional", "बोर्ड"], category: "2D Board" },
+    { keywords: ["nameplate", "name plate", "desk sign", "residential plate", "नेमप्लेट"], category: "House/Office Nameplate" },
+    { keywords: ["wooden", "wood", "timber", "cnc wood", "काठ"], category: "Wooden Signage" },
+    { keywords: ["2.5d", "relief", "textured cnc"], category: "2.5D Signage" },
+    { keywords: ["lamp", "table lamp", "bedside", "ल्याम्प"], category: "Acrylic Table Lamp" },
+    { keywords: ["number plate", "bike plate", "car plate", "license plate", "नम्बर"], category: "3D Number Plate" },
+    { keywords: ["double sided", "round light board", "rotating box", "projecting"], category: "Double Sided Round Light Board" },
+  ];
+
+  const matchedCategories = new Set<string>();
+  for (const item of mapping) {
+    if (item.keywords.some(keyword => text.includes(keyword))) {
+      matchedCategories.add(item.category);
+    }
+  }
+
+  // Fallback for general product search keywords
+  if (matchedCategories.size === 0 && (
+    text.includes("product") || text.includes("shop") || text.includes("catalog") || 
+    text.includes("collection") || text.includes("items") || text.includes("bestseller") || 
+    text.includes("best seller") || text.includes("sell") || text.includes("kinne") || text.includes("buy")
+  )) {
+    matchedCategories.add("Neon Sign");
+    matchedCategories.add("3D Signage");
+  }
+
+  for (const cat of matchedCategories) {
+    const catProds = PRODUCTS.filter(p => p.category === cat);
+    matched.push(...catProds.slice(0, 2));
+    if (matched.length >= 3) break;
+  }
+
+  return matched.slice(0, 3);
+}
+
 export async function POST(request: Request) {
   try {
     const { message, history } = await request.json();
@@ -159,7 +204,8 @@ export async function POST(request: Request) {
     // If no API key is configured or is empty, fallback to the smart keyword-based local responder
     if (!apiKey) {
       const fallbackReply = getLocalFallbackResponse(message);
-      return NextResponse.json({ reply: fallbackReply });
+      const matchedProducts = getMatchingProducts(message, fallbackReply);
+      return NextResponse.json({ reply: fallbackReply, products: matchedProducts });
     }
 
     // Format chat history for Gemini API structure: { role: 'user' | 'model', parts: [{ text: string }] }
@@ -215,7 +261,8 @@ export async function POST(request: Request) {
       const errorText = await response.text();
       console.error("Gemini API error status:", response.status, errorText);
       const fallbackReply = getLocalFallbackResponse(message);
-      return NextResponse.json({ reply: fallbackReply });
+      const matchedProducts = getMatchingProducts(message, fallbackReply);
+      return NextResponse.json({ reply: fallbackReply, products: matchedProducts });
     }
 
     const data = await response.json();
@@ -224,10 +271,12 @@ export async function POST(request: Request) {
     if (!replyText) {
       console.warn("Empty response structure received from Gemini API:", data);
       const fallbackReply = getLocalFallbackResponse(message);
-      return NextResponse.json({ reply: fallbackReply });
+      const matchedProducts = getMatchingProducts(message, fallbackReply);
+      return NextResponse.json({ reply: fallbackReply, products: matchedProducts });
     }
 
-    return NextResponse.json({ reply: replyText.trim() });
+    const matchedProducts = getMatchingProducts(message, replyText);
+    return NextResponse.json({ reply: replyText.trim(), products: matchedProducts });
   } catch (error) {
     console.error("Chat API route error:", error);
     return NextResponse.json(

@@ -145,11 +145,11 @@ export default function Testimonials() {
 
   return (
     <section ref={sectionRef} className="py-20 md:py-32 overflow-hidden bg-background">
-      <div ref={headerRef} className="max-w-7xl mx-auto px-6 mb-10 md:mb-20 text-center md:text-left">
+      <div ref={headerRef} className="max-w-3xl mx-auto px-6 mb-10 md:mb-20 text-center flex flex-col items-center">
         <h2 className="text-[clamp(2.5rem,5vw,4rem)] font-extrabold leading-[0.9] tracking-[-0.04em] text-foreground mb-6">
           Client <span className="text-accent">Stories</span>.
         </h2>
-        <p className="text-lg md:text-xl text-muted max-w-2xl mx-auto md:mx-0">
+        <p className="text-lg md:text-xl text-muted max-w-2xl mx-auto">
           Don't just take our word for it. Here's what our clients have to say about the luminous transformations we've created for their spaces.
         </p>
       </div>
