@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Image from "next/image";
 import MarqueeSlider from "@/components/ui/marquee-slider";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -63,7 +62,6 @@ const expertise = [
 
 export default function Expertise() {
   const containerRef = useRef<HTMLElement>(null);
-  const [activeExpertiseIndex, setActiveExpertiseIndex] = useState(0);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -86,41 +84,8 @@ export default function Expertise() {
     return () => ctx.revert();
   }, []);
 
-  // Slowly transition the background collage index automatically
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setActiveExpertiseIndex((prev) => (prev + 1) % expertise.length);
-    }, 4000);
-    return () => clearInterval(timer);
-  }, []);
-
   return (
     <section ref={containerRef} id="expertise" className="relative min-h-screen lg:min-h-[125vh] flex flex-col justify-center overflow-hidden bg-background text-foreground py-12 md:py-24">
-      {/* Cinematic Background Collage - Hidden on Mobile, Active on Desktop */}
-      <div className="hidden md:block absolute inset-0 z-0 pointer-events-none select-none">
-        {expertise.map((item, idx) => (
-          <div 
-            key={idx} 
-            className={`absolute inset-0 transition-all duration-[1200ms] ease-[cubic-bezier(0.25,1,0.5,1)] ${
-              idx === activeExpertiseIndex 
-                ? 'opacity-[0.35] dark:opacity-[0.22] scale-[1.03] blur-none' 
-                : 'opacity-0 scale-[1.0] blur-sm'
-            }`}
-          >
-            <Image
-              src={item.image}
-              alt={item.title}
-              fill
-              sizes="100vw"
-              className="object-cover object-center grayscale contrast-[1.1]"
-            />
-          </div>
-        ))}
-        {/* Soft uniform overlay to ensure optimal contrast */}
-        <div className="absolute inset-0 bg-background/5 dark:bg-background/10 transition-colors duration-500" />
-        {/* Top/bottom vertical fade to guarantee seamless color transition between sections */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background transition-colors duration-500" />
-      </div>
 
       <div className="relative w-full px-4 sm:px-6 md:px-12 z-10 max-w-7xl mx-auto">
         <div className="flex flex-col items-center justify-center text-center max-w-2xl mx-auto mb-10 md:mb-20">
