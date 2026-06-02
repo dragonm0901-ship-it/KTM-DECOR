@@ -218,6 +218,7 @@ Vercel is the natural choice for Next.js applications. By default, Vercel will l
    - **Root Directory:** Leave blank (which defaults to root `./`).
 5. Under **Environment Variables**, add:
    - `GEMINI_API_KEY` = `AIzaSyD...` (Your Gemini Key from your local `.env.local` file)
+   - `DASHBOARD_URL` = `https://ktm-decor-admin.vercel.app` (or your custom `https://admin.ktmdecor.com` once set up in Phase 6/7. This environment variable is critical so Next.js knows where to proxy `/admin` requests)
 6. Click **Deploy**.
 7. Vercel will build your main store pages. Once done, it will provide a link like `https://ktm-decor-site.vercel.app`.
 

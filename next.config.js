@@ -34,20 +34,46 @@ const nextConfig = {
     ];
   },
   async redirects() {
+    return [];
+  },
+  async rewrites() {
+    const isProd = process.env.NODE_ENV === "production";
+    const DASHBOARD_URL = process.env.DASHBOARD_URL;
+
+    if (DASHBOARD_URL) {
+      return [
+        {
+          source: "/admin",
+          destination: `${DASHBOARD_URL}/admin/`,
+        },
+        {
+          source: "/admin/:path*",
+          destination: `${DASHBOARD_URL}/admin/:path*`,
+        },
+      ];
+    }
+
+    if (!isProd) {
+      return [
+        {
+          source: "/admin",
+          destination: "http://127.0.0.1:5173/admin/",
+        },
+        {
+          source: "/admin/:path*",
+          destination: "http://127.0.0.1:5173/admin/:path*",
+        },
+      ];
+    }
+
     return [
       {
         source: "/admin",
-        destination: "/admin/",
-        permanent: true,
+        destination: "/admin/index.html",
       },
-    ];
-  },
-  async rewrites() {
-    const DASHBOARD_URL = process.env.DASHBOARD_URL || "http://127.0.0.1:5173";
-    return [
       {
-        source: "/admin/:path*",
-        destination: `${DASHBOARD_URL}/admin/:path*`,
+        source: "/admin/",
+        destination: "/admin/index.html",
       },
     ];
   },

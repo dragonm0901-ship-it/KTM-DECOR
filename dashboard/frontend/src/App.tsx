@@ -128,14 +128,14 @@ export const App: React.FC = () => {
               </span>
               <div className="grid grid-cols-2 gap-2">
                 <button
-                  onClick={() => handleSetTestCredentials("admin@ktmdecor.com", "adminpassword")}
+                  onClick={() => handleSetTestCredentials("admin@ktmdecor.com", import.meta.env.VITE_SEED_ADMIN_PASSWORD || "adminpassword")}
                   className="px-3 py-2 text-[10px] text-left border border-border bg-background rounded hover:border-accent transition-all hover:bg-accent/5"
                 >
                   <span className="font-bold text-accent block">Sagar (Admin)</span>
                   admin@ktmdecor.com
                 </button>
                 <button
-                  onClick={() => handleSetTestCredentials("staff@ktmdecor.com", "staffpassword")}
+                  onClick={() => handleSetTestCredentials("staff@ktmdecor.com", import.meta.env.VITE_SEED_STAFF_PASSWORD || "staffpassword")}
                   className="px-3 py-2 text-[10px] text-left border border-border bg-background rounded hover:border-accent transition-all hover:bg-accent/5"
                 >
                   <span className="font-bold text-accent block">Shared Staff Login</span>

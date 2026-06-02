@@ -105,9 +105,12 @@ const seedUsers = async () => {
       await User.create({
         name: "Sagar (Admin)",
         email: "admin@ktmdecor.com",
-        password: "adminpassword",
+        password: process.env.SEED_ADMIN_PASSWORD || "adminpassword",
         role: "admin",
       });
+    } else if (process.env.SEED_ADMIN_PASSWORD) {
+      adminExists.password = process.env.SEED_ADMIN_PASSWORD;
+      await adminExists.save();
     }
 
     // Seed Shared Staff Login user
@@ -116,9 +119,12 @@ const seedUsers = async () => {
       await User.create({
         name: "Shared Staff Login",
         email: "staff@ktmdecor.com",
-        password: "staffpassword",
+        password: process.env.SEED_STAFF_PASSWORD || "staffpassword",
         role: "staff",
       });
+    } else if (process.env.SEED_STAFF_PASSWORD) {
+      sharedStaffExists.password = process.env.SEED_STAFF_PASSWORD;
+      await sharedStaffExists.save();
     }
 
     // Seed the 6 Nepali staff members
@@ -137,9 +143,12 @@ const seedUsers = async () => {
         await User.create({
           name: s.name,
           email: s.email,
-          password: "staffpassword",
+          password: process.env.SEED_STAFF_PASSWORD || "staffpassword",
           role: "staff",
         });
+      } else if (process.env.SEED_STAFF_PASSWORD) {
+        exists.password = process.env.SEED_STAFF_PASSWORD;
+        await exists.save();
       }
     }
 

@@ -120,3 +120,9 @@ Go to your DNS manager (Cloudflare, Namecheap, GoDaddy, etc.) and add the follow
     },
   });
   ```
+
+### 5. ERR_TOO_MANY_REDIRECTS on `/admin`
+* **Problem:** Accessing `https://ktmdecor.com/admin` redirects too many times.
+* **Solution:**
+  1. Ensure that the `DASHBOARD_URL` environment variable is defined on the Vercel project of the main Next.js site (e.g. `DASHBOARD_URL=https://admin.ktmdecor.com` or the Vercel deployment of the dashboard `https://ktm-decor-admin.vercel.app`).
+  2. If this is not set, Next.js defaults to proxying to local Vite (`http://127.0.0.1:5173`), which is unreachable in production. This causes a proxy failure and fallback to Next.js's internal routing, resulting in infinite redirect loops.
