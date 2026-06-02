@@ -43,39 +43,60 @@ export default function Services() {
   const cardsRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
-    if (typeof window === "undefined" || window.innerWidth < 1024) return;
+    if (typeof window === "undefined") return;
 
-    // Initial configuration
-    gsap.set(".card-0", { y: "0%", scale: 1, rotation: 0, opacity: 1 });
-    gsap.set([".card-1", ".card-2", ".card-3"], { y: "150%", scale: 1, rotation: 0, opacity: 0 });
+    if (window.innerWidth >= 1024) {
+      // Desktop Stack Animation
+      gsap.set(".card-0", { y: "0%", scale: 1, rotation: 0, opacity: 1 });
+      gsap.set([".card-1", ".card-2", ".card-3"], { y: "150%", scale: 1, rotation: 0, opacity: 0 });
 
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: containerRef.current,
-        start: "top top",
-        end: "bottom bottom",
-        scrub: 1,
-      }
-    });
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 1,
+        }
+      });
 
-    // STEP 1: Card 0 scales down/rotates slightly, Card 1 slides up to 0%
-    tl.to(".card-0", { scale: 0.92, rotation: -3, ease: "power1.inOut", duration: 1 }, 0)
-      .to(".card-1", { y: "0%", opacity: 1, ease: "power1.out", duration: 1 }, 0)
-      .to(".highlight-step-1", { color: "#FE914C", ease: "power2.out", duration: 0.5 }, 0.3);
+      // STEP 1: Card 0 scales down/rotates slightly, Card 1 slides up to 0%
+      tl.to(".card-0", { scale: 0.92, rotation: -3, ease: "power1.inOut", duration: 1 }, 0)
+        .to(".card-1", { y: "0%", opacity: 1, ease: "power1.out", duration: 1 }, 0)
+        .to(".highlight-step-1", { color: "#FE914C", ease: "power2.out", duration: 0.5 }, 0.3);
 
-    // STEP 2: Card 1 scales down/rotates slightly, Card 2 slides up to 0%
-    tl.to(".card-1", { scale: 0.92, rotation: 3, ease: "power1.inOut", duration: 1 }, 1)
-      .to(".card-2", { y: "0%", opacity: 1, ease: "power1.out", duration: 1 }, 1)
-      .to(".highlight-step-2", { color: "#FE914C", ease: "power2.out", duration: 0.5 }, 1.3);
+      // STEP 2: Card 1 scales down/rotates slightly, Card 2 slides up to 0%
+      tl.to(".card-1", { scale: 0.92, rotation: 3, ease: "power1.inOut", duration: 1 }, 1)
+        .to(".card-2", { y: "0%", opacity: 1, ease: "power1.out", duration: 1 }, 1)
+        .to(".highlight-step-2", { color: "#FE914C", ease: "power2.out", duration: 0.5 }, 1.3);
 
-    // STEP 3: Card 2 scales down/rotates slightly, Card 3 slides up to 0%
-    tl.to(".card-2", { scale: 0.92, rotation: -3, ease: "power1.inOut", duration: 1 }, 2)
-      .to(".card-3", { y: "0%", opacity: 1, ease: "power1.out", duration: 1 }, 2)
-      .to(".highlight-step-3", { color: "#FE914C", ease: "power2.out", duration: 0.5 }, 2.3);
+      // STEP 3: Card 2 scales down/rotates slightly, Card 3 slides up to 0%
+      tl.to(".card-2", { scale: 0.92, rotation: -3, ease: "power1.inOut", duration: 1 }, 2)
+        .to(".card-3", { y: "0%", opacity: 1, ease: "power1.out", duration: 1 }, 2)
+        .to(".highlight-step-3", { color: "#FE914C", ease: "power2.out", duration: 0.5 }, 2.3);
 
-    // STEP 4: Pause/hold the final stacked state so the user can read it before unpinning
-    tl.to({}, { duration: 1 });
-
+      // STEP 4: Pause/hold the final stacked state so the user can read it before unpinning
+      tl.to({}, { duration: 1 });
+    } else {
+      // Mobile Scroll Reveal Animation
+      servicesData.forEach((_, i) => {
+        gsap.fromTo(`.card-${i}`, 
+          { y: 60, opacity: 0, scale: 0.96 },
+          { 
+            y: 0, 
+            opacity: 1, 
+            scale: 1,
+            ease: "power2.out",
+            duration: 0.8,
+            scrollTrigger: {
+              trigger: `.card-${i}`,
+              start: "top 90%",
+              end: "top 60%",
+              toggleActions: "play none none reverse"
+            }
+          }
+        );
+      });
+    }
   }, { scope: containerRef });
 
   return (

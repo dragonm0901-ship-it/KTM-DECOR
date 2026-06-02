@@ -24,15 +24,54 @@ export default function ProductDetailClient() {
   const [product, setProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [addedPopup, setAddedPopup] = useState(false);
+  const [allProducts, setAllProducts] = useState<Product[]>(PRODUCTS);
 
+  // Fetch product detail on ID change
   useEffect(() => {
     if (!id) return;
-    const foundProduct = PRODUCTS.find(p => p.id === id);
-    if (foundProduct) {
-      setProduct(foundProduct);
-      window.scrollTo(0, 0);
-    }
+    const fetchDetail = async () => {
+      try {
+        const currentApiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+        const res = await fetch(`${currentApiUrl}/api/products/${id}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.id) {
+            setProduct(data);
+            window.scrollTo(0, 0);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn("Express backend API details fetch offline. Using local static fallback.", err);
+      }
+      
+      const foundProduct = PRODUCTS.find(p => p.id === id);
+      if (foundProduct) {
+        setProduct(foundProduct);
+        window.scrollTo(0, 0);
+      }
+    };
+    fetchDetail();
   }, [id]);
+
+  // Fetch all products for dynamic suggestions
+  useEffect(() => {
+    const fetchAllForSuggestions = async () => {
+      try {
+        const currentApiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+        const res = await fetch(`${currentApiUrl}/api/products`);
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            setAllProducts(data);
+          }
+        }
+      } catch (err) {
+        console.warn("Express backend API offline for suggestions. Using static catalog.", err);
+      }
+    };
+    fetchAllForSuggestions();
+  }, []);
 
   if (!product) {
     return (
@@ -51,7 +90,7 @@ export default function ProductDetailClient() {
   }
 
   // Filter up to 4 suggested products from the same category (excluding current product)
-  const suggestions = PRODUCTS.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
+  const suggestions = allProducts.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
 
   // --- GLOBAL CART DISPATCH TRIGGER ---
   const handleAddToCart = () => {

@@ -27,7 +27,27 @@ export default function ShopPage() {
   const [selectedBadge, setSelectedBadge] = useState("All");
   const [sortBy, setSortBy] = useState<"featured" | "price-low" | "price-high" | "name-az">("featured");
   const [filteredProducts, setFilteredProducts] = useState<Product[]>(PRODUCTS);
+  const [dbProducts, setDbProducts] = useState<Product[]>(PRODUCTS);
   const [visibleCount, setVisibleCount] = useState(20);
+
+  // Mount logic: Fetch products from express backend
+  useEffect(() => {
+    const fetchCatalog = async () => {
+      try {
+        const currentApiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+        const res = await fetch(`${currentApiUrl}/api/products`);
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            setDbProducts(data);
+          }
+        }
+      } catch (err) {
+        console.warn("Express backend API is offline. Using local static products fallback.", err);
+      }
+    };
+    fetchCatalog();
+  }, []);
   
   // UI Panels states
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -45,7 +65,7 @@ export default function ShopPage() {
 
   // --- FILTER & SORT ENGINE ---
   useEffect(() => {
-    let result = PRODUCTS;
+    let result = dbProducts;
 
     // A. Category Filter
     if (activeCategory !== "All") {
@@ -85,7 +105,7 @@ export default function ShopPage() {
 
     setFilteredProducts(result);
     setVisibleCount(20);
-  }, [activeCategory, activeSubCategory, searchQuery, priceRange, selectedBadge, sortBy]);
+  }, [activeCategory, activeSubCategory, searchQuery, priceRange, selectedBadge, sortBy, dbProducts]);
 
   // Stagger GSAP Entrance animations on Filter Card Changes
   useEffect(() => {
@@ -100,12 +120,12 @@ export default function ShopPage() {
 
   // Helper dynamic counts calculators
   const getProductCountByCategory = (cat: string) => {
-    if (cat === "All") return PRODUCTS.length;
-    return PRODUCTS.filter(p => p.category === cat).length;
+    if (cat === "All") return dbProducts.length;
+    return dbProducts.filter(p => p.category === cat).length;
   };
 
   const getProductCountBySubCategory = (sub: string) => {
-    return PRODUCTS.filter(p => p.subCategory === sub).length;
+    return dbProducts.filter(p => p.subCategory === sub).length;
   };
 
   return (
@@ -424,7 +444,7 @@ export default function ShopPage() {
                         <span className="text-[8px] font-black text-muted uppercase tracking-widest block">{product.subCategory}</span>
                         
                         <Link href={`/shop/${product.id}`} className="block">
-                          <h3 className="text-sm sm:text-base font-bold tracking-tight text-foreground truncate hover:text-accent transition-colors">
+                          <h3 className="text-xs sm:text-base font-bold tracking-tight text-foreground truncate hover:text-accent transition-colors">
                             {product.name}
                           </h3>
                         </Link>

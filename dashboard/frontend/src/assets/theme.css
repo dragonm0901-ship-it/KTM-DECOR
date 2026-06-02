@@ -1,0 +1,19 @@
+:root {
+  --background: #F2F2F2;
+  --card: #FFFFFF;
+  --foreground: #000000;
+  --muted: #666666;
+  --border: rgba(0, 0, 0, 0.08);
+  --primary: #FE914C;
+  --accent: #FE914C;
+  --accent-light: #FFA46A;
+  --accent-dark: #E2752D;
+}
+
+.dark {
+  --background: #050505;
+  --card: #0F0F0F;
+  --foreground: #F2F2F2;
+  --muted: #A1A1AA;
+  --border: rgba(255, 255, 255, 0.1);
+}

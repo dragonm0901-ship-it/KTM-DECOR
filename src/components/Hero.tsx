@@ -58,6 +58,7 @@ export default function Hero() {
   const desktopContainerRef = useRef<HTMLElement>(null);
   const desktopSceneRef = useRef<HTMLDivElement>(null);
   const desktopTextRef = useRef<HTMLDivElement>(null);
+  const desktopTextInnerRef = useRef<HTMLDivElement>(null);
   const desktopOverlayRef = useRef<HTMLDivElement>(null);
 
   // Mobile Refs (from committed version)
@@ -70,70 +71,96 @@ export default function Hero() {
   const mobileCollageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let mm = gsap.matchMedia();
+    let mm: gsap.MatchMedia | null = null;
 
-    // ── DESKTOP ANIMATION TRIGGER (min-width: 1024px) ──
-    mm.add("(min-width: 1024px)", () => {
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: desktopContainerRef.current,
-          start: "top top",
-          end: "bottom bottom",
-          scrub: 1,
-        }
+    const startAnimations = () => {
+      mm = gsap.matchMedia();
+
+      // ── DESKTOP ANIMATION TRIGGER (min-width: 1024px) ──
+      mm.add("(min-width: 1024px)", () => {
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: desktopContainerRef.current,
+            start: "top top",
+            end: "bottom bottom",
+            scrub: 1,
+          }
+        });
+
+        // 3D Scene animation spans full timeline duration (1.0)
+        tl.fromTo(desktopSceneRef.current, 
+          { rotateX: 60, scale: 2, y: "50vh", z: -200 }, 
+          { rotateX: 0, scale: 1, y: "15vh", z: 0, ease: "none", duration: 1.0 },
+          0
+        );
+
+        // Fading ease effect: pop out of blur as animation starts
+        tl.fromTo(desktopSceneRef.current,
+          { filter: "blur(12px)" },
+          { filter: "blur(0px)", ease: "power2.out", duration: 0.3 },
+          0
+        );
+
+        // Hero text fades out and moves up in the first 25% of the scroll trigger (0.25 / 1.0)
+        // We animate the outer container (desktopTextRef) to avoid conflict with the entrance animation
+        tl.to(desktopTextRef.current, {
+          opacity: 0,
+          y: -150,
+          scale: 0.9,
+          ease: "power2.out",
+          duration: 0.25,
+        }, 0);
+
+        // Overlay fades out in the first 25% of scroll trigger
+        tl.to(desktopOverlayRef.current, {
+          opacity: 0,
+          ease: "power1.inOut",
+          duration: 0.25,
+        }, 0);
+
+        // Desktop Entrance Animations
+        gsap.fromTo(".hero-card-3d", 
+          { opacity: 0, y: 50 },
+          { opacity: 1, y: 0, duration: 1.5, stagger: 0.05, ease: "power3.out", delay: 0.2 }
+        );
+
+        // Entrance animation targets the inner container (desktopTextInnerRef) to prevent any conflict
+        gsap.fromTo(desktopTextInnerRef.current,
+          { opacity: 0, y: 50 },
+          { opacity: 1, y: 0, duration: 1.5, ease: "power3.out", delay: 0.5 }
+        );
       });
 
-      tl.fromTo(desktopSceneRef.current, 
-        { rotateX: 60, scale: 2, y: "50vh", z: -200 }, 
-        { rotateX: 0, scale: 1, y: "15vh", z: 0, ease: "none" },
-        0
-      );
+      // ── MOBILE ANIMATION TRIGGER (max-width: 1023px) ──
+      mm.add("(max-width: 1023px)", () => {
+        const tl = gsap.timeline();
 
-      // Fading ease effect: pop out of blur as animation starts
-      tl.fromTo(desktopSceneRef.current,
-        { filter: "blur(12px)" },
-        { filter: "blur(0px)", ease: "power2.out" },
-        0
-      );
+        // Instantly show mobile ambient glows
+        gsap.set(".neon-glow-accent", { opacity: 0.35 });
 
-      tl.to(desktopTextRef.current, {
-        opacity: 0,
-        y: -150,
-        scale: 0.9,
-        ease: "power2.inOut",
-      }, 0);
+        // Quick reveal animations matching committed mobile layout
+        tl.fromTo(mobileBadgeRef.current, { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" })
+          .fromTo(".hero-subtext-mobile", { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, "-=0.35")
+          .fromTo(".hero-card", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, stagger: 0.08, ease: "power2.out" }, "-=0.4");
+      });
+    };
 
-      tl.to(desktopOverlayRef.current, {
-        opacity: 0,
-        ease: "power1.inOut"
-      }, 0);
-
-      // Desktop Entrance Animations
-      gsap.fromTo(".hero-card-3d", 
-        { opacity: 0, y: 50 },
-        { opacity: 1, y: 0, duration: 1.5, stagger: 0.05, ease: "power3.out", delay: 0.2 }
-      );
-
-      gsap.fromTo(desktopTextRef.current,
-        { opacity: 0, y: 50 },
-        { opacity: 1, y: 0, duration: 1.5, ease: "power3.out", delay: 0.5 }
-      );
-    });
-
-    // ── MOBILE ANIMATION TRIGGER (max-width: 1023px) ──
-    mm.add("(max-width: 1023px)", () => {
-      const tl = gsap.timeline();
-
-      // Instantly show mobile ambient glows
-      gsap.set(".neon-glow-accent", { opacity: 0.35 });
-
-      // Quick reveal animations matching committed mobile layout
-      tl.fromTo(mobileBadgeRef.current, { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" })
-        .fromTo(".hero-subtext-mobile", { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, "-=0.35")
-        .fromTo(".hero-card", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, stagger: 0.08, ease: "power2.out" }, "-=0.4");
-    });
-
-    return () => mm.revert();
+    if (typeof window !== "undefined" && (window as any).__PRELOADER_ACTIVE__) {
+      const handlePreloaderComplete = () => {
+        startAnimations();
+        window.removeEventListener("preloaderComplete", handlePreloaderComplete);
+      };
+      window.addEventListener("preloaderComplete", handlePreloaderComplete);
+      return () => {
+        window.removeEventListener("preloaderComplete", handlePreloaderComplete);
+        if (mm) (mm as any).revert();
+      };
+    } else {
+      startAnimations();
+      return () => {
+        if (mm) (mm as any).revert();
+      };
+    }
   }, []);
 
   return (
@@ -198,46 +225,51 @@ export default function Hero() {
             ref={desktopTextRef}
             className="relative z-30 flex flex-col items-center justify-center text-center px-6 w-full max-w-4xl mx-auto pointer-events-auto"
           >
-            {/* Status Badge */}
-            <div className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full bg-accent border border-accent/10 mb-8 md:mb-10 shadow-2xl">
-              <span className="text-[11px] md:text-xs font-bold tracking-widest uppercase text-white">
-                Trusted by 2000+ businesses in Nepal
-              </span>
-            </div>
-
-            {/* Main Headline */}
-            <h1 className="text-[clamp(3.5rem,10vw,8.5rem)] font-extrabold leading-[0.9] tracking-[-0.04em] mb-6 md:mb-8 text-white drop-shadow-[0_4px_16px_rgba(0,0,0,0.45)]">
-              <span className="block">Your space,</span>
-              <span className="block mt-2">
-                custom <span className="text-accent relative inline-block drop-shadow-[0_2px_12px_rgba(254,145,76,0.5)]">
-                  illuminated.
-                  <div className="absolute -bottom-2 left-0 w-full h-[6px] bg-accent/60 blur-[6px] rounded-full" />
+            <div
+              ref={desktopTextInnerRef}
+              className="w-full flex flex-col items-center justify-center opacity-0"
+            >
+              {/* Status Badge */}
+              <div className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full bg-accent border border-accent/10 mb-8 md:mb-10 shadow-2xl">
+                <span className="text-[11px] md:text-xs font-bold tracking-widest uppercase text-white">
+                  Trusted by 2000+ businesses in Nepal
                 </span>
-              </span>
-            </h1>
+              </div>
 
-            {/* Subtext */}
-            <p className="text-lg md:text-xl max-w-2xl leading-relaxed mb-10 text-white/80 font-medium">
-              Premium neon signs and illuminated decor crafted with precision
-              to bring your brand&apos;s story to life.
-            </p>
+              {/* Main Headline */}
+              <h1 className="text-[clamp(3.5rem,10vw,8.5rem)] font-extrabold leading-[0.9] tracking-[-0.04em] mb-6 md:mb-8 text-white drop-shadow-[0_4px_16px_rgba(0,0,0,0.45)]">
+                <span className="block">Your space,</span>
+                <span className="block mt-2">
+                  custom <span className="text-accent relative inline-block drop-shadow-[0_2px_12px_rgba(254,145,76,0.5)]">
+                    illuminated.
+                    <div className="absolute -bottom-2 left-0 w-full h-[6px] bg-accent/60 blur-[6px] rounded-full" />
+                  </span>
+                </span>
+              </h1>
 
-            {/* CTAs */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-              <Link
-                href="/shop"
-                className="group relative overflow-hidden flex items-center gap-3 px-10 py-5 bg-accent text-white rounded-[4px] text-[12px] font-bold tracking-widest uppercase hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 shadow-[0_0_40px_rgba(254,145,76,0.4)]"
-              >
-                <span className="animate-laser-sheen absolute inset-0 w-[50%] h-full bg-gradient-to-r from-transparent via-white/25 to-transparent pointer-events-none" />
-                <span>Explore Collection</span>
-                <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-              </Link>
-              <a
-                href="/start-project"
-                className="px-10 py-5 bg-white text-black hover:bg-neutral-200 text-[12px] font-bold tracking-widest uppercase rounded-[4px] transition-all duration-300 shadow-xl"
-              >
-                Create a Design
-              </a>
+              {/* Subtext */}
+              <p className="text-lg md:text-xl max-w-2xl leading-relaxed mb-10 text-white/80 font-medium">
+                Premium neon signs and illuminated decor crafted with precision
+                to bring your brand&apos;s story to life.
+              </p>
+
+              {/* CTAs */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+                <Link
+                  href="/shop"
+                  className="group relative overflow-hidden flex items-center gap-3 px-10 py-5 bg-accent text-white rounded-[4px] text-[12px] font-bold tracking-widest uppercase hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 shadow-[0_0_40px_rgba(254,145,76,0.4)]"
+                >
+                  <span className="animate-laser-sheen absolute inset-0 w-[50%] h-full bg-gradient-to-r from-transparent via-white/25 to-transparent pointer-events-none" />
+                  <span>Explore Collection</span>
+                  <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                </Link>
+                <a
+                  href="/start-project"
+                  className="px-10 py-5 bg-white text-black hover:bg-neutral-200 text-[12px] font-bold tracking-widest uppercase rounded-[4px] transition-all duration-300 shadow-xl"
+                >
+                  Create a Design
+                </a>
+              </div>
             </div>
           </div>
 

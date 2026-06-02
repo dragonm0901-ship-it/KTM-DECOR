@@ -1,7 +1,13 @@
 "use client";
 
+import { useRef } from "react";
 import Image from "next/image";
 import { MessageSquare, PenTool, Wrench, Truck, Plus, Settings } from "@/components/ui/solar-icons";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const steps = [
   {
@@ -37,8 +43,57 @@ const steps = [
 ];
 
 export default function HowItWorks() {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(() => {
+    if (typeof window === "undefined") return;
+
+    if (window.innerWidth < 1024) {
+      // Mobile: Buttery, premium slide-up and fade-in
+      const stepCards = gsap.utils.toArray<HTMLElement>(".step-card");
+      stepCards.forEach((card) => {
+        gsap.fromTo(card,
+          { 
+            y: 20, 
+            opacity: 0,
+            scale: 0.99
+          },
+          {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            ease: "power4.out",
+            duration: 1.2,
+            scrollTrigger: {
+              trigger: card,
+              start: "top 95%",
+              toggleActions: "play none none reverse"
+            }
+          }
+        );
+      });
+    } else {
+      // Desktop: Staggered sequential slide up
+      gsap.fromTo(".step-card",
+        { y: 50, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.8,
+          stagger: 0.15,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: ".step-card-grid",
+            start: "top 80%",
+            toggleActions: "play none none reverse"
+          }
+        }
+      );
+    }
+  }, { scope: containerRef });
+
   return (
-    <section id="process" className="py-24 md:py-32 px-6 md:px-12 bg-background text-foreground relative overflow-hidden">
+    <section ref={containerRef} id="process" className="py-24 md:py-32 px-6 md:px-12 bg-background text-foreground relative overflow-hidden">
       {/* Premium Laser-Process Background Image at 50% Opacity (Extended top and bottom to eliminate high-DPI subpixel rounding gaps) */}
       <div className="absolute top-[-8px] bottom-[-8px] left-0 right-0 z-0 opacity-50 pointer-events-none select-none">
         <Image
@@ -80,20 +135,20 @@ export default function HowItWorks() {
         </div>
 
         {/* 5-Card Spacious Grid Layout (Centered Bottom Row via 6-col Grid) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8 lg:gap-10">
+        <div className="step-card-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8 lg:gap-10">
           {steps.map((step, i) => {
             const StepIcon = step.icon;
             return (
               <div
                 key={i}
-                className={`group relative p-8 md:p-10 rounded-[4px] bg-neutral-50/70 dark:bg-neutral-900/40 border border-neutral-200/50 dark:border-white/5 shadow-sm hover:border-accent/40 hover:shadow-xl hover:-translate-y-2 transition-all duration-500 backdrop-blur-sm min-h-[380px] flex flex-col justify-between overflow-hidden lg:col-span-2 ${i === 3 ? "lg:col-start-2" : ""}`}
+                className={`step-card group relative p-8 md:p-10 rounded-[4px] bg-neutral-50/70 dark:bg-neutral-900/40 border border-neutral-200/50 dark:border-white/5 shadow-sm hover:border-accent/40 hover:shadow-xl hover:-translate-y-2 transition-all duration-500 backdrop-blur-sm min-h-[380px] flex flex-col justify-between overflow-hidden lg:col-span-2 ${i === 3 ? "lg:col-start-2" : ""}`}
               >
                 {/* Background decorative neon glow aura */}
-                <div className="absolute -bottom-10 -right-10 w-36 h-36 bg-accent/5 rounded-full blur-2xl group-hover:bg-accent/12 transition-all duration-500 pointer-events-none" />
+                <div className="step-card-aura absolute -bottom-10 -right-10 w-36 h-36 bg-accent/5 rounded-full blur-2xl group-hover:bg-accent/12 transition-all duration-500 pointer-events-none" />
                 
                 {/* Top header containing Icon */}
                 <div className="mb-8">
-                  <div className="w-14 h-14 rounded-[4px] bg-accent/10 flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white group-hover:scale-110 transition-all duration-500">
+                  <div className="step-card-icon w-14 h-14 rounded-[4px] bg-accent/10 flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white group-hover:scale-110 transition-all duration-500">
                     <StepIcon className="w-6 h-6" />
                   </div>
                 </div>
@@ -101,7 +156,7 @@ export default function HowItWorks() {
                 {/* Bottom detail card block */}
                 <div className="flex-1 flex flex-col justify-end">
                   {/* Step Title */}
-                  <h3 className="text-2xl md:text-3xl font-black text-neutral-900 dark:text-white mb-4 tracking-tight group-hover:text-accent transition-colors duration-300">
+                  <h3 className="step-card-title text-2xl md:text-3xl font-black text-neutral-900 dark:text-white mb-4 tracking-tight group-hover:text-accent transition-colors duration-300">
                     {step.title}
                   </h3>
                   

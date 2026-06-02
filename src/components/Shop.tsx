@@ -156,7 +156,7 @@ export default function Shop() {
                 <span className="text-[8px] sm:text-[9px] font-bold tracking-[0.2em] uppercase text-white/65 block mb-0.5 sm:mb-1.5">
                   {project.category}
                 </span>
-                <h3 className="text-xs sm:text-lg font-extrabold tracking-tighter text-white mb-1 sm:mb-4 leading-tight truncate">
+                <h3 className="text-[10px] sm:text-lg font-extrabold tracking-tighter text-white mb-1 sm:mb-4 leading-tight truncate">
                   {project.name}
                 </h3>
                 <div className="flex justify-between items-center mb-1 sm:mb-4">

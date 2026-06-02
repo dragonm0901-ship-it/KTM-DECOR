@@ -257,11 +257,6 @@ html.is-loading body::before {
 
 /* Prevent initial hidden state/flashing of hero content on mobile viewports */
 @media (max-width: 1023px) {
-  #hero .opacity-0,
-  #hero .hero-card,
-  #hero .hero-feature,
-  #hero .neon-glow-accent,
-  #hero .hero-subtext-mobile,
   .no-mobile-animate {
     opacity: 1 !important;
     transform: none !important;
@@ -560,4 +555,27 @@ html {
   animation: marquee-mobile var(--marquee-duration, 15s) linear infinite;
   will-change: transform;
   transform: translateZ(0);
+}
+
+/* How It Works mobile card overrides */
+@media (max-width: 1023px) {
+  #process .step-card {
+    border-color: rgba(254, 145, 76, 0.3) !important;
+    box-shadow: 0 10px 15px -3px rgba(254, 145, 76, 0.1), 0 4px 6px -2px rgba(254, 145, 76, 0.05) !important;
+    transform: none !important;
+  }
+  .dark #process .step-card {
+    border-color: rgba(254, 145, 76, 0.2) !important;
+  }
+  #process .step-card-aura {
+    background-color: rgba(254, 145, 76, 0.1) !important;
+  }
+  #process .step-card-icon {
+    background-color: var(--accent) !important;
+    color: #ffffff !important;
+    transform: none !important;
+  }
+  #process .step-card-title {
+    color: var(--accent) !important;
+  }
 }

@@ -7,6 +7,10 @@ import gsap from "gsap";
 // Survives Next.js client-side routing transitions but is reset on browser page refresh!
 let preloaderHasRun = false;
 
+if (typeof window !== "undefined" && !preloaderHasRun) {
+  (window as any).__PRELOADER_ACTIVE__ = true;
+}
+
 export default function Preloader() {
   const [isDone, setIsDone] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
@@ -26,6 +30,10 @@ export default function Preloader() {
   useEffect(() => {
     if (shouldSkip) {
       document.documentElement.classList.remove("is-loading");
+      if (typeof window !== "undefined") {
+        (window as any).__PRELOADER_ACTIVE__ = false;
+        window.dispatchEvent(new CustomEvent("preloaderComplete"));
+      }
       return;
     }
 
@@ -39,6 +47,10 @@ export default function Preloader() {
       document.documentElement.classList.remove("is-loading");
       setIsHidden(true);
       preloaderHasRun = true;
+      if (typeof window !== "undefined") {
+        (window as any).__PRELOADER_ACTIVE__ = false;
+        window.dispatchEvent(new CustomEvent("preloaderComplete"));
+      }
     }, safetyDuration);
 
     let tl: gsap.core.Timeline | null = null;
@@ -137,6 +149,10 @@ export default function Preloader() {
       }
       setIsHidden(true);
       preloaderHasRun = true;
+      if (typeof window !== "undefined") {
+        (window as any).__PRELOADER_ACTIVE__ = false;
+        window.dispatchEvent(new CustomEvent("preloaderComplete"));
+      }
     }, safetyTimeout);
 
     const tl = gsap.timeline({
@@ -233,6 +249,12 @@ export default function Preloader() {
         // Remove the solid background block body cover so the page renders behind panels
         document.documentElement.classList.remove("is-loading");
 
+        // Dispatch event to start page animations (like Hero section)
+        if (typeof window !== "undefined") {
+          (window as any).__PRELOADER_ACTIVE__ = false;
+          window.dispatchEvent(new CustomEvent("preloaderComplete"));
+        }
+
         // Swap the logo instantly: make header logo visible under the preloader logo
         headerLogo.style.transition = "none";
         headerLogo.style.opacity = "1";
@@ -257,28 +279,43 @@ export default function Preloader() {
       // Ensure we remove the is-loading class on fallback
       tl.add(() => {
         document.documentElement.classList.remove("is-loading");
+        if (typeof window !== "undefined") {
+          (window as any).__PRELOADER_ACTIVE__ = false;
+          window.dispatchEvent(new CustomEvent("preloaderComplete"));
+        }
       });
     }
 
-    // 4. Slide open the transition screen panels (starts exactly after the logo has settled)
-    tl.to(
-      lineTopRef.current,
-      {
-        yPercent: -100,
-        duration: panelDuration,
-        ease: "expo.inOut",
-      }
-    );
+    // 4. Slide open or fade transition screen panels (starts exactly after the logo has settled)
+    if (isMobileViewport) {
+      tl.to(
+        lineTopRef.current,
+        {
+          yPercent: -100,
+          duration: panelDuration,
+          ease: "expo.inOut",
+        }
+      );
 
-    tl.to(
-      lineBotRef.current,
-      {
-        yPercent: 100,
-        duration: panelDuration,
-        ease: "expo.inOut",
-      },
-      "<"
-    );
+      tl.to(
+        lineBotRef.current,
+        {
+          yPercent: 100,
+          duration: panelDuration,
+          ease: "expo.inOut",
+        },
+        "<"
+      );
+    } else {
+      tl.to(
+        [lineTopRef.current, lineBotRef.current],
+        {
+          opacity: 0,
+          duration: panelDuration,
+          ease: "power2.inOut",
+        }
+      );
+    }
 
     return () => {
       clearTimeout(safetyTimer);
