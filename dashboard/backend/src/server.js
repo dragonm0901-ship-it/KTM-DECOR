@@ -52,15 +52,27 @@ app.use(express.urlencoded({ limit: "15mb", extended: true }));
 
 // Connection to MongoDB
 const PORT = process.env.PORT || 5001;
-const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/ktm_decor_dashboard";
+const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI || "mongodb://localhost:27017/ktm_decor_dashboard";
 
 // Database Connection Caching for Serverless
 let cachedDb = null;
 const connectDB = async () => {
-  if (cachedDb) return cachedDb;
-  if (!MONGO_URI) throw new Error("MONGO_URI environment variable is not defined");
+  if (cachedDb && mongoose.connection?.readyState === 1) return cachedDb;
+  if (!MONGO_URI) throw new Error("MONGO_URI or MONGODB_URI environment variable is not defined");
   mongoose.set("strictQuery", true);
-  const conn = await mongoose.connect(MONGO_URI);
+
+  // Clean up any stale or half-open connections before reconnecting
+  if (mongoose.connection?.readyState !== 0) {
+    try {
+      await mongoose.disconnect();
+    } catch (err) {
+      console.warn("Error disconnecting stale connection:", err);
+    }
+  }
+
+  const conn = await mongoose.connect(MONGO_URI, {
+    serverSelectionTimeoutMS: 5000, // Timeout after 5 seconds instead of 30 seconds
+  });
   cachedDb = conn;
   return conn;
 };
@@ -69,14 +81,11 @@ const connectDB = async () => {
 let seeded = false;
 const runSeeds = async () => {
   if (seeded) return;
-  try {
-    await seedUsers();
-    await seedProducts();
-    seeded = true;
-    console.log("Database seeded successfully");
-  } catch (error) {
-    console.error("Database seeding failed:", error);
-  }
+  // Let errors bubble up to database middleware so it fails gracefully with a 500 status code
+  await seedUsers();
+  await seedProducts();
+  seeded = true;
+  console.log("Database seeded successfully");
 };
 
 // Middleware to ensure database connection in serverless environment
@@ -87,7 +96,10 @@ app.use(async (req, res, next) => {
     next();
   } catch (err) {
     console.error("Database middleware connection error:", err);
-    res.status(500).json({ message: "Database connection failed" });
+    res.status(500).json({ 
+      message: "Database connection failed",
+      error: err.message 
+    });
   }
 });
 
@@ -415,11 +427,63 @@ const seedProducts = async () => {
 
 // ─── AUTH ENDPOINTS ─────────────────────────────────────────
 
+// Diagnostic endpoint to check configuration status
+app.get("/api/auth/status", async (req, res) => {
+  const dbState = mongoose.connection?.readyState;
+  const states = {
+    0: "disconnected",
+    1: "connected",
+    2: "connecting",
+    3: "disconnecting"
+  };
+
+  const status = {
+    dbConnected: dbState === 1,
+    dbState: states[dbState] || "unknown",
+    envAdminPasswordDefined: !!process.env.SEED_ADMIN_PASSWORD,
+    envAdminPasswordLength: process.env.SEED_ADMIN_PASSWORD ? process.env.SEED_ADMIN_PASSWORD.length : 0,
+    envStaffPasswordDefined: !!process.env.SEED_STAFF_PASSWORD,
+    envStaffPasswordLength: process.env.SEED_STAFF_PASSWORD ? process.env.SEED_STAFF_PASSWORD.length : 0,
+    envMongoUriDefined: !!process.env.MONGO_URI,
+    envMongoUriLength: process.env.MONGO_URI ? process.env.MONGO_URI.length : 0,
+    envMongodbUriDefined: !!process.env.MONGODB_URI,
+    envMongodbUriLength: process.env.MONGODB_URI ? process.env.MONGODB_URI.length : 0,
+    envJwtSecretDefined: !!process.env.JWT_SECRET,
+    envJwtSecretLength: process.env.JWT_SECRET ? process.env.JWT_SECRET.length : 0,
+  };
+
+  if (dbState !== 1) {
+    return res.json({
+      ...status,
+      adminExists: false,
+      note: "Database is not connected; skipped query to avoid hanging"
+    });
+  }
+
+  try {
+    const adminExists = await User.findOne({ email: "admin@ktmdecor.com" });
+    const staffExists = await User.findOne({ email: "staff@ktmdecor.com" });
+    res.json({
+      ...status,
+      adminExists: !!adminExists,
+      staffExists: !!staffExists,
+    });
+  } catch (error) {
+    res.json({
+      ...status,
+      adminExists: false,
+      staffExists: false,
+      error: error.message
+    });
+  }
+});
+
 // Login endpoint
 app.post("/api/auth/login", async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await User.findOne({ email });
+    const normalizedEmail = email ? email.toLowerCase().trim() : "";
+    const user = await User.findOne({ email: normalizedEmail });
     if (user && (await user.comparePassword(password))) {
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
         expiresIn: "30d",

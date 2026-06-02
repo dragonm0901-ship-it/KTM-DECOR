@@ -33,7 +33,7 @@ export const App: React.FC = () => {
     setLoginError("");
     setLoading(true);
 
-    const success = await login(email, password);
+    const success = await login(email.trim().toLowerCase(), password);
     setLoading(false);
     if (!success) {
       setLoginError("Invalid email or password. Hint: check pre-filled test users.");
@@ -89,6 +89,9 @@ export const App: React.FC = () => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck="false"
                     className="w-full pl-10 pr-4 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm"
                     placeholder="name@ktmdecor.com"
                     required
