@@ -34,7 +34,7 @@ export default function ShopPage() {
   useEffect(() => {
     const fetchCatalog = async () => {
       try {
-        const currentApiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+        const currentApiUrl = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === "production" ? "" : "http://localhost:5001");
         const res = await fetch(`${currentApiUrl}/api/products`);
         if (res.ok) {
           const data = await res.json();
