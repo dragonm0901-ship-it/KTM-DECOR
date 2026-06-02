@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Image from "next/image";
 
 export interface MarqueeSliderCard {
@@ -14,22 +13,6 @@ interface MarqueeSliderProps {
 }
 
 export default function MarqueeSlider({ cards }: MarqueeSliderProps) {
-  const [viewportWidth, setViewportWidth] = useState(1200);
-
-  // Track viewport size dynamically
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const handleResize = () => setViewportWidth(window.innerWidth);
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  const isMobile = viewportWidth < 768;
-  const cardWidth = isMobile ? 250 : 546;
-  const cardHeight = isMobile ? 290 : 525;
-  const gap = isMobile ? 16 : 32;
-
   // Clone cards once to create a seamless looping track
   const extendedCards = [...cards, ...cards];
 
@@ -41,20 +24,20 @@ export default function MarqueeSlider({ cards }: MarqueeSliderProps) {
         
         {/* Continuous marquee track with hover pauses and interactive highlights */}
         <div
-          className="flex animate-marquee-x lg:hover:[animation-play-state:paused] lg:hover:[&>div]:opacity-45 lg:hover:[&>div]:scale-[0.96]"
+          className="flex animate-marquee-x lg:hover:[animation-play-state:paused] lg:hover:[&>div]:opacity-45 lg:hover:[&>div]:scale-[0.96] gap-4 md:gap-8"
           style={{
-            gap: `${gap}px`,
             width: "max-content",
-            animationDuration: isMobile ? "25s" : "40s",
+            animationDuration: "40s",
           }}
         >
           {extendedCards.map((card, index) => (
             <div
               key={index}
-              className="group relative shrink-0 select-none overflow-hidden rounded-[4px] border border-border bg-card shadow-lg transition-all duration-500 ease-out lg:hover:!opacity-100 lg:hover:!scale-[1.04]"
+              className="group relative shrink-0 select-none overflow-hidden rounded-[4px] border border-border bg-card shadow-lg transition-all duration-500 ease-out lg:hover:!opacity-100 lg:hover:!scale-[1.04] w-[250px] h-[290px] md:w-[546px] md:h-[525px]"
               style={{
-                width: `${cardWidth}px`,
-                height: `${cardHeight}px`,
+                transform: "translate3d(0, 0, 0)",
+                backfaceVisibility: "hidden",
+                WebkitBackfaceVisibility: "hidden",
               }}
             >
               {/* Image background with gradient overlay */}
@@ -63,9 +46,10 @@ export default function MarqueeSlider({ cards }: MarqueeSliderProps) {
                   src={card.image}
                   alt={card.title}
                   fill
-                  sizes={`${cardWidth}px`}
+                  sizes="(max-width: 768px) 250px, 546px"
                   className="object-cover transition-transform duration-700 ease-out lg:group-hover:scale-105 pointer-events-none"
                   draggable={false}
+                  priority={true}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent pointer-events-none" />
               </div>
