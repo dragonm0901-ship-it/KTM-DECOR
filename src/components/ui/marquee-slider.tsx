@@ -41,7 +41,7 @@ export default function MarqueeSlider({ cards }: MarqueeSliderProps) {
         
         {/* Continuous marquee track with hover pauses and interactive highlights */}
         <div
-          className="flex animate-marquee-x hover:[animation-play-state:paused] hover:[&>div]:opacity-45 hover:[&>div]:scale-[0.96]"
+          className="flex animate-marquee-x lg:hover:[animation-play-state:paused] lg:hover:[&>div]:opacity-45 lg:hover:[&>div]:scale-[0.96]"
           style={{
             gap: `${gap}px`,
             width: "max-content",
@@ -51,7 +51,7 @@ export default function MarqueeSlider({ cards }: MarqueeSliderProps) {
           {extendedCards.map((card, index) => (
             <div
               key={index}
-              className="group relative shrink-0 select-none overflow-hidden rounded-[4px] border border-border bg-card shadow-lg transition-all duration-500 ease-out hover:!opacity-100 hover:!scale-[1.04]"
+              className="group relative shrink-0 select-none overflow-hidden rounded-[4px] border border-border bg-card shadow-lg transition-all duration-500 ease-out lg:hover:!opacity-100 lg:hover:!scale-[1.04]"
               style={{
                 width: `${cardWidth}px`,
                 height: `${cardHeight}px`,
@@ -64,7 +64,7 @@ export default function MarqueeSlider({ cards }: MarqueeSliderProps) {
                   alt={card.title}
                   fill
                   sizes={`${cardWidth}px`}
-                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-105 pointer-events-none"
+                  className="object-cover transition-transform duration-700 ease-out lg:group-hover:scale-105 pointer-events-none"
                   draggable={false}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent pointer-events-none" />
