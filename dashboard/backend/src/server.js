@@ -88,6 +88,68 @@ const runSeeds = async () => {
   console.log("Database seeded successfully");
 };
 
+// Diagnostic endpoint to check configuration status
+app.get("/api/auth/status", async (req, res) => {
+  const dbState = mongoose.connection?.readyState;
+  const states = {
+    0: "disconnected",
+    1: "connected",
+    2: "connecting",
+    3: "disconnecting"
+  };
+
+  const envKeys = Object.keys(process.env).filter(key => 
+    key.includes("MONGO") || 
+    key.includes("URI") || 
+    key.includes("URL") || 
+    key.includes("SECRET") || 
+    key.includes("PASSWORD") || 
+    key.includes("PORT") ||
+    key.includes("VITE")
+  );
+
+  const status = {
+    dbConnected: dbState === 1,
+    dbState: states[dbState] || "unknown",
+    envKeysAvailable: envKeys,
+    envAdminPasswordDefined: !!process.env.SEED_ADMIN_PASSWORD,
+    envAdminPasswordLength: process.env.SEED_ADMIN_PASSWORD ? process.env.SEED_ADMIN_PASSWORD.length : 0,
+    envStaffPasswordDefined: !!process.env.SEED_STAFF_PASSWORD,
+    envStaffPasswordLength: process.env.SEED_STAFF_PASSWORD ? process.env.SEED_STAFF_PASSWORD.length : 0,
+    envMongoUriDefined: !!process.env.MONGO_URI,
+    envMongoUriLength: process.env.MONGO_URI ? process.env.MONGO_URI.length : 0,
+    envMongodbUriDefined: !!process.env.MONGODB_URI,
+    envMongodbUriLength: process.env.MONGODB_URI ? process.env.MONGODB_URI.length : 0,
+    envJwtSecretDefined: !!process.env.JWT_SECRET,
+    envJwtSecretLength: process.env.JWT_SECRET ? process.env.JWT_SECRET.length : 0,
+  };
+
+  if (dbState !== 1) {
+    return res.json({
+      ...status,
+      adminExists: false,
+      note: "Database is not connected; skipped query to avoid hanging"
+    });
+  }
+
+  try {
+    const adminExists = await User.findOne({ email: "admin@ktmdecor.com" });
+    const staffExists = await User.findOne({ email: "staff@ktmdecor.com" });
+    res.json({
+      ...status,
+      adminExists: !!adminExists,
+      staffExists: !!staffExists,
+    });
+  } catch (error) {
+    res.json({
+      ...status,
+      adminExists: false,
+      staffExists: false,
+      error: error.message
+    });
+  }
+});
+
 // Middleware to ensure database connection in serverless environment
 app.use(async (req, res, next) => {
   try {
@@ -427,67 +489,6 @@ const seedProducts = async () => {
 
 // ─── AUTH ENDPOINTS ─────────────────────────────────────────
 
-// Diagnostic endpoint to check configuration status
-app.get("/api/auth/status", async (req, res) => {
-  const dbState = mongoose.connection?.readyState;
-  const states = {
-    0: "disconnected",
-    1: "connected",
-    2: "connecting",
-    3: "disconnecting"
-  };
-
-  const envKeys = Object.keys(process.env).filter(key => 
-    key.includes("MONGO") || 
-    key.includes("URI") || 
-    key.includes("URL") || 
-    key.includes("SECRET") || 
-    key.includes("PASSWORD") || 
-    key.includes("PORT") ||
-    key.includes("VITE")
-  );
-
-  const status = {
-    dbConnected: dbState === 1,
-    dbState: states[dbState] || "unknown",
-    envKeysAvailable: envKeys,
-    envAdminPasswordDefined: !!process.env.SEED_ADMIN_PASSWORD,
-    envAdminPasswordLength: process.env.SEED_ADMIN_PASSWORD ? process.env.SEED_ADMIN_PASSWORD.length : 0,
-    envStaffPasswordDefined: !!process.env.SEED_STAFF_PASSWORD,
-    envStaffPasswordLength: process.env.SEED_STAFF_PASSWORD ? process.env.SEED_STAFF_PASSWORD.length : 0,
-    envMongoUriDefined: !!process.env.MONGO_URI,
-    envMongoUriLength: process.env.MONGO_URI ? process.env.MONGO_URI.length : 0,
-    envMongodbUriDefined: !!process.env.MONGODB_URI,
-    envMongodbUriLength: process.env.MONGODB_URI ? process.env.MONGODB_URI.length : 0,
-    envJwtSecretDefined: !!process.env.JWT_SECRET,
-    envJwtSecretLength: process.env.JWT_SECRET ? process.env.JWT_SECRET.length : 0,
-  };
-
-  if (dbState !== 1) {
-    return res.json({
-      ...status,
-      adminExists: false,
-      note: "Database is not connected; skipped query to avoid hanging"
-    });
-  }
-
-  try {
-    const adminExists = await User.findOne({ email: "admin@ktmdecor.com" });
-    const staffExists = await User.findOne({ email: "staff@ktmdecor.com" });
-    res.json({
-      ...status,
-      adminExists: !!adminExists,
-      staffExists: !!staffExists,
-    });
-  } catch (error) {
-    res.json({
-      ...status,
-      adminExists: false,
-      staffExists: false,
-      error: error.message
-    });
-  }
-});
 
 // Login endpoint
 app.post("/api/auth/login", async (req, res) => {
