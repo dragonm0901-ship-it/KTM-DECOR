@@ -437,9 +437,20 @@ app.get("/api/auth/status", async (req, res) => {
     3: "disconnecting"
   };
 
+  const envKeys = Object.keys(process.env).filter(key => 
+    key.includes("MONGO") || 
+    key.includes("URI") || 
+    key.includes("URL") || 
+    key.includes("SECRET") || 
+    key.includes("PASSWORD") || 
+    key.includes("PORT") ||
+    key.includes("VITE")
+  );
+
   const status = {
     dbConnected: dbState === 1,
     dbState: states[dbState] || "unknown",
+    envKeysAvailable: envKeys,
     envAdminPasswordDefined: !!process.env.SEED_ADMIN_PASSWORD,
     envAdminPasswordLength: process.env.SEED_ADMIN_PASSWORD ? process.env.SEED_ADMIN_PASSWORD.length : 0,
     envStaffPasswordDefined: !!process.env.SEED_STAFF_PASSWORD,

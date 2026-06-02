@@ -172,9 +172,36 @@ const sortTasks = (tasksList: Task[]): Task[] => {
   });
 };
 
+const getSafeLocalStorage = (key: string, fallback: string = "null") => {
+  try {
+    const val = localStorage.getItem(key);
+    if (!val || val === "undefined") return JSON.parse(fallback);
+    return JSON.parse(val);
+  } catch (e) {
+    console.error(`Failed to parse ${key} from localStorage:`, e);
+    try {
+      localStorage.removeItem(key);
+    } catch (_) {}
+    return JSON.parse(fallback);
+  }
+};
+
+const getSafeToken = () => {
+  try {
+    const token = localStorage.getItem("token");
+    if (token === "undefined") {
+      localStorage.removeItem("token");
+      return null;
+    }
+    return token;
+  } catch (e) {
+    return null;
+  }
+};
+
 export const useStore = create<DashboardState>((set, get) => ({
-  user: JSON.parse(localStorage.getItem("user") || "null"),
-  token: localStorage.getItem("token"),
+  user: getSafeLocalStorage("user"),
+  token: getSafeToken(),
   users: [],
   tasks: [],
   notifications: [],
@@ -186,8 +213,8 @@ export const useStore = create<DashboardState>((set, get) => ({
   pusher: null,
   theme: (localStorage.getItem("theme") as "light" | "dark") || "light",
   focusMode: false,
-  quickNotes: JSON.parse(localStorage.getItem("quickNotes") || "[]"),
-  activeStaffProfile: JSON.parse(localStorage.getItem("activeStaffProfile") || "null"),
+  quickNotes: getSafeLocalStorage("quickNotes", "[]"),
+  activeStaffProfile: getSafeLocalStorage("activeStaffProfile"),
 
   init: () => {
     const { token, user } = get();
