@@ -108,6 +108,12 @@ app.get("/api/auth/status", async (req, res) => {
     key.includes("VITE")
   );
 
+  const maskString = (str) => {
+    if (!str) return "none";
+    if (str.length <= 30) return str;
+    return str.substring(0, 15) + "..." + str.substring(str.length - 15);
+  };
+
   const status = {
     dbConnected: dbState === 1,
     dbState: states[dbState] || "unknown",
@@ -118,8 +124,10 @@ app.get("/api/auth/status", async (req, res) => {
     envStaffPasswordLength: process.env.SEED_STAFF_PASSWORD ? process.env.SEED_STAFF_PASSWORD.length : 0,
     envMongoUriDefined: !!process.env.MONGO_URI,
     envMongoUriLength: process.env.MONGO_URI ? process.env.MONGO_URI.length : 0,
+    envMongoUriMasked: maskString(process.env.MONGO_URI),
     envMongodbUriDefined: !!process.env.MONGODB_URI,
     envMongodbUriLength: process.env.MONGODB_URI ? process.env.MONGODB_URI.length : 0,
+    envMongodbUriMasked: maskString(process.env.MONGODB_URI),
     envJwtSecretDefined: !!process.env.JWT_SECRET,
     envJwtSecretLength: process.env.JWT_SECRET ? process.env.JWT_SECRET.length : 0,
   };
