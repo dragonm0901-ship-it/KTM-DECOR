@@ -93,7 +93,7 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
     if (editingTask) {
       // In our store, update is handled by the server. We will mock a PUT or hit backend
       const { token } = useStore.getState();
-      const currentApiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
+      const currentApiUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? "" : "http://localhost:5001");
       fetch(`${currentApiUrl}/api/tasks/${editingTask._id}`, {
         method: "PUT",
         headers: {
