@@ -61,7 +61,8 @@ import {
   VolumeLoud as SolarMegaphone,
   Login as SolarLogin,
   KeyMinimalistic as SolarKeyMinimalistic,
-  Letter as SolarLetter
+  Letter as SolarLetter,
+  Phone as SolarPhone
 } from "@solar-icons/react";
 
 export interface IconProps extends React.ComponentPropsWithoutRef<"svg"> {
@@ -152,4 +153,5 @@ export const LogIn = createIcon(SolarLogin);
 export const KeyRound = createIcon(SolarKeyMinimalistic);
 export const Mail = createIcon(SolarLetter);
 export const Activity = createIcon(SolarHistory);
+export const Phone = createIcon(SolarPhone);
 

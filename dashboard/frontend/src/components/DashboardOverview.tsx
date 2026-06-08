@@ -13,7 +13,9 @@ import {
   Trash2,
   Calendar,
   AlertCircle,
-  DollarSign
+  DollarSign,
+  Package,
+  Briefcase
 } from "./ui/solar-icons";
 
 interface OverviewProps {
@@ -38,7 +40,11 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
     addQuickNote,
     deleteQuickNote,
     users,
-    activeStaffProfile
+    activeStaffProfile,
+    orders,
+    expenses,
+    purchases,
+    inventoryItems
   } = useStore();
 
   const [noteText, setNoteText] = useState("");
@@ -51,27 +57,75 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
     .filter((t) => t.status === "done")
     .sort((a, b) => new Date(a.updatedAt || a.createdAt).getTime() - new Date(b.updatedAt || b.createdAt).getTime());
 
-  // Dynamic Sales: Sum of total cost of all completed tasks
-  const totalSales = completedTasks.reduce((acc, t) => acc + (t.totalCost || 0), 0);
+  // Approved manual orders
+  const approvedOrders = orders
+    .filter((o) => o.approved && o.stage === "delivered")
+    .sort((a, b) => new Date(a.approvedAt || a.updatedAt || a.createdAt).getTime() - new Date(b.approvedAt || b.updatedAt || b.createdAt).getTime());
+
+  const activeOrdersCount = orders.filter((o) => o.stage !== "delivered").length;
+
+  // Dynamic Sales: Sum of total cost of all completed tasks + approved orders
+  const taskSales = completedTasks.reduce((acc, t) => acc + (t.totalCost || 0), 0);
+  const orderSales = approvedOrders.reduce((acc, o) => acc + (o.totalPrice || 0), 0);
+  const totalSales = taskSales + orderSales;
+
+  // Advance and Due calculations — only count active (non-delivered) orders
+  const activeOrders = orders.filter((o) => o.stage !== "delivered");
+  const totalAdvancePaid = activeOrders.reduce((acc, o) => acc + (o.advancePayment || 0), 0);
+  const totalDuePayment = activeOrders.reduce((acc, o) => acc + (o.duePayment || 0), 0);
 
   // Statistics calculations
   const pendingTasks = tasks.filter((t) => t.status !== "done");
   const completedTasksCount = completedTasks.length;
   const pinnedTasks = tasks.filter((t) => t.pinned);
 
+  // New calculations for Overview Cards
+  const totalExpensesVal = expenses.reduce((sum, e) => sum + e.amount, 0);
+  const totalPurchasesVal = purchases.reduce((sum, p) => sum + p.amount, 0);
+  const outstandingPurchasesVal = purchases.filter((p) => p.status === "pending").reduce((sum, p) => sum + p.amount, 0);
+
+  const lowStockVal = inventoryItems.filter((i) => i.quantity <= i.alertLevel && i.quantity > 0).length;
+  const outOfStockVal = inventoryItems.filter((i) => i.quantity === 0).length;
+
+  const expenseCategorySums = {
+    salary: expenses.filter((e) => e.category === "salary").reduce((sum, e) => sum + e.amount, 0),
+    rent: expenses.filter((e) => e.category === "rent").reduce((sum, e) => sum + e.amount, 0),
+    travel: expenses.filter((e) => e.category === "travel").reduce((sum, e) => sum + e.amount, 0),
+    miscellaneous: expenses.filter((e) => e.category === "miscellaneous").reduce((sum, e) => sum + e.amount, 0),
+  };
+
   // Staff specific pending tasks
   const staffPendingTasks = pendingTasks.filter(
     (t) => t.assignee?._id === (user?.email === "staff@ktmdecor.com" ? activeStaffProfile?._id : user?._id)
   );
 
-  // Generate sales chart data points
+  // Generate sales chart data points (merging tasks and approved orders chronologically)
   const getSalesChartData = () => {
     const points: { label: string; value: number }[] = [{ label: "Start", value: 0 }];
-    let cumulative = 0;
+    
+    const revenueItems: { date: Date; value: number }[] = [];
     
     completedTasks.forEach((t) => {
-      cumulative += t.totalCost || 0;
-      const dateStr = new Date(t.updatedAt || t.createdAt).toLocaleDateString([], {
+      revenueItems.push({
+        date: new Date(t.updatedAt || t.createdAt),
+        value: t.totalCost || 0
+      });
+    });
+    
+    approvedOrders.forEach((o) => {
+      revenueItems.push({
+        date: new Date(o.approvedAt || o.updatedAt || o.createdAt),
+        value: o.totalPrice || 0
+      });
+    });
+
+    // Sort chronologically
+    revenueItems.sort((a, b) => a.date.getTime() - b.date.getTime());
+
+    let cumulative = 0;
+    revenueItems.forEach((item) => {
+      cumulative += item.value;
+      const dateStr = item.date.toLocaleDateString([], {
         month: "short",
         day: "numeric"
       });
@@ -261,48 +315,78 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
 
       {/* METRIC CARD STATS FOR ADMIN OR STAFF */}
       {user?.role === "admin" ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="glass-panel p-5 rounded-lg flex items-center justify-between">
-            <div>
-              <span className="text-xs text-muted font-semibold uppercase tracking-wider">Total Sales</span>
-              <h3 className="text-2xl font-bold font-display mt-2 text-green-500">Rs. {totalSales.toLocaleString()}</h3>
-              <p className="text-[10px] text-muted mt-1">Project valuation metrics</p>
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="glass-panel p-5 rounded-lg flex items-center justify-between">
+              <div>
+                <span className="text-xs text-muted font-semibold uppercase tracking-wider">Total Sales</span>
+                <h3 className="text-2xl font-bold font-display mt-2 text-green-500 font-sans">Rs. {totalSales.toLocaleString()}</h3>
+                <p className="text-[9px] text-muted mt-1 space-x-1">
+                  <span>Tasks: Rs. {taskSales.toLocaleString()}</span>
+                  <span>|</span>
+                  <span>Orders: Rs. {orderSales.toLocaleString()}</span>
+                </p>
+              </div>
+              <div className="p-2.5 bg-green-600 text-white rounded-md shadow-sm">
+                <DollarSign size={22} />
+              </div>
             </div>
-            <div className="p-2.5 border border-border bg-card text-green-500 rounded-md shadow-sm">
-              <DollarSign size={22} />
+
+            <div className="glass-panel p-5 rounded-lg flex items-center justify-between">
+              <div>
+                <span className="text-xs text-muted font-semibold uppercase tracking-wider">Active Orders</span>
+                <h3 className="text-2xl font-bold font-display mt-2 text-accent font-sans">{activeOrdersCount}</h3>
+                <p className="text-[10px] text-muted mt-1">In progress tracking board</p>
+              </div>
+              <div className="p-2.5 bg-accent text-white rounded-md shadow-sm">
+                <Package size={22} />
+              </div>
+            </div>
+
+            <div className="glass-panel p-5 rounded-lg flex items-center justify-between">
+              <div>
+                <span className="text-xs text-muted font-semibold uppercase tracking-wider">Pending Tasks</span>
+                <h3 className="text-2xl font-bold font-display mt-2 text-amber-500 font-sans">{pendingTasks.length}</h3>
+                <p className="text-[10px] text-muted mt-1">Awaiting implementation</p>
+              </div>
+              <div className="p-2.5 bg-amber-600 text-white rounded-md shadow-sm">
+                <Clock size={22} />
+              </div>
+            </div>
+
+            <div className="glass-panel p-5 rounded-lg flex items-center justify-between">
+              <div>
+                <span className="text-xs text-muted font-semibold uppercase tracking-wider">Completed Work</span>
+                <h3 className="text-2xl font-bold font-display mt-2 text-blue-500 font-sans">{completedTasksCount + approvedOrders.length}</h3>
+                <p className="text-[10px] text-muted mt-1">Tasks: {completedTasksCount} | Orders: {approvedOrders.length}</p>
+              </div>
+              <div className="p-2.5 bg-blue-600 text-white rounded-md shadow-sm">
+                <CheckCircle size={22} />
+              </div>
             </div>
           </div>
 
-          <div className="glass-panel p-5 rounded-lg flex items-center justify-between">
-            <div>
-              <span className="text-xs text-muted font-semibold uppercase tracking-wider">Marketing Notes</span>
-              <h3 className="text-2xl font-bold font-display mt-2 text-accent">{campaigns.length}</h3>
-              <p className="text-[10px] text-muted mt-1">Collaborative team updates</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="glass-panel p-4 rounded-lg flex items-center justify-between bg-emerald-500/[0.01] border-emerald-500/10">
+              <div>
+                <span className="text-[10px] text-muted font-bold uppercase tracking-wider">Total Advance Received</span>
+                <h3 className="text-xl font-bold font-display mt-1 text-emerald-600 dark:text-emerald-400">Rs. {totalAdvancePaid.toLocaleString()}</h3>
+                <p className="text-[9px] text-muted">Upfront client payments collected</p>
+              </div>
+              <div className="p-2 bg-emerald-600 text-white rounded shadow-sm">
+                <CheckCircle size={18} />
+              </div>
             </div>
-            <div className="p-2.5 border border-border bg-card text-accent rounded-md shadow-sm">
-              <FileText size={22} />
-            </div>
-          </div>
 
-          <div className="glass-panel p-5 rounded-lg flex items-center justify-between">
-            <div>
-              <span className="text-xs text-muted font-semibold uppercase tracking-wider">Pending Tasks</span>
-              <h3 className="text-2xl font-bold font-display mt-2 text-amber-500">{pendingTasks.length}</h3>
-              <p className="text-[10px] text-muted mt-1">Awaiting implementation</p>
-            </div>
-            <div className="p-2.5 border border-border bg-card text-amber-500 rounded-md shadow-sm">
-              <Clock size={22} />
-            </div>
-          </div>
-
-          <div className="glass-panel p-5 rounded-lg flex items-center justify-between">
-            <div>
-              <span className="text-xs text-muted font-semibold uppercase tracking-wider">Done Tasks</span>
-              <h3 className="text-2xl font-bold font-display mt-2 text-blue-500">{completedTasksCount}</h3>
-              <p className="text-[10px] text-muted mt-1">Completed checklist logs</p>
-            </div>
-            <div className="p-2.5 border border-border bg-card text-blue-500 rounded-md shadow-sm">
-              <CheckCircle size={22} />
+            <div className="glass-panel p-4 rounded-lg flex items-center justify-between bg-red-500/[0.01] border-red-500/10">
+              <div>
+                <span className="text-[10px] text-muted font-bold uppercase tracking-wider">Total Outstanding Due</span>
+                <h3 className="text-xl font-bold font-display mt-1 text-red-500">Rs. {totalDuePayment.toLocaleString()}</h3>
+                <p className="text-[9px] text-muted">Receivables remaining from active/completed orders</p>
+              </div>
+              <div className="p-2 bg-red-600 text-white rounded shadow-sm">
+                <Clock size={18} />
+              </div>
             </div>
           </div>
         </div>
@@ -346,6 +430,143 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
             <div className="p-2.5 border border-border bg-card text-blue-500 rounded-md shadow-sm">
               <FileText size={22} />
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* FINANCIAL & INVENTORY OVERVIEW CARD SECTION */}
+      {user?.role === "admin" && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Expenses Overview Card */}
+          <div className="glass-panel p-5 rounded-lg border border-border flex flex-col justify-between h-[230px]">
+            <div>
+              <div className="flex items-center justify-between border-b border-border pb-2.5 mb-3">
+                <h3 className="font-bold text-sm font-display flex items-center gap-2">
+                  <DollarSign size={16} className="text-red-500" />
+                  Expenses Summary
+                </h3>
+                <span className="text-[10px] font-bold bg-red-600 text-white px-2 py-0.5 rounded shadow-sm">
+                  Log
+                </span>
+              </div>
+              <div className="mb-3">
+                <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Total Expenses</span>
+                <h4 className="text-xl font-extrabold text-foreground mt-0.5">Rs. {totalExpensesVal.toLocaleString()}</h4>
+              </div>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[10px] text-muted font-semibold">
+                <div className="flex justify-between">
+                  <span>Salary:</span>
+                  <span className="font-extrabold text-foreground">Rs. {expenseCategorySums.salary.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Rent:</span>
+                  <span className="font-extrabold text-foreground">Rs. {expenseCategorySums.rent.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Travel:</span>
+                  <span className="font-extrabold text-foreground">Rs. {expenseCategorySums.travel.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Misc:</span>
+                  <span className="font-extrabold text-foreground">Rs. {expenseCategorySums.miscellaneous.toLocaleString()}</span>
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={() => setCurrentTab("expenses")}
+              className="text-left text-[10px] font-bold text-accent hover:text-accent-dark transition-colors mt-3"
+            >
+              View Expense Log &rarr;
+            </button>
+          </div>
+
+          {/* Purchases Tracker Card */}
+          <div className="glass-panel p-5 rounded-lg border border-border flex flex-col justify-between h-[230px]">
+            <div>
+              <div className="flex items-center justify-between border-b border-border pb-2.5 mb-3">
+                <h3 className="font-bold text-sm font-display flex items-center gap-2">
+                  <Briefcase size={16} className="text-blue-500" />
+                  Purchases Tracker
+                </h3>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded shadow-sm ${
+                  outstandingPurchasesVal > 0 ? "bg-amber-600 text-white" : "bg-green-600 text-white"
+                }`}>
+                  {outstandingPurchasesVal > 0 ? "Pending Dues" : "Settled"}
+                </span>
+              </div>
+              <div className="mb-2">
+                <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Total Purchases</span>
+                <h4 className="text-xl font-extrabold text-foreground mt-0.5">Rs. {totalPurchasesVal.toLocaleString()}</h4>
+                {outstandingPurchasesVal > 0 && (
+                  <p className="text-[9px] text-red-500 font-bold mt-0.5">Rs. {outstandingPurchasesVal.toLocaleString()} outstanding dues</p>
+                )}
+              </div>
+              <div className="space-y-1">
+                <span className="text-[9px] text-muted uppercase font-bold tracking-wider block">Recent Invoices</span>
+                {purchases.slice(0, 2).map((p) => (
+                  <div key={p._id} className="flex justify-between items-center text-[10px] border-b border-border/40 pb-1">
+                    <span className="truncate max-w-[120px] font-semibold text-foreground">{p.supplier}</span>
+                    <span className="text-muted">Rs. {p.amount.toLocaleString()}</span>
+                  </div>
+                ))}
+                {purchases.length === 0 && (
+                  <span className="text-[10px] text-muted italic">No purchases logged</span>
+                )}
+              </div>
+            </div>
+            <button
+              onClick={() => setCurrentTab("purchase")}
+              className="text-left text-[10px] font-bold text-accent hover:text-accent-dark transition-colors mt-3"
+            >
+              View Purchases Tracker &rarr;
+            </button>
+          </div>
+
+          {/* Material Inventory Card */}
+          <div className="glass-panel p-5 rounded-lg border border-border flex flex-col justify-between h-[230px]">
+            <div>
+              <div className="flex items-center justify-between border-b border-border pb-2.5 mb-3">
+                <h3 className="font-bold text-sm font-display flex items-center gap-2">
+                  <Package size={16} className="text-emerald-500" />
+                  Material Inventory
+                </h3>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded shadow-sm ${
+                  (lowStockVal + outOfStockVal) > 0 ? "bg-red-600 text-white" : "bg-green-600 text-white"
+                }`}>
+                  {(lowStockVal + outOfStockVal) > 0 ? "Alerts" : "Ok"}
+                </span>
+              </div>
+              <div className="mb-2 flex justify-between items-center">
+                <div>
+                  <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Low Stock / Out</span>
+                  <h4 className="text-xl font-extrabold text-foreground mt-0.5">{(lowStockVal + outOfStockVal)} Items</h4>
+                </div>
+                <div className="text-right text-[9px] text-muted font-bold space-y-0.5">
+                  <div className="text-amber-500">{lowStockVal} Low Stock</div>
+                  <div className="text-red-500">{outOfStockVal} Out of Stock</div>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <span className="text-[9px] text-muted uppercase font-bold tracking-wider block">Critical Materials</span>
+                {inventoryItems.filter((i) => i.quantity <= i.alertLevel).slice(0, 2).map((i) => (
+                  <div key={i._id} className="flex justify-between items-center text-[10px] border-b border-border/40 pb-1">
+                    <span className="truncate max-w-[120px] font-semibold text-foreground">{i.name}</span>
+                    <span className={`font-bold ${i.quantity === 0 ? "text-red-500" : "text-amber-500"}`}>
+                      {i.quantity} {i.unit}
+                    </span>
+                  </div>
+                ))}
+                {inventoryItems.filter((i) => i.quantity <= i.alertLevel).length === 0 && (
+                  <span className="text-[10px] text-green-500 font-bold italic">All materials fully stocked</span>
+                )}
+              </div>
+            </div>
+            <button
+              onClick={() => setCurrentTab("inventory")}
+              className="text-left text-[10px] font-bold text-accent hover:text-accent-dark transition-colors mt-3"
+            >
+              View Material Inventory &rarr;
+            </button>
           </div>
         </div>
       )}

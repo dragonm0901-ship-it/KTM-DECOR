@@ -12,6 +12,12 @@ import Notification from "./models/Notification.js";
 import MarketingCampaign from "./models/MarketingCampaign.js";
 import ActivityLog from "./models/ActivityLog.js";
 import Product from "./models/Product.js";
+import Order from "./models/Order.js";
+import Sale from "./models/Sale.js";
+import Expense from "./models/Expense.js";
+import Purchase from "./models/Purchase.js";
+import InventoryItem from "./models/InventoryItem.js";
+import Quotation from "./models/Quotation.js";
 
 // Middleware
 import { protect, admin } from "./middleware/auth.js";
@@ -77,6 +83,73 @@ const connectDB = async () => {
   return conn;
 };
 
+// Sync manual registry order to Sales ledger
+async function syncOrderSale(order, userId) {
+  try {
+    if (order.approved) {
+      // Check if sale already exists
+      const existingSale = await Sale.findOne({ orderId: order._id });
+      if (!existingSale) {
+        const sale = new Sale({
+          clientName: order.customerName,
+          productName: order.productName,
+          amount: order.totalPrice,
+          date: order.approvedAt || new Date(),
+          paymentMethod: order.paymentMethod || "cash",
+          notes: order.manufacturingNotes || `Automatic sale from approved order: ${order.productName}`,
+          createdBy: userId || order.createdBy,
+          orderId: order._id
+        });
+        await sale.save();
+        
+        const populatedSale = await Sale.findById(sale._id).populate("createdBy", "name role");
+        triggerPusher("sale_created", populatedSale);
+        await logActivity(userId || order.createdBy, "Sale Logged", `Logged sale from approved order for "${order.productName}" (Rs. ${order.totalPrice.toLocaleString()})`);
+      }
+    } else {
+      // If not approved, remove any corresponding sale
+      const existingSale = await Sale.findOne({ orderId: order._id });
+      if (existingSale) {
+        await Sale.findByIdAndDelete(existingSale._id);
+        triggerPusher("sale_deleted", existingSale._id.toString());
+        await logActivity(userId || order.createdBy, "Sale Deleted", `Deleted sale log for "${order.productName}" due to order revert`);
+      }
+    }
+  } catch (err) {
+    console.error("Error syncing order to sale:", err);
+  }
+}
+
+// Sync existing approved orders with sales collection on startup
+async function syncExistingApprovedOrders() {
+  try {
+    const approvedOrders = await Order.find({ approved: true, deleted: { $ne: true } });
+    let createdCount = 0;
+    for (const order of approvedOrders) {
+      const existingSale = await Sale.findOne({ orderId: order._id });
+      if (!existingSale) {
+        const sale = new Sale({
+          clientName: order.customerName,
+          productName: order.productName,
+          amount: order.totalPrice,
+          date: order.approvedAt || order.updatedAt || new Date(),
+          paymentMethod: order.paymentMethod || "cash",
+          notes: order.manufacturingNotes || `Automatic sale from approved order: ${order.productName}`,
+          createdBy: order.createdBy,
+          orderId: order._id
+        });
+        await sale.save();
+        createdCount++;
+      }
+    }
+    if (createdCount > 0) {
+      console.log(`Synced database: created ${createdCount} missing Sales records for approved orders.`);
+    }
+  } catch (err) {
+    console.error("Error syncing existing approved orders with sales:", err);
+  }
+}
+
 // Seeding Caching
 let seeded = false;
 const runSeeds = async () => {
@@ -84,6 +157,7 @@ const runSeeds = async () => {
   // Let errors bubble up to database middleware so it fails gracefully with a 500 status code
   await seedUsers();
   await seedProducts();
+  await syncExistingApprovedOrders();
   seeded = true;
   console.log("Database seeded successfully");
 };
@@ -946,9 +1020,14 @@ app.get("/api/bin", protect, admin, async (req, res) => {
     const deletedCampaigns = await MarketingCampaign.find({ deleted: true })
       .populate("createdBy", "name role");
 
+    const deletedOrders = await Order.find({ deleted: true })
+      .populate("assignee", "name email role")
+      .populate("createdBy", "name role");
+
     res.json({
       tasks: deletedTasks,
-      campaigns: deletedCampaigns
+      campaigns: deletedCampaigns,
+      orders: deletedOrders
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -988,6 +1067,21 @@ app.put("/api/bin/:type/:id/restore", protect, admin, async (req, res) => {
       triggerPusher("bin_updated", {});
       await logActivity(req.user._id, "Campaign Restored", `Restored marketing entry "${campaign.title}"`);
       return res.json(populatedCampaign);
+    } else if (type === "order") {
+      const order = await Order.findById(id);
+      if (!order) return res.status(404).json({ message: "Order not found" });
+      order.deleted = false;
+      order.deletedAt = undefined;
+      await order.save();
+
+      const populatedOrder = await Order.findById(order._id)
+        .populate("createdBy", "name role")
+        .populate("assignee", "name email role");
+
+      triggerPusher("order_created", populatedOrder);
+      triggerPusher("bin_updated", {});
+      await logActivity(req.user._id, "Order Restored", `Restored order for "${order.productName}"`);
+      return res.json(populatedOrder);
     }
     res.status(400).json({ message: "Invalid record type" });
   } catch (error) {
@@ -1013,6 +1107,13 @@ app.delete("/api/bin/:type/:id/force", protect, admin, async (req, res) => {
       triggerPusher("bin_updated", {});
       await logActivity(req.user._id, "Campaign Perm Deleted", `Permanently deleted marketing entry "${campaign.title}"`);
       return res.json({ message: "Marketing entry permanently deleted" });
+    } else if (type === "order") {
+      const order = await Order.findById(id);
+      if (!order) return res.status(404).json({ message: "Order not found" });
+      await order.deleteOne();
+      triggerPusher("bin_updated", {});
+      await logActivity(req.user._id, "Order Perm Deleted", `Permanently deleted order for "${order.productName}"`);
+      return res.json({ message: "Order permanently deleted" });
     }
     res.status(400).json({ message: "Invalid record type" });
   } catch (error) {
@@ -1143,6 +1244,555 @@ app.delete("/api/products/:id", protect, admin, async (req, res) => {
     triggerPusher("product_deleted", req.params.id);
     await logActivity(req.user._id, "Product Deleted", `Deleted catalog product "${product.name}"`);
     res.json({ message: "Product deleted from catalog" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// ─── ORDERS ENDPOINTS ──────────────────────────────────────────
+
+// Get all orders (non-deleted, sorted by creation date descending)
+app.get("/api/orders", protect, async (req, res) => {
+  try {
+    const orders = await Order.find({ deleted: { $ne: true } })
+      .populate("createdBy", "name role")
+      .populate("assignee", "name email role")
+      .sort({ createdAt: -1 });
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Create manual order (Admin only)
+app.post("/api/orders", protect, admin, async (req, res) => {
+  const {
+    productName,
+    size,
+    price,
+    deliveryPrice,
+    installationPrice,
+    advancePayment,
+    color,
+    productImageUrl,
+    locationImageUrl,
+    customerName,
+    customerContact,
+    customerEmail,
+    customerAddress,
+    orderFrom,
+    paymentMethod,
+    manufacturingNotes,
+    deliveryDate,
+    assignee,
+  } = req.body;
+
+  try {
+    const order = await Order.create({
+      productName,
+      size,
+      price: Number(price) || 0,
+      deliveryPrice: Number(deliveryPrice) || 0,
+      installationPrice: Number(installationPrice) || 0,
+      advancePayment: Number(advancePayment) || 0,
+      color,
+      productImageUrl: productImageUrl || "",
+      locationImageUrl: locationImageUrl || "",
+      customerName,
+      customerContact,
+      customerEmail: customerEmail || "",
+      customerAddress,
+      orderFrom,
+      paymentMethod,
+      manufacturingNotes: manufacturingNotes || "",
+      deliveryDate: deliveryDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      assignee: assignee || null,
+      createdBy: req.user._id,
+    });
+
+    const populatedOrder = await Order.findById(order._id)
+      .populate("createdBy", "name role")
+      .populate("assignee", "name email role");
+
+    triggerPusher("order_created", populatedOrder);
+    await logActivity(req.user._id, "Order Created", `Posted manual order for "${productName}" (Rs. ${populatedOrder.totalPrice.toLocaleString()})`);
+
+    res.status(201).json(populatedOrder);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Update order details (Admin only)
+app.put("/api/orders/:id", protect, admin, async (req, res) => {
+  const {
+    productName,
+    size,
+    price,
+    deliveryPrice,
+    installationPrice,
+    advancePayment,
+    color,
+    productImageUrl,
+    locationImageUrl,
+    customerName,
+    customerContact,
+    customerEmail,
+    customerAddress,
+    orderFrom,
+    paymentMethod,
+    manufacturingNotes,
+    deliveryDate,
+    assignee,
+  } = req.body;
+
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    order.productName = productName || order.productName;
+    order.size = size || order.size;
+    if (price !== undefined) order.price = Number(price) || 0;
+    if (deliveryPrice !== undefined) order.deliveryPrice = Number(deliveryPrice) || 0;
+    if (installationPrice !== undefined) order.installationPrice = Number(installationPrice) || 0;
+    if (advancePayment !== undefined) order.advancePayment = Number(advancePayment) || 0;
+    order.color = color || order.color;
+    if (productImageUrl !== undefined) order.productImageUrl = productImageUrl;
+    if (locationImageUrl !== undefined) order.locationImageUrl = locationImageUrl;
+    order.customerName = customerName || order.customerName;
+    order.customerContact = customerContact || order.customerContact;
+    order.customerEmail = customerEmail !== undefined ? customerEmail : order.customerEmail;
+    order.customerAddress = customerAddress || order.customerAddress;
+    order.deliveryDate = deliveryDate || order.deliveryDate;
+    if (assignee !== undefined) order.assignee = assignee || null;
+    order.orderFrom = orderFrom || order.orderFrom;
+    order.paymentMethod = paymentMethod || order.paymentMethod;
+    if (manufacturingNotes !== undefined) order.manufacturingNotes = manufacturingNotes;
+
+    await order.save();
+
+    const populatedOrder = await Order.findById(order._id)
+      .populate("createdBy", "name role")
+      .populate("assignee", "name email role");
+
+    triggerPusher("order_updated", populatedOrder);
+    await logActivity(req.user._id, "Order Updated", `Modified details of order for "${order.productName}"`);
+
+    res.json(populatedOrder);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Update order stage/progress (Admin & Staff)
+app.put("/api/orders/:id/progress", protect, async (req, res) => {
+  const { stage, assignee } = req.body;
+
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    const previousStage = order.stage;
+    if (stage) order.stage = stage;
+    if (assignee !== undefined) order.assignee = assignee || null;
+
+    // If explicitly moves it to delivered, approve it
+    if (stage === "delivered") {
+      order.approved = true;
+      order.approvedAt = new Date();
+    } else if (stage && stage !== "delivered") {
+      // If moving back, unapprove
+      order.approved = false;
+      order.approvedAt = undefined;
+    }
+
+    await order.save();
+    await syncOrderSale(order, req.user._id);
+
+    const populatedOrder = await Order.findById(order._id)
+      .populate("createdBy", "name role")
+      .populate("assignee", "name email role");
+
+    triggerPusher("order_updated", populatedOrder);
+    
+    let logMsg = `Updated order "${order.productName}"`;
+    if (stage && previousStage !== stage) {
+      logMsg = `Moved "${order.productName}" from ${previousStage.toUpperCase()} to ${stage.toUpperCase()}`;
+    }
+    await logActivity(
+      req.user._id,
+      "Order Progress Updated",
+      logMsg
+    );
+
+    res.json(populatedOrder);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Approve order (Admin only)
+app.put("/api/orders/:id/approve", protect, admin, async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    order.stage = "delivered";
+    order.approved = true;
+    order.approvedAt = new Date();
+
+    await order.save();
+    await syncOrderSale(order, req.user._id);
+
+    const populatedOrder = await Order.findById(order._id)
+      .populate("createdBy", "name role")
+      .populate("assignee", "name email role");
+
+    triggerPusher("order_updated", populatedOrder);
+    await logActivity(req.user._id, "Order Approved", `Approved order for "${order.productName}". Revenue Rs. ${populatedOrder.totalPrice.toLocaleString()} added to Sales.`);
+
+    res.json(populatedOrder);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Delete order (Admin only, soft-delete)
+app.delete("/api/orders/:id", protect, admin, async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    order.deleted = true;
+    order.deletedAt = new Date();
+    order.approved = false; // remove sale association
+    await order.save();
+    await syncOrderSale(order, req.user._id);
+
+    triggerPusher("order_deleted", req.params.id);
+    triggerPusher("bin_updated", {});
+    await logActivity(req.user._id, "Order Deleted", `Deleted order for "${order.productName}"`);
+
+    res.json({ message: "Order soft-deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// ==========================================
+// SALES ROUTES
+// ==========================================
+app.get("/api/sales", protect, admin, async (req, res) => {
+  try {
+    const sales = await Sale.find({}).populate("createdBy", "name role").populate("orderId").sort({ date: -1 });
+    res.json(sales);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.post("/api/sales", protect, admin, async (req, res) => {
+  const { clientName, productName, amount, date, paymentMethod, notes } = req.body;
+  try {
+    const sale = new Sale({
+      clientName,
+      productName,
+      amount: Number(amount) || 0,
+      date: date || new Date(),
+      paymentMethod,
+      notes,
+      createdBy: req.user._id,
+    });
+    await sale.save();
+
+    const populatedSale = await Sale.findById(sale._id).populate("createdBy", "name role").populate("orderId");
+    triggerPusher("sale_created", populatedSale);
+    await logActivity(req.user._id, "Sale Logged", `Logged direct sale to "${clientName}" for "${productName}" (Rs. ${Number(amount).toLocaleString()})`);
+
+    res.status(201).json(populatedSale);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.delete("/api/sales/:id", protect, admin, async (req, res) => {
+  try {
+    const sale = await Sale.findById(req.params.id);
+    if (!sale) return res.status(404).json({ message: "Sale not found" });
+    await Sale.findByIdAndDelete(req.params.id);
+    triggerPusher("sale_deleted", req.params.id);
+    await logActivity(req.user._id, "Sale Deleted", `Deleted sale log for "${sale.productName}"`);
+    res.json({ message: "Sale deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// ==========================================
+// EXPENSES ROUTES
+// ==========================================
+app.get("/api/expenses", protect, admin, async (req, res) => {
+  try {
+    const expenses = await Expense.find({}).populate("createdBy", "name role").sort({ date: -1 });
+    res.json(expenses);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.post("/api/expenses", protect, admin, async (req, res) => {
+  const { title, category, amount, date, description } = req.body;
+  try {
+    const expense = new Expense({
+      title,
+      category,
+      amount: Number(amount) || 0,
+      date: date || new Date(),
+      description,
+      createdBy: req.user._id,
+    });
+    await expense.save();
+
+    const populatedExpense = await Expense.findById(expense._id).populate("createdBy", "name role");
+    triggerPusher("expense_created", populatedExpense);
+    await logActivity(req.user._id, "Expense Logged", `Logged expense "${title}" (Rs. ${Number(amount).toLocaleString()})`);
+
+    res.status(201).json(populatedExpense);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.delete("/api/expenses/:id", protect, admin, async (req, res) => {
+  try {
+    const expense = await Expense.findById(req.params.id);
+    if (!expense) return res.status(404).json({ message: "Expense not found" });
+    await Expense.findByIdAndDelete(req.params.id);
+    triggerPusher("expense_deleted", req.params.id);
+    await logActivity(req.user._id, "Expense Deleted", `Deleted expense log for "${expense.title}"`);
+    res.json({ message: "Expense deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// ==========================================
+// PURCHASE ROUTES
+// ==========================================
+app.get("/api/purchases", protect, admin, async (req, res) => {
+  try {
+    const purchases = await Purchase.find({}).populate("createdBy", "name role").sort({ date: -1 });
+    res.json(purchases);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.post("/api/purchases", protect, admin, async (req, res) => {
+  const { supplier, itemDetails, amount, date, status, items } = req.body;
+  try {
+    const purchase = new Purchase({
+      supplier,
+      itemDetails,
+      amount: Number(amount) || 0,
+      date: date || new Date(),
+      status: status || "pending",
+      items: items || [],
+      createdBy: req.user._id,
+    });
+    await purchase.save();
+
+    const populatedPurchase = await Purchase.findById(purchase._id).populate("createdBy", "name role");
+    triggerPusher("purchase_created", populatedPurchase);
+    await logActivity(req.user._id, "Purchase Logged", `Logged purchase from "${supplier}" (Rs. ${Number(amount).toLocaleString()})`);
+
+    res.status(201).json(populatedPurchase);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.put("/api/purchases/:id", protect, admin, async (req, res) => {
+  const { status } = req.body;
+  try {
+    const purchase = await Purchase.findById(req.params.id);
+    if (!purchase) return res.status(404).json({ message: "Purchase not found" });
+    purchase.status = status || purchase.status;
+    await purchase.save();
+
+    const populatedPurchase = await Purchase.findById(purchase._id).populate("createdBy", "name role");
+    triggerPusher("purchase_updated", populatedPurchase);
+    await logActivity(req.user._id, "Purchase Updated", `Updated purchase status from "${purchase.supplier}" to ${status.toUpperCase()}`);
+
+    res.json(populatedPurchase);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.delete("/api/purchases/:id", protect, admin, async (req, res) => {
+  try {
+    const purchase = await Purchase.findById(req.params.id);
+    if (!purchase) return res.status(404).json({ message: "Purchase not found" });
+    await Purchase.findByIdAndDelete(req.params.id);
+    triggerPusher("purchase_deleted", req.params.id);
+    await logActivity(req.user._id, "Purchase Deleted", `Deleted purchase from "${purchase.supplier}"`);
+    res.json({ message: "Purchase deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// ==========================================
+// INVENTORY ROUTES
+// ==========================================
+app.get("/api/inventory", protect, async (req, res) => {
+  try {
+    const items = await InventoryItem.find({}).populate("createdBy", "name role").sort({ name: 1 });
+    res.json(items);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.post("/api/inventory", protect, admin, async (req, res) => {
+  const { name, category, quantity, unit, alertLevel } = req.body;
+  try {
+    const item = new InventoryItem({
+      name,
+      category,
+      quantity: Number(quantity) || 0,
+      unit,
+      alertLevel: Number(alertLevel) || 5,
+      createdBy: req.user._id,
+    });
+    await item.save();
+
+    const populatedItem = await InventoryItem.findById(item._id).populate("createdBy", "name role");
+    triggerPusher("inventory_created", populatedItem);
+    await logActivity(req.user._id, "Inventory Item Added", `Added inventory item "${name}" (${quantity} ${unit})`);
+
+    res.status(201).json(populatedItem);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.put("/api/inventory/:id", protect, admin, async (req, res) => {
+  const { name, category, quantity, unit, alertLevel } = req.body;
+  try {
+    const item = await InventoryItem.findById(req.params.id);
+    if (!item) return res.status(404).json({ message: "Inventory item not found" });
+
+    if (name !== undefined) item.name = name;
+    if (category !== undefined) item.category = category;
+    if (quantity !== undefined) item.quantity = Number(quantity);
+    if (unit !== undefined) item.unit = unit;
+    if (alertLevel !== undefined) item.alertLevel = Number(alertLevel);
+
+    await item.save();
+
+    const populatedItem = await InventoryItem.findById(item._id).populate("createdBy", "name role");
+    triggerPusher("inventory_updated", populatedItem);
+
+    res.json(populatedItem);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.delete("/api/inventory/:id", protect, admin, async (req, res) => {
+  try {
+    const item = await InventoryItem.findById(req.params.id);
+    if (!item) return res.status(404).json({ message: "Inventory item not found" });
+    await InventoryItem.findByIdAndDelete(req.params.id);
+    triggerPusher("inventory_deleted", req.params.id);
+    await logActivity(req.user._id, "Inventory Item Deleted", `Deleted inventory item "${item.name}"`);
+    res.json({ message: "Inventory item deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// ==========================================
+// QUOTATION ROUTES
+// ==========================================
+app.get("/api/quotations", protect, admin, async (req, res) => {
+  try {
+    const quotations = await Quotation.find({}).populate("createdBy", "name role").sort({ date: -1 });
+    res.json(quotations);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.post("/api/quotations", protect, admin, async (req, res) => {
+  const { clientName, clientEmail, clientContact, projectName, items, discount, tax, grandTotal, status, date, voucherNo, voucherDate, amountInWords, remarks } = req.body;
+  try {
+    const quotation = new Quotation({
+      clientName,
+      clientEmail,
+      clientContact,
+      projectName,
+      items,
+      discount: Number(discount) || 0,
+      tax: Number(tax) || 0,
+      grandTotal: Number(grandTotal) || 0,
+      status: status || "draft",
+      date: date || new Date(),
+      voucherNo,
+      voucherDate,
+      amountInWords,
+      remarks,
+      createdBy: req.user._id,
+    });
+    await quotation.save();
+
+    const populatedQuotation = await Quotation.findById(quotation._id).populate("createdBy", "name role");
+    triggerPusher("quotation_created", populatedQuotation);
+    await logActivity(req.user._id, "Quotation Created", `Generated quotation for "${clientName}" on project "${projectName}" (Total: Rs. ${Number(grandTotal).toLocaleString()})`);
+
+    res.status(201).json(populatedQuotation);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.put("/api/quotations/:id", protect, admin, async (req, res) => {
+  const { status } = req.body;
+  try {
+    const quotation = await Quotation.findById(req.params.id);
+    if (!quotation) return res.status(404).json({ message: "Quotation not found" });
+
+    quotation.status = status || quotation.status;
+    await quotation.save();
+
+    const populatedQuotation = await Quotation.findById(quotation._id).populate("createdBy", "name role");
+    triggerPusher("quotation_updated", populatedQuotation);
+    await logActivity(req.user._id, "Quotation Updated", `Updated quotation status for "${quotation.clientName}" to ${status.toUpperCase()}`);
+
+    res.json(populatedQuotation);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.delete("/api/quotations/:id", protect, admin, async (req, res) => {
+  try {
+    const quotation = await Quotation.findById(req.params.id);
+    if (!quotation) return res.status(404).json({ message: "Quotation not found" });
+    await Quotation.findByIdAndDelete(req.params.id);
+    triggerPusher("quotation_deleted", req.params.id);
+    await logActivity(req.user._id, "Quotation Deleted", `Deleted quotation for "${quotation.clientName}"`);
+    res.json({ message: "Quotation deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

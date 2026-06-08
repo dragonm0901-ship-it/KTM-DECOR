@@ -343,14 +343,14 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
                               <>
                                 <button
                                   onClick={() => openEditModal(task)}
-                                  className="p-1 rounded hover:bg-border text-muted hover:text-foreground"
+                                  className="p-1 rounded bg-accent text-white hover:bg-accent-dark shadow-sm"
                                   title="Edit"
                                 >
                                   <Edit2 size={11} />
                                 </button>
                                 <button
                                   onClick={() => deleteTask(task._id)}
-                                  className="p-1 rounded hover:bg-red-500/10 text-muted hover:text-red-500"
+                                  className="p-1 rounded bg-red-600 text-white hover:bg-red-700 shadow-sm"
                                   title="Delete"
                                 >
                                   <Trash2 size={11} />
@@ -381,7 +381,7 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
                                   {col.id === "in_progress" && (
                                     <button
                                       onClick={() => updateTaskStatus(task._id, "done")}
-                                      className="p-1 hover:bg-green-500/15 rounded text-green-500"
+                                      className="p-1 bg-green-600 text-white hover:bg-green-700 rounded shadow-sm"
                                       title="Move to Done"
                                     >
                                       <ArrowRight size={11} />
@@ -510,13 +510,13 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
                           <div className="flex justify-end gap-2">
                             <button
                               onClick={() => openEditModal(task)}
-                              className="p-1 text-muted hover:text-foreground hover:bg-border rounded transition-all"
+                              className="p-1 text-white bg-accent hover:bg-accent-dark rounded transition-all shadow-sm"
                             >
                               <Edit2 size={14} />
                             </button>
                             <button
                               onClick={() => deleteTask(task._id)}
-                              className="p-1 text-muted hover:text-red-500 hover:bg-red-500/10 rounded transition-all"
+                              className="p-1 text-white bg-red-600 hover:bg-red-700 rounded transition-all shadow-sm"
                             >
                               <Trash2 size={14} />
                             </button>

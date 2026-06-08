@@ -446,14 +446,14 @@ export const ProductManagement: React.FC = () => {
                     <div className="flex items-center justify-end gap-1.5">
                       <button
                         onClick={() => openEditModal(prod)}
-                        className="p-1.5 rounded hover:bg-border text-muted hover:text-foreground transition-all"
+                        className="p-1.5 rounded bg-accent text-white hover:bg-accent-dark transition-all shadow-sm"
                         title="Edit Product"
                       >
                         <Edit2 size={14} />
                       </button>
                       <button
                         onClick={() => handleDelete(prod.id, prod.name)}
-                        className="p-1.5 rounded hover:bg-red-500/10 text-muted hover:text-red-500 transition-all"
+                        className="p-1.5 rounded bg-red-600 text-white hover:bg-red-700 transition-all shadow-sm"
                         title="Delete Product"
                       >
                         <Trash2 size={14} />
@@ -513,7 +513,7 @@ export const ProductManagement: React.FC = () => {
             </h2>
 
             {formError && (
-              <div className="p-3 text-xs bg-red-500/10 border border-red-500/20 text-red-500 rounded font-semibold flex items-center gap-2">
+              <div className="p-3 text-xs bg-red-600 border border-red-600 text-white rounded font-semibold flex items-center gap-2">
                 <Info size={14} className="flex-shrink-0" />
                 <span>{formError}</span>
               </div>

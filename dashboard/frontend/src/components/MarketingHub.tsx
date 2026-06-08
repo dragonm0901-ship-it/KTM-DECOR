@@ -269,7 +269,7 @@ export const MarketingHub: React.FC<MarketingHubProps> = ({
                               deleteCampaign(item._id);
                             }
                           }}
-                          className="p-1 border border-red-500/20 text-red-500 hover:bg-red-500/10 rounded transition-colors"
+                          className="p-1 bg-red-600 text-white hover:bg-red-700 rounded transition-colors shadow-sm"
                           title="Move to Bin"
                         >
                           <Trash2 size={12} />

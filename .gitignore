@@ -34,8 +34,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Windsurf
-windsurf_deployment.yaml
 
 # Dashboard Built Outputs
 /public/admin/

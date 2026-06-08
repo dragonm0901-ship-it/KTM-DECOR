@@ -60,6 +60,40 @@ export interface MarketingCampaign {
   updatedAt?: string;
 }
 
+export interface Order {
+  _id: string;
+  productName: string;
+  size: string;
+  price: number;
+  deliveryPrice: number;
+  installationPrice: number;
+  totalPrice: number;
+  advancePayment: number;
+  duePayment: number;
+  color: string;
+  productImageUrl?: string;
+  locationImageUrl?: string;
+  customerName: string;
+  customerContact: string;
+  customerEmail?: string;
+  customerAddress: string;
+  orderFrom: "tiktok" | "instagram" | "whatsapp" | "direct";
+  paymentMethod: "cash" | "online_banking" | "esewa" | "cheque";
+  manufacturingNotes?: string;
+  stage: "design" | "manufacturing" | "completed" | "delivered";
+  approved: boolean;
+  approvedAt?: string;
+  deliveryDate: string;
+  assignee?: User;
+  createdBy: {
+    _id: string;
+    name: string;
+    role: string;
+  };
+  createdAt: string;
+  updatedAt?: string;
+}
+
 export interface Activity {
   _id: string;
   user: User;
@@ -85,6 +119,90 @@ export interface Product {
   updatedAt?: string;
 }
 
+export interface Sale {
+  _id: string;
+  clientName: string;
+  productName: string;
+  amount: number;
+  date: string;
+  paymentMethod: "cash" | "online_banking" | "esewa" | "cheque" | "other";
+  notes?: string;
+  createdBy: User;
+  orderId?: string | Order;
+  createdAt: string;
+}
+
+export interface Expense {
+  _id: string;
+  title: string;
+  category: "salary" | "rent" | "travel" | "miscellaneous";
+  amount: number;
+  date: string;
+  description?: string;
+  createdBy: User;
+  createdAt: string;
+}
+
+export interface PurchaseItem {
+  name: string;
+  quantity: number;
+  unit: string;
+  price: number;
+}
+
+export interface Purchase {
+  _id: string;
+  supplier: string;
+  itemDetails: string;
+  amount: number;
+  date: string;
+  status: "paid" | "pending" | "partial";
+  items?: PurchaseItem[];
+  createdBy: User;
+  createdAt: string;
+}
+
+export interface InventoryItem {
+  _id: string;
+  name: string;
+  category: string;
+  quantity: number;
+  unit: string;
+  alertLevel: number;
+  createdBy: User;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface QuotationItem {
+  _id?: string;
+  description: string;
+  hsCode?: string;
+  quantity: number;
+  rate: number;
+  total: number;
+}
+
+export interface Quotation {
+  _id: string;
+  clientName: string;
+  clientEmail?: string;
+  clientContact?: string;
+  projectName: string;
+  items: QuotationItem[];
+  discount: number;
+  tax: number;
+  grandTotal: number;
+  status: "draft" | "sent" | "accepted" | "rejected";
+  date: string;
+  voucherNo?: string;
+  voucherDate?: string;
+  amountInWords?: string;
+  remarks?: string;
+  createdBy: User;
+  createdAt: string;
+}
+
 interface DashboardState {
   user: User | null;
   token: string | null;
@@ -94,8 +212,15 @@ interface DashboardState {
   campaigns: MarketingCampaign[];
   binTasks: Task[];
   binCampaigns: MarketingCampaign[];
+  binOrders: Order[];
   products: Product[];
   activities: Activity[];
+  orders: Order[];
+  sales: Sale[];
+  expenses: Expense[];
+  purchases: Purchase[];
+  inventoryItems: InventoryItem[];
+  quotations: Quotation[];
   pusher: Pusher | null;
   theme: "light" | "dark";
   focusMode: boolean;
@@ -139,11 +264,47 @@ interface DashboardState {
   
   // Bin
   fetchBin: () => Promise<void>;
-  restoreBinItem: (type: "task" | "campaign", id: string) => Promise<void>;
-  deleteBinItemPermanently: (type: "task" | "campaign", id: string) => Promise<void>;
+  restoreBinItem: (type: "task" | "campaign" | "order", id: string) => Promise<void>;
+  deleteBinItemPermanently: (type: "task" | "campaign" | "order", id: string) => Promise<void>;
   
   // Activities
   fetchActivities: () => Promise<void>;
+  
+  // Orders
+  fetchOrders: () => Promise<void>;
+  createOrder: (data: any) => Promise<void>;
+  updateOrder: (orderId: string, data: any) => Promise<void>;
+  updateOrderProgress: (orderId: string, stage?: Order["stage"], assigneeId?: string | null) => Promise<void>;
+  approveOrder: (orderId: string) => Promise<void>;
+  deleteOrder: (orderId: string) => Promise<void>;
+
+  // Sales
+  fetchSales: () => Promise<void>;
+  createSale: (data: any) => Promise<void>;
+  deleteSale: (id: string) => Promise<void>;
+
+  // Expenses
+  fetchExpenses: () => Promise<void>;
+  createExpense: (data: any) => Promise<void>;
+  deleteExpense: (id: string) => Promise<void>;
+
+  // Purchases
+  fetchPurchases: () => Promise<void>;
+  createPurchase: (data: any) => Promise<void>;
+  updatePurchaseStatus: (id: string, status: Purchase["status"]) => Promise<void>;
+  deletePurchase: (id: string) => Promise<void>;
+
+  // Inventory
+  fetchInventoryItems: () => Promise<void>;
+  createInventoryItem: (data: any) => Promise<void>;
+  updateInventoryItem: (id: string, data: any) => Promise<void>;
+  deleteInventoryItem: (id: string) => Promise<void>;
+
+  // Quotations
+  fetchQuotations: () => Promise<void>;
+  createQuotation: (data: any) => Promise<void>;
+  updateQuotationStatus: (id: string, status: Quotation["status"]) => Promise<void>;
+  deleteQuotation: (id: string) => Promise<void>;
   
   // Quick Notes
   addQuickNote: (note: string) => void;
@@ -208,8 +369,15 @@ export const useStore = create<DashboardState>((set, get) => ({
   campaigns: [],
   binTasks: [],
   binCampaigns: [],
+  binOrders: [],
   products: [],
   activities: [],
+  orders: [],
+  sales: [],
+  expenses: [],
+  purchases: [],
+  inventoryItems: [],
+  quotations: [],
   pusher: null,
   theme: (localStorage.getItem("theme") as "light" | "dark") || "light",
   focusMode: false,
@@ -234,7 +402,13 @@ export const useStore = create<DashboardState>((set, get) => ({
       get().fetchCampaigns();
       get().fetchActivities();
       get().fetchProducts();
+      get().fetchOrders();
+      get().fetchInventoryItems();
       if (user.role === "admin") {
+        get().fetchSales();
+        get().fetchExpenses();
+        get().fetchPurchases();
+        get().fetchQuotations();
         get().fetchBin();
       }
       
@@ -384,6 +558,112 @@ export const useStore = create<DashboardState>((set, get) => ({
         }));
       });
 
+      channel.bind("order_created", (newOrder: Order) => {
+        set((state) => {
+          const filtered = state.orders.filter((o) => o._id !== newOrder._id);
+          return { orders: [newOrder, ...filtered] };
+        });
+      });
+
+      channel.bind("order_updated", (updatedOrder: Order) => {
+        set((state) => {
+          const filtered = state.orders.filter((o) => o._id !== updatedOrder._id);
+          return { orders: [updatedOrder, ...filtered] };
+        });
+      });
+
+      channel.bind("order_deleted", (deletedOrderId: string) => {
+        set((state) => ({
+          orders: state.orders.filter((o) => o._id !== deletedOrderId),
+        }));
+      });
+
+      channel.bind("sale_created", (newSale: Sale) => {
+        set((state) => {
+          const filtered = state.sales.filter((s) => s._id !== newSale._id);
+          return { sales: [newSale, ...filtered] };
+        });
+      });
+
+      channel.bind("sale_deleted", (deletedSaleId: string) => {
+        set((state) => ({
+          sales: state.sales.filter((s) => s._id !== deletedSaleId),
+        }));
+      });
+
+      channel.bind("expense_created", (newExpense: Expense) => {
+        set((state) => {
+          const filtered = state.expenses.filter((e) => e._id !== newExpense._id);
+          return { expenses: [newExpense, ...filtered] };
+        });
+      });
+
+      channel.bind("expense_deleted", (deletedExpenseId: string) => {
+        set((state) => ({
+          expenses: state.expenses.filter((e) => e._id !== deletedExpenseId),
+        }));
+      });
+
+      channel.bind("purchase_created", (newPurchase: Purchase) => {
+        set((state) => {
+          const filtered = state.purchases.filter((p) => p._id !== newPurchase._id);
+          return { purchases: [newPurchase, ...filtered] };
+        });
+      });
+
+      channel.bind("purchase_updated", (updatedPurchase: Purchase) => {
+        set((state) => {
+          const filtered = state.purchases.filter((p) => p._id !== updatedPurchase._id);
+          return { purchases: [updatedPurchase, ...filtered] };
+        });
+      });
+
+      channel.bind("purchase_deleted", (deletedPurchaseId: string) => {
+        set((state) => ({
+          purchases: state.purchases.filter((p) => p._id !== deletedPurchaseId),
+        }));
+      });
+
+      channel.bind("inventory_created", (newItem: InventoryItem) => {
+        set((state) => {
+          const filtered = state.inventoryItems.filter((i) => i._id !== newItem._id);
+          return { inventoryItems: [newItem, ...filtered].sort((a, b) => a.name.localeCompare(b.name)) };
+        });
+      });
+
+      channel.bind("inventory_updated", (updatedItem: InventoryItem) => {
+        set((state) => {
+          const filtered = state.inventoryItems.filter((i) => i._id !== updatedItem._id);
+          return { inventoryItems: [updatedItem, ...filtered].sort((a, b) => a.name.localeCompare(b.name)) };
+        });
+      });
+
+      channel.bind("inventory_deleted", (deletedItemId: string) => {
+        set((state) => ({
+          inventoryItems: state.inventoryItems.filter((i) => i._id !== deletedItemId),
+        }));
+      });
+
+      channel.bind("quotation_created", (newQuotation: Quotation) => {
+        set((state) => {
+          const filtered = state.quotations.filter((q) => q._id !== newQuotation._id);
+          return { quotations: [newQuotation, ...filtered] };
+        });
+      });
+
+      channel.bind("quotation_updated", (updatedQuotation: Quotation) => {
+        set((state) => {
+          const filtered = state.quotations.filter((q) => q._id !== updatedQuotation._id);
+          return { quotations: [updatedQuotation, ...filtered] };
+        });
+      });
+
+      channel.bind("quotation_deleted", (deletedQuotationId: string) => {
+        set((state) => ({
+          quotations: state.quotations.filter((q) => q._id !== deletedQuotationId),
+        }));
+      });
+
       set({ pusher });
     }
   },
@@ -437,8 +717,10 @@ export const useStore = create<DashboardState>((set, get) => ({
       campaigns: [],
       binTasks: [],
       binCampaigns: [],
+      binOrders: [],
       products: [],
       activities: [],
+      orders: [],
       pusher: null,
     });
   },
@@ -747,7 +1029,8 @@ export const useStore = create<DashboardState>((set, get) => ({
         const data = await res.json();
         set({
           binTasks: data.tasks || [],
-          binCampaigns: data.campaigns || []
+          binCampaigns: data.campaigns || [],
+          binOrders: data.orders || []
         });
       }
     } catch (err) {
@@ -793,6 +1076,445 @@ export const useStore = create<DashboardState>((set, get) => ({
       }
     } catch (err) {
       console.error("Fetch activities failed:", err);
+    }
+  },
+
+  fetchOrders: async () => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/orders`, {
+        headers: getHeaders(token),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        set({ orders: data });
+      }
+    } catch (err) {
+      console.error("Fetch orders failed:", err);
+    }
+  },
+
+  createOrder: async (orderData) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/orders`, {
+        method: "POST",
+        headers: getHeaders(token),
+        body: JSON.stringify(orderData),
+      });
+      if (!res.ok) throw new Error("Order creation failed");
+      const newOrder = await res.json();
+      set((state) => {
+        const filtered = state.orders.filter((o) => o._id !== newOrder._id);
+        return { orders: [newOrder, ...filtered] };
+      });
+    } catch (err) {
+      console.error("Create order failed:", err);
+      throw err;
+    }
+  },
+
+  updateOrder: async (orderId, orderData) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/orders/${orderId}`, {
+        method: "PUT",
+        headers: getHeaders(token),
+        body: JSON.stringify(orderData),
+      });
+      if (!res.ok) throw new Error("Order update failed");
+      const updatedOrder = await res.json();
+      set((state) => {
+        const filtered = state.orders.filter((o) => o._id !== orderId);
+        return { orders: [updatedOrder, ...filtered] };
+      });
+    } catch (err) {
+      console.error("Update order failed:", err);
+      throw err;
+    }
+  },
+
+  updateOrderProgress: async (orderId, stage, assigneeId) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/orders/${orderId}/progress`, {
+        method: "PUT",
+        headers: getHeaders(token),
+        body: JSON.stringify({ stage, assignee: assigneeId }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message || "Order progress update failed");
+      }
+      const updatedOrder = await res.json();
+      set((state) => {
+        const filtered = state.orders.filter((o) => o._id !== orderId);
+        return { orders: [updatedOrder, ...filtered] };
+      });
+    } catch (err) {
+      console.error("Update order progress failed:", err);
+      throw err;
+    }
+  },
+
+  approveOrder: async (orderId) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/orders/${orderId}/approve`, {
+        method: "PUT",
+        headers: getHeaders(token),
+      });
+      if (!res.ok) throw new Error("Order approval failed");
+      const updatedOrder = await res.json();
+      set((state) => {
+        const filtered = state.orders.filter((o) => o._id !== orderId);
+        return { orders: [updatedOrder, ...filtered] };
+      });
+    } catch (err) {
+      console.error("Approve order failed:", err);
+      throw err;
+    }
+  },
+
+  deleteOrder: async (orderId) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/orders/${orderId}`, {
+        method: "DELETE",
+        headers: getHeaders(token),
+      });
+      if (!res.ok) throw new Error("Order deletion failed");
+      set((state) => ({
+        orders: state.orders.filter((o) => o._id !== orderId),
+      }));
+    } catch (err) {
+      console.error("Delete order failed:", err);
+      throw err;
+    }
+  },
+
+  // Sales Actions
+  fetchSales: async () => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/sales`, {
+        headers: getHeaders(token),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        set({ sales: data });
+      }
+    } catch (err) {
+      console.error("Fetch sales failed:", err);
+    }
+  },
+
+  createSale: async (saleData) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/sales`, {
+        method: "POST",
+        headers: getHeaders(token),
+        body: JSON.stringify(saleData),
+      });
+      if (!res.ok) throw new Error("Sale logging failed");
+      const newSale = await res.json();
+      set((state) => {
+        const filtered = state.sales.filter((s) => s._id !== newSale._id);
+        return { sales: [newSale, ...filtered] };
+      });
+    } catch (err) {
+      console.error("Create sale failed:", err);
+      throw err;
+    }
+  },
+
+  deleteSale: async (saleId) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/sales/${saleId}`, {
+        method: "DELETE",
+        headers: getHeaders(token),
+      });
+      if (!res.ok) throw new Error("Sale deletion failed");
+      set((state) => ({
+        sales: state.sales.filter((s) => s._id !== saleId),
+      }));
+    } catch (err) {
+      console.error("Delete sale failed:", err);
+      throw err;
+    }
+  },
+
+  // Expenses Actions
+  fetchExpenses: async () => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/expenses`, {
+        headers: getHeaders(token),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        set({ expenses: data });
+      }
+    } catch (err) {
+      console.error("Fetch expenses failed:", err);
+    }
+  },
+
+  createExpense: async (expenseData) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/expenses`, {
+        method: "POST",
+        headers: getHeaders(token),
+        body: JSON.stringify(expenseData),
+      });
+      if (!res.ok) throw new Error("Expense creation failed");
+      const newExpense = await res.json();
+      set((state) => {
+        const filtered = state.expenses.filter((e) => e._id !== newExpense._id);
+        return { expenses: [newExpense, ...filtered] };
+      });
+    } catch (err) {
+      console.error("Create expense failed:", err);
+      throw err;
+    }
+  },
+
+  deleteExpense: async (expenseId) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/expenses/${expenseId}`, {
+        method: "DELETE",
+        headers: getHeaders(token),
+      });
+      if (!res.ok) throw new Error("Expense deletion failed");
+      set((state) => ({
+        expenses: state.expenses.filter((e) => e._id !== expenseId),
+      }));
+    } catch (err) {
+      console.error("Delete expense failed:", err);
+      throw err;
+    }
+  },
+
+  // Purchases Actions
+  fetchPurchases: async () => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/purchases`, {
+        headers: getHeaders(token),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        set({ purchases: data });
+      }
+    } catch (err) {
+      console.error("Fetch purchases failed:", err);
+    }
+  },
+
+  createPurchase: async (purchaseData) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/purchases`, {
+        method: "POST",
+        headers: getHeaders(token),
+        body: JSON.stringify(purchaseData),
+      });
+      if (!res.ok) throw new Error("Purchase creation failed");
+      const newPurchase = await res.json();
+      set((state) => {
+        const filtered = state.purchases.filter((p) => p._id !== newPurchase._id);
+        return { purchases: [newPurchase, ...filtered] };
+      });
+    } catch (err) {
+      console.error("Create purchase failed:", err);
+      throw err;
+    }
+  },
+
+  updatePurchaseStatus: async (purchaseId, status) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/purchases/${purchaseId}`, {
+        method: "PUT",
+        headers: getHeaders(token),
+        body: JSON.stringify({ status }),
+      });
+      if (!res.ok) throw new Error("Purchase update failed");
+      const updatedPurchase = await res.json();
+      set((state) => {
+        const filtered = state.purchases.filter((p) => p._id !== purchaseId);
+        return { purchases: [updatedPurchase, ...filtered] };
+      });
+    } catch (err) {
+      console.error("Update purchase failed:", err);
+      throw err;
+    }
+  },
+
+  deletePurchase: async (purchaseId) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/purchases/${purchaseId}`, {
+        method: "DELETE",
+        headers: getHeaders(token),
+      });
+      if (!res.ok) throw new Error("Purchase deletion failed");
+      set((state) => ({
+        purchases: state.purchases.filter((p) => p._id !== purchaseId),
+      }));
+    } catch (err) {
+      console.error("Delete purchase failed:", err);
+      throw err;
+    }
+  },
+
+  // Inventory Actions
+  fetchInventoryItems: async () => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/inventory`, {
+        headers: getHeaders(token),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        set({ inventoryItems: data });
+      }
+    } catch (err) {
+      console.error("Fetch inventory failed:", err);
+    }
+  },
+
+  createInventoryItem: async (itemData) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/inventory`, {
+        method: "POST",
+        headers: getHeaders(token),
+        body: JSON.stringify(itemData),
+      });
+      if (!res.ok) throw new Error("Inventory item creation failed");
+      const newItem = await res.json();
+      set((state) => {
+        const filtered = state.inventoryItems.filter((i) => i._id !== newItem._id);
+        return { inventoryItems: [newItem, ...filtered].sort((a, b) => a.name.localeCompare(b.name)) };
+      });
+    } catch (err) {
+      console.error("Create inventory item failed:", err);
+      throw err;
+    }
+  },
+
+  updateInventoryItem: async (itemId, itemData) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/inventory/${itemId}`, {
+        method: "PUT",
+        headers: getHeaders(token),
+        body: JSON.stringify(itemData),
+      });
+      if (!res.ok) throw new Error("Inventory item update failed");
+      const updatedItem = await res.json();
+      set((state) => {
+        const filtered = state.inventoryItems.filter((i) => i._id !== itemId);
+        return { inventoryItems: [updatedItem, ...filtered].sort((a, b) => a.name.localeCompare(b.name)) };
+      });
+    } catch (err) {
+      console.error("Update inventory item failed:", err);
+      throw err;
+    }
+  },
+
+  deleteInventoryItem: async (itemId) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/inventory/${itemId}`, {
+        method: "DELETE",
+        headers: getHeaders(token),
+      });
+      if (!res.ok) throw new Error("Inventory item deletion failed");
+      set((state) => ({
+        inventoryItems: state.inventoryItems.filter((i) => i._id !== itemId),
+      }));
+    } catch (err) {
+      console.error("Delete inventory item failed:", err);
+      throw err;
+    }
+  },
+
+  // Quotations Actions
+  fetchQuotations: async () => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/quotations`, {
+        headers: getHeaders(token),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        set({ quotations: data });
+      }
+    } catch (err) {
+      console.error("Fetch quotations failed:", err);
+    }
+  },
+
+  createQuotation: async (quotationData) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/quotations`, {
+        method: "POST",
+        headers: getHeaders(token),
+        body: JSON.stringify(quotationData),
+      });
+      if (!res.ok) throw new Error("Quotation creation failed");
+      const newQuotation = await res.json();
+      set((state) => {
+        const filtered = state.quotations.filter((q) => q._id !== newQuotation._id);
+        return { quotations: [newQuotation, ...filtered] };
+      });
+    } catch (err) {
+      console.error("Create quotation failed:", err);
+      throw err;
+    }
+  },
+
+  updateQuotationStatus: async (quotationId, status) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/quotations/${quotationId}`, {
+        method: "PUT",
+        headers: getHeaders(token),
+        body: JSON.stringify({ status }),
+      });
+      if (!res.ok) throw new Error("Quotation update failed");
+      const updatedQuotation = await res.json();
+      set((state) => {
+        const filtered = state.quotations.filter((q) => q._id !== quotationId);
+        return { quotations: [updatedQuotation, ...filtered] };
+      });
+    } catch (err) {
+      console.error("Update quotation failed:", err);
+      throw err;
+    }
+  },
+
+  deleteQuotation: async (quotationId) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/quotations/${quotationId}`, {
+        method: "DELETE",
+        headers: getHeaders(token),
+      });
+      if (!res.ok) throw new Error("Quotation deletion failed");
+      set((state) => ({
+        quotations: state.quotations.filter((q) => q._id !== quotationId),
+      }));
+    } catch (err) {
+      console.error("Delete quotation failed:", err);
+      throw err;
     }
   },
 

@@ -174,3 +174,4 @@ export default function HowItWorks() {
     </section>
   );
 }
+// sync push

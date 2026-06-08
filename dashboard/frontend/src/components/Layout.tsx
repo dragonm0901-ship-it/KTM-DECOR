@@ -15,7 +15,13 @@ import {
   CheckCircle2,
   Calendar,
   Trash2,
-  ShoppingBag
+  ShoppingBag,
+  Package,
+  Truck,
+  TrendingUp,
+  Briefcase,
+  FileText,
+  DollarSign
 } from "./ui/solar-icons";
 
 interface LayoutProps {
@@ -82,6 +88,19 @@ export const Layout: React.FC<LayoutProps> = ({
   const navigationItems = [
     { id: "overview", label: "Overview", icon: LayoutDashboard },
     { id: "tasks", label: "Tasks Board", icon: CheckSquare },
+    { id: "orders", label: "Orders", icon: Package },
+    { id: "order-progress", label: "Order Progress", icon: Truck },
+    ...(user?.role === "admin" ? [
+      { id: "sales", label: "Sales Ledger", icon: TrendingUp },
+      { id: "expenses", label: "Expenses Log", icon: DollarSign }
+    ] : []),
+    ...(user?.role === "admin" ? [
+      { id: "purchase", label: "Purchases", icon: Briefcase }
+    ] : []),
+    { id: "inventory", label: "Inventory", icon: Package },
+    ...(user?.role === "admin" ? [
+      { id: "quotation", label: "Quotations", icon: FileText }
+    ] : []),
     { id: "marketing", label: "Marketing Hub", icon: Megaphone },
     ...(user?.role === "admin" ? [
       { id: "products", label: "Shop Catalog", icon: ShoppingBag },
@@ -90,7 +109,7 @@ export const Layout: React.FC<LayoutProps> = ({
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground transition-colors duration-300">
+    <div className="h-screen flex flex-col bg-background text-foreground transition-colors duration-300 overflow-hidden">
       {/* HEADER */}
       <header className="sticky top-0 z-40 w-full glass-panel h-16 px-4 flex items-center justify-between border-b border-border">
         <div className="flex items-center gap-3">
@@ -256,7 +275,7 @@ export const Layout: React.FC<LayoutProps> = ({
             )}
             <button
               onClick={logout}
-              className="p-2 rounded-md hover:bg-red-500/10 hover:text-red-500 transition-colors text-muted"
+              className="p-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors shadow-sm"
               title="Logout"
             >
               <LogOut size={20} />
@@ -265,7 +284,7 @@ export const Layout: React.FC<LayoutProps> = ({
         </div>
       </header>
 
-      <div className="flex-1 flex relative">
+      <div className="flex-1 flex relative overflow-hidden">
         {/* DESKTOP SIDEBAR */}
         <aside
           className={`hidden md:flex flex-col border-r border-border glass-panel transition-all duration-300 ${

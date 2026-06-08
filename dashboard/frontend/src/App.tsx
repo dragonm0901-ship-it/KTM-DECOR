@@ -6,6 +6,13 @@ import { TaskBoard } from "./components/TaskBoard";
 import { MarketingHub } from "./components/MarketingHub";
 import { BinView } from "./components/BinView";
 import { ProductManagement } from "./components/ProductManagement";
+import { OrdersTab } from "./components/OrdersTab";
+import { OrderProgressTab } from "./components/OrderProgressTab";
+import { SalesTab } from "./components/SalesTab";
+import { ExpensesTab } from "./components/ExpensesTab";
+import { PurchaseTab } from "./components/PurchaseTab";
+import { InventoryTab } from "./components/InventoryTab";
+import { QuotationTab } from "./components/QuotationTab";
 import { LogIn, KeyRound, Mail } from "./components/ui/solar-icons";
 
 export const App: React.FC = () => {
@@ -27,6 +34,15 @@ export const App: React.FC = () => {
   useEffect(() => {
     init();
   }, [token, init]);
+
+  useEffect(() => {
+    if (user && user.role !== "admin") {
+      const restrictedTabs = ["sales", "expenses", "quotation", "products", "bin", "purchase"];
+      if (restrictedTabs.includes(currentTab)) {
+        setCurrentTab("overview");
+      }
+    }
+  }, [currentTab, user]);
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,14 +147,14 @@ export const App: React.FC = () => {
               </span>
               <div className="grid grid-cols-2 gap-2">
                 <button
-                  onClick={() => handleSetTestCredentials("admin@ktmdecor.com", import.meta.env.VITE_SEED_ADMIN_PASSWORD || "adminpassword")}
+                  onClick={() => handleSetTestCredentials("admin@ktmdecor.com", import.meta.env.VITE_SEED_ADMIN_PASSWORD || "uH9#fX8$mK2!vP5_wZ7*tQ3")}
                   className="px-3 py-2 text-[10px] text-left border border-border bg-background rounded hover:border-accent transition-all hover:bg-accent/5"
                 >
                   <span className="font-bold text-accent block">Sagar (Admin)</span>
                   admin@ktmdecor.com
                 </button>
                 <button
-                  onClick={() => handleSetTestCredentials("staff@ktmdecor.com", import.meta.env.VITE_SEED_STAFF_PASSWORD || "staffpassword")}
+                  onClick={() => handleSetTestCredentials("staff@ktmdecor.com", import.meta.env.VITE_SEED_STAFF_PASSWORD || "xR4!yP6_zT8$wB2*qM5#sK9")}
                   className="px-3 py-2 text-[10px] text-left border border-border bg-background rounded hover:border-accent transition-all hover:bg-accent/5"
                 >
                   <span className="font-bold text-accent block">Shared Staff Login</span>
@@ -183,11 +199,32 @@ export const App: React.FC = () => {
           setEditingCampaign={setEditingCampaign}
         />
       )}
-      {currentTab === "bin" && (
+      {currentTab === "bin" && user?.role === "admin" && (
         <BinView />
       )}
       {currentTab === "products" && user?.role === "admin" && (
         <ProductManagement />
+      )}
+      {currentTab === "orders" && (
+        <OrdersTab />
+      )}
+      {currentTab === "order-progress" && (
+        <OrderProgressTab />
+      )}
+      {currentTab === "sales" && user?.role === "admin" && (
+        <SalesTab />
+      )}
+      {currentTab === "expenses" && user?.role === "admin" && (
+        <ExpensesTab />
+      )}
+      {currentTab === "purchase" && user?.role === "admin" && (
+        <PurchaseTab />
+      )}
+      {currentTab === "inventory" && (
+        <InventoryTab />
+      )}
+      {currentTab === "quotation" && user?.role === "admin" && (
+        <QuotationTab />
       )}
     </Layout>
   );
