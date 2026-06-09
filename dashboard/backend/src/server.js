@@ -232,6 +232,14 @@ app.get("/api/auth/status", async (req, res) => {
     envMongodbUriMasked: maskString(process.env.MONGODB_URI),
     envJwtSecretDefined: !!process.env.JWT_SECRET,
     envJwtSecretLength: process.env.JWT_SECRET ? process.env.JWT_SECRET.length : 0,
+    inventorySeedPathsChecked: [
+      path.join(__dirname, "inventorySeed.json"),
+      path.join(process.cwd(), "dashboard/backend/src/inventorySeed.json"),
+      path.join(process.cwd(), "src/inventorySeed.json")
+    ].map(p => ({
+      path: p,
+      exists: fs.existsSync(p)
+    }))
   };
 
   if (dbState !== 1) {
