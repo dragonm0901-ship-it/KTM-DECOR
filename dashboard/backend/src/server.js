@@ -264,7 +264,9 @@ app.get("/api/auth/status", async (req, res) => {
 app.use(async (req, res, next) => {
   try {
     await connectDB();
-    await runSeeds();
+    if (!seeded) {
+      runSeeds().catch((err) => console.error("Database background seeding error:", err));
+    }
     next();
   } catch (err) {
     console.error("Database middleware connection error:", err);
@@ -715,9 +717,21 @@ const seedInventoryItems = async () => {
         return;
       }
 
-      const seedFilePath = path.join(__dirname, "inventorySeed.json");
-      if (!fs.existsSync(seedFilePath)) {
-        console.warn(`Skipping inventory seeding: ${seedFilePath} not found.`);
+      const pathsToTry = [
+        path.join(__dirname, "inventorySeed.json"),
+        path.join(process.cwd(), "dashboard/backend/src/inventorySeed.json"),
+        path.join(process.cwd(), "src/inventorySeed.json")
+      ];
+      let seedFilePath = "";
+      for (const p of pathsToTry) {
+        if (fs.existsSync(p)) {
+          seedFilePath = p;
+          break;
+        }
+      }
+
+      if (!seedFilePath) {
+        console.warn("Skipping inventory seeding: inventorySeed.json not found in paths:", pathsToTry);
         return;
       }
 
