@@ -19,7 +19,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, onClo
   if (!order) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
+    <div className="modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
       <div className="bg-card w-full max-w-2xl rounded-lg border border-border p-6 shadow-2xl animate-scale-up my-8 max-h-[90vh] overflow-y-auto text-left">
         <div className="flex items-center justify-between mb-6 border-b border-border pb-3">
           <h2 className="text-lg font-bold font-display flex items-center gap-2">
@@ -62,7 +62,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, onClo
             {/* Dual Photos View */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <div className="text-[10px] text-muted-foreground uppercase font-semibold">Product Sign Image</div>
+                <div className="text-[10px] text-muted-foreground uppercase font-semibold">Design Image</div>
                 <div className="h-28 rounded border border-border overflow-hidden bg-background relative flex items-center justify-center">
                   {order.productImageUrl ? (
                     <img src={order.productImageUrl} alt="Product Design" className="object-cover w-full h-full" />

@@ -21,7 +21,8 @@ import {
   TrendingUp,
   Briefcase,
   FileText,
-  DollarSign
+  DollarSign,
+  Menu
 } from "./ui/solar-icons";
 
 interface LayoutProps {
@@ -49,6 +50,7 @@ export const Layout: React.FC<LayoutProps> = ({
   } = useStore();
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
   const [announcementMsg, setAnnouncementMsg] = useState("");
   const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
@@ -112,13 +114,22 @@ export const Layout: React.FC<LayoutProps> = ({
     <div className="h-screen flex flex-col bg-background text-foreground transition-colors duration-300 overflow-hidden">
       {/* HEADER */}
       <header className="sticky top-0 z-40 w-full glass-panel h-16 px-4 flex items-center justify-between border-b border-border">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          {/* Mobile hamburger button */}
+          <button
+            onClick={() => setMobileMenuOpen(true)}
+            className="md:hidden p-2 rounded-md hover:bg-border transition-colors text-muted hover:text-foreground -ml-1.5"
+            aria-label="Open menu"
+          >
+            <Menu size={20} />
+          </button>
+          
           <img
             src="/admin/logo/ktm%20decor.svg"
             alt="KTM DECOR"
-            className="h-8 w-auto object-contain dark:invert dark:hue-rotate-180"
+            className="h-8 w-auto object-contain dark:invert dark:hue-rotate-180 ml-1 md:ml-0"
           />
-          <span className="text-[10px] border border-accent/30 text-accent px-2 py-0.5 rounded font-bold uppercase tracking-wider ml-1">
+          <span className="text-[10px] border border-accent/30 text-accent px-2 py-0.5 rounded font-bold uppercase tracking-wider ml-1 hidden sm:inline-block">
             Dashboard
           </span>
         </div>
@@ -127,7 +138,7 @@ export const Layout: React.FC<LayoutProps> = ({
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-md hover:bg-border transition-colors text-muted hover:text-foreground"
+            className="p-2 rounded-md hover:bg-border transition-colors text-muted hover:text-foreground hidden md:inline-flex"
             aria-label="Toggle theme"
           >
             {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
@@ -275,10 +286,11 @@ export const Layout: React.FC<LayoutProps> = ({
             )}
             <button
               onClick={logout}
-              className="p-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors shadow-sm"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors shadow-sm text-xs font-bold uppercase tracking-wider"
               title="Logout"
             >
-              <LogOut size={20} />
+              <span>Logout</span>
+              <LogOut size={16} />
             </button>
           </div>
         </div>
@@ -333,32 +345,103 @@ export const Layout: React.FC<LayoutProps> = ({
         </aside>
 
         {/* MAIN CONTENT AREA */}
-        <main className="flex-1 min-h-[calc(100vh-4rem)] p-4 sm:p-6 md:p-8 overflow-y-auto pb-24 md:pb-8">
+        <main className="flex-1 min-h-[calc(100vh-4rem)] p-3 sm:p-6 md:p-8 overflow-y-auto pb-8">
           <div className="max-w-7xl mx-auto animate-fade-in">
             {children}
           </div>
         </main>
       </div>
 
-      {/* MOBILE BOTTOM NAVIGATION BAR */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 glass-panel border-t border-border flex justify-around py-2">
-        {navigationItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = currentTab === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => setCurrentTab(item.id)}
-              className={`flex flex-col items-center gap-1 py-1 px-3 rounded-md transition-all ${
-                isActive ? "text-accent" : "text-muted"
-              }`}
-            >
-              <Icon size={20} />
-              <span className="text-[10px] font-medium">{item.label}</span>
-            </button>
-          );
-        })}
-      </div>
+
+
+      {/* Mobile Sidebar Overlay */}
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed inset-0 z-50">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+
+          {/* Slide-in Panel */}
+          <aside className="absolute top-0 left-0 bottom-0 w-72 bg-card border-r border-border shadow-2xl flex flex-col animate-slide-in-left">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-border">
+              <div className="flex items-center gap-2">
+                <img
+                  src="/admin/logo/ktm%20decor.svg"
+                  alt="KTM DECOR"
+                  className="h-7 w-auto object-contain dark:invert dark:hue-rotate-180"
+                />
+                <span className="text-[9px] border border-accent/30 text-accent px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">
+                  Menu
+                </span>
+              </div>
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 rounded-md hover:bg-border transition-colors text-muted hover:text-foreground"
+                aria-label="Close menu"
+              >
+                <X size={22} />
+              </button>
+            </div>
+
+            {/* User info */}
+            <div className="px-4 py-3 border-b border-border/60">
+              <div className="text-sm font-bold text-foreground">{user?.name}</div>
+              <div className="text-[10px] text-muted uppercase tracking-wider mt-0.5">
+                {user?.role === "admin" ? "Administrator" : "Staff Member"}
+              </div>
+            </div>
+
+            {/* Navigation Items */}
+            <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+              {navigationItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = currentTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setCurrentTab(item.id);
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-all ${
+                      isActive
+                        ? "bg-accent text-white shadow-md shadow-accent/15"
+                        : "text-muted hover:bg-border hover:text-foreground"
+                    }`}
+                  >
+                    <Icon size={20} className={isActive ? "" : "text-muted"} />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
+
+            {/* Bottom actions */}
+            <div className="p-3 border-t border-border space-y-2">
+              <button
+                onClick={toggleTheme}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-muted hover:bg-border hover:text-foreground transition-all"
+              >
+                {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+                <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+              </button>
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  logout();
+                }}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-bold text-red-500 hover:bg-red-500/10 transition-all"
+              >
+                <LogOut size={20} />
+                <span>Logout</span>
+              </button>
+            </div>
+          </aside>
+        </div>
+      )}
 
       {/* ANNOUNCEMENT MODAL */}
       {showAnnouncementModal && (

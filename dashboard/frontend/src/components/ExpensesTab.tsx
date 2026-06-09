@@ -8,13 +8,17 @@ import {
   X,
   Calendar,
   User,
-  TrendingUp
+  TrendingUp,
+  Edit2,
+  Eye
 } from "./ui/solar-icons";
 
 export const ExpensesTab: React.FC = () => {
-  const { expenses, sales, createExpense, deleteExpense, user } = useStore();
+  const { expenses, sales, createExpense, updateExpense, deleteExpense, user } = useStore();
 
   const [showModal, setShowModal] = useState(false);
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
+  const [viewingExpense, setViewingExpense] = useState<Expense | null>(null);
 
   // Form States
   const [title, setTitle] = useState("");
@@ -34,6 +38,7 @@ export const ExpensesTab: React.FC = () => {
     if (cat === "wages_salaries" || cat === "salary") return "salary";
     if (cat === "rent_utilities" || cat === "rent") return "rent";
     if (cat === "logistics_fuel" || cat === "travel") return "travel";
+    if (cat === "food") return "food";
     return "miscellaneous"; // defaults and other types mapped here
   };
 
@@ -54,11 +59,23 @@ export const ExpensesTab: React.FC = () => {
   });
 
   const handleOpenAddModal = () => {
+    setEditingExpense(null);
     setTitle("");
     setCategory("salary");
     setAmount("");
     setDescription("");
     setDate(new Date().toISOString().split("T")[0]);
+    setFormError("");
+    setShowModal(true);
+  };
+
+  const handleOpenEditModal = (expense: Expense) => {
+    setEditingExpense(expense);
+    setTitle(expense.title);
+    setCategory(getNormalizedCategory(expense.category));
+    setAmount(String(expense.amount));
+    setDescription(expense.description || "");
+    setDate(new Date(expense.date).toISOString().split("T")[0]);
     setFormError("");
     setShowModal(true);
   };
@@ -74,16 +91,29 @@ export const ExpensesTab: React.FC = () => {
 
     setSubmitting(true);
     try {
-      await createExpense({
-        title,
-        category,
-        amount: Number(amount),
-        description,
-        date
-      });
+      if (editingExpense) {
+        // Update existing expense
+        await updateExpense(editingExpense._id, {
+          title,
+          category,
+          amount: Number(amount),
+          description,
+          date
+        });
+      } else {
+        // Create new expense
+        await createExpense({
+          title,
+          category,
+          amount: Number(amount),
+          description,
+          date
+        });
+      }
       setShowModal(false);
+      setEditingExpense(null);
     } catch (err: any) {
-      setFormError(err.message || "Failed to log expense.");
+      setFormError(err.message || "Failed to save expense.");
     } finally {
       setSubmitting(false);
     }
@@ -108,6 +138,8 @@ export const ExpensesTab: React.FC = () => {
         return "Rent & Utilities";
       case "travel":
         return "Travel & Transport";
+      case "food":
+        return "Food & Catering";
       case "miscellaneous":
         return "Miscellaneous";
       default:
@@ -124,6 +156,8 @@ export const ExpensesTab: React.FC = () => {
         return "bg-pink-600 border-pink-600 text-white";
       case "travel":
         return "bg-blue-600 border-blue-600 text-white";
+      case "food":
+        return "bg-amber-600 border-amber-600 text-white";
       default:
         return "bg-zinc-600 border-zinc-600 text-white";
     }
@@ -139,13 +173,15 @@ export const ExpensesTab: React.FC = () => {
   const salarySum = expenses.reduce((sum, e) => sum + (getNormalizedCategory(e.category) === "salary" ? e.amount : 0), 0);
   const rentSum = expenses.reduce((sum, e) => sum + (getNormalizedCategory(e.category) === "rent" ? e.amount : 0), 0);
   const travelSum = expenses.reduce((sum, e) => sum + (getNormalizedCategory(e.category) === "travel" ? e.amount : 0), 0);
+  const foodSum = expenses.reduce((sum, e) => sum + (getNormalizedCategory(e.category) === "food" ? e.amount : 0), 0);
   const miscSum = expenses.reduce((sum, e) => sum + (getNormalizedCategory(e.category) === "miscellaneous" ? e.amount : 0), 0);
-  const totalCategorySum = salarySum + rentSum + travelSum + miscSum || 1;
+  const totalCategorySum = salarySum + rentSum + travelSum + foodSum + miscSum || 1;
 
   const categoriesData = [
     { key: "salary", label: "Salary & Wages", value: salarySum, color: "#9333EA", hoverColor: "#A855F7" },
     { key: "rent", label: "Rent & Utilities", value: rentSum, color: "#EC4899", hoverColor: "#F472B6" },
     { key: "travel", label: "Travel & Transport", value: travelSum, color: "#2563EB", hoverColor: "#3B82F6" },
+    { key: "food", label: "Food & Catering", value: foodSum, color: "#D97706", hoverColor: "#F59E0B" },
     { key: "miscellaneous", label: "Miscellaneous", value: miscSum, color: "#71717A", hoverColor: "#94A3B8" }
   ].filter(c => c.value > 0);
 
@@ -337,6 +373,10 @@ export const ExpensesTab: React.FC = () => {
               <div className="flex justify-between items-center">
                 <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-blue-600" /> Travel</span>
                 <span className="text-foreground">Rs. {travelSum.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-amber-600" /> Food</span>
+                <span className="text-foreground">Rs. {foodSum.toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-zinc-600" /> Misc</span>
@@ -605,6 +645,7 @@ export const ExpensesTab: React.FC = () => {
             <option value="salary">Salary & Wages</option>
             <option value="rent">Rent & Utilities</option>
             <option value="travel">Travel & Transport</option>
+            <option value="food">Food & Catering</option>
             <option value="miscellaneous">Miscellaneous</option>
           </select>
         </div>
@@ -662,15 +703,33 @@ export const ExpensesTab: React.FC = () => {
                       Rs. {expense.amount.toLocaleString()}
                     </td>
                     <td className="p-4 text-right">
-                      {user?.role === "admin" && (
+                      <div className="flex items-center justify-end gap-1.5">
                         <button
-                          onClick={() => handleDelete(expense._id)}
-                          className="p-1.5 bg-red-600 rounded text-white hover:bg-red-700 transition-colors shadow-sm"
-                          title="Delete Log"
+                          onClick={() => setViewingExpense(viewingExpense?._id === expense._id ? null : expense)}
+                          className="p-1.5 bg-blue-600 rounded text-white hover:bg-blue-700 transition-colors shadow-sm"
+                          title="View Details"
                         >
-                          <Trash2 size={14} />
+                          <Eye size={14} />
                         </button>
-                      )}
+                        {user?.role === "admin" && (
+                          <>
+                            <button
+                              onClick={() => handleOpenEditModal(expense)}
+                              className="p-1.5 bg-amber-600 rounded text-white hover:bg-amber-700 transition-colors shadow-sm"
+                              title="Edit Expense"
+                            >
+                              <Edit2 size={14} />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(expense._id)}
+                              className="p-1.5 bg-red-600 rounded text-white hover:bg-red-700 transition-colors shadow-sm"
+                              title="Delete Log"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -687,7 +746,7 @@ export const ExpensesTab: React.FC = () => {
             <div className="flex items-center justify-between mb-4 border-b border-border pb-2">
               <h2 className="text-lg font-bold font-display flex items-center gap-2">
                 <DollarSign className="text-accent" />
-                Log Business Expense
+                {editingExpense ? "Edit Expense" : "Log Business Expense"}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
@@ -730,6 +789,7 @@ export const ExpensesTab: React.FC = () => {
                   <option value="salary">Salary & Wages</option>
                   <option value="rent">Rent & Utilities</option>
                   <option value="travel">Travel & Transport</option>
+                  <option value="food">Food & Catering</option>
                   <option value="miscellaneous">Miscellaneous</option>
                 </select>
               </div>
@@ -788,10 +848,93 @@ export const ExpensesTab: React.FC = () => {
                   disabled={submitting}
                   className="px-4 py-2 bg-accent text-white rounded text-xs hover:bg-accent-dark transition-colors shadow-md shadow-accent/15 font-bold disabled:opacity-50"
                 >
-                  {submitting ? "Logging..." : "Log Expense"}
+                  {submitting ? "Saving..." : editingExpense ? "Update Expense" : "Log Expense"}
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* View Expense Detail Modal */}
+      {viewingExpense && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-card w-full max-w-md rounded-lg border border-border p-6 shadow-2xl animate-scale-up">
+            <div className="flex items-center justify-between mb-4 border-b border-border pb-2">
+              <h2 className="text-lg font-bold font-display flex items-center gap-2">
+                <Eye className="text-accent" />
+                Expense Details
+              </h2>
+              <button
+                onClick={() => setViewingExpense(null)}
+                className="text-muted hover:text-foreground"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="space-y-4 text-xs">
+              <div>
+                <span className="text-[10px] text-muted uppercase font-bold tracking-wider block mb-0.5">Expense Title</span>
+                <span className="text-sm font-bold text-foreground">{viewingExpense.title}</span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-[10px] text-muted uppercase font-bold tracking-wider block mb-0.5">Category</span>
+                  <span className={`inline-block px-2 py-0.5 rounded text-[9px] font-bold border uppercase tracking-wider ${getCategoryBadge(viewingExpense.category)}`}>
+                    {getCategoryLabel(viewingExpense.category)}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-muted uppercase font-bold tracking-wider block mb-0.5">Date</span>
+                  <span className="text-sm font-semibold text-foreground">
+                    {new Date(viewingExpense.date).toLocaleDateString([], { month: "long", day: "numeric", year: "numeric" })}
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-[10px] text-muted uppercase font-bold tracking-wider block mb-0.5">Amount</span>
+                  <span className="text-lg font-extrabold text-red-500 font-display">Rs. {viewingExpense.amount.toLocaleString()}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-muted uppercase font-bold tracking-wider block mb-0.5">Logged By</span>
+                  <span className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                    <User size={12} className="text-accent" />
+                    {viewingExpense.createdBy?.name || "System"}
+                  </span>
+                </div>
+              </div>
+
+              {viewingExpense.description && (
+                <div className="border-t border-border pt-3">
+                  <span className="text-[10px] text-muted uppercase font-bold tracking-wider block mb-1">Description / Remarks</span>
+                  <p className="text-sm text-foreground font-medium whitespace-pre-wrap">{viewingExpense.description}</p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-3 border-t border-border pt-4 mt-4">
+              {user?.role === "admin" && (
+                <button
+                  onClick={() => {
+                    handleOpenEditModal(viewingExpense);
+                    setViewingExpense(null);
+                  }}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-amber-600 text-white rounded text-xs hover:bg-amber-700 transition-colors shadow-sm font-bold"
+                >
+                  <Edit2 size={13} /> Edit Expense
+                </button>
+              )}
+              <button
+                onClick={() => setViewingExpense(null)}
+                className="px-4 py-2 border border-border rounded text-xs hover:bg-border transition-colors font-semibold"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -7,7 +7,9 @@ import {
   SlidersHorizontal,
   X,
   Calendar,
-  User
+  User,
+  Edit2,
+  Eye
 } from "./ui/solar-icons";
 
 interface FormPurchaseItem {
@@ -18,9 +20,11 @@ interface FormPurchaseItem {
 }
 
 export const PurchaseTab: React.FC = () => {
-  const { purchases, createPurchase, updatePurchaseStatus, deletePurchase, user } = useStore();
+  const { purchases, createPurchase, updatePurchaseStatus, updatePurchase, deletePurchase, user } = useStore();
 
   const [showModal, setShowModal] = useState(false);
+  const [editingPurchase, setEditingPurchase] = useState<Purchase | null>(null);
+  const [viewingPurchase, setViewingPurchase] = useState<Purchase | null>(null);
   const [expandedPurchaseId, setExpandedPurchaseId] = useState<string | null>(null);
 
   // Form States
@@ -54,10 +58,25 @@ export const PurchaseTab: React.FC = () => {
   });
 
   const handleOpenAddModal = () => {
+    setEditingPurchase(null);
     setSupplier("");
     setItemsList([{ name: "", quantity: 1, unit: "pcs", price: 0 }]);
     setStatus("pending");
     setDate(new Date().toISOString().split("T")[0]);
+    setFormError("");
+    setShowModal(true);
+  };
+
+  const handleOpenEditModal = (purchase: Purchase) => {
+    setEditingPurchase(purchase);
+    setSupplier(purchase.supplier);
+    setItemsList(
+      purchase.items && purchase.items.length > 0
+        ? purchase.items.map((item) => ({ ...item }))
+        : [{ name: purchase.itemDetails || "", quantity: 1, unit: "pcs", price: purchase.amount }]
+    );
+    setStatus(purchase.status);
+    setDate(new Date(purchase.date).toISOString().split("T")[0]);
     setFormError("");
     setShowModal(true);
   };
@@ -105,17 +124,31 @@ export const PurchaseTab: React.FC = () => {
 
     setSubmitting(true);
     try {
-      await createPurchase({
-        supplier,
-        itemDetails: itemDetailsText,
-        amount: calculatedTotalAmount,
-        status,
-        items: itemsList,
-        date
-      });
+      if (editingPurchase) {
+        // Update existing purchase
+        await updatePurchase(editingPurchase._id, {
+          supplier,
+          itemDetails: itemDetailsText,
+          amount: calculatedTotalAmount,
+          status,
+          items: itemsList,
+          date
+        });
+      } else {
+        // Create new purchase
+        await createPurchase({
+          supplier,
+          itemDetails: itemDetailsText,
+          amount: calculatedTotalAmount,
+          status,
+          items: itemsList,
+          date
+        });
+      }
       setShowModal(false);
+      setEditingPurchase(null);
     } catch (err: any) {
-      setFormError(err.message || "Failed to log purchase.");
+      setFormError(err.message || "Failed to save purchase.");
     } finally {
       setSubmitting(false);
     }
@@ -297,15 +330,33 @@ export const PurchaseTab: React.FC = () => {
                         Rs. {purchase.amount.toLocaleString()}
                       </td>
                       <td className="p-4 text-right">
-                        {user?.role === "admin" && (
+                        <div className="flex items-center justify-end gap-1.5">
                           <button
-                            onClick={() => handleDelete(purchase._id)}
-                            className="p-1.5 bg-red-600 rounded text-white hover:bg-red-700 transition-colors shadow-sm"
-                            title="Delete Log"
+                            onClick={() => setViewingPurchase(viewingPurchase?._id === purchase._id ? null : purchase)}
+                            className="p-1.5 bg-blue-600 rounded text-white hover:bg-blue-700 transition-colors shadow-sm"
+                            title="View Details"
                           >
-                            <Trash2 size={14} />
+                            <Eye size={14} />
                           </button>
-                        )}
+                          {user?.role === "admin" && (
+                            <>
+                              <button
+                                onClick={() => handleOpenEditModal(purchase)}
+                                className="p-1.5 bg-amber-600 rounded text-white hover:bg-amber-700 transition-colors shadow-sm"
+                                title="Edit Purchase"
+                              >
+                                <Edit2 size={14} />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(purchase._id)}
+                                className="p-1.5 bg-red-600 rounded text-white hover:bg-red-700 transition-colors shadow-sm"
+                                title="Delete Log"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </>
+                          )}
+                        </div>
                       </td>
                     </tr>
 
@@ -353,14 +404,13 @@ export const PurchaseTab: React.FC = () => {
         </div>
       </div>
 
-      {/* Log Purchase Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div className="modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="bg-card w-full max-w-2xl rounded-lg border border-border p-6 shadow-2xl animate-scale-up max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4 border-b border-border pb-2">
               <h2 className="text-lg font-bold font-display flex items-center gap-2">
                 <Briefcase className="text-accent" />
-                Log Supplier Purchase
+                {editingPurchase ? "Edit Purchase Invoice" : "Log Supplier Purchase"}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
@@ -519,10 +569,119 @@ export const PurchaseTab: React.FC = () => {
                   disabled={submitting}
                   className="px-4 py-2 bg-accent text-white rounded text-xs hover:bg-accent-dark transition-colors shadow-md shadow-accent/15 font-bold disabled:opacity-50"
                 >
-                  {submitting ? "Logging..." : "Log Invoice"}
+                  {submitting ? "Saving..." : editingPurchase ? "Update Invoice" : "Log Invoice"}
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {viewingPurchase && (
+        <div className="modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-card w-full max-w-lg rounded-lg border border-border p-6 shadow-2xl animate-scale-up max-h-[85vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4 border-b border-border pb-2">
+              <h2 className="text-lg font-bold font-display flex items-center gap-2">
+                <Eye className="text-accent" />
+                Purchase Details
+              </h2>
+              <button
+                onClick={() => setViewingPurchase(null)}
+                className="text-muted hover:text-foreground"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="space-y-4 text-xs">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-[10px] text-muted uppercase font-bold tracking-wider block mb-0.5">Supplier / Vendor</span>
+                  <span className="text-sm font-bold text-foreground">{viewingPurchase.supplier}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-muted uppercase font-bold tracking-wider block mb-0.5">Invoice Date</span>
+                  <span className="text-sm font-semibold text-foreground">
+                    {new Date(viewingPurchase.date).toLocaleDateString([], { month: "long", day: "numeric", year: "numeric" })}
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-[10px] text-muted uppercase font-bold tracking-wider block mb-0.5">Payment Status</span>
+                  <span className={`inline-block px-2 py-0.5 rounded text-[9px] font-bold border uppercase ${getStatusBadge(viewingPurchase.status)}`}>
+                    {viewingPurchase.status}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-muted uppercase font-bold tracking-wider block mb-0.5">Total Amount</span>
+                  <span className="text-lg font-extrabold text-foreground font-display">Rs. {viewingPurchase.amount.toLocaleString()}</span>
+                </div>
+              </div>
+
+              <div>
+                <span className="text-[10px] text-muted uppercase font-bold tracking-wider block mb-0.5">Logged By</span>
+                <span className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                  <User size={12} className="text-accent" />
+                  {viewingPurchase.createdBy?.name || "System"}
+                </span>
+              </div>
+
+              {/* Itemized Breakdown */}
+              {viewingPurchase.items && viewingPurchase.items.length > 0 ? (
+                <div className="border-t border-border pt-3">
+                  <span className="text-[10px] text-muted uppercase font-bold tracking-wider block mb-2">Itemized Invoice Breakdown</span>
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="text-muted border-b border-border/60 uppercase font-semibold text-[9px]">
+                        <th className="pb-2">Material / Item</th>
+                        <th className="pb-2 text-center">Qty</th>
+                        <th className="pb-2 text-right">Unit Price</th>
+                        <th className="pb-2 text-right">Subtotal</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border/40">
+                      {viewingPurchase.items.map((item, index) => (
+                        <tr key={index} className="text-foreground">
+                          <td className="py-2 font-semibold">{item.name}</td>
+                          <td className="py-2 text-center font-bold">
+                            {item.quantity} <span className="text-[9px] font-normal text-muted">{item.unit}</span>
+                          </td>
+                          <td className="py-2 text-right">Rs. {item.price.toLocaleString()}</td>
+                          <td className="py-2 text-right font-bold">Rs. {(item.quantity * item.price).toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="border-t border-border pt-3">
+                  <span className="text-[10px] text-muted uppercase font-bold tracking-wider block mb-1">Item Details</span>
+                  <p className="text-sm text-foreground font-medium">{viewingPurchase.itemDetails}</p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-3 border-t border-border pt-4 mt-4">
+              {user?.role === "admin" && (
+                <button
+                  onClick={() => {
+                    handleOpenEditModal(viewingPurchase);
+                    setViewingPurchase(null);
+                  }}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-amber-600 text-white rounded text-xs hover:bg-amber-700 transition-colors shadow-sm font-bold"
+                >
+                  <Edit2 size={13} /> Edit Purchase
+                </button>
+              )}
+              <button
+                onClick={() => setViewingPurchase(null)}
+                className="px-4 py-2 border border-border rounded text-xs hover:bg-border transition-colors font-semibold"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -1,13 +1,11 @@
 import React, { useState } from "react";
-import { useStore, Sale, Order } from "../store/useStore";
+import { useStore, Order } from "../store/useStore";
 import {
   TrendingUp,
-  Plus,
   Trash2,
   DollarSign,
   User,
   SlidersHorizontal,
-  X,
   Package,
   Calendar,
   Eye,
@@ -17,20 +15,8 @@ import {
 import { OrderDetailModal } from "./OrderDetailModal";
 
 export const SalesTab: React.FC = () => {
-  const { sales, orders, createSale, deleteSale, approveOrder, user } = useStore();
-
-  const [showModal, setShowModal] = useState(false);
+  const { sales, orders, deleteSale, approveOrder, user } = useStore();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-
-  // Form States
-  const [clientName, setClientName] = useState("");
-  const [productName, setProductName] = useState("");
-  const [amount, setAmount] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<Sale["paymentMethod"]>("cash");
-  const [notes, setNotes] = useState("");
-  const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]);
-  const [formError, setFormError] = useState("");
-  const [submitting, setSubmitting] = useState(false);
 
   // Filters
   const [searchQuery, setSearchQuery] = useState("");
@@ -167,43 +153,7 @@ export const SalesTab: React.FC = () => {
     setHoveredPoint(null);
   };
 
-  const handleOpenAddModal = () => {
-    setClientName("");
-    setProductName("");
-    setAmount("");
-    setPaymentMethod("cash");
-    setNotes("");
-    setDate(new Date().toISOString().split("T")[0]);
-    setFormError("");
-    setShowModal(true);
-  };
 
-  const handleAddSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormError("");
-
-    if (!clientName.trim() || !productName.trim() || !amount.trim()) {
-      setFormError("Please fill out all required fields.");
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      await createSale({
-        clientName,
-        productName,
-        amount: Number(amount),
-        paymentMethod,
-        notes,
-        date
-      });
-      setShowModal(false);
-    } catch (err: any) {
-      setFormError(err.message || "Failed to log sale.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
   const handleDelete = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this sale log?")) {
@@ -244,13 +194,7 @@ export const SalesTab: React.FC = () => {
           </p>
         </div>
 
-        <button
-          onClick={handleOpenAddModal}
-          className="flex items-center justify-center gap-1.5 py-2.5 px-4 bg-accent hover:bg-accent-dark text-white rounded font-bold text-xs transition-all shadow-md shadow-accent/15 self-start sm:self-auto"
-        >
-          <Plus size={16} />
-          Log Direct Sale
-        </button>
+
       </div>
 
       {/* Metrics Cards */}
@@ -666,136 +610,7 @@ export const SalesTab: React.FC = () => {
         </div>
       </div>
 
-      {/* Log Custom Sale Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-card w-full max-w-md rounded-lg border border-border p-6 shadow-2xl animate-scale-up">
-            <div className="flex items-center justify-between mb-4 border-b border-border pb-2">
-              <h2 className="text-lg font-bold font-display flex items-center gap-2">
-                <DollarSign className="text-accent" />
-                Log Direct Sale
-              </h2>
-              <button
-                onClick={() => setShowModal(false)}
-                className="text-muted hover:text-foreground"
-              >
-                <X size={20} />
-              </button>
-            </div>
 
-            {formError && (
-              <div className="mb-4 p-3 text-xs bg-red-500/10 border border-red-500/20 text-red-500 rounded font-semibold">
-                {formError}
-              </div>
-            )}
-
-            <form onSubmit={handleAddSubmit} className="space-y-4 text-left">
-              <div>
-                <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1">
-                  Client Name *
-                </label>
-                <input
-                  type="text"
-                  value={clientName}
-                  onChange={(e) => setClientName(e.target.value)}
-                  className="w-full px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm"
-                  placeholder="e.g. Acme Corporation"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1">
-                  Product / Service Description *
-                </label>
-                <input
-                  type="text"
-                  value={productName}
-                  onChange={(e) => setProductName(e.target.value)}
-                  className="w-full px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm"
-                  placeholder="e.g. Custom Neon Sign Vector Layout"
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1">
-                    Amount (Rs.) *
-                  </label>
-                  <input
-                    type="number"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    className="w-full px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm font-bold"
-                    placeholder="Amount in Rs."
-                    min="0"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1">
-                    Sales Date *
-                  </label>
-                  <input
-                    type="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm font-semibold"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1">
-                  Payment Method
-                </label>
-                <select
-                  value={paymentMethod}
-                  onChange={(e) => setPaymentMethod(e.target.value as any)}
-                  className="w-full px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm font-semibold"
-                >
-                  <option value="cash">Cash</option>
-                  <option value="online_banking">Fonepay</option>
-                  <option value="esewa">Esewa</option>
-                  <option value="cheque">Cheque</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1">
-                  Additional Notes
-                </label>
-                <textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  className="w-full h-20 px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm resize-none"
-                  placeholder="Payment details, delivery remarks, discounts, etc."
-                />
-              </div>
-
-              <div className="flex justify-end gap-3 border-t border-border pt-4 mt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 border border-border rounded text-xs hover:bg-border transition-colors font-semibold"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="px-4 py-2 bg-accent text-white rounded text-xs hover:bg-accent-dark transition-colors shadow-md shadow-accent/15 font-bold disabled:opacity-50"
-                >
-                  {submitting ? "Logging..." : "Log Sale"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* Order Detail Modal */}
       <OrderDetailModal

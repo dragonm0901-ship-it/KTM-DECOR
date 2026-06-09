@@ -35,7 +35,6 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
     updateTaskStatus,
     togglePinTask,
     deleteTask,
-    focusMode,
     activeStaffProfile
   } = useStore();
 
@@ -129,8 +128,7 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
 
   // Filter tasks
   const filteredTasks = tasks.filter((t) => {
-    // Focus mode filter
-    if (focusMode && !t.pinned) return false;
+
     
     // Priority filter
     if (filterPriority !== "all" && t.priority !== filterPriority) return false;
@@ -532,9 +530,8 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
         </div>
       )}
 
-      {/* CREATE/EDIT TASK MODAL */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div className="modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="bg-card w-full max-w-md rounded-lg border border-border p-6 shadow-2xl animate-scale-up">
             <div className="flex items-center justify-between mb-4 border-b border-border pb-2">
               <h2 className="text-lg font-bold font-display flex items-center gap-2">

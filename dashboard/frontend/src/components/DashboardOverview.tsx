@@ -7,12 +7,9 @@ import {
   TrendingUp,
   FileText,
   Pin,
-  Eye,
-  EyeOff,
   Plus,
   Trash2,
   Calendar,
-  AlertCircle,
   DollarSign,
   Package,
   Briefcase
@@ -34,8 +31,6 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
     tasks,
     campaigns,
     activities,
-    focusMode,
-    toggleFocusMode,
     quickNotes,
     addQuickNote,
     deleteQuickNote,
@@ -51,6 +46,9 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [fabOpen, setFabOpen] = useState(false);
   const [hoveredPoint, setHoveredPoint] = useState<{ x: number; y: number; label: string; value: number } | null>(null);
+
+  // Defensive guard: ensure quickNotes is always an array for rendering
+  const safeQuickNotes = Array.isArray(quickNotes) ? quickNotes : [];
 
   // Completed tasks sorted chronologically by completion date (updatedAt)
   const completedTasks = tasks
@@ -69,15 +67,13 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
   const orderSales = approvedOrders.reduce((acc, o) => acc + (o.totalPrice || 0), 0);
   const totalSales = taskSales + orderSales;
 
-  // Advance and Due calculations — only count active (non-delivered) orders
-  const activeOrders = orders.filter((o) => o.stage !== "delivered");
-  const totalAdvancePaid = activeOrders.reduce((acc, o) => acc + (o.advancePayment || 0), 0);
-  const totalDuePayment = activeOrders.reduce((acc, o) => acc + (o.duePayment || 0), 0);
+  // Advance and Due calculations — calculated from all orders in registry
+  const totalAdvancePaid = orders.reduce((acc, o) => acc + (o.advancePayment || 0), 0);
+  const totalDuePayment = orders.reduce((acc, o) => acc + (o.duePayment || 0), 0);
 
-  // Statistics calculations
   const pendingTasks = tasks.filter((t) => t.status !== "done");
   const completedTasksCount = completedTasks.length;
-  const pinnedTasks = tasks.filter((t) => t.pinned);
+  const pinnedTasks = tasks.filter((t) => t.pinned && t.status !== "done");
 
   // New calculations for Overview Cards
   const totalExpensesVal = expenses.reduce((sum, e) => sum + e.amount, 0);
@@ -91,11 +87,17 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
     salary: expenses.filter((e) => e.category === "salary").reduce((sum, e) => sum + e.amount, 0),
     rent: expenses.filter((e) => e.category === "rent").reduce((sum, e) => sum + e.amount, 0),
     travel: expenses.filter((e) => e.category === "travel").reduce((sum, e) => sum + e.amount, 0),
+    food: expenses.filter((e) => e.category === "food").reduce((sum, e) => sum + e.amount, 0),
     miscellaneous: expenses.filter((e) => e.category === "miscellaneous").reduce((sum, e) => sum + e.amount, 0),
   };
 
   // Staff specific pending tasks
   const staffPendingTasks = pendingTasks.filter(
+    (t) => t.assignee?._id === (user?.email === "staff@ktmdecor.com" ? activeStaffProfile?._id : user?._id)
+  );
+
+  // Staff specific completed tasks
+  const staffCompletedTasks = completedTasks.filter(
     (t) => t.assignee?._id === (user?.email === "staff@ktmdecor.com" ? activeStaffProfile?._id : user?._id)
   );
 
@@ -259,21 +261,6 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               : "Review your pending items and get started on today's tasks."}
           </p>
         </div>
-
-        {/* Focus Mode & Controls */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={toggleFocusMode}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold uppercase tracking-wider transition-all border ${
-              focusMode
-                ? "bg-accent/15 border-accent text-accent shadow-sm"
-                : "border-border text-muted hover:text-foreground"
-            }`}
-          >
-            {focusMode ? <EyeOff size={14} /> : <Eye size={14} />}
-            Focus Mode: {focusMode ? "ON" : "OFF"}
-          </button>
-        </div>
       </div>
 
       {/* ─── PINNED / HIGH PRIORITY SECTION ─── */}
@@ -408,14 +395,14 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
 
           <div className="glass-panel p-5 rounded-lg flex items-center justify-between">
             <div>
-              <span className="text-xs text-muted font-semibold uppercase tracking-wider">Focus Mode Status</span>
-              <h3 className="text-xl font-bold font-display mt-2">
-                {focusMode ? "Active: Pinned Only" : "Standard View"}
+              <span className="text-xs text-muted font-semibold uppercase tracking-wider">Your Completed Tasks</span>
+              <h3 className="text-2xl font-bold font-display mt-2 text-green-500">
+                {staffCompletedTasks.length}
               </h3>
-              <p className="text-[10px] text-muted mt-1">Hides distractions from feed</p>
+              <p className="text-[10px] text-muted mt-1">Finished deliverables</p>
             </div>
-            <div className="p-2.5 border border-border bg-card text-accent rounded-md shadow-sm">
-              {focusMode ? <EyeOff size={22} /> : <Eye size={22} />}
+            <div className="p-2.5 border border-border bg-card text-green-500 rounded-md shadow-sm">
+              <CheckCircle size={22} />
             </div>
           </div>
 
@@ -465,6 +452,10 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                 <div className="flex justify-between">
                   <span>Travel:</span>
                   <span className="font-extrabold text-foreground">Rs. {expenseCategorySums.travel.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Food:</span>
+                  <span className="font-extrabold text-foreground">Rs. {expenseCategorySums.food.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Misc:</span>
@@ -682,36 +673,43 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
           </div>
         ) : (
           <div className="glass-panel rounded-lg p-5 flex flex-col h-[400px]">
-            <h2 className="text-base font-bold font-display border-b border-border pb-3 mb-4 flex items-center gap-2">
-              <AlertCircle size={18} className="text-accent" />
-              Focus & Priorities
+            <h2 className="text-base font-bold font-display border-b border-border pb-3 mb-4 flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <CheckCircle size={18} className="text-accent" />
+                Completed Tasks
+              </span>
+              <span className="text-xs bg-border px-2 py-0.5 rounded font-bold text-muted">
+                {staffCompletedTasks.length}
+              </span>
             </h2>
-            <div className="flex-1 flex flex-col justify-between">
-              <div className="space-y-4">
-                <p className="text-sm leading-relaxed text-muted">
-                  Focus Mode allows you to filter out background noise and list only your pinned, high-priority deliverables.
-                </p>
-                <div className="p-4 rounded bg-accent/5 border border-accent/15 flex items-start gap-3">
-                  <Pin size={18} className="text-accent mt-0.5" />
-                  <div>
-                    <h4 className="font-semibold text-sm">Pinning tasks</h4>
-                    <p className="text-xs text-muted mt-1">
-                      Admins pin critical announcements or client requirements. Pinned tasks lock to the top of your layout for instant visibility.
-                    </p>
-                  </div>
+            <div className="flex-1 overflow-y-auto pr-1 space-y-3">
+              {staffCompletedTasks.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-center text-muted">
+                  <CheckCircle size={40} className="text-muted/30 mb-2" />
+                  <p className="text-sm">No tasks completed yet.</p>
                 </div>
-              </div>
-
-              <button
-                onClick={toggleFocusMode}
-                className={`w-full py-3 rounded-md font-semibold text-sm transition-all border ${
-                  focusMode
-                    ? "bg-accent text-white border-accent hover:bg-accent-dark"
-                    : "border-accent text-accent bg-transparent hover:bg-accent/5"
-                }`}
-              >
-                {focusMode ? "Disable Focus Mode" : "Enable Focus Mode"}
-              </button>
+              ) : (
+                staffCompletedTasks.map((task) => (
+                  <div
+                    key={task._id}
+                    onClick={() => setCurrentTab("tasks")}
+                    className="p-3 bg-card border border-border rounded-md hover:border-accent hover:shadow-sm cursor-pointer transition-all"
+                  >
+                    <h4 className="font-semibold text-sm line-clamp-1">{task.title}</h4>
+                    <p className="text-xs text-muted mt-1 line-clamp-1">
+                      {task.description || "No description."}
+                    </p>
+                    <div className="flex justify-between items-center mt-3">
+                      <span className="text-[9px] border border-green-500/25 text-green-600 dark:text-green-400 px-2 py-0.5 rounded font-semibold uppercase">
+                        Completed
+                      </span>
+                      <span className="text-[10px] text-muted font-medium">
+                        Due: {new Date(task.dueDate).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         )}
@@ -754,26 +752,29 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
           )}
 
           <div className="flex-1 overflow-y-auto pr-1">
-            {quickNotes.length === 0 ? (
+            {safeQuickNotes.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center text-muted">
                 <FileText size={40} className="text-muted/30 mb-2" />
                 <p className="text-sm">No personal notes created yet. Click the + button above to add one.</p>
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-2">
-                {quickNotes.map((note, index) => {
+                {safeQuickNotes.map((note, index) => {
                   const colorClass = stickyColors[index % stickyColors.length];
                   return (
                     <div
-                      key={index}
+                      key={note._id}
                       className={`p-3 rounded-md border flex flex-col justify-between min-h-[90px] ${colorClass}`}
                     >
-                      <p className="text-xs font-medium leading-normal break-words">
-                        {note}
+                      <p className="text-xs font-semibold leading-normal break-words">
+                        {note.text}
                       </p>
-                      <div className="flex justify-end mt-2">
+                      <div className="flex justify-between items-center mt-2 border-t border-black/5 pt-1.5 text-[9px] opacity-75">
+                        <span className="font-bold">
+                          By {note.createdBy?.name?.split(" ")[0] || "Staff"}
+                        </span>
                         <button
-                          onClick={() => deleteQuickNote(index)}
+                          onClick={() => deleteQuickNote(note._id)}
                           className="p-0.5 rounded hover:bg-black/10 text-inherit opacity-70 hover:opacity-100 transition-all"
                           title="Delete note"
                         >

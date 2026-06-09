@@ -135,10 +135,17 @@ export interface Sale {
 export interface Expense {
   _id: string;
   title: string;
-  category: "salary" | "rent" | "travel" | "miscellaneous";
+  category: "salary" | "rent" | "travel" | "food" | "miscellaneous";
   amount: number;
   date: string;
   description?: string;
+  createdBy: User;
+  createdAt: string;
+}
+
+export interface QuickNote {
+  _id: string;
+  text: string;
   createdBy: User;
   createdAt: string;
 }
@@ -224,7 +231,7 @@ interface DashboardState {
   pusher: Pusher | null;
   theme: "light" | "dark";
   focusMode: boolean;
-  quickNotes: string[];
+  quickNotes: QuickNote[];
   activeStaffProfile: User | null;
   
   // Actions
@@ -286,12 +293,14 @@ interface DashboardState {
   // Expenses
   fetchExpenses: () => Promise<void>;
   createExpense: (data: any) => Promise<void>;
+  updateExpense: (id: string, data: any) => Promise<void>;
   deleteExpense: (id: string) => Promise<void>;
 
   // Purchases
   fetchPurchases: () => Promise<void>;
   createPurchase: (data: any) => Promise<void>;
   updatePurchaseStatus: (id: string, status: Purchase["status"]) => Promise<void>;
+  updatePurchase: (id: string, data: any) => Promise<void>;
   deletePurchase: (id: string) => Promise<void>;
 
   // Inventory
@@ -307,8 +316,9 @@ interface DashboardState {
   deleteQuotation: (id: string) => Promise<void>;
   
   // Quick Notes
-  addQuickNote: (note: string) => void;
-  deleteQuickNote: (index: number) => void;
+  fetchQuickNotes: () => Promise<void>;
+  addQuickNote: (note: string) => Promise<void>;
+  deleteQuickNote: (id: string) => Promise<void>;
 }
 
 // Helpers
@@ -381,7 +391,7 @@ export const useStore = create<DashboardState>((set, get) => ({
   pusher: null,
   theme: (localStorage.getItem("theme") as "light" | "dark") || "light",
   focusMode: false,
-  quickNotes: getSafeLocalStorage("quickNotes", "[]"),
+  quickNotes: [],
   activeStaffProfile: getSafeLocalStorage("activeStaffProfile"),
 
   init: () => {
@@ -404,6 +414,7 @@ export const useStore = create<DashboardState>((set, get) => ({
       get().fetchProducts();
       get().fetchOrders();
       get().fetchInventoryItems();
+      get().fetchQuickNotes();
       if (user.role === "admin") {
         get().fetchSales();
         get().fetchExpenses();
@@ -598,6 +609,13 @@ export const useStore = create<DashboardState>((set, get) => ({
         });
       });
 
+      channel.bind("expense_updated", (updatedExpense: Expense) => {
+        set((state) => {
+          const filtered = state.expenses.filter((e) => e._id !== updatedExpense._id);
+          return { expenses: [updatedExpense, ...filtered] };
+        });
+      });
+
       channel.bind("expense_deleted", (deletedExpenseId: string) => {
         set((state) => ({
           expenses: state.expenses.filter((e) => e._id !== deletedExpenseId),
@@ -661,6 +679,20 @@ export const useStore = create<DashboardState>((set, get) => ({
       channel.bind("quotation_deleted", (deletedQuotationId: string) => {
         set((state) => ({
           quotations: state.quotations.filter((q) => q._id !== deletedQuotationId),
+        }));
+      });
+
+      channel.bind("note_created", (newNote: QuickNote) => {
+        set((state) => {
+          const currentNotes = Array.isArray(state.quickNotes) ? state.quickNotes : [];
+          const filtered = currentNotes.filter((n) => n._id !== newNote._id);
+          return { quickNotes: [newNote, ...filtered] };
+        });
+      });
+
+      channel.bind("note_deleted", (deletedNoteId: string) => {
+        set((state) => ({
+          quickNotes: (Array.isArray(state.quickNotes) ? state.quickNotes : []).filter((n) => n._id !== deletedNoteId),
         }));
       });
 
@@ -1282,6 +1314,29 @@ export const useStore = create<DashboardState>((set, get) => ({
     }
   },
 
+  updateExpense: async (expenseId, expenseData) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/expenses/${expenseId}`, {
+        method: "PUT",
+        headers: {
+          ...getHeaders(token),
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(expenseData),
+      });
+      if (!res.ok) throw new Error("Expense update failed");
+      const updatedExpense = await res.json();
+      set((state) => {
+        const filtered = state.expenses.filter((e) => e._id !== expenseId);
+        return { expenses: [updatedExpense, ...filtered] };
+      });
+    } catch (err) {
+      console.error("Update expense failed:", err);
+      throw err;
+    }
+  },
+
   deleteExpense: async (expenseId) => {
     const { token } = get();
     try {
@@ -1342,6 +1397,29 @@ export const useStore = create<DashboardState>((set, get) => ({
         method: "PUT",
         headers: getHeaders(token),
         body: JSON.stringify({ status }),
+      });
+      if (!res.ok) throw new Error("Purchase update failed");
+      const updatedPurchase = await res.json();
+      set((state) => {
+        const filtered = state.purchases.filter((p) => p._id !== purchaseId);
+        return { purchases: [updatedPurchase, ...filtered] };
+      });
+    } catch (err) {
+      console.error("Update purchase failed:", err);
+      throw err;
+    }
+  },
+
+  updatePurchase: async (purchaseId, purchaseData) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/purchases/${purchaseId}`, {
+        method: "PUT",
+        headers: {
+          ...getHeaders(token),
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(purchaseData),
       });
       if (!res.ok) throw new Error("Purchase update failed");
       const updatedPurchase = await res.json();
@@ -1518,19 +1596,64 @@ export const useStore = create<DashboardState>((set, get) => ({
     }
   },
 
-  addQuickNote: (note) => {
-    set((state) => {
-      const updatedNotes = [note, ...state.quickNotes];
-      localStorage.setItem("quickNotes", JSON.stringify(updatedNotes));
-      return { quickNotes: updatedNotes };
-    });
+  fetchQuickNotes: async () => {
+    const { token } = get();
+    console.log("[QuickNotes] Fetching... token exists:", !!token);
+    try {
+      const res = await fetch(`${API_URL}/api/notes`, {
+        headers: getHeaders(token),
+      });
+      console.log("[QuickNotes] Response status:", res.status);
+      if (!res.ok) {
+        console.error("[QuickNotes] Failed with status:", res.status);
+        return;
+      }
+      const data = await res.json();
+      console.log("[QuickNotes] Data received:", data, "isArray:", Array.isArray(data), "length:", Array.isArray(data) ? data.length : "N/A");
+      // Handle both raw array and wrapped { notes: [...] } responses
+      const notes = Array.isArray(data) ? data : (Array.isArray(data?.notes) ? data.notes : []);
+      set({ quickNotes: notes });
+    } catch (err) {
+      console.error("[QuickNotes] Fetch failed:", err);
+      // Don't reset quickNotes to [] on error — preserve any existing data
+    }
   },
 
-  deleteQuickNote: (index) => {
-    set((state) => {
-      const updatedNotes = state.quickNotes.filter((_, idx) => idx !== index);
-      localStorage.setItem("quickNotes", JSON.stringify(updatedNotes));
-      return { quickNotes: updatedNotes };
-    });
+  addQuickNote: async (noteText) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/notes`, {
+        method: "POST",
+        headers: getHeaders(token),
+        body: JSON.stringify({ text: noteText }),
+      });
+      if (!res.ok) throw new Error("Failed to add quick note");
+      const data = await res.json();
+      set((state) => {
+        const currentNotes = Array.isArray(state.quickNotes) ? state.quickNotes : [];
+        const filtered = currentNotes.filter((n) => n._id !== data._id);
+        return { quickNotes: [data, ...filtered] };
+      });
+    } catch (err) {
+      console.error("Add quick note failed:", err);
+      throw err;
+    }
+  },
+
+  deleteQuickNote: async (id) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/notes/${id}`, {
+        method: "DELETE",
+        headers: getHeaders(token),
+      });
+      if (!res.ok) throw new Error("Failed to delete quick note");
+      set((state) => ({
+        quickNotes: (Array.isArray(state.quickNotes) ? state.quickNotes : []).filter((n) => n._id !== id),
+      }));
+    } catch (err) {
+      console.error("Delete quick note failed:", err);
+      throw err;
+    }
   },
 }));

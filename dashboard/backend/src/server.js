@@ -18,6 +18,7 @@ import Expense from "./models/Expense.js";
 import Purchase from "./models/Purchase.js";
 import InventoryItem from "./models/InventoryItem.js";
 import Quotation from "./models/Quotation.js";
+import QuickNote from "./models/QuickNote.js";
 
 // Middleware
 import { protect, admin } from "./middleware/auth.js";
@@ -105,6 +106,17 @@ async function syncOrderSale(order, userId) {
         const populatedSale = await Sale.findById(sale._id).populate("createdBy", "name role");
         triggerPusher("sale_created", populatedSale);
         await logActivity(userId || order.createdBy, "Sale Logged", `Logged sale from approved order for "${order.productName}" (Rs. ${order.totalPrice.toLocaleString()})`);
+      } else {
+        existingSale.clientName = order.customerName;
+        existingSale.productName = order.productName;
+        existingSale.amount = order.totalPrice;
+        existingSale.paymentMethod = order.paymentMethod || "cash";
+        existingSale.notes = order.manufacturingNotes || `Automatic sale from approved order: ${order.productName}`;
+        await existingSale.save();
+        
+        const populatedSale = await Sale.findById(existingSale._id).populate("createdBy", "name role");
+        triggerPusher("sale_created", populatedSale);
+        await logActivity(userId || order.createdBy, "Sale Updated", `Updated sale details from approved order for "${order.productName}" (Rs. ${order.totalPrice.toLocaleString()})`);
       }
     } else {
       // If not approved, remove any corresponding sale
@@ -1372,6 +1384,7 @@ app.put("/api/orders/:id", protect, admin, async (req, res) => {
     if (manufacturingNotes !== undefined) order.manufacturingNotes = manufacturingNotes;
 
     await order.save();
+    await syncOrderSale(order, req.user._id);
 
     const populatedOrder = await Order.findById(order._id)
       .populate("createdBy", "name role")
@@ -1571,6 +1584,30 @@ app.post("/api/expenses", protect, admin, async (req, res) => {
   }
 });
 
+app.put("/api/expenses/:id", protect, admin, async (req, res) => {
+  const { title, category, amount, date, description } = req.body;
+  try {
+    const expense = await Expense.findById(req.params.id);
+    if (!expense) return res.status(404).json({ message: "Expense not found" });
+
+    if (title !== undefined) expense.title = title;
+    if (category !== undefined) expense.category = category;
+    if (amount !== undefined) expense.amount = Number(amount) || 0;
+    if (date !== undefined) expense.date = date;
+    if (description !== undefined) expense.description = description;
+
+    await expense.save();
+
+    const populatedExpense = await Expense.findById(expense._id).populate("createdBy", "name role");
+    triggerPusher("expense_updated", populatedExpense);
+    await logActivity(req.user._id, "Expense Updated", `Updated expense log "${expense.title}" (Rs. ${expense.amount.toLocaleString()})`);
+
+    res.json(populatedExpense);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 app.delete("/api/expenses/:id", protect, admin, async (req, res) => {
   try {
     const expense = await Expense.findById(req.params.id);
@@ -1621,16 +1658,23 @@ app.post("/api/purchases", protect, admin, async (req, res) => {
 });
 
 app.put("/api/purchases/:id", protect, admin, async (req, res) => {
-  const { status } = req.body;
+  const { supplier, itemDetails, amount, date, status, items } = req.body;
   try {
     const purchase = await Purchase.findById(req.params.id);
     if (!purchase) return res.status(404).json({ message: "Purchase not found" });
-    purchase.status = status || purchase.status;
+    
+    if (supplier !== undefined) purchase.supplier = supplier;
+    if (itemDetails !== undefined) purchase.itemDetails = itemDetails;
+    if (amount !== undefined) purchase.amount = Number(amount) || 0;
+    if (date !== undefined) purchase.date = date;
+    if (status !== undefined) purchase.status = status;
+    if (items !== undefined) purchase.items = items;
+    
     await purchase.save();
 
     const populatedPurchase = await Purchase.findById(purchase._id).populate("createdBy", "name role");
     triggerPusher("purchase_updated", populatedPurchase);
-    await logActivity(req.user._id, "Purchase Updated", `Updated purchase status from "${purchase.supplier}" to ${status.toUpperCase()}`);
+    await logActivity(req.user._id, "Purchase Updated", `Updated purchase details for "${purchase.supplier}" (Rs. ${purchase.amount.toLocaleString()})`);
 
     res.json(populatedPurchase);
   } catch (error) {
@@ -1814,7 +1858,48 @@ app.get("/api/activities", protect, async (req, res) => {
 // Quick-Notes support
 app.get("/api/notes", protect, async (req, res) => {
   try {
-    res.json({ message: "Sticky notes are maintained locally on the client." });
+    const notes = await QuickNote.find({}).populate("createdBy", "name role").sort({ createdAt: -1 });
+    res.json(notes);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.post("/api/notes", protect, async (req, res) => {
+  const { text } = req.body;
+  try {
+    if (!text || !text.trim()) {
+      return res.status(400).json({ message: "Note text is required" });
+    }
+    const note = new QuickNote({
+      text: text.trim(),
+      createdBy: req.user._id,
+    });
+    await note.save();
+
+    const populatedNote = await QuickNote.findById(note._id).populate("createdBy", "name role");
+
+    // Broadcast to everyone via Pusher!
+    triggerPusher("note_created", populatedNote);
+
+    res.status(201).json(populatedNote);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.delete("/api/notes/:id", protect, async (req, res) => {
+  try {
+    const note = await QuickNote.findById(req.params.id);
+    if (!note) {
+      return res.status(404).json({ message: "Note not found" });
+    }
+    await QuickNote.deleteOne({ _id: req.params.id });
+
+    // Broadcast delete event via Pusher!
+    triggerPusher("note_deleted", req.params.id);
+
+    res.json({ message: "Note deleted successfully", id: req.params.id });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -50,3 +50,71 @@ h1, h2, h3, h4, h5, h6, .font-display {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--muted);
 }
+
+/* ──── MOBILE SIDEBAR SLIDE-IN ANIMATION ──── */
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ──── MODAL SCALE-UP ANIMATION ──── */
+@keyframes scaleUp {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-scale-up {
+  animation: scaleUp 0.2s ease-out forwards;
+}
+
+/* ──── MOBILE MODAL / POPUP FIXES ──── */
+/* ──── MOBILE MODAL / POPUP FIXES ──── */
+@media (max-width: 640px) {
+  /* Modal overlays — tighter padding on mobile */
+  .modal-overlay {
+    padding: 0.5rem !important;
+    align-items: flex-start !important;
+    padding-top: 2rem !important;
+  }
+
+  /* Modal inner containers — reduce padding, ensure scrollability */
+  .modal-overlay > div {
+    padding: 1rem !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    border-radius: 0.75rem !important;
+    margin: 0 !important;
+  }
+
+  /* Modal form grids — stack to single column on mobile */
+  .modal-overlay .grid-cols-2,
+  .modal-overlay .md\:grid-cols-2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Reduce modal header text size on mobile */
+  .modal-overlay h2 {
+    font-size: 0.95rem;
+  }
+
+  /* Ensure form inputs are full width */
+  .modal-overlay input,
+  .modal-overlay select,
+  .modal-overlay textarea {
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
+}
