@@ -192,7 +192,6 @@ const runSeeds = async () => {
 
 // Diagnostic endpoint to check configuration status
 app.get("/api/auth/status", async (req, res) => {
-  const dbState = mongoose.connection?.readyState;
   const states = {
     0: "disconnected",
     1: "connected",
@@ -216,56 +215,79 @@ app.get("/api/auth/status", async (req, res) => {
     return str.substring(0, 15) + "..." + str.substring(str.length - 15);
   };
 
+  let connectError = null;
+  try {
+    await connectDB();
+  } catch (err) {
+    connectError = err.message;
+  }
+
+  const dbState = mongoose.connection?.readyState;
+
   const status = {
     dbConnected: dbState === 1,
     dbState: states[dbState] || "unknown",
+    connectError,
     envKeysAvailable: envKeys,
     envAdminPasswordDefined: !!process.env.SEED_ADMIN_PASSWORD,
-    envAdminPasswordLength: process.env.SEED_ADMIN_PASSWORD ? process.env.SEED_ADMIN_PASSWORD.length : 0,
     envStaffPasswordDefined: !!process.env.SEED_STAFF_PASSWORD,
-    envStaffPasswordLength: process.env.SEED_STAFF_PASSWORD ? process.env.SEED_STAFF_PASSWORD.length : 0,
     envMongoUriDefined: !!process.env.MONGO_URI,
-    envMongoUriLength: process.env.MONGO_URI ? process.env.MONGO_URI.length : 0,
     envMongoUriMasked: maskString(process.env.MONGO_URI),
-    envMongodbUriDefined: !!process.env.MONGODB_URI,
-    envMongodbUriLength: process.env.MONGODB_URI ? process.env.MONGODB_URI.length : 0,
-    envMongodbUriMasked: maskString(process.env.MONGODB_URI),
     envJwtSecretDefined: !!process.env.JWT_SECRET,
-    envJwtSecretLength: process.env.JWT_SECRET ? process.env.JWT_SECRET.length : 0,
-    inventorySeedPathsChecked: [
-      path.join(__dirname, "inventorySeed.json"),
-      path.join(process.cwd(), "dashboard/backend/src/inventorySeed.json"),
-      path.join(process.cwd(), "src/inventorySeed.json")
-    ].map(p => ({
-      path: p,
-      exists: fs.existsSync(p)
-    }))
   };
 
   if (dbState !== 1) {
-    return res.json({
-      ...status,
-      adminExists: false,
-      note: "Database is not connected; skipped query to avoid hanging"
-    });
+    return res.json(status);
   }
 
+  let seedError = null;
+  let userCount = 0;
+  let adminUserFound = null;
+  let inventoryCount = 0;
+  let runSeedSuccess = false;
+
   try {
-    const adminExists = await User.findOne({ email: "admin@ktmdecor.com" });
-    const staffExists = await User.findOne({ email: "staff@ktmdecor.com" });
-    res.json({
-      ...status,
-      adminExists: !!adminExists,
-      staffExists: !!staffExists,
-    });
+    userCount = await User.countDocuments();
+    inventoryCount = await InventoryItem.countDocuments();
+    adminUserFound = await User.findOne({ role: "admin" });
+
+    const pathsToTry = [
+      path.join(__dirname, "inventorySeed.json"),
+      path.join(process.cwd(), "dashboard/backend/src/inventorySeed.json"),
+      path.join(process.cwd(), "src/inventorySeed.json")
+    ];
+    let resolvedPath = "";
+    for (const p of pathsToTry) {
+      if (fs.existsSync(p)) {
+        resolvedPath = p;
+        break;
+      }
+    }
+
+    if (resolvedPath && adminUserFound && inventoryCount === 0) {
+      const rawData = fs.readFileSync(resolvedPath, "utf8");
+      const seedData = JSON.parse(rawData);
+      const itemsToInsert = seedData.map((item) => ({
+        ...item,
+        createdBy: adminUserFound._id,
+      }));
+      await InventoryItem.insertMany(itemsToInsert);
+      inventoryCount = await InventoryItem.countDocuments();
+      runSeedSuccess = true;
+    }
   } catch (error) {
-    res.json({
-      ...status,
-      adminExists: false,
-      staffExists: false,
-      error: error.message
-    });
+    seedError = error.message;
   }
+
+  res.json({
+    ...status,
+    userCount,
+    adminUserFound: !!adminUserFound,
+    adminEmail: adminUserFound ? adminUserFound.email : "none",
+    inventoryCount,
+    seedError,
+    runSeedSuccess
+  });
 });
 
 // Middleware to ensure database connection in serverless environment
