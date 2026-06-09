@@ -4,6 +4,12 @@ import cors from "cors";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import Pusher from "pusher";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Models
 import User from "./models/User.js";
@@ -63,25 +69,31 @@ const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI || "mongodb:/
 
 // Database Connection Caching for Serverless
 let cachedDb = null;
-const connectDB = async () => {
-  if (cachedDb && mongoose.connection?.readyState === 1) return cachedDb;
-  if (!MONGO_URI) throw new Error("MONGO_URI or MONGODB_URI environment variable is not defined");
-  mongoose.set("strictQuery", true);
+let connectionPromise = null;
 
-  // Clean up any stale or half-open connections before reconnecting
-  if (mongoose.connection?.readyState !== 0) {
-    try {
-      await mongoose.disconnect();
-    } catch (err) {
-      console.warn("Error disconnecting stale connection:", err);
+const connectDB = async () => {
+  if (mongoose.connection?.readyState === 1) return mongoose.connection;
+  if (mongoose.connection?.readyState === 2) {
+    if (connectionPromise) {
+      return connectionPromise;
     }
   }
 
-  const conn = await mongoose.connect(MONGO_URI, {
-    serverSelectionTimeoutMS: 5000, // Timeout after 5 seconds instead of 30 seconds
+  if (!MONGO_URI) throw new Error("MONGO_URI or MONGODB_URI environment variable is not defined");
+  mongoose.set("strictQuery", true);
+
+  connectionPromise = mongoose.connect(MONGO_URI, {
+    serverSelectionTimeoutMS: 5000,
+  }).then((conn) => {
+    connectionPromise = null;
+    cachedDb = conn;
+    return conn;
+  }).catch((err) => {
+    connectionPromise = null;
+    throw err;
   });
-  cachedDb = conn;
-  return conn;
+
+  return connectionPromise;
 };
 
 // Sync manual registry order to Sales ledger
@@ -169,6 +181,7 @@ const runSeeds = async () => {
   // Let errors bubble up to database middleware so it fails gracefully with a 500 status code
   await seedUsers();
   await seedProducts();
+  await seedInventoryItems();
   await syncExistingApprovedOrders();
   seeded = true;
   console.log("Database seeded successfully");
@@ -256,6 +269,99 @@ app.use(async (req, res, next) => {
       message: "Database connection failed",
       error: err.message 
     });
+  }
+});
+
+// ─── DASHBOARD BOOTSTRAP ENDPOINT ─────────────────────────────
+app.get("/api/bootstrap", protect, async (req, res) => {
+  try {
+    const userRole = req.user.role;
+    const userEmail = req.user.email;
+    const userId = req.user._id;
+
+    // 1. Build tasks query
+    let taskQuery = { deleted: { $ne: true } };
+    if (userRole !== "admin") {
+      if (userEmail === "staff@ktmdecor.com") {
+        const staffUsers = await User.find({ role: "staff" }).select("_id");
+        const staffIds = staffUsers.map((u) => u._id);
+        taskQuery = { assignee: { $in: [userId, ...staffIds] }, deleted: { $ne: true } };
+      } else {
+        taskQuery = { assignee: userId, deleted: { $ne: true } };
+      }
+    }
+
+    // 2. Build notifications query
+    let notifQuery = {};
+    if (userEmail === "staff@ktmdecor.com") {
+      const staffUsers = await User.find({ role: "staff" }).select("_id");
+      const staffIds = staffUsers.map((u) => u._id);
+      notifQuery = {
+        $or: [
+          { recipient: userId },
+          { recipient: { $in: staffIds } },
+          { recipient: null }
+        ]
+      };
+    } else {
+      notifQuery = {
+        $or: [{ recipient: userId }, { recipient: null }]
+      };
+    }
+
+    // 3. Define parallel database queries
+    const promises = {
+      tasks: Task.find(taskQuery)
+        .populate("assignee", "name email role")
+        .populate("createdBy", "name role")
+        .sort({ pinned: -1, createdAt: -1 }),
+      users: User.find({}).select("name email role"),
+      notifications: Notification.find(notifQuery).sort({ createdAt: -1 }),
+      campaigns: MarketingCampaign.find({ deleted: { $ne: true } })
+        .populate("createdBy", "name role")
+        .sort({ scheduledDate: 1 }),
+      activities: ActivityLog.find({})
+        .populate("user", "name email role")
+        .sort({ createdAt: -1 })
+        .limit(30),
+      products: Product.find({}).sort({ createdAt: -1 }),
+      orders: Order.find({ deleted: { $ne: true } })
+        .populate("createdBy", "name role")
+        .populate("assignee", "name email role")
+        .sort({ createdAt: -1 }),
+      inventoryItems: InventoryItem.find({})
+        .populate("createdBy", "name role")
+        .sort({ name: 1 }),
+      quickNotes: QuickNote.find({})
+        .populate("createdBy", "name role")
+        .sort({ createdAt: -1 }),
+    };
+
+    // 4. Inject admin-only data
+    if (userRole === "admin") {
+      promises.sales = Sale.find({}).populate("createdBy", "name role").populate("orderId").sort({ date: -1 });
+      promises.expenses = Expense.find({}).populate("createdBy", "name role").sort({ date: -1 });
+      promises.purchases = Purchase.find({}).populate("createdBy", "name role").sort({ date: -1 });
+      promises.quotations = Quotation.find({}).populate("createdBy", "name role").sort({ date: -1 });
+      
+      promises.binTasks = Task.find({ deleted: true }).populate("assignee", "name email role").populate("createdBy", "name role");
+      promises.binCampaigns = MarketingCampaign.find({ deleted: true }).populate("createdBy", "name role");
+      promises.binOrders = Order.find({ deleted: true }).populate("assignee", "name email role").populate("createdBy", "name role");
+    }
+
+    // 5. Query all collections concurrently
+    const keys = Object.keys(promises);
+    const results = await Promise.all(Object.values(promises));
+    
+    // 6. Map results to keys
+    const payload = {};
+    keys.forEach((key, index) => {
+      payload[key] = results[index];
+    });
+
+    res.json(payload);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 
@@ -578,6 +684,41 @@ const seedProducts = async () => {
     }
   } catch (error) {
     console.error("Error seeding products:", error);
+  }
+};
+
+// Seed default inventory items if DB is empty (initializes items from JSON file)
+const seedInventoryItems = async () => {
+  try {
+    const itemCount = await InventoryItem.countDocuments();
+    if (itemCount === 0) {
+      console.log("Seeding default inventory items from inventorySeed.json...");
+      // Find an admin user to assign as creator
+      const adminUser = await User.findOne({ role: "admin" });
+      if (!adminUser) {
+        console.warn("Skipping inventory seeding: no admin user found.");
+        return;
+      }
+
+      const seedFilePath = path.join(__dirname, "inventorySeed.json");
+      if (!fs.existsSync(seedFilePath)) {
+        console.warn(`Skipping inventory seeding: ${seedFilePath} not found.`);
+        return;
+      }
+
+      const rawData = fs.readFileSync(seedFilePath, "utf8");
+      const seedData = JSON.parse(rawData);
+
+      const itemsToInsert = seedData.map((item) => ({
+        ...item,
+        createdBy: adminUser._id,
+      }));
+
+      await InventoryItem.insertMany(itemsToInsert);
+      console.log(`Seeded ${itemsToInsert.length} inventory items into MongoDB successfully.`);
+    }
+  } catch (error) {
+    console.error("Error seeding inventory items:", error);
   }
 };
 

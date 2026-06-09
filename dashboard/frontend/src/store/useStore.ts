@@ -236,6 +236,7 @@ interface DashboardState {
   
   // Actions
   init: () => void;
+  bootstrap: () => Promise<void>;
   setActiveStaffProfile: (profile: User | null) => void;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
@@ -406,22 +407,7 @@ export const useStore = create<DashboardState>((set, get) => ({
     }
 
     if (token && user) {
-      get().fetchTasks();
-      get().fetchUsers();
-      get().fetchNotifications();
-      get().fetchCampaigns();
-      get().fetchActivities();
-      get().fetchProducts();
-      get().fetchOrders();
-      get().fetchInventoryItems();
-      get().fetchQuickNotes();
-      if (user.role === "admin") {
-        get().fetchSales();
-        get().fetchExpenses();
-        get().fetchPurchases();
-        get().fetchQuotations();
-        get().fetchBin();
-      }
+      get().bootstrap();
       
       // Connect Pusher (cleanup previous connection if any)
       const existingPusher = get().pusher;
@@ -697,6 +683,41 @@ export const useStore = create<DashboardState>((set, get) => ({
       });
 
       set({ pusher });
+    }
+  },
+
+  bootstrap: async () => {
+    const { token, user } = get();
+    if (!token || !user) return;
+    try {
+      const res = await fetch(`${API_URL}/api/bootstrap`, {
+        headers: getHeaders(token),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        set({
+          tasks: sortTasks(data.tasks || []),
+          users: data.users || [],
+          notifications: data.notifications || [],
+          campaigns: data.campaigns || [],
+          activities: data.activities || [],
+          products: data.products || [],
+          orders: data.orders || [],
+          inventoryItems: data.inventoryItems || [],
+          quickNotes: Array.isArray(data.quickNotes) ? data.quickNotes : [],
+          ...(user.role === "admin" ? {
+            sales: data.sales || [],
+            expenses: data.expenses || [],
+            purchases: data.purchases || [],
+            quotations: data.quotations || [],
+            binTasks: data.binTasks || [],
+            binCampaigns: data.binCampaigns || [],
+            binOrders: data.binOrders || [],
+          } : {})
+        });
+      }
+    } catch (err) {
+      console.error("Dashboard bootstrap failed:", err);
     }
   },
 
