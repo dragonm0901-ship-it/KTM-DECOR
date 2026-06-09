@@ -17,15 +17,13 @@ export const protect = async (req, res, next) => {
       if (!req.user) {
         return res.status(401).json({ message: "Not authorized, user not found" });
       }
-      next();
+      return next();
     } catch (error) {
       console.error("Auth middleware error:", error);
-      res.status(401).json({ message: "Not authorized, token failed" });
+      return res.status(401).json({ message: "Not authorized, token failed" });
     }
-  }
-
-  if (!token) {
-    res.status(401).json({ message: "Not authorized, no token provided" });
+  } else {
+    return res.status(401).json({ message: "Not authorized, no token provided" });
   }
 };
 

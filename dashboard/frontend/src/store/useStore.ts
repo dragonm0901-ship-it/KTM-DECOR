@@ -729,7 +729,9 @@ export const useStore = create<DashboardState>((set, get) => ({
         body: JSON.stringify({ email, password }),
       });
       if (!res.ok) {
-        throw new Error("Invalid credentials");
+        const errData = await res.json().catch(() => ({ message: "Unknown error" }));
+        console.error("Login failed:", res.status, errData.message);
+        throw new Error(errData.message || "Invalid credentials");
       }
       const data = await res.json();
       localStorage.setItem("token", data.token);
@@ -1155,7 +1157,11 @@ export const useStore = create<DashboardState>((set, get) => ({
         headers: getHeaders(token),
         body: JSON.stringify(orderData),
       });
-      if (!res.ok) throw new Error("Order creation failed");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({ message: "Unknown error" }));
+        console.error("Order creation failed:", res.status, errData.message);
+        throw new Error(errData.message || "Order creation failed");
+      }
       const newOrder = await res.json();
       set((state) => {
         const filtered = state.orders.filter((o) => o._id !== newOrder._id);
@@ -1568,7 +1574,11 @@ export const useStore = create<DashboardState>((set, get) => ({
         headers: getHeaders(token),
         body: JSON.stringify(quotationData),
       });
-      if (!res.ok) throw new Error("Quotation creation failed");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({ message: "Unknown error" }));
+        console.error("Quotation creation failed:", res.status, errData.message);
+        throw new Error(errData.message || "Quotation creation failed");
+      }
       const newQuotation = await res.json();
       set((state) => {
         const filtered = state.quotations.filter((q) => q._id !== newQuotation._id);

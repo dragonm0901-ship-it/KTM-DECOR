@@ -4,6 +4,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import Pusher from "pusher";
+import bcrypt from "bcryptjs";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -410,6 +411,19 @@ const logActivity = async (userId, action, details) => {
   }
 };
 
+// Helper: only update a user's password if the stored hash doesn't match the env variable.
+// This prevents the double-hashing bug that corrupts credentials on every cold start.
+const syncPasswordIfNeeded = async (user, envPassword) => {
+  if (!envPassword) return false;
+  const alreadyMatches = await bcrypt.compare(envPassword, user.password);
+  if (alreadyMatches) return false;
+  // Password mismatch — update it (pre-save hook will hash it)
+  user.password = envPassword;
+  await user.save();
+  console.log(`  ↳ Password synced for ${user.email}`);
+  return true;
+};
+
 // Seed default users if DB is empty
 const seedUsers = async () => {
   try {
@@ -425,9 +439,9 @@ const seedUsers = async () => {
         password: process.env.SEED_ADMIN_PASSWORD || "adminpassword",
         role: "admin",
       });
-    } else if (process.env.SEED_ADMIN_PASSWORD) {
-      adminExists.password = process.env.SEED_ADMIN_PASSWORD;
-      await adminExists.save();
+      console.log("  ↳ Created admin user: admin@ktmdecor.com");
+    } else {
+      await syncPasswordIfNeeded(adminExists, process.env.SEED_ADMIN_PASSWORD);
     }
 
     // Seed Shared Staff Login user
@@ -439,9 +453,9 @@ const seedUsers = async () => {
         password: process.env.SEED_STAFF_PASSWORD || "staffpassword",
         role: "staff",
       });
-    } else if (process.env.SEED_STAFF_PASSWORD) {
-      sharedStaffExists.password = process.env.SEED_STAFF_PASSWORD;
-      await sharedStaffExists.save();
+      console.log("  ↳ Created shared staff user: staff@ktmdecor.com");
+    } else {
+      await syncPasswordIfNeeded(sharedStaffExists, process.env.SEED_STAFF_PASSWORD);
     }
 
     // Seed the 6 Nepali staff members
@@ -463,9 +477,8 @@ const seedUsers = async () => {
           password: process.env.SEED_STAFF_PASSWORD || "staffpassword",
           role: "staff",
         });
-      } else if (process.env.SEED_STAFF_PASSWORD) {
-        exists.password = process.env.SEED_STAFF_PASSWORD;
-        await exists.save();
+      } else {
+        await syncPasswordIfNeeded(exists, process.env.SEED_STAFF_PASSWORD);
       }
     }
 

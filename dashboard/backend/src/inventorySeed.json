@@ -1,0 +1,590 @@
+[
+  {
+    "name": "Red Neon",
+    "category": "Neon Lights",
+    "quantity": 5,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Green Neon",
+    "category": "Neon Lights",
+    "quantity": 8,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Blue Neon",
+    "category": "Neon Lights",
+    "quantity": 9,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "White Neon",
+    "category": "Neon Lights",
+    "quantity": 11,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Warm Neon",
+    "category": "Neon Lights",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Yellow Neon",
+    "category": "Neon Lights",
+    "quantity": 8,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Orange Neon",
+    "category": "Neon Lights",
+    "quantity": 8,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Pink Neon",
+    "category": "Neon Lights",
+    "quantity": 5,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Purple Neon",
+    "category": "Neon Lights",
+    "quantity": 7,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Ice Blue",
+    "category": "Neon Lights",
+    "quantity": 5,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "RGB Neon",
+    "category": "Neon Lights",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "1A Adapter (12 Volt ,12 Watt)",
+    "category": "Adapters",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "2A Adapter ( 12 Volt, 24 Watt)",
+    "category": "Adapters",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "3A Adapter ( 12 Volt, 36 Watt)",
+    "category": "Adapters",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "5A Adapter ( 12 Volt, 60 Watt)",
+    "category": "Adapters",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "10A Adapter (12 Volt, 120 Watt)",
+    "category": "Adapters",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "200 Watt Adapter ( 12 Volt)",
+    "category": "Adapters",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "300 Watt Adapter ( 12 Volt)",
+    "category": "Adapters",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "400 Watt Adapter ( 12 Volt)",
+    "category": "Adapters",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "500 Watt Adapter ( 12 Volt)",
+    "category": "Adapters",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Dimmer",
+    "category": "Adapters",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Photo Sensor",
+    "category": "Adapters",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "AC LED ( 220 Volt), 3 meter long",
+    "category": "LED Lights",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "White LED Strip",
+    "category": "LED Lights",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Warm LED Strip",
+    "category": "LED Lights",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "White Modular",
+    "category": "LED Lights",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Warm Modular",
+    "category": "LED Lights",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "RGB LED",
+    "category": "LED Lights",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "RGB Modular",
+    "category": "LED Lights",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "4mm Clear Acrylic",
+    "category": "Acrylic Sheet",
+    "quantity": 0,
+    "unit": "sheets",
+    "alertLevel": 5
+  },
+  {
+    "name": "3mm Clear Acrylic",
+    "category": "Acrylic Sheet",
+    "quantity": 0,
+    "unit": "sheets",
+    "alertLevel": 5
+  },
+  {
+    "name": "Clear Acrylic",
+    "category": "Acrylic Sheet",
+    "quantity": 0,
+    "unit": "sheets",
+    "alertLevel": 5
+  },
+  {
+    "name": "White Acrylic",
+    "category": "Acrylic Sheet",
+    "quantity": 0,
+    "unit": "sheets",
+    "alertLevel": 5
+  },
+  {
+    "name": "Red Acrylic",
+    "category": "Acrylic Sheet",
+    "quantity": 0,
+    "unit": "sheets",
+    "alertLevel": 5
+  },
+  {
+    "name": "Black Acrylic",
+    "category": "Acrylic Sheet",
+    "quantity": 0,
+    "unit": "sheets",
+    "alertLevel": 5
+  },
+  {
+    "name": "Golden Acrylic",
+    "category": "Acrylic Sheet",
+    "quantity": 0,
+    "unit": "sheets",
+    "alertLevel": 5
+  },
+  {
+    "name": "Blue Acrylic",
+    "category": "Acrylic Sheet",
+    "quantity": 0,
+    "unit": "sheets",
+    "alertLevel": 5
+  },
+  {
+    "name": "Green Acrylic",
+    "category": "Acrylic Sheet",
+    "quantity": 0,
+    "unit": "sheets",
+    "alertLevel": 5
+  },
+  {
+    "name": "Ice Blue Acrylic",
+    "category": "Acrylic Sheet",
+    "quantity": 0,
+    "unit": "sheets",
+    "alertLevel": 5
+  },
+  {
+    "name": "Yellow Acrylic",
+    "category": "Acrylic Sheet",
+    "quantity": 0,
+    "unit": "sheets",
+    "alertLevel": 5
+  },
+  {
+    "name": "Orange Acrylic",
+    "category": "Acrylic Sheet",
+    "quantity": 0,
+    "unit": "sheets",
+    "alertLevel": 5
+  },
+  {
+    "name": "Pink Acrylic",
+    "category": "Acrylic Sheet",
+    "quantity": 0,
+    "unit": "sheets",
+    "alertLevel": 5
+  },
+  {
+    "name": "Black ACP",
+    "category": "ACP Board",
+    "quantity": 0,
+    "unit": "sheets",
+    "alertLevel": 5
+  },
+  {
+    "name": "White ACP",
+    "category": "ACP Board",
+    "quantity": 0,
+    "unit": "sheets",
+    "alertLevel": 5
+  },
+  {
+    "name": "Blue ACP",
+    "category": "ACP Board",
+    "quantity": 0,
+    "unit": "sheets",
+    "alertLevel": 5
+  },
+  {
+    "name": "Red ACP",
+    "category": "ACP Board",
+    "quantity": 0,
+    "unit": "sheets",
+    "alertLevel": 5
+  },
+  {
+    "name": "Brown ACP",
+    "category": "ACP Board",
+    "quantity": 0,
+    "unit": "sheets",
+    "alertLevel": 5
+  },
+  {
+    "name": "Orange ACP",
+    "category": "ACP Board",
+    "quantity": 0,
+    "unit": "sheets",
+    "alertLevel": 5
+  },
+  {
+    "name": "2mm Foamex",
+    "category": "Foamex Board",
+    "quantity": 0,
+    "unit": "sheets",
+    "alertLevel": 5
+  },
+  {
+    "name": "3mm Foamex",
+    "category": "Foamex Board",
+    "quantity": 0,
+    "unit": "sheets",
+    "alertLevel": 5
+  },
+  {
+    "name": "4mm Foamex",
+    "category": "Foamex Board",
+    "quantity": 0,
+    "unit": "sheets",
+    "alertLevel": 5
+  },
+  {
+    "name": "5mm Foamex",
+    "category": "Foamex Board",
+    "quantity": 0,
+    "unit": "sheets",
+    "alertLevel": 5
+  },
+  {
+    "name": "6mm Foamex",
+    "category": "Foamex Board",
+    "quantity": 0,
+    "unit": "sheets",
+    "alertLevel": 5
+  },
+  {
+    "name": "Saal Wood",
+    "category": "Wood",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Pine Wood",
+    "category": "Wood",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Rubber Wood",
+    "category": "Wood",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "MDF",
+    "category": "Wood",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Laminated MDF",
+    "category": "Wood",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Natural Teak Ply",
+    "category": "Wood",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Transparent Wire",
+    "category": "Wires",
+    "quantity": 0,
+    "unit": "meters",
+    "alertLevel": 5
+  },
+  {
+    "name": "B/W Wire",
+    "category": "Wires",
+    "quantity": 0,
+    "unit": "meters",
+    "alertLevel": 5
+  },
+  {
+    "name": "Solder Wire",
+    "category": "Wires",
+    "quantity": 0,
+    "unit": "meters",
+    "alertLevel": 5
+  },
+  {
+    "name": "Paper Cutter",
+    "category": "Cutter",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Wire Cutter",
+    "category": "Cutter",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Wire Stipper",
+    "category": "Cutter",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Packaging Tape",
+    "category": "Packaging",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Wrapping Plastic",
+    "category": "Packaging",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Bubble Wrap",
+    "category": "Packaging",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Packaging Cardboard ( Cartoon )",
+    "category": "Packaging",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Vega",
+    "category": "Glue & Remover",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Vega Remover",
+    "category": "Glue & Remover",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Syringe",
+    "category": "Glue & Remover",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Black Screw ( 1 Inch )",
+    "category": "Fitting",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Black Screw ( 1/2 Inch )",
+    "category": "Fitting",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Black Screw ( 1.5 inch )",
+    "category": "Fitting",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Self drill Screw ( 1 inch )",
+    "category": "Fitting",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Self drill Screw ( 1.5 inch )",
+    "category": "Fitting",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "L angles",
+    "category": "Fitting",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Chain",
+    "category": "Fitting",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Mounting Hook",
+    "category": "Fitting",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Grip",
+    "category": "Fitting",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Double Sided Tape",
+    "category": "Fitting",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "Insulation Tape",
+    "category": "Fitting",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  },
+  {
+    "name": "",
+    "category": "General",
+    "quantity": 0,
+    "unit": "pcs",
+    "alertLevel": 5
+  }
+]
