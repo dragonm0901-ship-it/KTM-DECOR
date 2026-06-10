@@ -27,6 +27,7 @@ import Purchase from "./models/Purchase.js";
 import InventoryItem from "./models/InventoryItem.js";
 import Quotation from "./models/Quotation.js";
 import QuickNote from "./models/QuickNote.js";
+import MonthlyStatement from "./models/MonthlyStatement.js";
 
 // Middleware
 import { protect, admin } from "./middleware/auth.js";
@@ -91,6 +92,10 @@ const connectDB = async () => {
   }).then((conn) => {
     connectionPromise = null;
     cachedDb = conn;
+    // Auto-generate missing monthly statements for previous month
+    generateMissingPreviousMonthStatements().catch((err) => {
+      console.error("Auto statement generation error:", err);
+    });
     return conn;
   }).catch((err) => {
     connectionPromise = null;
@@ -2213,6 +2218,266 @@ app.delete("/api/notes/:id", protect, async (req, res) => {
 });
 
 
+// Helper to get previous month and year (1-based month)
+function getPreviousMonthAndYear() {
+  const now = new Date();
+  let month = now.getMonth();
+  let year = now.getFullYear();
+  if (month === 0) {
+    month = 12;
+    year -= 1;
+  }
+  return { month, year };
+}
+
+// Helper to generate CSV text content for a statement type, month, and year
+async function generateStatementCSVText(type, month, year) {
+  let dateFilter = {};
+  const mNum = parseInt(month, 10);
+  const yNum = parseInt(year, 10);
+  const startOfMonth = new Date(Date.UTC(yNum, mNum - 1, 1, 0, 0, 0));
+  const endOfMonth = new Date(Date.UTC(yNum, mNum, 0, 23, 59, 59, 999));
+  dateFilter = { date: { $gte: startOfMonth, $lte: endOfMonth } };
+
+  let sales = [];
+  let expenses = [];
+  let purchases = [];
+
+  if (type === "all" || type === "sales") {
+    sales = await Sale.find(dateFilter).sort({ date: 1 });
+  }
+  if (type === "all" || type === "expenses") {
+    expenses = await Expense.find(dateFilter).sort({ date: 1 });
+  }
+  if (type === "all" || type === "purchases") {
+    purchases = await Purchase.find(dateFilter).sort({ date: 1 });
+  }
+
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+  const periodLabel = `${monthNames[mNum - 1]}_${yNum}`;
+  const cleanPeriodLabel = periodLabel.replace(/_/g, " ");
+
+  const workbook = new ExcelJS.Workbook();
+
+  if (type === "all") {
+    const sheet = workbook.addWorksheet("Combined Statement");
+    
+    sheet.addRow(["KTM DECOR - COMBINED STATEMENT"]);
+    sheet.addRow(["Statement Period:", cleanPeriodLabel]);
+    sheet.addRow(["Exported On:", new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString()]);
+    sheet.addRow([]);
+    
+    sheet.addRow(["METRIC SUMMARY", "AMOUNT (Rs.)", "RECORDS COUNT"]);
+    
+    const totalSales = sales.reduce((sum, s) => sum + s.amount, 0);
+    const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+    const totalPurchases = purchases.reduce((sum, p) => sum + p.amount, 0);
+    const netProfit = totalSales - totalExpenses - totalPurchases;
+    
+    sheet.addRow(["Total Sales Revenue", totalSales, sales.length]);
+    sheet.addRow(["Total Expenses Value", totalExpenses, expenses.length]);
+    sheet.addRow(["Total Purchases Value", totalPurchases, purchases.length]);
+    sheet.addRow(["NET OPERATING PROFIT / (LOSS)", netProfit, ""]);
+    sheet.addRow([]);
+    
+    sheet.addRow(["SALES LEDGER"]);
+    sheet.addRow(["S.N.", "Date", "Client Name", "Product", "Payment Method", "Amount (Rs.)", "Notes"]);
+    sales.forEach((s, idx) => {
+      sheet.addRow([
+        idx + 1,
+        new Date(s.date).toLocaleDateString(),
+        s.clientName,
+        s.productName,
+        s.paymentMethod.toUpperCase(),
+        s.amount,
+        s.notes || ""
+      ]);
+    });
+    sheet.addRow(["TOTAL", "", "", "", "", totalSales, ""]);
+    sheet.addRow([]);
+    
+    sheet.addRow(["EXPENSES LOG"]);
+    sheet.addRow(["S.N.", "Date", "Expense Item", "Category", "Amount (Rs.)", "Description"]);
+    expenses.forEach((e, idx) => {
+      sheet.addRow([
+        idx + 1,
+        new Date(e.date).toLocaleDateString(),
+        e.title,
+        e.category.toUpperCase(),
+        e.amount,
+        e.description || ""
+      ]);
+    });
+    sheet.addRow(["TOTAL", "", "", "", totalExpenses, ""]);
+    sheet.addRow([]);
+    
+    sheet.addRow(["PURCHASES LEDGER"]);
+    sheet.addRow(["S.N.", "Date", "Supplier", "Purchase Details", "Status", "Amount (Rs.)"]);
+    purchases.forEach((p, idx) => {
+      sheet.addRow([
+        idx + 1,
+        new Date(p.date).toLocaleDateString(),
+        p.supplier,
+        p.itemDetails,
+        p.status.toUpperCase(),
+        p.amount
+      ]);
+    });
+    sheet.addRow(["TOTAL", "", "", "", "", totalPurchases]);
+
+    const csvBuffer = await workbook.csv.writeBuffer();
+    return csvBuffer.toString("utf-8");
+  }
+
+  if (type === "sales") {
+    const salesSheet = workbook.addWorksheet("Sales Ledger");
+    salesSheet.columns = [
+      { header: "S.N.", key: "sn" },
+      { header: "Date", key: "date" },
+      { header: "Client Name", key: "clientName" },
+      { header: "Product", key: "productName" },
+      { header: "Payment Method", key: "paymentMethod" },
+      { header: "Amount (Rs.)", key: "amount" },
+      { header: "Notes", key: "notes" }
+    ];
+
+    sales.forEach((s, idx) => {
+      salesSheet.addRow({
+        sn: idx + 1,
+        date: new Date(s.date).toLocaleDateString(),
+        clientName: s.clientName,
+        productName: s.productName,
+        paymentMethod: s.paymentMethod.toUpperCase(),
+        amount: s.amount,
+        notes: s.notes || ""
+      });
+    });
+
+    const totalAmount = sales.reduce((sum, s) => sum + s.amount, 0);
+    salesSheet.addRow({
+      sn: "TOTAL",
+      date: "",
+      clientName: "",
+      productName: "",
+      paymentMethod: "",
+      amount: totalAmount,
+      notes: ""
+    });
+
+    const csvBuffer = await workbook.csv.writeBuffer();
+    return csvBuffer.toString("utf-8");
+  }
+
+  if (type === "expenses") {
+    const expensesSheet = workbook.addWorksheet("Expenses Log");
+    expensesSheet.columns = [
+      { header: "S.N.", key: "sn" },
+      { header: "Date", key: "date" },
+      { header: "Expense Item", key: "title" },
+      { header: "Category", key: "category" },
+      { header: "Amount (Rs.)", key: "amount" },
+      { header: "Description", key: "description" }
+    ];
+
+    expenses.forEach((e, idx) => {
+      expensesSheet.addRow({
+        sn: idx + 1,
+        date: new Date(e.date).toLocaleDateString(),
+        title: e.title,
+        category: e.category.toUpperCase(),
+        amount: e.amount,
+        description: e.description || ""
+      });
+    });
+
+    const totalAmount = expenses.reduce((sum, e) => sum + e.amount, 0);
+    expensesSheet.addRow({
+      sn: "TOTAL",
+      date: "",
+      title: "",
+      category: "",
+      amount: totalAmount,
+      description: ""
+    });
+
+    const csvBuffer = await workbook.csv.writeBuffer();
+    return csvBuffer.toString("utf-8");
+  }
+
+  if (type === "purchases") {
+    const purchasesSheet = workbook.addWorksheet("Purchases Ledger");
+    purchasesSheet.columns = [
+      { header: "S.N.", key: "sn" },
+      { header: "Date", key: "date" },
+      { header: "Supplier", key: "supplier" },
+      { header: "Purchase Details", key: "details" },
+      { header: "Status", key: "status" },
+      { header: "Amount (Rs.)", key: "amount" }
+    ];
+
+    purchases.forEach((p, idx) => {
+      purchasesSheet.addRow({
+        sn: idx + 1,
+        date: new Date(p.date).toLocaleDateString(),
+        supplier: p.supplier,
+        details: p.itemDetails,
+        status: p.status.toUpperCase(),
+        amount: p.amount
+      });
+    });
+
+    const totalAmount = purchases.reduce((sum, p) => sum + p.amount, 0);
+    purchasesSheet.addRow({
+      sn: "TOTAL",
+      date: "",
+      supplier: "",
+      details: "",
+      status: "",
+      amount: totalAmount
+    });
+
+    const csvBuffer = await workbook.csv.writeBuffer();
+    return csvBuffer.toString("utf-8");
+  }
+
+  return "";
+}
+
+// Function to generate and save missing statements for the previous month
+async function generateMissingPreviousMonthStatements() {
+  const { month, year } = getPreviousMonthAndYear();
+  const types = ["sales", "expenses", "purchases", "all"];
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+  const monthLabel = monthNames[month - 1];
+
+  for (const type of types) {
+    const exists = await MonthlyStatement.findOne({ month, year, type });
+    if (!exists) {
+      try {
+        const csvText = await generateStatementCSVText(type, month, year);
+        const filename = `${type}_statement_${monthLabel}_${year}.csv`;
+        
+        await MonthlyStatement.create({
+          month,
+          year,
+          type,
+          filename,
+          content: csvText
+        });
+        console.log(`Auto-generated monthly statement: ${filename}`);
+      } catch (err) {
+        console.error(`Error generating auto monthly statement for ${type} (${monthLabel} ${year}):`, err);
+      }
+    }
+  }
+}
+
 // Export monthly or all-time statements (Admin only) - Beautifully formatted with ExcelJS
 app.get("/api/export/statement", protect, admin, async (req, res) => {
   const { type = "all", month = "all", year = new Date().getFullYear().toString() } = req.query;
@@ -2457,6 +2722,39 @@ app.get("/api/export/statement", protect, admin, async (req, res) => {
   }
 });
 
+// Get all archived monthly statements (Admin only)
+app.get("/api/export/archives", protect, admin, async (req, res) => {
+  try {
+    // Lazy check: trigger auto-generator for previous month if missing
+    await generateMissingPreviousMonthStatements();
+    
+    // Fetch statement metadata, excluding content field
+    const archives = await MonthlyStatement.find({})
+      .select("-content")
+      .sort({ year: -1, month: -1, type: 1 });
+      
+    res.json(archives);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Download specific monthly statement archive by ID (Admin only)
+app.get("/api/export/archive/:id", protect, admin, async (req, res) => {
+  try {
+    const statement = await MonthlyStatement.findById(req.params.id);
+    if (!statement) {
+      return res.status(404).json({ message: "Statement archive not found" });
+    }
+    
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", `attachment; filename=${statement.filename}`);
+    res.send(statement.content);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Export inventory data as CSV (Any authenticated staff/admin can download) - Updated to ExcelJS
 app.get("/api/export/inventory", protect, async (req, res) => {
   try {
@@ -2512,6 +2810,17 @@ if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
     .catch((err) => {
       console.error("Failed to start local database/server:", err);
     });
+}
+
+// For long-running instances: check and generate missing statements every 24 hours
+if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
+  setInterval(() => {
+    if (mongoose.connection?.readyState === 1) {
+      generateMissingPreviousMonthStatements().catch((err) => {
+        console.error("Interval auto statement generation error:", err);
+      });
+    }
+  }, 24 * 60 * 60 * 1000);
 }
 
 export default app;

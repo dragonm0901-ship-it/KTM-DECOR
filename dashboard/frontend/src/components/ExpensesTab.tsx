@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useStore, Expense } from "../store/useStore";
 import {
   DollarSign,
@@ -14,7 +14,24 @@ import {
 } from "./ui/solar-icons";
 
 export const ExpensesTab: React.FC = () => {
-  const { expenses, sales, createExpense, updateExpense, deleteExpense, user, exportStatement } = useStore();
+  const {
+    expenses,
+    sales,
+    createExpense,
+    updateExpense,
+    deleteExpense,
+    user,
+    exportStatement,
+    statementArchives,
+    fetchStatementArchives,
+    downloadArchive
+  } = useStore();
+
+  useEffect(() => {
+    if (user?.role === "admin") {
+      fetchStatementArchives();
+    }
+  }, [user, fetchStatementArchives]);
 
   // Statement Export States
   const [exportMonth, setExportMonth] = useState((new Date().getMonth() + 1).toString());
@@ -400,6 +417,30 @@ export const ExpensesTab: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Archived Monthly Statements */}
+      {user?.role === "admin" && statementArchives.filter((a) => a.type === "expenses").length > 0 && (
+        <div className="bg-card border border-border p-4 rounded-lg">
+          <h3 className="text-xs font-bold text-muted uppercase tracking-wider mb-3 flex items-center gap-2">
+            <Calendar size={14} className="text-accent" />
+            Archived Monthly Expenses Statements (CSV)
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {statementArchives
+              .filter((a) => a.type === "expenses")
+              .map((archive) => (
+                <button
+                  key={archive._id}
+                  onClick={() => downloadArchive(archive._id, archive.filename)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded border border-border bg-background hover:bg-accent/[0.04] hover:border-accent/30 text-xs font-bold transition-all"
+                >
+                  <DollarSign size={12} className="text-accent" />
+                  {archive.filename.replace("expenses_statement_", "").replace(".csv", "").replace("_", " ")}
+                </button>
+              ))}
+          </div>
+        </div>
+      )}
 
       {/* Pie Chart & Overall summary layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

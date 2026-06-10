@@ -335,6 +335,9 @@ interface DashboardState {
   // Exports
   exportStatement: (type: string, month: string, year: string) => Promise<void>;
   exportInventory: () => Promise<void>;
+  statementArchives: any[];
+  fetchStatementArchives: () => Promise<void>;
+  downloadArchive: (id: string, filename: string) => Promise<void>;
 }
 
 // Helpers
@@ -408,6 +411,7 @@ export const useStore = create<DashboardState>((set, get) => ({
   theme: (localStorage.getItem("theme") as "light" | "dark") || "light",
   focusMode: false,
   quickNotes: [],
+  statementArchives: [],
   activeStaffProfile: getSafeLocalStorage("activeStaffProfile"),
 
   init: () => {
@@ -1755,6 +1759,43 @@ export const useStore = create<DashboardState>((set, get) => ({
       window.URL.revokeObjectURL(url);
     } catch (err) {
       console.error(err);
+      throw err;
+    }
+  },
+
+  fetchStatementArchives: async () => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/export/archives`, {
+        headers: getHeaders(token),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        set({ statementArchives: data });
+      }
+    } catch (err) {
+      console.error("Fetch statement archives failed:", err);
+    }
+  },
+
+  downloadArchive: async (id, filename) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/export/archive/${id}`, {
+        headers: getHeaders(token),
+      });
+      if (!res.ok) throw new Error("Downloading statement archive failed");
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Download archive failed:", err);
       throw err;
     }
   },

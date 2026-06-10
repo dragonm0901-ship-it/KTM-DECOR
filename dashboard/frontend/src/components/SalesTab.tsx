@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useStore, Order } from "../store/useStore";
 import {
   TrendingUp,
@@ -15,8 +15,25 @@ import {
 import { OrderDetailModal } from "./OrderDetailModal";
 
 export const SalesTab: React.FC = () => {
-  const { sales, orders, deleteSale, approveOrder, user, exportStatement } = useStore();
+  const {
+    sales,
+    orders,
+    deleteSale,
+    approveOrder,
+    user,
+    exportStatement,
+    statementArchives,
+    fetchStatementArchives,
+    downloadArchive
+  } = useStore();
+  
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
+  useEffect(() => {
+    if (user?.role === "admin") {
+      fetchStatementArchives();
+    }
+  }, [user, fetchStatementArchives]);
 
   // Statement Export States
   const [exportMonth, setExportMonth] = useState((new Date().getMonth() + 1).toString());
@@ -250,6 +267,30 @@ export const SalesTab: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Archived Monthly Statements */}
+      {user?.role === "admin" && statementArchives.filter((a) => a.type === "sales").length > 0 && (
+        <div className="bg-card border border-border p-4 rounded-lg">
+          <h3 className="text-xs font-bold text-muted uppercase tracking-wider mb-3 flex items-center gap-2">
+            <Calendar size={14} className="text-accent" />
+            Archived Monthly Sales Statements (CSV)
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {statementArchives
+              .filter((a) => a.type === "sales")
+              .map((archive) => (
+                <button
+                  key={archive._id}
+                  onClick={() => downloadArchive(archive._id, archive.filename)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded border border-border bg-background hover:bg-accent/[0.04] hover:border-accent/30 text-xs font-bold transition-all"
+                >
+                  <TrendingUp size={12} className="text-accent" />
+                  {archive.filename.replace("sales_statement_", "").replace(".csv", "").replace("_", " ")}
+                </button>
+              ))}
+          </div>
+        </div>
+      )}
 
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">

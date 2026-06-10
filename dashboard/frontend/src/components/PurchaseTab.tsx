@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useStore, Purchase } from "../store/useStore";
 import {
   Briefcase,
@@ -20,7 +20,24 @@ interface FormPurchaseItem {
 }
 
 export const PurchaseTab: React.FC = () => {
-  const { purchases, createPurchase, updatePurchaseStatus, updatePurchase, deletePurchase, user, exportStatement } = useStore();
+  const {
+    purchases,
+    createPurchase,
+    updatePurchaseStatus,
+    updatePurchase,
+    deletePurchase,
+    user,
+    exportStatement,
+    statementArchives,
+    fetchStatementArchives,
+    downloadArchive
+  } = useStore();
+
+  useEffect(() => {
+    if (user?.role === "admin") {
+      fetchStatementArchives();
+    }
+  }, [user, fetchStatementArchives]);
 
   // Statement Export States
   const [exportMonth, setExportMonth] = useState((new Date().getMonth() + 1).toString());
@@ -262,6 +279,30 @@ export const PurchaseTab: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Archived Monthly Statements */}
+      {user?.role === "admin" && statementArchives.filter((a) => a.type === "purchases").length > 0 && (
+        <div className="bg-card border border-border p-4 rounded-lg">
+          <h3 className="text-xs font-bold text-muted uppercase tracking-wider mb-3 flex items-center gap-2">
+            <Calendar size={14} className="text-accent" />
+            Archived Monthly Purchases Statements (CSV)
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {statementArchives
+              .filter((a) => a.type === "purchases")
+              .map((archive) => (
+                <button
+                  key={archive._id}
+                  onClick={() => downloadArchive(archive._id, archive.filename)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded border border-border bg-background hover:bg-accent/[0.04] hover:border-accent/30 text-xs font-bold transition-all"
+                >
+                  <Briefcase size={12} className="text-accent" />
+                  {archive.filename.replace("purchases_statement_", "").replace(".csv", "").replace("_", " ")}
+                </button>
+              ))}
+          </div>
+        </div>
+      )}
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">

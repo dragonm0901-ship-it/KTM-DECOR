@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useStore } from "../store/useStore";
 import {
   Activity as ActivityIcon,
@@ -48,7 +48,10 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
     inventoryItems,
     sales,
     exportStatement,
-    exportInventory
+    exportInventory,
+    statementArchives,
+    fetchStatementArchives,
+    downloadArchive
   } = useStore();
 
   const [noteText, setNoteText] = useState("");
@@ -64,6 +67,12 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
   const [exportMonth, setExportMonth] = useState<string>((new Date().getMonth() + 1).toString());
   const [exportYear, setExportYear] = useState<string>(new Date().getFullYear().toString());
   const [exportingType, setExportingType] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user?.role === "admin") {
+      fetchStatementArchives();
+    }
+  }, [user, fetchStatementArchives]);
 
   const handleExport = async (type: string) => {
     setExportingType(type);
@@ -780,6 +789,39 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                 {exportingType === "inventory" && <span className="text-[9px] text-emerald-500 font-bold mt-1 animate-pulse">Exporting...</span>}
               </button>
             </div>
+
+            {/* Archived Monthly Combined Statements */}
+            {user?.role === "admin" && statementArchives.filter((a) => a.type === "all").length > 0 && (
+              <div className="mt-6 border-t border-border pt-4">
+                <h4 className="text-xs font-bold text-muted uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <Calendar size={14} className="text-accent" />
+                  Archived Monthly Combined Statements (CSV)
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                  {statementArchives
+                    .filter((a) => a.type === "all")
+                    .map((archive) => (
+                      <button
+                        key={archive._id}
+                        onClick={() => downloadArchive(archive._id, archive.filename)}
+                        className="flex items-center gap-3 p-3 rounded-lg border border-border bg-card hover:bg-accent/[0.04] hover:border-accent/30 transition-all text-left group"
+                      >
+                        <div className="p-2 bg-accent/10 text-accent rounded group-hover:scale-105 transition-transform">
+                          <FileText size={16} />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-foreground truncate">
+                            Combined Statement
+                          </p>
+                          <p className="text-[10px] text-muted font-medium mt-0.5">
+                            {archive.filename.replace("combined_statement_", "").replace("all_statement_", "").replace(".csv", "").replace("_", " ")}
+                          </p>
+                        </div>
+                      </button>
+                    ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
