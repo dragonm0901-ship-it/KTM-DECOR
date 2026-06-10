@@ -267,11 +267,16 @@ app.get("/api/auth/status", async (req, res) => {
     if (resolvedPath && adminUserFound && inventoryCount === 0) {
       const rawData = fs.readFileSync(resolvedPath, "utf8");
       const seedData = JSON.parse(rawData);
-      const itemsToInsert = seedData.map((item) => ({
-        ...item,
-        createdBy: adminUserFound._id,
-      }));
-      await InventoryItem.insertMany(itemsToInsert);
+      // Filter out invalid items (e.g. missing name, category, or unit) to protect validation schema
+      const itemsToInsert = seedData
+        .filter((item) => item && item.name && item.name.trim() && item.category && item.unit)
+        .map((item) => ({
+          ...item,
+          createdBy: adminUserFound._id,
+        }));
+      if (itemsToInsert.length > 0) {
+        await InventoryItem.insertMany(itemsToInsert);
+      }
       inventoryCount = await InventoryItem.countDocuments();
       runSeedSuccess = true;
     }
@@ -769,12 +774,17 @@ const seedInventoryItems = async () => {
       const rawData = fs.readFileSync(seedFilePath, "utf8");
       const seedData = JSON.parse(rawData);
 
-      const itemsToInsert = seedData.map((item) => ({
-        ...item,
-        createdBy: adminUser._id,
-      }));
+      // Filter out invalid items (e.g. missing name, category, or unit) to protect validation schema
+      const itemsToInsert = seedData
+        .filter((item) => item && item.name && item.name.trim() && item.category && item.unit)
+        .map((item) => ({
+          ...item,
+          createdBy: adminUser._id,
+        }));
 
-      await InventoryItem.insertMany(itemsToInsert);
+      if (itemsToInsert.length > 0) {
+        await InventoryItem.insertMany(itemsToInsert);
+      }
       console.log(`Seeded ${itemsToInsert.length} inventory items into MongoDB successfully.`);
     }
   } catch (error) {

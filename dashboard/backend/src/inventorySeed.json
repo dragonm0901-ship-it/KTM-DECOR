@@ -579,12 +579,5 @@
     "quantity": 0,
     "unit": "pcs",
     "alertLevel": 5
-  },
-  {
-    "name": "",
-    "category": "General",
-    "quantity": 0,
-    "unit": "pcs",
-    "alertLevel": 5
   }
 ]
