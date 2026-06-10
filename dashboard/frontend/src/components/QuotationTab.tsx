@@ -4,7 +4,7 @@ import {
   FileText,
   Plus,
   Trash2,
-  SlidersHorizontal,
+  Search,
   X,
   Calendar,
   DollarSign,
@@ -343,7 +343,7 @@ export const QuotationTab: React.FC = () => {
             className="w-full px-3 py-2 pl-9 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-xs"
             placeholder="Search by client or project name..."
           />
-          <SlidersHorizontal className="absolute left-3 top-2.5 h-4.5 w-4.5 text-muted" />
+          <Search className="absolute left-3 top-2.5 h-4.5 w-4.5 text-muted" />
         </div>
 
         <div className="flex items-center gap-2 text-xs w-full md:w-auto">

@@ -12,8 +12,14 @@ import {
   Calendar,
   DollarSign,
   Package,
-  Briefcase
+  Briefcase,
+  User,
+  Eye,
+  Phone,
+  MapPin,
+  X
 } from "./ui/solar-icons";
+import { OrderDetailModal } from "./OrderDetailModal";
 
 interface OverviewProps {
   setCurrentTab: (tab: string) => void;
@@ -46,6 +52,13 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [fabOpen, setFabOpen] = useState(false);
   const [hoveredPoint, setHoveredPoint] = useState<{ x: number; y: number; label: string; value: number } | null>(null);
+
+  // Outstanding Due Modal States
+  const [showOutstandingModal, setShowOutstandingModal] = useState(false);
+  const [selectedOrderForDetails, setSelectedOrderForDetails] = useState<any>(null);
+
+  // Get list of active/completed orders with outstanding due payment > 0
+  const outstandingOrdersList = orders.filter((o) => o.duePayment > 0);
 
   // Defensive guard: ensure quickNotes is always an array for rendering
   const safeQuickNotes = Array.isArray(quickNotes) ? quickNotes : [];
@@ -365,13 +378,16 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               </div>
             </div>
 
-            <div className="glass-panel p-4 rounded-lg flex items-center justify-between bg-red-500/[0.01] border-red-500/10">
+            <div 
+              onClick={() => setShowOutstandingModal(true)}
+              className="glass-panel p-4 rounded-lg flex items-center justify-between bg-red-500/[0.01] border-red-500/10 cursor-pointer hover:border-red-500/30 hover:bg-red-500/[0.03] hover:shadow-md transition-all group"
+            >
               <div>
-                <span className="text-[10px] text-muted font-bold uppercase tracking-wider">Total Outstanding Due</span>
+                <span className="text-[10px] text-muted font-bold uppercase tracking-wider group-hover:text-red-400 transition-colors">Total Outstanding Due</span>
                 <h3 className="text-xl font-bold font-display mt-1 text-red-500">Rs. {totalDuePayment.toLocaleString()}</h3>
-                <p className="text-[9px] text-muted">Receivables remaining from active/completed orders</p>
+                <p className="text-[9px] text-muted">Receivables remaining from active/completed orders (Click to view list)</p>
               </div>
-              <div className="p-2 bg-red-600 text-white rounded shadow-sm">
+              <div className="p-2 bg-red-600 text-white rounded shadow-sm group-hover:scale-105 transition-transform">
                 <Clock size={18} />
               </div>
             </div>
@@ -1014,6 +1030,100 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Outstanding Due Accounts List Modal */}
+      {showOutstandingModal && (
+        <div className="modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="bg-card w-full max-w-xl rounded-lg border border-border p-6 shadow-2xl animate-scale-up my-8 max-h-[85vh] overflow-y-auto text-left">
+            <div className="flex items-center justify-between mb-4 border-b border-border pb-3">
+              <h2 className="text-lg font-bold font-display flex items-center gap-2 text-red-500">
+                <DollarSign size={20} />
+                Outstanding Receivables Dues
+              </h2>
+              <button
+                type="button"
+                onClick={() => setShowOutstandingModal(false)}
+                className="text-muted hover:text-foreground"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <p className="text-xs text-muted mb-4">
+              Below is the list of clients with remaining due balances on active or completed orders. Click on any client to view full details of the order.
+            </p>
+
+            <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-1">
+              {outstandingOrdersList.length === 0 ? (
+                <div className="py-8 text-center text-muted text-xs">
+                  No outstanding client dues found. All payments are fully settled!
+                </div>
+              ) : (
+                outstandingOrdersList.map((order) => (
+                  <div
+                    key={order._id}
+                    onClick={() => setSelectedOrderForDetails(order)}
+                    className="glass-panel p-3.5 rounded-md border border-border/80 flex items-center justify-between hover:border-red-500/30 hover:bg-red-500/[0.02] hover:shadow-sm cursor-pointer transition-all group"
+                  >
+                    <div className="space-y-1">
+                      <div className="text-xs font-bold text-foreground group-hover:text-accent transition-colors flex items-center gap-1.5">
+                        <User size={12} className="text-accent" />
+                        {order.customerName}
+                      </div>
+                      <div className="text-[10px] text-muted font-medium">
+                        Product: <span className="font-semibold text-foreground">{order.productName}</span> ({order.size})
+                      </div>
+                      <div className="text-[10px] text-muted font-medium flex items-center gap-1">
+                        <Phone size={10} /> {order.customerContact}
+                        <span className="mx-1">|</span>
+                        <MapPin size={10} className="text-accent" /> {order.customerAddress}
+                      </div>
+                    </div>
+
+                    <div className="text-right flex items-center gap-3">
+                      <div>
+                        <div className="text-xs font-extrabold text-red-500">
+                          Rs. {order.duePayment.toLocaleString()} due
+                        </div>
+                        <div className="text-[9px] text-muted">
+                          Total: Rs. {order.totalPrice.toLocaleString()}
+                        </div>
+                      </div>
+                      <Eye size={16} className="text-muted group-hover:text-accent transition-colors" />
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="flex justify-end gap-3 border-t border-border pt-4 mt-6">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowOutstandingModal(false);
+                  setCurrentTab("orders");
+                }}
+                className="px-4 py-2 border border-border rounded text-xs hover:bg-border transition-colors font-semibold text-muted hover:text-foreground"
+              >
+                Go to Registry
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowOutstandingModal(false)}
+                className="px-4 py-2 bg-accent hover:bg-accent-dark text-white rounded text-xs font-bold transition-all shadow-md shadow-accent/15"
+              >
+                Close Dues List
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Order Detail Modal */}
+      <OrderDetailModal
+        order={selectedOrderForDetails}
+        onClose={() => setSelectedOrderForDetails(null)}
+      />
     </div>
   );
 };

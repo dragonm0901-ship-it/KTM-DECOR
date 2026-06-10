@@ -7,7 +7,8 @@ import {
   SlidersHorizontal,
   X,
   Minus,
-  Edit2
+  Edit2,
+  Search
 } from "./ui/solar-icons";
 
 export const InventoryTab: React.FC = () => {
@@ -226,7 +227,7 @@ export const InventoryTab: React.FC = () => {
             className="w-full px-3 py-2 pl-9 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-xs"
             placeholder="Search materials by name or category..."
           />
-          <SlidersHorizontal className="absolute left-3 top-2.5 h-4.5 w-4.5 text-muted" />
+          <Search className="absolute left-3 top-2.5 h-4.5 w-4.5 text-muted" />
         </div>
 
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto text-xs font-semibold">
