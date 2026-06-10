@@ -680,7 +680,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                   Financial Statements & Exports
                 </h3>
                 <p className="text-xs text-muted mt-1">
-                  Generate and download monthly XLSX statements or inventory CSV reports at any time.
+                  Generate and download monthly CSV statements or inventory CSV reports at any time.
                 </p>
               </div>
 

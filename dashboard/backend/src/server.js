@@ -2227,10 +2227,6 @@ app.get("/api/export/statement", protect, admin, async (req, res) => {
       dateFilter = { date: { $gte: startOfMonth, $lte: endOfMonth } };
     }
 
-    // Create workbook
-    const workbook = new ExcelJS.Workbook();
-    workbook.creator = "KTM DECOR Admin Dashboard";
-
     // Fetch data
     let sales = [];
     let expenses = [];
@@ -2254,7 +2250,86 @@ app.get("/api/export/statement", protect, admin, async (req, res) => {
     const periodLabel = month === "all" ? "All_Time" : `${monthNames[parseInt(month, 10) - 1]}_${year}`;
     const cleanPeriodLabel = periodLabel.replace(/_/g, " ");
 
-    // CSV Exports for single tables
+    const workbook = new ExcelJS.Workbook();
+
+    if (type === "all") {
+      const sheet = workbook.addWorksheet("Combined Statement");
+      
+      sheet.addRow(["KTM DECOR - COMBINED STATEMENT"]);
+      sheet.addRow(["Statement Period:", cleanPeriodLabel]);
+      sheet.addRow(["Exported On:", new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString()]);
+      sheet.addRow([]); // Blank row
+      
+      // Summary Overview
+      sheet.addRow(["METRIC SUMMARY", "AMOUNT (Rs.)", "RECORDS COUNT"]);
+      
+      const totalSales = sales.reduce((sum, s) => sum + s.amount, 0);
+      const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+      const totalPurchases = purchases.reduce((sum, p) => sum + p.amount, 0);
+      const netProfit = totalSales - totalExpenses - totalPurchases;
+      
+      sheet.addRow(["Total Sales Revenue", totalSales, sales.length]);
+      sheet.addRow(["Total Expenses Value", totalExpenses, expenses.length]);
+      sheet.addRow(["Total Purchases Value", totalPurchases, purchases.length]);
+      sheet.addRow(["NET OPERATING PROFIT / (LOSS)", netProfit, ""]);
+      sheet.addRow([]); // Blank row
+      
+      // Sales Ledger
+      sheet.addRow(["SALES LEDGER"]);
+      sheet.addRow(["S.N.", "Date", "Client Name", "Product", "Payment Method", "Amount (Rs.)", "Notes"]);
+      sales.forEach((s, idx) => {
+        sheet.addRow([
+          idx + 1,
+          new Date(s.date).toLocaleDateString(),
+          s.clientName,
+          s.productName,
+          s.paymentMethod.toUpperCase(),
+          s.amount,
+          s.notes || ""
+        ]);
+      });
+      sheet.addRow(["TOTAL", "", "", "", "", totalSales, ""]);
+      sheet.addRow([]); // Blank row
+      
+      // Expenses Log
+      sheet.addRow(["EXPENSES LOG"]);
+      sheet.addRow(["S.N.", "Date", "Expense Item", "Category", "Amount (Rs.)", "Description"]);
+      expenses.forEach((e, idx) => {
+        sheet.addRow([
+          idx + 1,
+          new Date(e.date).toLocaleDateString(),
+          e.title,
+          e.category.toUpperCase(),
+          e.amount,
+          e.description || ""
+        ]);
+      });
+      sheet.addRow(["TOTAL", "", "", "", totalExpenses, ""]);
+      sheet.addRow([]); // Blank row
+      
+      // Purchases Ledger
+      sheet.addRow(["PURCHASES LEDGER"]);
+      sheet.addRow(["S.N.", "Date", "Supplier", "Purchase Details", "Status", "Amount (Rs.)"]);
+      purchases.forEach((p, idx) => {
+        sheet.addRow([
+          idx + 1,
+          new Date(p.date).toLocaleDateString(),
+          p.supplier,
+          p.itemDetails,
+          p.status.toUpperCase(),
+          p.amount
+        ]);
+      });
+      sheet.addRow(["TOTAL", "", "", "", "", totalPurchases]);
+
+      const filename = `combined_statement_${periodLabel}.csv`;
+      res.setHeader("Content-Type", "text/csv");
+      res.setHeader("Content-Disposition", `attachment; filename=${filename}`);
+      await workbook.csv.write(res);
+      res.end();
+      return;
+    }
+
     if (type === "sales") {
       const salesSheet = workbook.addWorksheet("Sales Ledger");
       salesSheet.columns = [
@@ -2377,361 +2452,6 @@ app.get("/api/export/statement", protect, admin, async (req, res) => {
       res.end();
       return;
     }
-
-    // Helper: Style sheet helper to enforce gridlines and basic border/font formatting
-    const applyDefaultBorders = (sheet, startRow, endRow, numCols) => {
-      sheet.views = [{ showGridLines: true }];
-      for (let r = startRow; r <= endRow; r++) {
-        const row = sheet.getRow(r);
-        for (let c = 1; c <= numCols; c++) {
-          const cell = row.getCell(c);
-          cell.font = cell.font || { name: "Segoe UI", size: 10 };
-          cell.border = cell.border || {
-            top: { style: "thin", color: { argb: "E5E7EB" } },
-            left: { style: "thin", color: { argb: "E5E7EB" } },
-            bottom: { style: "thin", color: { argb: "E5E7EB" } },
-            right: { style: "thin", color: { argb: "E5E7EB" } }
-          };
-        }
-      }
-    };
-
-    // 1. SUMMARY SHEET
-    if (type === "all") {
-      const summarySheet = workbook.addWorksheet("Summary Overview");
-      summarySheet.columns = [
-        { key: "metric", width: 32 },
-        { key: "value", width: 22 },
-        { key: "count", width: 16 }
-      ];
-
-      // Banner Row 1
-      summarySheet.mergeCells("A1:C1");
-      const banner = summarySheet.getCell("A1");
-      banner.value = "KTM DECOR - BUSINESS STATEMENT OVERVIEW";
-      banner.font = { name: "Segoe UI", size: 13, bold: true, color: { argb: "FFFFFF" } };
-      banner.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FE914C" } };
-      banner.alignment = { horizontal: "center", vertical: "middle" };
-      summarySheet.getRow(1).height = 36;
-
-      // Period & Info
-      summarySheet.getCell("A2").value = "Statement Period:";
-      summarySheet.getCell("A2").font = { name: "Segoe UI", size: 10, bold: true };
-      summarySheet.getCell("B2").value = cleanPeriodLabel;
-      summarySheet.getCell("B2").alignment = { horizontal: "left" };
-
-      summarySheet.getCell("A3").value = "Exported On:";
-      summarySheet.getCell("A3").font = { name: "Segoe UI", size: 10, bold: true };
-      summarySheet.getCell("B3").value = new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString();
-      summarySheet.getCell("B3").alignment = { horizontal: "left" };
-
-      // Headers (Row 5)
-      const headersRow = summarySheet.getRow(5);
-      headersRow.values = ["METRIC SUMMARY", "AMOUNT (Rs.)", "RECORDS COUNT"];
-      headersRow.height = 24;
-      headersRow.eachCell((cell) => {
-        cell.font = { name: "Segoe UI", size: 11, bold: true, color: { argb: "000000" } };
-        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "F3F4F6" } };
-        cell.alignment = { horizontal: "center", vertical: "middle" };
-      });
-
-      // Data rows
-      summarySheet.getCell("A6").value = "Total Sales Revenue";
-      summarySheet.getCell("B6").value = { formula: `'Sales Ledger'!F${sales.length + 3}` };
-      summarySheet.getCell("C6").value = sales.length;
-
-      summarySheet.getCell("A7").value = "Total Expenses Value";
-      summarySheet.getCell("B7").value = { formula: `'Expenses Log'!E${expenses.length + 3}` };
-      summarySheet.getCell("C7").value = expenses.length;
-
-      summarySheet.getCell("A8").value = "Total Purchases Value";
-      summarySheet.getCell("B8").value = { formula: `'Purchases Ledger'!F${purchases.length + 3}` };
-      summarySheet.getCell("C8").value = purchases.length;
-
-      // Net Profit (Row 10)
-      summarySheet.getCell("A10").value = "NET OPERATING PROFIT / (LOSS)";
-      summarySheet.getCell("A10").font = { name: "Segoe UI", size: 10, bold: true };
-      
-      const profitCell = summarySheet.getCell("B10");
-      profitCell.value = { formula: "B6-B7-B8" };
-      profitCell.font = { name: "Segoe UI", size: 11, bold: true };
-      
-      // Formatting number cells on summary sheet
-      ["B6", "B7", "B8", "B10"].forEach((cellRef) => {
-        const cell = summarySheet.getCell(cellRef);
-        cell.numFormat = `"Rs. "#,##0.00`;
-        cell.alignment = { horizontal: "right", vertical: "middle" };
-      });
-
-      // Standard styling & borders for Summary sheet
-      applyDefaultBorders(summarySheet, 1, 11, 3);
-      
-      // Additional styling for Summary sheet cells
-      summarySheet.getRow(10).eachCell((cell, colIdx) => {
-        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF0E5" } };
-        cell.border = {
-          top: { style: "thin", color: { argb: "9CA3AF" } },
-          bottom: { style: "double", color: { argb: "374151" } }
-        };
-      });
-    }
-
-    // 2. SALES SHEET
-    if (type === "all" || type === "sales") {
-      const salesSheet = workbook.addWorksheet("Sales Ledger");
-      salesSheet.columns = [
-        { key: "sn", width: 8 },
-        { key: "date", width: 14 },
-        { key: "clientName", width: 25 },
-        { key: "productName", width: 25 },
-        { key: "paymentMethod", width: 18 },
-        { key: "amount", width: 18 },
-        { key: "notes", width: 30 }
-      ];
-
-      // Title Banner Row 1
-      salesSheet.mergeCells("A1:G1");
-      const banner = salesSheet.getCell("A1");
-      banner.value = "KTM DECOR - SALES TRANSACTION LEDGER";
-      banner.font = { name: "Segoe UI", size: 13, bold: true, color: { argb: "FFFFFF" } };
-      banner.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "3B82F6" } }; // Blue accent
-      banner.alignment = { horizontal: "center", vertical: "middle" };
-      salesSheet.getRow(1).height = 36;
-
-      // Table Headers Row 2
-      const headersRow = salesSheet.getRow(2);
-      headersRow.values = ["S.N.", "Date", "Client Name", "Product", "Payment Method", "Amount (Rs.)", "Notes"];
-      headersRow.height = 24;
-      headersRow.eachCell((cell) => {
-        cell.font = { name: "Segoe UI", size: 10, bold: true, color: { argb: "000000" } };
-        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "EFF6FF" } }; // Light blue fill
-        cell.alignment = { horizontal: "center", vertical: "middle" };
-        cell.border = {
-          top: { style: "medium", color: { argb: "9CA3AF" } },
-          bottom: { style: "medium", color: { argb: "9CA3AF" } }
-        };
-      });
-
-      // Data Rows
-      sales.forEach((s, idx) => {
-        const row = salesSheet.addRow([
-          idx + 1,
-          new Date(s.date).toLocaleDateString(),
-          s.clientName,
-          s.productName,
-          s.paymentMethod.toUpperCase(),
-          s.amount,
-          s.notes || ""
-        ]);
-        row.height = 20;
-        
-        row.getCell(1).alignment = { horizontal: "center" };
-        row.getCell(2).alignment = { horizontal: "center" };
-        row.getCell(5).alignment = { horizontal: "center" };
-        row.getCell(6).numFormat = `"Rs. "#,##0.00`;
-        row.getCell(6).alignment = { horizontal: "right" };
-      });
-
-      // Total Row
-      const totalRowIndex = sales.length + 3;
-      const totalRow = salesSheet.addRow([
-        "TOTAL",
-        "",
-        "",
-        "",
-        "",
-        { formula: `SUM(F3:F${totalRowIndex - 1})` },
-        ""
-      ]);
-      totalRow.height = 22;
-      totalRow.eachCell((cell, colNum) => {
-        cell.font = { name: "Segoe UI", size: 10, bold: true };
-        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "EFF6FF" } };
-        cell.border = {
-          top: { style: "thin", color: { argb: "9CA3AF" } },
-          bottom: { style: "double", color: { argb: "374151" } }
-        };
-        if (colNum === 1) cell.alignment = { horizontal: "center" };
-        if (colNum === 6) {
-          cell.numFormat = `"Rs. "#,##0.00`;
-          cell.alignment = { horizontal: "right" };
-        }
-      });
-
-      applyDefaultBorders(salesSheet, 1, totalRowIndex, 7);
-    }
-
-    // 3. EXPENSES SHEET
-    if (type === "all" || type === "expenses") {
-      const expensesSheet = workbook.addWorksheet("Expenses Log");
-      expensesSheet.columns = [
-        { key: "sn", width: 8 },
-        { key: "date", width: 14 },
-        { key: "title", width: 25 },
-        { key: "category", width: 18 },
-        { key: "amount", width: 18 },
-        { key: "description", width: 32 }
-      ];
-
-      // Title Banner Row 1
-      expensesSheet.mergeCells("A1:F1");
-      const banner = expensesSheet.getCell("A1");
-      banner.value = "KTM DECOR - EXPENSES TRANSACTION LOG";
-      banner.font = { name: "Segoe UI", size: 13, bold: true, color: { argb: "FFFFFF" } };
-      banner.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "EF4444" } }; // Red
-      banner.alignment = { horizontal: "center", vertical: "middle" };
-      expensesSheet.getRow(1).height = 36;
-
-      // Table Headers Row 2
-      const headersRow = expensesSheet.getRow(2);
-      headersRow.values = ["S.N.", "Date", "Expense Item", "Category", "Amount (Rs.)", "Description"];
-      headersRow.height = 24;
-      headersRow.eachCell((cell) => {
-        cell.font = { name: "Segoe UI", size: 10, bold: true, color: { argb: "000000" } };
-        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FEF2F2" } }; // Light red fill
-        cell.alignment = { horizontal: "center", vertical: "middle" };
-        cell.border = {
-          top: { style: "medium", color: { argb: "9CA3AF" } },
-          bottom: { style: "medium", color: { argb: "9CA3AF" } }
-        };
-      });
-
-      // Data Rows
-      expenses.forEach((e, idx) => {
-        const row = expensesSheet.addRow([
-          idx + 1,
-          new Date(e.date).toLocaleDateString(),
-          e.title,
-          e.category.toUpperCase(),
-          e.amount,
-          e.description || ""
-        ]);
-        row.height = 20;
-
-        row.getCell(1).alignment = { horizontal: "center" };
-        row.getCell(2).alignment = { horizontal: "center" };
-        row.getCell(4).alignment = { horizontal: "center" };
-        row.getCell(5).numFormat = `"Rs. "#,##0.00`;
-        row.getCell(5).alignment = { horizontal: "right" };
-      });
-
-      // Total Row
-      const totalRowIndex = expenses.length + 3;
-      const totalRow = expensesSheet.addRow([
-        "TOTAL",
-        "",
-        "",
-        "",
-        { formula: `SUM(E3:E${totalRowIndex - 1})` },
-        ""
-      ]);
-      totalRow.height = 22;
-      totalRow.eachCell((cell, colNum) => {
-        cell.font = { name: "Segoe UI", size: 10, bold: true };
-        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FEF2F2" } };
-        cell.border = {
-          top: { style: "thin", color: { argb: "9CA3AF" } },
-          bottom: { style: "double", color: { argb: "374151" } }
-        };
-        if (colNum === 1) cell.alignment = { horizontal: "center" };
-        if (colNum === 5) {
-          cell.numFormat = `"Rs. "#,##0.00`;
-          cell.alignment = { horizontal: "right" };
-        }
-      });
-
-      applyDefaultBorders(expensesSheet, 1, totalRowIndex, 6);
-    }
-
-    // 4. PURCHASES SHEET
-    if (type === "all" || type === "purchases") {
-      const purchasesSheet = workbook.addWorksheet("Purchases Ledger");
-      purchasesSheet.columns = [
-        { key: "sn", width: 8 },
-        { key: "date", width: 14 },
-        { key: "supplier", width: 25 },
-        { key: "details", width: 30 },
-        { key: "status", width: 15 },
-        { key: "amount", width: 18 }
-      ];
-
-      // Title Banner Row 1
-      purchasesSheet.mergeCells("A1:F1");
-      const banner = purchasesSheet.getCell("A1");
-      banner.value = "KTM DECOR - RAW MATERIAL PURCHASES LEDGER";
-      banner.font = { name: "Segoe UI", size: 13, bold: true, color: { argb: "FFFFFF" } };
-      banner.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "F59E0B" } }; // Amber
-      banner.alignment = { horizontal: "center", vertical: "middle" };
-      purchasesSheet.getRow(1).height = 36;
-
-      // Table Headers Row 2
-      const headersRow = purchasesSheet.getRow(2);
-      headersRow.values = ["S.N.", "Date", "Supplier", "Purchase Details", "Status", "Amount (Rs.)"];
-      headersRow.height = 24;
-      headersRow.eachCell((cell) => {
-        cell.font = { name: "Segoe UI", size: 10, bold: true, color: { argb: "000000" } };
-        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FEF3C7" } }; // Light amber fill
-        cell.alignment = { horizontal: "center", vertical: "middle" };
-        cell.border = {
-          top: { style: "medium", color: { argb: "9CA3AF" } },
-          bottom: { style: "medium", color: { argb: "9CA3AF" } }
-        };
-      });
-
-      // Data Rows
-      purchases.forEach((p, idx) => {
-        const row = purchasesSheet.addRow([
-          idx + 1,
-          new Date(p.date).toLocaleDateString(),
-          p.supplier,
-          p.itemDetails,
-          p.status.toUpperCase(),
-          p.amount
-        ]);
-        row.height = 20;
-
-        row.getCell(1).alignment = { horizontal: "center" };
-        row.getCell(2).alignment = { horizontal: "center" };
-        row.getCell(5).alignment = { horizontal: "center" };
-        row.getCell(6).numFormat = `"Rs. "#,##0.00`;
-        row.getCell(6).alignment = { horizontal: "right" };
-      });
-
-      // Total Row
-      const totalRowIndex = purchases.length + 3;
-      const totalRow = purchasesSheet.addRow([
-        "TOTAL",
-        "",
-        "",
-        "",
-        "",
-        { formula: `SUM(F3:F${totalRowIndex - 1})` }
-      ]);
-      totalRow.height = 22;
-      totalRow.eachCell((cell, colNum) => {
-        cell.font = { name: "Segoe UI", size: 10, bold: true };
-        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FEF3C7" } };
-        cell.border = {
-          top: { style: "thin", color: { argb: "9CA3AF" } },
-          bottom: { style: "double", color: { argb: "374151" } }
-        };
-        if (colNum === 1) cell.alignment = { horizontal: "center" };
-        if (colNum === 6) {
-          cell.numFormat = `"Rs. "#,##0.00`;
-          cell.alignment = { horizontal: "right" };
-        }
-      });
-
-      applyDefaultBorders(purchasesSheet, 1, totalRowIndex, 6);
-    }
-
-    // Send spreadsheet workbook
-    const filename = `${type}_statement_${periodLabel}.xlsx`;
-    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-    res.setHeader("Content-Disposition", `attachment; filename=${filename}`);
-    
-    await workbook.xlsx.write(res);
-    res.end();
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
