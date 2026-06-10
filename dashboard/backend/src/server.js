@@ -744,52 +744,93 @@ const seedProducts = async () => {
 // Seed default inventory items if DB is empty (initializes items from JSON file)
 const seedInventoryItems = async () => {
   try {
-    const itemCount = await InventoryItem.countDocuments();
-    if (itemCount === 0) {
-      console.log("Seeding default inventory items from inventorySeed.json...");
-      // Find an admin user to assign as creator
-      const adminUser = await User.findOne({ role: "admin" });
-      if (!adminUser) {
-        console.warn("Skipping inventory seeding: no admin user found.");
-        return;
-      }
+    // Find an admin user to assign as creator
+    const adminUser = await User.findOne({ role: "admin" });
+    if (!adminUser) {
+      console.warn("Skipping inventory seeding: no admin user found.");
+      return;
+    }
 
-      const pathsToTry = [
-        path.join(__dirname, "inventorySeed.json"),
-        path.join(process.cwd(), "dashboard/backend/src/inventorySeed.json"),
-        path.join(process.cwd(), "src/inventorySeed.json")
-      ];
-      let seedFilePath = "";
-      for (const p of pathsToTry) {
-        if (fs.existsSync(p)) {
-          seedFilePath = p;
-          break;
+    // Resolve and read seed file
+    const pathsToTry = [
+      path.join(__dirname, "inventorySeed.json"),
+      path.join(process.cwd(), "dashboard/backend/src/inventorySeed.json"),
+      path.join(process.cwd(), "src/inventorySeed.json")
+    ];
+    let seedFilePath = "";
+    for (const p of pathsToTry) {
+      if (fs.existsSync(p)) {
+        seedFilePath = p;
+        break;
+      }
+    }
+
+    if (!seedFilePath) {
+      console.warn("Skipping inventory seeding: inventorySeed.json not found in paths:", pathsToTry);
+      return;
+    }
+
+    const rawData = fs.readFileSync(seedFilePath, "utf8");
+    const seedData = JSON.parse(rawData);
+
+    // Fetch existing items to prevent seeding duplicates
+    const existingItems = await InventoryItem.find({});
+    const existingNames = new Set(existingItems.map(item => item.name.toLowerCase().trim()));
+
+    const itemsToInsert = [];
+    seedData.forEach((item) => {
+      if (item && item.name && item.name.trim() && item.category && item.unit) {
+        const normalizedName = item.name.toLowerCase().trim();
+        if (!existingNames.has(normalizedName)) {
+          itemsToInsert.push({
+            ...item,
+            createdBy: adminUser._id
+          });
+          existingNames.add(normalizedName);
         }
       }
+    });
 
-      if (!seedFilePath) {
-        console.warn("Skipping inventory seeding: inventorySeed.json not found in paths:", pathsToTry);
-        return;
+    if (itemsToInsert.length > 0) {
+      await InventoryItem.insertMany(itemsToInsert);
+      console.log(`Seeded ${itemsToInsert.length} new inventory items into MongoDB successfully.`);
+    }
+
+    // Self-healing database cleanup of any pre-existing duplicates (common on serverless production wakeups)
+    const allItems = await InventoryItem.find({});
+    const grouped = {};
+    allItems.forEach(item => {
+      const key = item.name.toLowerCase().trim();
+      if (!grouped[key]) {
+        grouped[key] = [];
       }
+      grouped[key].push(item);
+    });
 
-      const rawData = fs.readFileSync(seedFilePath, "utf8");
-      const seedData = JSON.parse(rawData);
+    let deletedCount = 0;
+    for (const key in grouped) {
+      const group = grouped[key];
+      if (group.length > 1) {
+        // Sort: highest stock quantity first, or most recently updated if equal
+        group.sort((a, b) => {
+          if (b.quantity !== a.quantity) {
+            return b.quantity - a.quantity;
+          }
+          return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
+        });
 
-      // Filter out invalid items (e.g. missing name, category, or unit) to protect validation schema
-      const itemsToInsert = seedData
-        .filter((item) => item && item.name && item.name.trim() && item.category && item.unit)
-        .map((item) => ({
-          ...item,
-          createdBy: adminUser._id,
-        }));
-
-      if (itemsToInsert.length > 0) {
-        await InventoryItem.insertMany(itemsToInsert);
+        // Keep the best item (index 0), delete the rest
+        const idsToDelete = group.slice(1).map(item => item._id);
+        await InventoryItem.deleteMany({ _id: { $in: idsToDelete } });
+        deletedCount += idsToDelete.length;
       }
-      console.log(`Seeded ${itemsToInsert.length} inventory items into MongoDB successfully.`);
+    }
+
+    if (deletedCount > 0) {
+      console.log(`Self-healing cleanup: Deleted ${deletedCount} duplicate inventory items from database.`);
     }
   } catch (error) {
-    console.error("Error seeding inventory items:", error);
+    console.error("Error seeding or cleaning inventory items:", error);
   }
 };
 
