@@ -308,6 +308,7 @@ app.use(async (req, res, next) => {
 });
 
 // ─── DASHBOARD BOOTSTRAP ENDPOINT ─────────────────────────────
+// Trigger Vercel rebuild to apply deleted VITE_API_URL env variable
 app.get("/api/bootstrap", protect, async (req, res) => {
   try {
     const userRole = req.user.role;
