@@ -4,7 +4,15 @@ const NotificationSchema = new mongoose.Schema(
   {
     type: {
       type: String,
-      enum: ["task_assigned", "marketing_deadline", "system_announcement"],
+      enum: [
+        "task_assigned",
+        "marketing_deadline",
+        "system_announcement",
+        "order_assigned",
+        "new_order",
+        "new_quick_note",
+        "new_field_note"
+      ],
       required: true,
     },
     message: {

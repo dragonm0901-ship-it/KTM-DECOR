@@ -5,10 +5,9 @@ import {
   RotateCcw,
   Clock,
   Briefcase,
-  Lightbulb,
   FileText,
-  Megaphone,
-  Package
+  Package,
+  MapPin
 } from "./ui/solar-icons";
 
 export const BinView: React.FC = () => {
@@ -38,27 +37,7 @@ export const BinView: React.FC = () => {
     return `Expires in ${diffDays} ${diffDays === 1 ? "day" : "days"}`;
   };
 
-  const getCategoryIcon = (cat: string) => {
-    const norm = (cat || "").toLowerCase();
-    if (norm.includes("note")) {
-      return <FileText size={14} className="text-blue-500" />;
-    }
-    if (norm.includes("suggestion")) {
-      return <Lightbulb size={14} className="text-amber-500" />;
-    }
-    return <Briefcase size={14} className="text-emerald-500" />;
-  };
 
-  const getCategoryBadgeClass = (cat: string) => {
-    const norm = (cat || "").toLowerCase();
-    if (norm.includes("note")) {
-      return "border-blue-500/25 text-blue-600 dark:text-blue-400";
-    }
-    if (norm.includes("suggestion")) {
-      return "border-amber-500/25 text-amber-600 dark:text-amber-400";
-    }
-    return "border-emerald-500/25 text-emerald-600 dark:text-emerald-400";
-  };
 
   const handleRestore = async (type: "task" | "campaign" | "order", id: string) => {
     if (window.confirm(`Are you sure you want to restore this ${
@@ -115,8 +94,8 @@ export const BinView: React.FC = () => {
               : "border-transparent text-muted hover:text-foreground"
           }`}
         >
-          <Megaphone size={16} />
-          Deleted Marketing Notes
+          <FileText size={16} />
+          Deleted Field Notes
           <span className="ml-1 bg-border text-muted text-xs px-2 py-0.5 rounded-full font-bold">
             {binCampaigns.length}
           </span>
@@ -270,13 +249,12 @@ export const BinView: React.FC = () => {
         ) : binCampaigns.length === 0 ? (
           <div className="glass-panel p-12 text-center border-dashed border-2 border-border/60 rounded-lg max-w-lg mx-auto mt-6">
             <Trash2 className="mx-auto text-muted/30 mb-3" size={48} />
-            <h3 className="font-bold text-sm">Marketing Bin is Empty</h3>
-            <p className="text-xs text-muted mt-1">No soft-deleted marketing updates are stored here.</p>
+            <h3 className="font-bold text-sm">Field Notes Bin is Empty</h3>
+            <p className="text-xs text-muted mt-1">No soft-deleted field notes are stored here.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {binCampaigns.map((item) => {
-              const itemCategory = item.category || item.platform || "Note";
               return (
                 <div
                   key={item._id}
@@ -293,19 +271,18 @@ export const BinView: React.FC = () => {
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <div className={`flex items-center gap-1 border px-2 py-0.5 rounded-full font-bold text-[9px] uppercase ${getCategoryBadgeClass(itemCategory)}`}>
-                        {getCategoryIcon(itemCategory)}
-                        <span className="ml-1">{itemCategory}</span>
-                      </div>
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-accent/80">
+                      <MapPin size={12} />
+                      <span className="truncate">{item.district}, {item.location}</span>
                     </div>
 
-                    <p className="text-xs text-muted line-clamp-2">
-                      {item.notes || "No notes details."}
+                    <p className="text-xs text-muted line-clamp-3">
+                      {item.description || "No description provided."}
                     </p>
 
-                    <div className="text-[10px] text-muted border-t border-border/50 pt-2">
-                      <span>Deleted: {item.updatedAt ? new Date(item.updatedAt).toLocaleDateString() : ""}</span>
+                    <div className="text-[10px] text-muted border-t border-border/50 pt-2 space-y-1">
+                      {item.email && <div>Email: <strong className="text-foreground">{item.email}</strong></div>}
+                      <div>Deleted: {item.updatedAt ? new Date(item.updatedAt).toLocaleDateString() : ""}</div>
                     </div>
                   </div>
 

@@ -45,7 +45,8 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
     orders,
     expenses,
     purchases,
-    inventoryItems
+    inventoryItems,
+    sales
   } = useStore();
 
   const [noteText, setNoteText] = useState("");
@@ -75,10 +76,21 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
 
   const activeOrdersCount = orders.filter((o) => o.stage !== "delivered").length;
 
-  // Dynamic Sales: Sum of total cost of all completed tasks + approved orders
+  // Dynamic Sales: Sum of total cost of all completed tasks + sales ledger entries
   const taskSales = completedTasks.reduce((acc, t) => acc + (t.totalCost || 0), 0);
-  const orderSales = approvedOrders.reduce((acc, o) => acc + (o.totalPrice || 0), 0);
-  const totalSales = taskSales + orderSales;
+
+  // Safe array check for sales
+  const safeSales = Array.isArray(sales) ? sales : [];
+
+  const orderSales = safeSales
+    .filter((s) => s.orderId)
+    .reduce((acc, s) => acc + (s.amount || 0), 0);
+
+  const directSales = safeSales
+    .filter((s) => !s.orderId)
+    .reduce((acc, s) => acc + (s.amount || 0), 0);
+
+  const totalSales = taskSales + orderSales + directSales;
 
   // Advance and Due calculations — calculated from all orders in registry
   const totalAdvancePaid = orders.reduce((acc, o) => acc + (o.advancePayment || 0), 0);
@@ -104,15 +116,56 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
     miscellaneous: expenses.filter((e) => e.category === "miscellaneous").reduce((sum, e) => sum + e.amount, 0),
   };
 
+  const activeId = user?.email === "staff@ktmdecor.com" ? activeStaffProfile?._id : user?._id;
+
+  const getOrderPriority = (deliveryDateStr: string | Date) => {
+    if (!deliveryDateStr) return "low";
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const delivery = new Date(deliveryDateStr);
+    delivery.setHours(0, 0, 0, 0);
+    const diffTime = delivery.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    if (diffDays <= 2) return "high";
+    if (diffDays <= 5) return "medium";
+    return "low";
+  };
+
+  const staffPendingOrders = orders
+    .filter((o) => o.assignee?._id === activeId && o.deleted !== true && o.stage !== "delivered")
+    .map((o) => ({
+      _id: o._id,
+      title: `Order: ${o.productName}`,
+      description: `Client: ${o.customerName} | Size: ${o.size} | Color: ${o.color}`,
+      priority: getOrderPriority(o.deliveryDate),
+      dueDate: o.deliveryDate,
+      status: o.stage,
+      isOrder: true,
+    }));
+
+  const staffCompletedOrders = orders
+    .filter((o) => o.assignee?._id === activeId && o.deleted !== true && (o.stage === "delivered" || o.approved))
+    .map((o) => ({
+      _id: o._id,
+      title: `Order: ${o.productName}`,
+      description: `Client: ${o.customerName} | Size: ${o.size} | Color: ${o.color}`,
+      priority: "low",
+      dueDate: o.deliveryDate,
+      status: "done",
+      isOrder: true,
+    }));
+
   // Staff specific pending tasks
-  const staffPendingTasks = pendingTasks.filter(
-    (t) => t.assignee?._id === (user?.email === "staff@ktmdecor.com" ? activeStaffProfile?._id : user?._id)
-  );
+  const staffPendingTasks: any[] = [
+    ...pendingTasks.filter((t) => t.assignee?._id === activeId),
+    ...staffPendingOrders,
+  ];
 
   // Staff specific completed tasks
-  const staffCompletedTasks = completedTasks.filter(
-    (t) => t.assignee?._id === (user?.email === "staff@ktmdecor.com" ? activeStaffProfile?._id : user?._id)
-  );
+  const staffCompletedTasks: any[] = [
+    ...completedTasks.filter((t) => t.assignee?._id === activeId),
+    ...staffCompletedOrders,
+  ];
 
   // Generate sales chart data points (merging tasks and approved orders chronologically)
   const getSalesChartData = () => {
@@ -127,10 +180,10 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
       });
     });
     
-    approvedOrders.forEach((o) => {
+    safeSales.forEach((s) => {
       revenueItems.push({
-        date: new Date(o.approvedAt || o.updatedAt || o.createdAt),
-        value: o.totalPrice || 0
+        date: new Date(s.date),
+        value: s.amount || 0
       });
     });
 
@@ -231,7 +284,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
     setShowNoteInput(false);
   };
 
-  // Staff Performance list (completed tasks per user)
+  // Staff Performance list (completed tasks and orders per user)
   const getStaffPerformance = (): { name: string; completed: number; pending: number }[] => {
     const perfMap: { [key: string]: { name: string; completed: number; pending: number } } = {};
     
@@ -244,6 +297,17 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
       const assigneeId = t.assignee?._id;
       if (assigneeId && perfMap[assigneeId]) {
         if (t.status === "done") {
+          perfMap[assigneeId].completed += 1;
+        } else {
+          perfMap[assigneeId].pending += 1;
+        }
+      }
+    });
+
+    orders.forEach((o) => {
+      const assigneeId = o.assignee?._id;
+      if (assigneeId && perfMap[assigneeId] && o.deleted !== true) {
+        if (o.stage === "delivered" || o.approved) {
           perfMap[assigneeId].completed += 1;
         } else {
           perfMap[assigneeId].pending += 1;
@@ -321,10 +385,16 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               <div>
                 <span className="text-xs text-muted font-semibold uppercase tracking-wider">Total Sales</span>
                 <h3 className="text-2xl font-bold font-display mt-2 text-green-500 font-sans">Rs. {totalSales.toLocaleString()}</h3>
-                <p className="text-[9px] text-muted mt-1 space-x-1">
+                <p className="text-[9px] text-muted mt-1 flex flex-wrap gap-x-1.5 gap-y-0.5">
                   <span>Tasks: Rs. {taskSales.toLocaleString()}</span>
                   <span>|</span>
                   <span>Orders: Rs. {orderSales.toLocaleString()}</span>
+                  {directSales > 0 && (
+                    <>
+                      <span>|</span>
+                      <span>Direct: Rs. {directSales.toLocaleString()}</span>
+                    </>
+                  )}
                 </p>
               </div>
               <div className="p-2.5 bg-green-600 text-white rounded-md shadow-sm">
@@ -625,7 +695,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               staffPendingTasks.map((task) => (
                 <div
                   key={task._id}
-                  onClick={() => setCurrentTab("tasks")}
+                  onClick={() => setCurrentTab(task.isOrder ? "order-progress" : "tasks")}
                   className="p-3 bg-card border border-border rounded-md hover:border-accent hover:shadow-sm cursor-pointer transition-all"
                 >
                   <h4 className="font-semibold text-sm line-clamp-1">{task.title}</h4>
@@ -708,7 +778,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                 staffCompletedTasks.map((task) => (
                   <div
                     key={task._id}
-                    onClick={() => setCurrentTab("tasks")}
+                    onClick={() => setCurrentTab(task.isOrder ? "order-progress" : "tasks")}
                     className="p-3 bg-card border border-border rounded-md hover:border-accent hover:shadow-sm cursor-pointer transition-all"
                   >
                     <h4 className="font-semibold text-sm line-clamp-1">{task.title}</h4>

@@ -3,7 +3,7 @@ import { useStore, Task, MarketingCampaign } from "./store/useStore";
 import { Layout } from "./components/Layout";
 import { DashboardOverview } from "./components/DashboardOverview";
 import { TaskBoard } from "./components/TaskBoard";
-import { MarketingHub } from "./components/MarketingHub";
+import { FieldNotes } from "./components/FieldNotes";
 import { BinView } from "./components/BinView";
 import { ProductManagement } from "./components/ProductManagement";
 import { OrdersTab } from "./components/OrdersTab";
@@ -191,8 +191,8 @@ export const App: React.FC = () => {
           setEditingTask={setEditingTask}
         />
       )}
-      {currentTab === "marketing" && (
-        <MarketingHub
+      {currentTab === "field-notes" && (
+        <FieldNotes
           showModal={showCampaignModal}
           setShowModal={setShowCampaignModal}
           editingCampaign={editingCampaign}

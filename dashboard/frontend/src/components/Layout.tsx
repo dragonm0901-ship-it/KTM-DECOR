@@ -22,7 +22,8 @@ import {
   Briefcase,
   FileText,
   DollarSign,
-  Menu
+  Menu,
+  MessageSquare
 } from "./ui/solar-icons";
 
 interface LayoutProps {
@@ -103,7 +104,7 @@ export const Layout: React.FC<LayoutProps> = ({
     ...(user?.role === "admin" ? [
       { id: "quotation", label: "Quotations", icon: FileText }
     ] : []),
-    { id: "marketing", label: "Marketing Hub", icon: Megaphone },
+    { id: "field-notes", label: "Field Notes", icon: FileText },
     ...(user?.role === "admin" ? [
       { id: "products", label: "Shop Catalog", icon: ShoppingBag },
       { id: "bin", label: "Trash Bin", icon: Trash2 }
@@ -199,8 +200,12 @@ export const Layout: React.FC<LayoutProps> = ({
                           onClick={() => {
                             if (notif.type === "task_assigned") {
                               setCurrentTab("tasks");
-                            } else if (notif.type === "marketing_deadline") {
-                              setCurrentTab("marketing");
+                            } else if (notif.type === "marketing_deadline" || notif.type === "new_field_note") {
+                              setCurrentTab("field-notes");
+                            } else if (notif.type === "order_assigned" || notif.type === "new_order") {
+                              setCurrentTab("order-progress");
+                            } else if (notif.type === "new_quick_note") {
+                              setCurrentTab("overview");
                             }
                             setNotifDropdownOpen(false);
                           }}
@@ -217,6 +222,18 @@ export const Layout: React.FC<LayoutProps> = ({
                             )}
                             {notif.type === "system_announcement" && (
                               <Megaphone size={16} className="text-accent" />
+                            )}
+                            {notif.type === "order_assigned" && (
+                              <Package size={16} className="text-amber-500 animate-pulse" />
+                            )}
+                            {notif.type === "new_order" && (
+                              <Package size={16} className="text-amber-500" />
+                            )}
+                            {notif.type === "new_field_note" && (
+                              <FileText size={16} className="text-blue-500" />
+                            )}
+                            {notif.type === "new_quick_note" && (
+                              <MessageSquare size={16} className="text-purple-500" />
                             )}
                           </div>
                           <div className="flex-1">

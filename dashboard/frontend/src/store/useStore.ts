@@ -33,7 +33,14 @@ export interface Task {
 
 export interface Notification {
   _id: string;
-  type: "task_assigned" | "marketing_deadline" | "system_announcement";
+  type:
+    | "task_assigned"
+    | "marketing_deadline"
+    | "system_announcement"
+    | "order_assigned"
+    | "new_order"
+    | "new_quick_note"
+    | "new_field_note";
   message: string;
   recipient: string | null;
   read: boolean;
@@ -44,13 +51,11 @@ export interface Notification {
 export interface MarketingCampaign {
   _id: string;
   title: string;
-  category: string;
-  platform?: string;
-  status: "draft" | "discussion" | "active";
-  scheduledDate: string;
-  assetUrl?: string;
-  copy?: string;
-  notes?: string;
+  description: string;
+  district: string;
+  location: string;
+  fittingSpotImageUrl?: string;
+  email?: string;
   createdBy: {
     _id: string;
     name: string;
@@ -58,7 +63,11 @@ export interface MarketingCampaign {
   };
   createdAt: string;
   updatedAt?: string;
+  deleted?: boolean;
+  deletedAt?: string;
 }
+
+export type FieldNote = MarketingCampaign;
 
 export interface Order {
   _id: string;
@@ -92,6 +101,8 @@ export interface Order {
   };
   createdAt: string;
   updatedAt?: string;
+  deleted?: boolean;
+  deletedAt?: string;
 }
 
 export interface Activity {
@@ -513,7 +524,7 @@ export const useStore = create<DashboardState>((set, get) => ({
       channel.bind("campaign_updated", (updatedCampaign: MarketingCampaign) => {
         set((state) => {
           const filtered = state.campaigns.filter((c) => c._id !== updatedCampaign._id);
-          return { campaigns: [...filtered, updatedCampaign].sort((a, b) => new Date(a.scheduledDate).getTime() - new Date(b.scheduledDate).getTime()) };
+          return { campaigns: [...filtered, updatedCampaign].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) };
         });
       });
 
@@ -1167,6 +1178,7 @@ export const useStore = create<DashboardState>((set, get) => ({
         const filtered = state.orders.filter((o) => o._id !== newOrder._id);
         return { orders: [newOrder, ...filtered] };
       });
+      await get().fetchSales();
     } catch (err) {
       console.error("Create order failed:", err);
       throw err;
@@ -1187,6 +1199,7 @@ export const useStore = create<DashboardState>((set, get) => ({
         const filtered = state.orders.filter((o) => o._id !== orderId);
         return { orders: [updatedOrder, ...filtered] };
       });
+      await get().fetchSales();
     } catch (err) {
       console.error("Update order failed:", err);
       throw err;
@@ -1210,6 +1223,7 @@ export const useStore = create<DashboardState>((set, get) => ({
         const filtered = state.orders.filter((o) => o._id !== orderId);
         return { orders: [updatedOrder, ...filtered] };
       });
+      await get().fetchSales();
     } catch (err) {
       console.error("Update order progress failed:", err);
       throw err;
@@ -1229,6 +1243,7 @@ export const useStore = create<DashboardState>((set, get) => ({
         const filtered = state.orders.filter((o) => o._id !== orderId);
         return { orders: [updatedOrder, ...filtered] };
       });
+      await get().fetchSales();
     } catch (err) {
       console.error("Approve order failed:", err);
       throw err;
@@ -1246,6 +1261,7 @@ export const useStore = create<DashboardState>((set, get) => ({
       set((state) => ({
         orders: state.orders.filter((o) => o._id !== orderId),
       }));
+      await get().fetchSales();
     } catch (err) {
       console.error("Delete order failed:", err);
       throw err;

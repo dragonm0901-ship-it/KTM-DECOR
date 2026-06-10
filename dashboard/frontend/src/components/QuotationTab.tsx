@@ -203,7 +203,124 @@ export const QuotationTab: React.FC = () => {
   };
 
   const handlePrint = () => {
-    window.print();
+    const printContent = document.getElementById("print-area")?.innerHTML;
+    if (!printContent) return;
+
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      alert("Please allow popups to print.");
+      return;
+    }
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Quotation - KTM DECOR</title>
+          <style>
+            @page {
+              margin: 0;
+              size: A4;
+            }
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+              color: #000;
+              background: #fff;
+              margin: 0;
+              padding: 20mm 15mm;
+              line-height: 1.5;
+            }
+            .flex { display: flex; }
+            .justify-between { justify-content: space-between; }
+            .items-center { align-items: center; }
+            .items-start { align-items: flex-start; }
+            .flex-col { flex-direction: column; }
+            .items-end { align-items: flex-end; }
+            .text-center { text-align: center; }
+            .text-right { text-align: right; }
+            .text-left { text-align: left; }
+            .w-full { width: 100%; }
+            .w-12 { width: 3rem; }
+            .w-16 { width: 4rem; }
+            .w-28 { width: 7rem; }
+            .max-w-\\[260px\\] { max-width: 260px; }
+            .border { border: 1px solid #d1d5db; }
+            .border-b { border-bottom: 1px solid #e5e7eb; }
+            .border-t { border-top: 1px solid #e5e7eb; }
+            .border-gray-200 { border-color: #e5e7eb; }
+            .border-gray-300 { border-color: #d1d5db; }
+            .pb-4 { padding-bottom: 1rem; }
+            .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+            .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+            .p-2\\.5 { padding: 0.625rem; }
+            .p-8 { padding: 2rem; }
+            .m-2 { margin: 0.5rem; }
+            .ml-2 { margin-left: 0.5rem; }
+            .mt-2 { margin-top: 0.5rem; }
+            .mb-1 { margin-bottom: 0.25rem; }
+            .space-y-1 > * + * { margin-top: 0.25rem; }
+            .space-y-2 > * + * { margin-top: 0.5rem; }
+            .space-y-4 > * + * { margin-top: 1rem; }
+            .space-y-6 > * + * { margin-top: 1.5rem; }
+            .gap-2 { gap: 0.5rem; }
+            .gap-6 { gap: 1.5rem; }
+            .grid { display: grid; }
+            .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+            @media (min-width: 768px) {
+              .md\\:grid-cols-12 { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+              .md\\:col-span-7 { grid-column: span 7 / span 7; }
+              .md\\:col-span-5 { grid-column: span 5 / span 5; }
+            }
+            .bg-white { background-color: #fff; }
+            .bg-gray-50 { background-color: #f9fafb; }
+            .bg-\\[\\#FE914C\\] { background-color: #FE914C; }
+            .text-white { color: #fff; }
+            .text-black { color: #000; }
+            .text-gray-500 { color: #6b7280; }
+            .text-gray-600 { color: #4b5563; }
+            .text-gray-700 { color: #374151; }
+            .text-gray-800 { color: #1f2937; }
+            .text-gray-900 { color: #111827; }
+            .text-gray-950 { color: #030712; }
+            .text-xs { font-size: 0.75rem; }
+            .text-sm { font-size: 0.875rem; }
+            .text-lg { font-size: 1.125rem; }
+            .text-xl { font-size: 1.25rem; }
+            .text-2xl { font-size: 1.5rem; }
+            .font-bold { font-weight: 700; }
+            .font-extrabold { font-weight: 800; }
+            .font-medium { font-weight: 500; }
+            .font-semibold { font-weight: 600; }
+            .italic { font-style: italic; }
+            .uppercase { text-transform: uppercase; }
+            .tracking-widest { letter-spacing: 0.1em; }
+            .tracking-wider { letter-spacing: 0.05em; }
+            .leading-none { line-height: 1; }
+            .leading-snug { line-height: 1.375; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid #d1d5db; padding: 0.625rem; text-align: left; }
+            th { background-color: #FE914C; color: white; font-weight: bold; }
+            .text-center { text-align: center; }
+            .text-right { text-align: right; }
+            img { max-height: 80px; width: auto; object-fit: contain; }
+          </style>
+        </head>
+        <body>
+          <div style="padding: 10px;">
+            ${printContent}
+          </div>
+          <script>
+            window.onload = function() {
+              window.print();
+              setTimeout(function() {
+                window.close();
+              }, 500);
+            };
+          </script>
+        </body>
+      </html>
+    `);
+
+    printWindow.document.close();
   };
 
   // Filtered List

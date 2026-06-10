@@ -16,7 +16,7 @@ const __dirname = path.dirname(__filename);
 import User from "./models/User.js";
 import Task from "./models/Task.js";
 import Notification from "./models/Notification.js";
-import MarketingCampaign from "./models/MarketingCampaign.js";
+import FieldNote from "./models/FieldNote.js";
 import ActivityLog from "./models/ActivityLog.js";
 import Product from "./models/Product.js";
 import Order from "./models/Order.js";
@@ -358,9 +358,9 @@ app.get("/api/bootstrap", protect, async (req, res) => {
         .sort({ pinned: -1, createdAt: -1 }),
       users: User.find({}).select("name email role"),
       notifications: Notification.find(notifQuery).sort({ createdAt: -1 }),
-      campaigns: MarketingCampaign.find({ deleted: { $ne: true } })
+      campaigns: FieldNote.find({ deleted: { $ne: true } })
         .populate("createdBy", "name role")
-        .sort({ scheduledDate: 1 }),
+        .sort({ createdAt: -1 }),
       activities: ActivityLog.find({})
         .populate("user", "name email role")
         .sort({ createdAt: -1 })
@@ -386,7 +386,7 @@ app.get("/api/bootstrap", protect, async (req, res) => {
       promises.quotations = Quotation.find({}).populate("createdBy", "name role").sort({ date: -1 });
       
       promises.binTasks = Task.find({ deleted: true }).populate("assignee", "name email role").populate("createdBy", "name role");
-      promises.binCampaigns = MarketingCampaign.find({ deleted: true }).populate("createdBy", "name role");
+      promises.binCampaigns = FieldNote.find({ deleted: true }).populate("createdBy", "name role");
       promises.binOrders = Order.find({ deleted: true }).populate("assignee", "name email role").populate("createdBy", "name role");
     }
 
@@ -1121,111 +1121,113 @@ app.post("/api/notifications/announcement", protect, admin, async (req, res) => 
   }
 });
 
-// ─── MARKETING CAMPAIGNS ENDPOINTS ────────────────────────────
+// ─── FIELD NOTES ENDPOINTS ────────────────────────────────────
 
-// Get all campaigns
+// Get all field notes
 app.get("/api/campaigns", protect, async (req, res) => {
   try {
-    const campaigns = await MarketingCampaign.find({ deleted: { $ne: true } })
+    const fieldNotes = await FieldNote.find({ deleted: { $ne: true } })
       .populate("createdBy", "name role")
-      .sort({ scheduledDate: 1 });
-    res.json(campaigns);
+      .sort({ createdAt: -1 });
+    res.json(fieldNotes);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// Create campaign (Admin & Staff authorized to create deliverables)
+// Create field note (Staff only!)
 app.post("/api/campaigns", protect, async (req, res) => {
-  const { title, platform, category, status, scheduledDate, assetUrl, copy, notes } = req.body;
+  const { title, description, district, location, fittingSpotImageUrl, email } = req.body;
   try {
-    const finalCategory = category || platform || "Note";
-    const campaign = await MarketingCampaign.create({
+    // Only staff, not admins
+    if (req.user.role === "admin") {
+      return res.status(403).json({ message: "Only staff members can create field notes." });
+    }
+
+    const fieldNote = await FieldNote.create({
       title,
-      category: finalCategory,
-      platform: finalCategory,
-      status,
-      scheduledDate,
-      assetUrl,
-      copy,
-      notes,
+      description,
+      district,
+      location,
+      fittingSpotImageUrl: fittingSpotImageUrl || "",
+      email: email || "",
       createdBy: req.user._id,
     });
 
-    const populatedCampaign = await MarketingCampaign.findById(campaign._id).populate("createdBy", "name role");
+    const populatedFieldNote = await FieldNote.findById(fieldNote._id).populate("createdBy", "name role");
 
-    triggerPusher("campaign_updated", populatedCampaign);
+    triggerPusher("campaign_updated", populatedFieldNote);
 
-    // Create Notification alerts for marketing deadline
-    const deadlineNotif = await Notification.create({
-      type: "marketing_deadline",
-      message: `New marketing entry created: "${title}" (${finalCategory})`,
+    // Create and broadcast global notification for new field note
+    const globalFieldNoteNotif = await Notification.create({
+      type: "new_field_note",
+      message: `New field note: "${title}" by ${req.user.name} (District: ${district})`,
+      recipient: null,
     });
-    triggerPusher("receive_notification", deadlineNotif);
+    triggerPusher("receive_notification", globalFieldNoteNotif);
 
-    await logActivity(req.user._id, "Campaign Created", `Created marketing entry "${title}" (${finalCategory})`);
-    res.status(201).json(populatedCampaign);
+    await logActivity(req.user._id, "Field Note Created", `Created field note "${title}" in ${district}, ${location}`);
+    res.status(201).json(populatedFieldNote);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// Update campaign status or materials
+// Update field note (Admins or the owner staff member)
 app.put("/api/campaigns/:id", protect, async (req, res) => {
-  const { title, platform, category, status, scheduledDate, assetUrl, copy, notes } = req.body;
+  const { title, description, district, location, fittingSpotImageUrl, email } = req.body;
   try {
-    const campaign = await MarketingCampaign.findById(req.params.id);
-    if (!campaign) {
-      return res.status(404).json({ message: "Campaign not found" });
+    const fieldNote = await FieldNote.findById(req.params.id);
+    if (!fieldNote) {
+      return res.status(404).json({ message: "Field note not found" });
     }
 
-    campaign.title = title || campaign.title;
-    if (category || platform) {
-      const finalCategory = category || platform;
-      campaign.category = finalCategory;
-      campaign.platform = finalCategory;
+    if (req.user.role !== "admin" && fieldNote.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not authorized to modify this field note" });
     }
-    campaign.status = status || campaign.status;
-    campaign.scheduledDate = scheduledDate || campaign.scheduledDate;
-    campaign.assetUrl = assetUrl !== undefined ? assetUrl : campaign.assetUrl;
-    campaign.copy = copy !== undefined ? copy : campaign.copy;
-    campaign.notes = notes !== undefined ? notes : campaign.notes;
 
-    await campaign.save();
+    fieldNote.title = title || fieldNote.title;
+    fieldNote.description = description || fieldNote.description;
+    fieldNote.district = district || fieldNote.district;
+    fieldNote.location = location || fieldNote.location;
+    if (fittingSpotImageUrl !== undefined) fieldNote.fittingSpotImageUrl = fittingSpotImageUrl;
+    if (email !== undefined) fieldNote.email = email;
 
-    const populatedCampaign = await MarketingCampaign.findById(campaign._id).populate("createdBy", "name role");
+    await fieldNote.save();
 
-    triggerPusher("campaign_updated", populatedCampaign);
+    const populatedFieldNote = await FieldNote.findById(fieldNote._id).populate("createdBy", "name role");
+
+    triggerPusher("campaign_updated", populatedFieldNote);
 
     await logActivity(
       req.user._id,
-      "Campaign Updated",
-      `Updated marketing entry "${campaign.title}" to status "${campaign.status.toUpperCase()}"`
+      "Field Note Updated",
+      `Updated field note "${fieldNote.title}"`
     );
 
-    res.json(populatedCampaign);
+    res.json(populatedFieldNote);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// Delete campaign (Admin only, soft-deletes)
+// Delete field note (Admin only, soft-deletes)
 app.delete("/api/campaigns/:id", protect, admin, async (req, res) => {
   try {
-    const campaign = await MarketingCampaign.findById(req.params.id);
-    if (!campaign) {
-      return res.status(404).json({ message: "Marketing entry not found" });
+    const fieldNote = await FieldNote.findById(req.params.id);
+    if (!fieldNote) {
+      return res.status(404).json({ message: "Field note not found" });
     }
 
-    campaign.deleted = true;
-    campaign.deletedAt = new Date();
-    await campaign.save();
+    fieldNote.deleted = true;
+    fieldNote.deletedAt = new Date();
+    await fieldNote.save();
 
     triggerPusher("campaign_deleted", req.params.id);
     triggerPusher("bin_updated", {});
 
-    await logActivity(req.user._id, "Campaign Deleted", `Moved marketing entry "${campaign.title}" to Bin`);
-    res.json({ message: "Marketing entry moved to trash bin" });
+    await logActivity(req.user._id, "Field Note Deleted", `Moved field note "${fieldNote.title}" to Bin`);
+    res.json({ message: "Field note moved to trash bin" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -1240,7 +1242,7 @@ app.get("/api/bin", protect, admin, async (req, res) => {
       .populate("assignee", "name email role")
       .populate("createdBy", "name role");
       
-    const deletedCampaigns = await MarketingCampaign.find({ deleted: true })
+    const deletedCampaigns = await FieldNote.find({ deleted: true })
       .populate("createdBy", "name role");
 
     const deletedOrders = await Order.find({ deleted: true })
@@ -1276,20 +1278,20 @@ app.put("/api/bin/:type/:id/restore", protect, admin, async (req, res) => {
       triggerPusher("bin_updated", {});
       await logActivity(req.user._id, "Task Restored", `Restored task "${task.title}"`);
       return res.json(populatedTask);
-    } else if (type === "campaign") {
-      const campaign = await MarketingCampaign.findById(id);
-      if (!campaign) return res.status(404).json({ message: "Marketing entry not found" });
-      campaign.deleted = false;
-      campaign.deletedAt = undefined;
-      await campaign.save();
+    } else if (type === "campaign" || type === "field-note") {
+      const fieldNote = await FieldNote.findById(id);
+      if (!fieldNote) return res.status(404).json({ message: "Field note not found" });
+      fieldNote.deleted = false;
+      fieldNote.deletedAt = undefined;
+      await fieldNote.save();
 
-      const populatedCampaign = await MarketingCampaign.findById(campaign._id)
+      const populatedFieldNote = await FieldNote.findById(fieldNote._id)
         .populate("createdBy", "name role");
 
-      triggerPusher("campaign_updated", populatedCampaign);
+      triggerPusher("campaign_updated", populatedFieldNote);
       triggerPusher("bin_updated", {});
-      await logActivity(req.user._id, "Campaign Restored", `Restored marketing entry "${campaign.title}"`);
-      return res.json(populatedCampaign);
+      await logActivity(req.user._id, "Field Note Restored", `Restored field note "${fieldNote.title}"`);
+      return res.json(populatedFieldNote);
     } else if (type === "order") {
       const order = await Order.findById(id);
       if (!order) return res.status(404).json({ message: "Order not found" });
@@ -1323,13 +1325,13 @@ app.delete("/api/bin/:type/:id/force", protect, admin, async (req, res) => {
       triggerPusher("bin_updated", {});
       await logActivity(req.user._id, "Task Perm Deleted", `Permanently deleted task "${task.title}"`);
       return res.json({ message: "Task permanently deleted" });
-    } else if (type === "campaign") {
-      const campaign = await MarketingCampaign.findById(id);
-      if (!campaign) return res.status(404).json({ message: "Marketing entry not found" });
-      await campaign.deleteOne();
+    } else if (type === "campaign" || type === "field-note") {
+      const fieldNote = await FieldNote.findById(id);
+      if (!fieldNote) return res.status(404).json({ message: "Field note not found" });
+      await fieldNote.deleteOne();
       triggerPusher("bin_updated", {});
-      await logActivity(req.user._id, "Campaign Perm Deleted", `Permanently deleted marketing entry "${campaign.title}"`);
-      return res.json({ message: "Marketing entry permanently deleted" });
+      await logActivity(req.user._id, "Field Note Perm Deleted", `Permanently deleted field note "${fieldNote.title}"`);
+      return res.json({ message: "Field note permanently deleted" });
     } else if (type === "order") {
       const order = await Order.findById(id);
       if (!order) return res.status(404).json({ message: "Order not found" });
@@ -1540,6 +1542,24 @@ app.post("/api/orders", protect, admin, async (req, res) => {
     triggerPusher("order_created", populatedOrder);
     await logActivity(req.user._id, "Order Created", `Posted manual order for "${productName}" (Rs. ${populatedOrder.totalPrice.toLocaleString()})`);
 
+    // Create and broadcast notification if assignee is set
+    if (order.assignee) {
+      const notif = await Notification.create({
+        type: "order_assigned",
+        message: `New order assigned to you: "${order.productName}" by ${req.user.name}`,
+        recipient: order.assignee,
+      });
+      triggerPusher("receive_notification", notif);
+    }
+
+    // Create and broadcast global notification for new order
+    const globalOrderNotif = await Notification.create({
+      type: "new_order",
+      message: `New order: "${productName}" (Client: ${customerName}) created by ${req.user.name}`,
+      recipient: null,
+    });
+    triggerPusher("receive_notification", globalOrderNotif);
+
     res.status(201).json(populatedOrder);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -1575,6 +1595,8 @@ app.put("/api/orders/:id", protect, admin, async (req, res) => {
       return res.status(404).json({ message: "Order not found" });
     }
 
+    const oldAssignee = order.assignee ? order.assignee.toString() : null;
+
     order.productName = productName || order.productName;
     order.size = size || order.size;
     if (price !== undefined) order.price = Number(price) || 0;
@@ -1596,6 +1618,17 @@ app.put("/api/orders/:id", protect, admin, async (req, res) => {
 
     await order.save();
     await syncOrderSale(order, req.user._id);
+
+    // Send notification if assignee changed and is not null
+    const newAssigneeStr = order.assignee ? order.assignee.toString() : null;
+    if (newAssigneeStr && newAssigneeStr !== oldAssignee) {
+      const notif = await Notification.create({
+        type: "order_assigned",
+        message: `New order assigned to you: "${order.productName}" by ${req.user.name}`,
+        recipient: order.assignee,
+      });
+      triggerPusher("receive_notification", notif);
+    }
 
     const populatedOrder = await Order.findById(order._id)
       .populate("createdBy", "name role")
@@ -1620,6 +1653,8 @@ app.put("/api/orders/:id/progress", protect, async (req, res) => {
       return res.status(404).json({ message: "Order not found" });
     }
 
+    const oldAssignee = order.assignee ? order.assignee.toString() : null;
+
     const previousStage = order.stage;
     if (stage) order.stage = stage;
     if (assignee !== undefined) order.assignee = assignee || null;
@@ -1636,6 +1671,17 @@ app.put("/api/orders/:id/progress", protect, async (req, res) => {
 
     await order.save();
     await syncOrderSale(order, req.user._id);
+
+    // Send notification if assignee changed and is not null
+    const newAssigneeStr = order.assignee ? order.assignee.toString() : null;
+    if (newAssigneeStr && newAssigneeStr !== oldAssignee) {
+      const notif = await Notification.create({
+        type: "order_assigned",
+        message: `New order assigned to you: "${order.productName}" by ${req.user.name}`,
+        recipient: order.assignee,
+      });
+      triggerPusher("receive_notification", notif);
+    }
 
     const populatedOrder = await Order.findById(order._id)
       .populate("createdBy", "name role")
@@ -2092,6 +2138,14 @@ app.post("/api/notes", protect, async (req, res) => {
 
     // Broadcast to everyone via Pusher!
     triggerPusher("note_created", populatedNote);
+
+    // Create and broadcast global notification for new note
+    const globalNoteNotif = await Notification.create({
+      type: "new_quick_note",
+      message: `New note: "${text.trim()}" by ${req.user.name}`,
+      recipient: null,
+    });
+    triggerPusher("receive_notification", globalNoteNotif);
 
     res.status(201).json(populatedNote);
   } catch (error) {
