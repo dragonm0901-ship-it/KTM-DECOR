@@ -12,7 +12,21 @@ import {
 } from "./ui/solar-icons";
 
 export const InventoryTab: React.FC = () => {
-  const { inventoryItems, createInventoryItem, updateInventoryItem, deleteInventoryItem, user } = useStore();
+  const { inventoryItems, createInventoryItem, updateInventoryItem, deleteInventoryItem, user, exportInventory } = useStore();
+
+  // Statement Export States
+  const [exporting, setExporting] = useState(false);
+
+  const handleExportClick = async () => {
+    setExporting(true);
+    try {
+      await exportInventory();
+    } catch (err) {
+      alert("Failed to export inventory CSV: " + (err instanceof Error ? err.message : String(err)));
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
@@ -159,7 +173,7 @@ export const InventoryTab: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-card p-4 rounded-lg border border-border">
         <div>
           <h1 className="text-2xl font-bold font-display flex items-center gap-2">
             <Package className="text-accent" />
@@ -170,15 +184,26 @@ export const InventoryTab: React.FC = () => {
           </p>
         </div>
 
-        {user?.role === "admin" && (
+        <div className="flex flex-wrap items-center gap-3 self-start md:self-auto">
           <button
-            onClick={handleOpenAddModal}
-            className="flex items-center justify-center gap-1.5 py-2.5 px-4 bg-accent hover:bg-accent-dark text-white rounded font-bold text-xs transition-all shadow-md shadow-accent/15 self-start sm:self-auto"
+            onClick={handleExportClick}
+            disabled={exporting}
+            className="flex items-center justify-center gap-1.5 py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-bold text-xs transition-all h-9 disabled:opacity-50"
           >
-            <Plus size={16} />
-            Register New Material
+            <Package size={16} />
+            {exporting ? "Exporting..." : "Export CSV"}
           </button>
-        )}
+
+          {user?.role === "admin" && (
+            <button
+              onClick={handleOpenAddModal}
+              className="flex items-center justify-center gap-1.5 py-2 px-4 bg-accent hover:bg-accent-dark text-white rounded font-bold text-xs transition-all shadow-md shadow-accent/15 h-9"
+            >
+              <Plus size={16} />
+              Register New Material
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Summary Cards */}

@@ -46,7 +46,9 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
     expenses,
     purchases,
     inventoryItems,
-    sales
+    sales,
+    exportStatement,
+    exportInventory
   } = useStore();
 
   const [noteText, setNoteText] = useState("");
@@ -57,6 +59,27 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
   // Outstanding Due Modal States
   const [showOutstandingModal, setShowOutstandingModal] = useState(false);
   const [selectedOrderForDetails, setSelectedOrderForDetails] = useState<any>(null);
+
+  // Statement Export States
+  const [exportMonth, setExportMonth] = useState<string>((new Date().getMonth() + 1).toString());
+  const [exportYear, setExportYear] = useState<string>(new Date().getFullYear().toString());
+  const [exportingType, setExportingType] = useState<string | null>(null);
+
+  const handleExport = async (type: string) => {
+    setExportingType(type);
+    try {
+      if (type === "inventory") {
+        await exportInventory();
+      } else {
+        await exportStatement(type, exportMonth, exportYear);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to export statement: " + (err instanceof Error ? err.message : String(err)));
+    } finally {
+      setExportingType(null);
+    }
+  };
 
   // Get list of active/completed orders with outstanding due payment > 0
   const outstandingOrdersList = orders.filter((o) => o.duePayment > 0);
@@ -509,141 +532,254 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
 
       {/* FINANCIAL & INVENTORY OVERVIEW CARD SECTION */}
       {user?.role === "admin" && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Expenses Overview Card */}
-          <div className="glass-panel p-5 rounded-lg border border-border flex flex-col justify-between h-[230px]">
-            <div>
-              <div className="flex items-center justify-between border-b border-border pb-2.5 mb-3">
-                <h3 className="font-bold text-sm font-display flex items-center gap-2">
-                  <DollarSign size={16} className="text-red-500" />
-                  Expenses Summary
-                </h3>
-                <span className="text-[10px] font-bold bg-red-600 text-white px-2 py-0.5 rounded shadow-sm">
-                  Log
-                </span>
+        <div className="space-y-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Expenses Overview Card */}
+            <div className="glass-panel p-5 rounded-lg border border-border flex flex-col justify-between h-[230px]">
+              <div>
+                <div className="flex items-center justify-between border-b border-border pb-2.5 mb-3">
+                  <h3 className="font-bold text-sm font-display flex items-center gap-2">
+                    <DollarSign size={16} className="text-red-500" />
+                    Expenses Summary
+                  </h3>
+                  <span className="text-[10px] font-bold bg-red-600 text-white px-2 py-0.5 rounded shadow-sm">
+                    Log
+                  </span>
+                </div>
+                <div className="mb-3">
+                  <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Total Expenses</span>
+                  <h4 className="text-xl font-extrabold text-foreground mt-0.5">Rs. {totalExpensesVal.toLocaleString()}</h4>
+                </div>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[10px] text-muted font-semibold">
+                  <div className="flex justify-between">
+                    <span>Salary:</span>
+                    <span className="font-extrabold text-foreground">Rs. {expenseCategorySums.salary.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Rent:</span>
+                    <span className="font-extrabold text-foreground">Rs. {expenseCategorySums.rent.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Travel:</span>
+                    <span className="font-extrabold text-foreground">Rs. {expenseCategorySums.travel.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Food:</span>
+                    <span className="font-extrabold text-foreground">Rs. {expenseCategorySums.food.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Misc:</span>
+                    <span className="font-extrabold text-foreground">Rs. {expenseCategorySums.miscellaneous.toLocaleString()}</span>
+                  </div>
+                </div>
               </div>
-              <div className="mb-3">
-                <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Total Expenses</span>
-                <h4 className="text-xl font-extrabold text-foreground mt-0.5">Rs. {totalExpensesVal.toLocaleString()}</h4>
-              </div>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[10px] text-muted font-semibold">
-                <div className="flex justify-between">
-                  <span>Salary:</span>
-                  <span className="font-extrabold text-foreground">Rs. {expenseCategorySums.salary.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Rent:</span>
-                  <span className="font-extrabold text-foreground">Rs. {expenseCategorySums.rent.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Travel:</span>
-                  <span className="font-extrabold text-foreground">Rs. {expenseCategorySums.travel.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Food:</span>
-                  <span className="font-extrabold text-foreground">Rs. {expenseCategorySums.food.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Misc:</span>
-                  <span className="font-extrabold text-foreground">Rs. {expenseCategorySums.miscellaneous.toLocaleString()}</span>
-                </div>
-              </div>
+              <button
+                onClick={() => setCurrentTab("expenses")}
+                className="text-left text-[10px] font-bold text-accent hover:text-accent-dark transition-colors mt-3"
+              >
+                View Expense Log &rarr;
+              </button>
             </div>
-            <button
-              onClick={() => setCurrentTab("expenses")}
-              className="text-left text-[10px] font-bold text-accent hover:text-accent-dark transition-colors mt-3"
-            >
-              View Expense Log &rarr;
-            </button>
+
+            {/* Purchases Tracker Card */}
+            <div className="glass-panel p-5 rounded-lg border border-border flex flex-col justify-between h-[230px]">
+              <div>
+                <div className="flex items-center justify-between border-b border-border pb-2.5 mb-3">
+                  <h3 className="font-bold text-sm font-display flex items-center gap-2">
+                    <Briefcase size={16} className="text-blue-500" />
+                    Purchases Tracker
+                  </h3>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded shadow-sm ${
+                    outstandingPurchasesVal > 0 ? "bg-amber-600 text-white" : "bg-green-600 text-white"
+                  }`}>
+                    {outstandingPurchasesVal > 0 ? "Pending Dues" : "Settled"}
+                  </span>
+                </div>
+                <div className="mb-2">
+                  <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Total Purchases</span>
+                  <h4 className="text-xl font-extrabold text-foreground mt-0.5">Rs. {totalPurchasesVal.toLocaleString()}</h4>
+                  {outstandingPurchasesVal > 0 && (
+                    <p className="text-[9px] text-red-500 font-bold mt-0.5">Rs. {outstandingPurchasesVal.toLocaleString()} outstanding dues</p>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <span className="text-[9px] text-muted uppercase font-bold tracking-wider block">Recent Invoices</span>
+                  {purchases.slice(0, 2).map((p) => (
+                    <div key={p._id} className="flex justify-between items-center text-[10px] border-b border-border/40 pb-1">
+                      <span className="truncate max-w-[120px] font-semibold text-foreground">{p.supplier}</span>
+                      <span className="text-muted">Rs. {p.amount.toLocaleString()}</span>
+                    </div>
+                  ))}
+                  {purchases.length === 0 && (
+                    <span className="text-[10px] text-muted italic">No purchases logged</span>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={() => setCurrentTab("purchase")}
+                className="text-left text-[10px] font-bold text-accent hover:text-accent-dark transition-colors mt-3"
+              >
+                View Purchases Tracker &rarr;
+              </button>
+            </div>
+
+            {/* Material Inventory Card */}
+            <div className="glass-panel p-5 rounded-lg border border-border flex flex-col justify-between h-[230px]">
+              <div>
+                <div className="flex items-center justify-between border-b border-border pb-2.5 mb-3">
+                  <h3 className="font-bold text-sm font-display flex items-center gap-2">
+                    <Package size={16} className="text-emerald-500" />
+                    Material Inventory
+                  </h3>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded shadow-sm ${
+                    (lowStockVal + outOfStockVal) > 0 ? "bg-red-600 text-white" : "bg-green-600 text-white"
+                  }`}>
+                    {(lowStockVal + outOfStockVal) > 0 ? "Alerts" : "Ok"}
+                  </span>
+                </div>
+                <div className="mb-2 flex justify-between items-center">
+                  <div>
+                    <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Low Stock / Out</span>
+                    <h4 className="text-xl font-extrabold text-foreground mt-0.5">{(lowStockVal + outOfStockVal)} Items</h4>
+                  </div>
+                  <div className="text-right text-[9px] text-muted font-bold space-y-0.5">
+                    <div className="text-amber-500">{lowStockVal} Low Stock</div>
+                    <div className="text-red-500">{outOfStockVal} Out of Stock</div>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-[9px] text-muted uppercase font-bold tracking-wider block">Critical Materials</span>
+                  {inventoryItems.filter((i) => i.quantity <= i.alertLevel).slice(0, 2).map((i) => (
+                    <div key={i._id} className="flex justify-between items-center text-[10px] border-b border-border/40 pb-1">
+                      <span className="truncate max-w-[120px] font-semibold text-foreground">{i.name}</span>
+                      <span className={`font-bold ${i.quantity === 0 ? "text-red-500" : "text-amber-500"}`}>
+                        {i.quantity} {i.unit}
+                      </span>
+                    </div>
+                  ))}
+                  {inventoryItems.filter((i) => i.quantity <= i.alertLevel).length === 0 && (
+                    <span className="text-[10px] text-green-500 font-bold italic">All materials fully stocked</span>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={() => setCurrentTab("inventory")}
+                className="text-left text-[10px] font-bold text-accent hover:text-accent-dark transition-colors mt-3"
+              >
+                View Material Inventory &rarr;
+              </button>
+            </div>
           </div>
 
-          {/* Purchases Tracker Card */}
-          <div className="glass-panel p-5 rounded-lg border border-border flex flex-col justify-between h-[230px]">
-            <div>
-              <div className="flex items-center justify-between border-b border-border pb-2.5 mb-3">
-                <h3 className="font-bold text-sm font-display flex items-center gap-2">
-                  <Briefcase size={16} className="text-blue-500" />
-                  Purchases Tracker
+          {/* Reports & Statement Downloads */}
+          <div className="glass-panel p-5 rounded-lg border border-border bg-accent/[0.01]">
+            <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-border pb-4 mb-4 gap-4">
+              <div>
+                <h3 className="font-bold text-base font-display flex items-center gap-2">
+                  <FileText className="text-accent" size={20} />
+                  Financial Statements & Exports
                 </h3>
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded shadow-sm ${
-                  outstandingPurchasesVal > 0 ? "bg-amber-600 text-white" : "bg-green-600 text-white"
-                }`}>
-                  {outstandingPurchasesVal > 0 ? "Pending Dues" : "Settled"}
-                </span>
+                <p className="text-xs text-muted mt-1">
+                  Generate and download monthly XLSX statements or inventory CSV reports at any time.
+                </p>
               </div>
-              <div className="mb-2">
-                <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Total Purchases</span>
-                <h4 className="text-xl font-extrabold text-foreground mt-0.5">Rs. {totalPurchasesVal.toLocaleString()}</h4>
-                {outstandingPurchasesVal > 0 && (
-                  <p className="text-[9px] text-red-500 font-bold mt-0.5">Rs. {outstandingPurchasesVal.toLocaleString()} outstanding dues</p>
-                )}
-              </div>
-              <div className="space-y-1">
-                <span className="text-[9px] text-muted uppercase font-bold tracking-wider block">Recent Invoices</span>
-                {purchases.slice(0, 2).map((p) => (
-                  <div key={p._id} className="flex justify-between items-center text-[10px] border-b border-border/40 pb-1">
-                    <span className="truncate max-w-[120px] font-semibold text-foreground">{p.supplier}</span>
-                    <span className="text-muted">Rs. {p.amount.toLocaleString()}</span>
-                  </div>
-                ))}
-                {purchases.length === 0 && (
-                  <span className="text-[10px] text-muted italic">No purchases logged</span>
-                )}
-              </div>
-            </div>
-            <button
-              onClick={() => setCurrentTab("purchase")}
-              className="text-left text-[10px] font-bold text-accent hover:text-accent-dark transition-colors mt-3"
-            >
-              View Purchases Tracker &rarr;
-            </button>
-          </div>
 
-          {/* Material Inventory Card */}
-          <div className="glass-panel p-5 rounded-lg border border-border flex flex-col justify-between h-[230px]">
-            <div>
-              <div className="flex items-center justify-between border-b border-border pb-2.5 mb-3">
-                <h3 className="font-bold text-sm font-display flex items-center gap-2">
-                  <Package size={16} className="text-emerald-500" />
-                  Material Inventory
-                </h3>
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded shadow-sm ${
-                  (lowStockVal + outOfStockVal) > 0 ? "bg-red-600 text-white" : "bg-green-600 text-white"
-                }`}>
-                  {(lowStockVal + outOfStockVal) > 0 ? "Alerts" : "Ok"}
-                </span>
-              </div>
-              <div className="mb-2 flex justify-between items-center">
-                <div>
-                  <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Low Stock / Out</span>
-                  <h4 className="text-xl font-extrabold text-foreground mt-0.5">{(lowStockVal + outOfStockVal)} Items</h4>
+              {/* Date Filters */}
+              <div className="flex items-center gap-3">
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-muted uppercase font-bold tracking-wider mb-1">Month</span>
+                  <select
+                    value={exportMonth}
+                    onChange={(e) => setExportMonth(e.target.value)}
+                    className="bg-card border border-border text-foreground text-xs rounded px-3 py-1.5 focus:outline-none focus:border-accent font-semibold"
+                  >
+                    <option value="all">All Time</option>
+                    <option value="1">January</option>
+                    <option value="2">February</option>
+                    <option value="3">March</option>
+                    <option value="4">April</option>
+                    <option value="5">May</option>
+                    <option value="6">June</option>
+                    <option value="7">July</option>
+                    <option value="8">August</option>
+                    <option value="9">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                  </select>
                 </div>
-                <div className="text-right text-[9px] text-muted font-bold space-y-0.5">
-                  <div className="text-amber-500">{lowStockVal} Low Stock</div>
-                  <div className="text-red-500">{outOfStockVal} Out of Stock</div>
+
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-muted uppercase font-bold tracking-wider mb-1">Year</span>
+                  <select
+                    value={exportYear}
+                    onChange={(e) => setExportYear(e.target.value)}
+                    className="bg-card border border-border text-foreground text-xs rounded px-3 py-1.5 focus:outline-none focus:border-accent font-semibold"
+                  >
+                    <option value="2025">2025</option>
+                    <option value="2026">2026</option>
+                    <option value="2027">2027</option>
+                  </select>
                 </div>
-              </div>
-              <div className="space-y-1">
-                <span className="text-[9px] text-muted uppercase font-bold tracking-wider block">Critical Materials</span>
-                {inventoryItems.filter((i) => i.quantity <= i.alertLevel).slice(0, 2).map((i) => (
-                  <div key={i._id} className="flex justify-between items-center text-[10px] border-b border-border/40 pb-1">
-                    <span className="truncate max-w-[120px] font-semibold text-foreground">{i.name}</span>
-                    <span className={`font-bold ${i.quantity === 0 ? "text-red-500" : "text-amber-500"}`}>
-                      {i.quantity} {i.unit}
-                    </span>
-                  </div>
-                ))}
-                {inventoryItems.filter((i) => i.quantity <= i.alertLevel).length === 0 && (
-                  <span className="text-[10px] text-green-500 font-bold italic">All materials fully stocked</span>
-                )}
               </div>
             </div>
-            <button
-              onClick={() => setCurrentTab("inventory")}
-              className="text-left text-[10px] font-bold text-accent hover:text-accent-dark transition-colors mt-3"
-            >
-              View Material Inventory &rarr;
-            </button>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              <button
+                onClick={() => handleExport("all")}
+                disabled={exportingType !== null}
+                className="flex flex-col items-center justify-center p-4 rounded-lg border border-accent/20 bg-accent/[0.03] hover:bg-accent/[0.06] transition-all text-center group"
+              >
+                <FileText className="text-accent group-hover:scale-110 transition-transform mb-2" size={24} />
+                <span className="text-xs font-bold text-foreground">Combined Statement</span>
+                <span className="text-[9px] text-muted mt-1">All sales, expenses, and purchases</span>
+                {exportingType === "all" && <span className="text-[9px] text-accent font-bold mt-1 animate-pulse">Exporting...</span>}
+              </button>
+
+              <button
+                onClick={() => handleExport("sales")}
+                disabled={exportingType !== null}
+                className="flex flex-col items-center justify-center p-4 rounded-lg border border-blue-500/20 bg-blue-500/[0.02] hover:bg-blue-500/[0.05] transition-all text-center group"
+              >
+                <TrendingUp className="text-blue-500 group-hover:scale-110 transition-transform mb-2" size={24} />
+                <span className="text-xs font-bold text-foreground">Sales Only</span>
+                <span className="text-[9px] text-muted mt-1">XLSX sheet of sales ledger</span>
+                {exportingType === "sales" && <span className="text-[9px] text-blue-500 font-bold mt-1 animate-pulse">Exporting...</span>}
+              </button>
+
+              <button
+                onClick={() => handleExport("expenses")}
+                disabled={exportingType !== null}
+                className="flex flex-col items-center justify-center p-4 rounded-lg border border-red-500/20 bg-red-500/[0.02] hover:bg-red-500/[0.05] transition-all text-center group"
+              >
+                <DollarSign className="text-red-500 group-hover:scale-110 transition-transform mb-2" size={24} />
+                <span className="text-xs font-bold text-foreground">Expenses Only</span>
+                <span className="text-[9px] text-muted mt-1">XLSX sheet of expenses log</span>
+                {exportingType === "expenses" && <span className="text-[9px] text-red-500 font-bold mt-1 animate-pulse">Exporting...</span>}
+              </button>
+
+              <button
+                onClick={() => handleExport("purchases")}
+                disabled={exportingType !== null}
+                className="flex flex-col items-center justify-center p-4 rounded-lg border border-amber-500/20 bg-amber-500/[0.02] hover:bg-amber-500/[0.05] transition-all text-center group"
+              >
+                <Briefcase className="text-amber-500 group-hover:scale-110 transition-transform mb-2" size={24} />
+                <span className="text-xs font-bold text-foreground">Purchases Only</span>
+                <span className="text-[9px] text-muted mt-1">XLSX sheet of material purchases</span>
+                {exportingType === "purchases" && <span className="text-[9px] text-amber-500 font-bold mt-1 animate-pulse">Exporting...</span>}
+              </button>
+
+              <button
+                onClick={() => handleExport("inventory")}
+                disabled={exportingType !== null}
+                className="flex flex-col items-center justify-center p-4 rounded-lg border border-emerald-500/20 bg-emerald-500/[0.02] hover:bg-emerald-500/[0.05] transition-all text-center group sm:col-span-2 lg:col-span-1"
+              >
+                <Package className="text-emerald-500 group-hover:scale-110 transition-transform mb-2" size={24} />
+                <span className="text-xs font-bold text-foreground">Inventory Catalog</span>
+                <span className="text-[9px] text-muted mt-1">CSV file of raw materials</span>
+                {exportingType === "inventory" && <span className="text-[9px] text-emerald-500 font-bold mt-1 animate-pulse">Exporting...</span>}
+              </button>
+            </div>
           </div>
         </div>
       )}

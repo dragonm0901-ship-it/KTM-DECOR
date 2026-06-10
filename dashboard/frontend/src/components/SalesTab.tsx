@@ -15,8 +15,24 @@ import {
 import { OrderDetailModal } from "./OrderDetailModal";
 
 export const SalesTab: React.FC = () => {
-  const { sales, orders, deleteSale, approveOrder, user } = useStore();
+  const { sales, orders, deleteSale, approveOrder, user, exportStatement } = useStore();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
+  // Statement Export States
+  const [exportMonth, setExportMonth] = useState((new Date().getMonth() + 1).toString());
+  const [exportYear, setExportYear] = useState(new Date().getFullYear().toString());
+  const [exporting, setExporting] = useState(false);
+
+  const handleExportClick = async () => {
+    setExporting(true);
+    try {
+      await exportStatement("sales", exportMonth, exportYear);
+    } catch (err) {
+      alert("Failed to export sales statement: " + (err instanceof Error ? err.message : String(err)));
+    } finally {
+      setExporting(false);
+    }
+  };
 
   // Filters
   const [searchQuery, setSearchQuery] = useState("");
@@ -184,7 +200,7 @@ export const SalesTab: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-card p-4 rounded-lg border border-border">
         <div>
           <h1 className="text-2xl font-bold font-display flex items-center gap-2">
             <TrendingUp className="text-accent" />
@@ -195,7 +211,44 @@ export const SalesTab: React.FC = () => {
           </p>
         </div>
 
-
+        {/* Quick Statement Download */}
+        <div className="flex items-center gap-2 self-start md:self-auto bg-border/20 p-2 rounded-md border border-border/40">
+          <select
+            value={exportMonth}
+            onChange={(e) => setExportMonth(e.target.value)}
+            className="bg-card border border-border text-foreground text-[11px] rounded px-2 py-1.5 focus:outline-none focus:border-accent font-semibold"
+          >
+            <option value="all">All Time</option>
+            <option value="1">Jan</option>
+            <option value="2">Feb</option>
+            <option value="3">Mar</option>
+            <option value="4">Apr</option>
+            <option value="5">May</option>
+            <option value="6">Jun</option>
+            <option value="7">Jul</option>
+            <option value="8">Aug</option>
+            <option value="9">Sep</option>
+            <option value="10">Oct</option>
+            <option value="11">Nov</option>
+            <option value="12">Dec</option>
+          </select>
+          <select
+            value={exportYear}
+            onChange={(e) => setExportYear(e.target.value)}
+            className="bg-card border border-border text-foreground text-[11px] rounded px-2 py-1.5 focus:outline-none focus:border-accent font-semibold"
+          >
+            <option value="2025">2025</option>
+            <option value="2026">2026</option>
+            <option value="2027">2027</option>
+          </select>
+          <button
+            onClick={handleExportClick}
+            disabled={exporting}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-accent text-white text-[11px] rounded font-bold hover:bg-accent-dark transition-all disabled:opacity-50"
+          >
+            {exporting ? "Exporting..." : "Export XLSX"}
+          </button>
+        </div>
       </div>
 
       {/* Metrics Cards */}

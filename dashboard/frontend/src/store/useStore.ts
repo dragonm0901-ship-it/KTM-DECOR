@@ -331,6 +331,10 @@ interface DashboardState {
   fetchQuickNotes: () => Promise<void>;
   addQuickNote: (note: string) => Promise<void>;
   deleteQuickNote: (id: string) => Promise<void>;
+
+  // Exports
+  exportStatement: (type: string, month: string, year: string) => Promise<void>;
+  exportInventory: () => Promise<void>;
 }
 
 // Helpers
@@ -1700,6 +1704,57 @@ export const useStore = create<DashboardState>((set, get) => ({
       }));
     } catch (err) {
       console.error("Delete quick note failed:", err);
+      throw err;
+    }
+  },
+
+  exportStatement: async (type, month, year) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/export/statement?type=${type}&month=${month}&year=${year}`, {
+        headers: getHeaders(token),
+      });
+      if (!res.ok) throw new Error("Exporting statement failed");
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      
+      const monthNames = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+      ];
+      const periodLabel = month === "all" ? "All_Time" : `${monthNames[parseInt(month, 10) - 1]}_${year}`;
+      a.download = `${type}_statement_${periodLabel}.xlsx`;
+      
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
+  },
+
+  exportInventory: async () => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/export/inventory`, {
+        headers: getHeaders(token),
+      });
+      if (!res.ok) throw new Error("Exporting inventory failed");
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Inventory_Report_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
       throw err;
     }
   },
