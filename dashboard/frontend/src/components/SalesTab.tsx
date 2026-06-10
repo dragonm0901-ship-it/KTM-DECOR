@@ -33,6 +33,7 @@ export const SalesTab: React.FC = () => {
     .reduce((sum, s) => sum + s.amount, 0);
 
   const combinedTotal = orderSalesTotal + directSalesTotal;
+  const totalDuePayment = orders.reduce((acc, o) => acc + (o.duePayment || 0), 0);
 
   // Merging orders and custom sales for a unified ledger
   const unifiedSales = sales.map((s) => {
@@ -198,37 +199,26 @@ export const SalesTab: React.FC = () => {
       </div>
 
       {/* Metrics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="glass-panel p-5 rounded-lg flex items-center gap-4 border border-border">
-          <div className="h-12 w-12 rounded-lg bg-emerald-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
-            <Package size={22} />
-          </div>
-          <div>
-            <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Sign Order Sales</span>
-            <h3 className="text-lg font-bold mt-1 text-foreground font-display">Rs. {orderSalesTotal.toLocaleString()}</h3>
-            <p className="text-[9px] text-muted mt-0.5">{sales.filter((s) => s.orderId).length} approved orders</p>
-          </div>
-        </div>
-
-        <div className="glass-panel p-5 rounded-lg flex items-center gap-4 border border-border">
-          <div className="h-12 w-12 rounded-lg bg-blue-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="glass-panel p-5 rounded-lg flex items-center gap-4 border border-border bg-accent/[0.02] border-accent/20">
+          <div className="h-12 w-12 rounded-lg bg-accent flex items-center justify-center text-white flex-shrink-0 shadow-sm">
             <TrendingUp size={22} />
           </div>
           <div>
-            <span className="text-[10px] text-muted uppercase font-bold tracking-wider">General Direct Sales</span>
-            <h3 className="text-lg font-bold mt-1 text-foreground font-display">Rs. {directSalesTotal.toLocaleString()}</h3>
-            <p className="text-[9px] text-muted mt-0.5">{sales.filter((s) => !s.orderId).length} custom logs</p>
+            <span className="text-[10px] text-muted uppercase font-bold tracking-wider text-accent">Total Sales</span>
+            <h3 className="text-xl font-bold mt-1 text-accent font-display">Rs. {combinedTotal.toLocaleString()}</h3>
+            <p className="text-[9px] text-muted mt-0.5">Approved ledger balance</p>
           </div>
         </div>
 
-        <div className="glass-panel p-5 rounded-lg flex items-center gap-4 border border-border bg-accent/[0.02] border-accent/20">
-          <div className="h-12 w-12 rounded-lg bg-accent flex items-center justify-center text-white flex-shrink-0 shadow-sm">
-            <DollarSign size={22} />
+        <div className="glass-panel p-5 rounded-lg flex items-center gap-4 border border-border bg-red-600/[0.02] border-red-500/20">
+          <div className="h-12 w-12 rounded-lg bg-red-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
+            <DollarSign size={22} className="text-white" />
           </div>
           <div>
-            <span className="text-[10px] text-muted uppercase font-bold tracking-wider text-accent">Total Combined Revenue</span>
-            <h3 className="text-xl font-bold mt-1 text-accent font-display">Rs. {combinedTotal.toLocaleString()}</h3>
-            <p className="text-[9px] text-muted mt-0.5">Approved ledger balance</p>
+            <span className="text-[10px] text-red-500 uppercase font-bold tracking-wider">Total Outstanding Dues</span>
+            <h3 className="text-xl font-bold mt-1 text-red-500 font-display">Rs. {totalDuePayment.toLocaleString()}</h3>
+            <p className="text-[9px] text-muted mt-0.5">{orders.filter(o => o.duePayment > 0).length} pending accounts</p>
           </div>
         </div>
       </div>
