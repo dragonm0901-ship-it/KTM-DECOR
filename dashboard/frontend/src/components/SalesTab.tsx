@@ -246,7 +246,7 @@ export const SalesTab: React.FC = () => {
             disabled={exporting}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-accent text-white text-[11px] rounded font-bold hover:bg-accent-dark transition-all disabled:opacity-50"
           >
-            {exporting ? "Exporting..." : "Export XLSX"}
+            {exporting ? "Exporting..." : "Export CSV"}
           </button>
         </div>
       </div>

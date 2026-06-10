@@ -2254,6 +2254,130 @@ app.get("/api/export/statement", protect, admin, async (req, res) => {
     const periodLabel = month === "all" ? "All_Time" : `${monthNames[parseInt(month, 10) - 1]}_${year}`;
     const cleanPeriodLabel = periodLabel.replace(/_/g, " ");
 
+    // CSV Exports for single tables
+    if (type === "sales") {
+      const salesSheet = workbook.addWorksheet("Sales Ledger");
+      salesSheet.columns = [
+        { header: "S.N.", key: "sn" },
+        { header: "Date", key: "date" },
+        { header: "Client Name", key: "clientName" },
+        { header: "Product", key: "productName" },
+        { header: "Payment Method", key: "paymentMethod" },
+        { header: "Amount (Rs.)", key: "amount" },
+        { header: "Notes", key: "notes" }
+      ];
+
+      sales.forEach((s, idx) => {
+        salesSheet.addRow({
+          sn: idx + 1,
+          date: new Date(s.date).toLocaleDateString(),
+          clientName: s.clientName,
+          productName: s.productName,
+          paymentMethod: s.paymentMethod.toUpperCase(),
+          amount: s.amount,
+          notes: s.notes || ""
+        });
+      });
+
+      const totalAmount = sales.reduce((sum, s) => sum + s.amount, 0);
+      salesSheet.addRow({
+        sn: "TOTAL",
+        date: "",
+        clientName: "",
+        productName: "",
+        paymentMethod: "",
+        amount: totalAmount,
+        notes: ""
+      });
+
+      const filename = `sales_statement_${periodLabel}.csv`;
+      res.setHeader("Content-Type", "text/csv");
+      res.setHeader("Content-Disposition", `attachment; filename=${filename}`);
+      await workbook.csv.write(res);
+      res.end();
+      return;
+    }
+
+    if (type === "expenses") {
+      const expensesSheet = workbook.addWorksheet("Expenses Log");
+      expensesSheet.columns = [
+        { header: "S.N.", key: "sn" },
+        { header: "Date", key: "date" },
+        { header: "Expense Item", key: "title" },
+        { header: "Category", key: "category" },
+        { header: "Amount (Rs.)", key: "amount" },
+        { header: "Description", key: "description" }
+      ];
+
+      expenses.forEach((e, idx) => {
+        expensesSheet.addRow({
+          sn: idx + 1,
+          date: new Date(e.date).toLocaleDateString(),
+          title: e.title,
+          category: e.category.toUpperCase(),
+          amount: e.amount,
+          description: e.description || ""
+        });
+      });
+
+      const totalAmount = expenses.reduce((sum, e) => sum + e.amount, 0);
+      expensesSheet.addRow({
+        sn: "TOTAL",
+        date: "",
+        title: "",
+        category: "",
+        amount: totalAmount,
+        description: ""
+      });
+
+      const filename = `expenses_statement_${periodLabel}.csv`;
+      res.setHeader("Content-Type", "text/csv");
+      res.setHeader("Content-Disposition", `attachment; filename=${filename}`);
+      await workbook.csv.write(res);
+      res.end();
+      return;
+    }
+
+    if (type === "purchases") {
+      const purchasesSheet = workbook.addWorksheet("Purchases Ledger");
+      purchasesSheet.columns = [
+        { header: "S.N.", key: "sn" },
+        { header: "Date", key: "date" },
+        { header: "Supplier", key: "supplier" },
+        { header: "Purchase Details", key: "details" },
+        { header: "Status", key: "status" },
+        { header: "Amount (Rs.)", key: "amount" }
+      ];
+
+      purchases.forEach((p, idx) => {
+        purchasesSheet.addRow({
+          sn: idx + 1,
+          date: new Date(p.date).toLocaleDateString(),
+          supplier: p.supplier,
+          details: p.itemDetails,
+          status: p.status.toUpperCase(),
+          amount: p.amount
+        });
+      });
+
+      const totalAmount = purchases.reduce((sum, p) => sum + p.amount, 0);
+      purchasesSheet.addRow({
+        sn: "TOTAL",
+        date: "",
+        supplier: "",
+        details: "",
+        status: "",
+        amount: totalAmount
+      });
+
+      const filename = `purchases_statement_${periodLabel}.csv`;
+      res.setHeader("Content-Type", "text/csv");
+      res.setHeader("Content-Disposition", `attachment; filename=${filename}`);
+      await workbook.csv.write(res);
+      res.end();
+      return;
+    }
+
     // Helper: Style sheet helper to enforce gridlines and basic border/font formatting
     const applyDefaultBorders = (sheet, startRow, endRow, numCols) => {
       sheet.views = [{ showGridLines: true }];

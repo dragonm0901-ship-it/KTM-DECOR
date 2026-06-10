@@ -1725,7 +1725,8 @@ export const useStore = create<DashboardState>((set, get) => ({
         "July", "August", "September", "October", "November", "December"
       ];
       const periodLabel = month === "all" ? "All_Time" : `${monthNames[parseInt(month, 10) - 1]}_${year}`;
-      a.download = `${type}_statement_${periodLabel}.xlsx`;
+      const fileExt = type === "all" ? "xlsx" : "csv";
+      a.download = `${type}_statement_${periodLabel}.${fileExt}`;
       
       document.body.appendChild(a);
       a.click();

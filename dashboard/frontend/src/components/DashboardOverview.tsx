@@ -743,7 +743,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               >
                 <TrendingUp className="text-blue-500 group-hover:scale-110 transition-transform mb-2" size={24} />
                 <span className="text-xs font-bold text-foreground">Sales Only</span>
-                <span className="text-[9px] text-muted mt-1">XLSX sheet of sales ledger</span>
+                <span className="text-[9px] text-muted mt-1">CSV file of sales ledger</span>
                 {exportingType === "sales" && <span className="text-[9px] text-blue-500 font-bold mt-1 animate-pulse">Exporting...</span>}
               </button>
 
@@ -754,7 +754,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               >
                 <DollarSign className="text-red-500 group-hover:scale-110 transition-transform mb-2" size={24} />
                 <span className="text-xs font-bold text-foreground">Expenses Only</span>
-                <span className="text-[9px] text-muted mt-1">XLSX sheet of expenses log</span>
+                <span className="text-[9px] text-muted mt-1">CSV file of expenses log</span>
                 {exportingType === "expenses" && <span className="text-[9px] text-red-500 font-bold mt-1 animate-pulse">Exporting...</span>}
               </button>
 
@@ -765,7 +765,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               >
                 <Briefcase className="text-amber-500 group-hover:scale-110 transition-transform mb-2" size={24} />
                 <span className="text-xs font-bold text-foreground">Purchases Only</span>
-                <span className="text-[9px] text-muted mt-1">XLSX sheet of material purchases</span>
+                <span className="text-[9px] text-muted mt-1">CSV file of material purchases</span>
                 {exportingType === "purchases" && <span className="text-[9px] text-amber-500 font-bold mt-1 animate-pulse">Exporting...</span>}
               </button>
 
