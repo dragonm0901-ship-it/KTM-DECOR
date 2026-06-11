@@ -531,8 +531,8 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
       )}
 
       {showModal && (
-        <div className="modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-card w-full max-w-md rounded-lg border border-border p-6 shadow-2xl animate-scale-up">
+        <div className="modal-overlay fixed inset-0 mt-16 sm:mt-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4">
+          <div className="bg-card w-full max-w-md rounded-t-lg sm:rounded-lg border border-border p-4 sm:p-6 shadow-2xl animate-scale-up max-h-[calc(100vh-6rem)] sm:max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4 border-b border-border pb-2">
               <h2 className="text-lg font-bold font-display flex items-center gap-2">
                 {editingTask ? <Edit2 size={20} className="text-accent" /> : <Plus size={20} className="text-accent" />}

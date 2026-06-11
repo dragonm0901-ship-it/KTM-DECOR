@@ -96,7 +96,7 @@ const OrderSchema = new mongoose.Schema(
     },
     stage: {
       type: String,
-      enum: ["design", "manufacturing", "completed", "delivered"],
+      enum: ["design", "manufacturing", "completed", "delivered", "paid"],
       default: "design",
     },
     approved: {
@@ -136,7 +136,11 @@ const OrderSchema = new mongoose.Schema(
 // Pre-save hook to calculate totalPrice automatically
 OrderSchema.pre("save", function (next) {
   this.totalPrice = (this.price || 0) + (this.deliveryPrice || 0) + (this.installationPrice || 0);
-  this.duePayment = this.totalPrice - (this.advancePayment || 0);
+  if (this.stage === "paid") {
+    this.duePayment = 0;
+  } else {
+    this.duePayment = this.totalPrice - (this.advancePayment || 0);
+  }
   next();
 });
 

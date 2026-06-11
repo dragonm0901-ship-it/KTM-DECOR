@@ -246,8 +246,9 @@ export const OrdersTab: React.FC = () => {
     }
   };
 
-  const calculateUrgency = (dateStr: string, approved: boolean) => {
-    if (approved) return { label: "Delivered", color: "bg-green-500/10 border-green-500/20 text-green-500" };
+  const calculateUrgency = (dateStr: string, approved: boolean, stage?: string) => {
+    if (stage === "paid") return { label: "Paid", color: "bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400 font-bold" };
+    if (approved || stage === "delivered") return { label: "Delivered", color: "bg-blue-500/10 border-blue-500/20 text-blue-600 dark:text-blue-400 font-bold" };
     if (!dateStr) return { label: "No Deadline", color: "bg-gray-150 text-gray-500 border-border" };
     
     const now = new Date();
@@ -339,6 +340,7 @@ export const OrdersTab: React.FC = () => {
               <option value="manufacturing">Manufacturing</option>
               <option value="completed">Completed</option>
               <option value="delivered">Delivered</option>
+              <option value="paid">Paid</option>
             </select>
           </div>
         </div>
@@ -439,8 +441,8 @@ export const OrdersTab: React.FC = () => {
                           <Clock size={11} className="text-accent" />
                           {new Date(order.deliveryDate).toLocaleDateString()}
                         </div>
-                        <span className={`inline-block px-1.5 py-0.5 border text-[9px] font-extrabold uppercase rounded tracking-wide ${calculateUrgency(order.deliveryDate, order.approved).color}`}>
-                          {calculateUrgency(order.deliveryDate, order.approved).label}
+                        <span className={`inline-block px-1.5 py-0.5 border text-[9px] font-extrabold uppercase rounded tracking-wide ${calculateUrgency(order.deliveryDate, order.approved, order.stage).color}`}>
+                          {calculateUrgency(order.deliveryDate, order.approved, order.stage).label}
                         </span>
                         <div className="text-[10px] text-muted font-medium mt-1">
                           Assignee: <strong className="text-foreground">{order.assignee?.name || "Unassigned"}</strong>
@@ -476,7 +478,7 @@ export const OrdersTab: React.FC = () => {
                     <td className="p-4 text-center">
                       <select
                         value={order.stage}
-                        disabled={order.approved && user?.role !== "admin"}
+                        disabled={order.approved && order.stage === "paid" && user?.role !== "admin"}
                         onChange={async (e) => {
                           const targetStage = e.target.value as Order["stage"];
                           if (targetStage === order.stage) return;
@@ -490,21 +492,22 @@ export const OrdersTab: React.FC = () => {
                           }
                         }}
                         className={`px-2.5 py-1.5 text-[10px] font-extrabold uppercase rounded border cursor-pointer focus:outline-none ${
-                          order.approved
-                            ? "bg-green-500/10 border-green-500/20 text-green-500"
+                          order.stage === "paid"
+                            ? "bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400"
+                            : order.stage === "delivered" || order.approved
+                            ? "bg-blue-500/10 border-blue-500/20 text-blue-600 dark:text-blue-400"
                             : order.stage === "completed"
-                            ? "bg-blue-500/10 border-blue-500/20 text-blue-500"
+                            ? "bg-purple-500/10 border-purple-500/20 text-purple-600 dark:text-purple-400"
                             : order.stage === "manufacturing"
-                            ? "bg-amber-500/10 border-amber-500/20 text-amber-500"
-                            : "bg-purple-500/10 border-purple-500/20 text-purple-500"
+                            ? "bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400"
+                            : "bg-orange-500/10 border-orange-500/20 text-orange-600 dark:text-orange-400"
                         }`}
                       >
                         <option value="design" className="bg-card text-foreground font-bold">Design Process</option>
                         <option value="manufacturing" className="bg-card text-foreground font-bold">Manufacturing Process</option>
                         <option value="completed" className="bg-card text-foreground font-bold">Completed</option>
-                        <option value="delivered" className="bg-card text-foreground font-bold">
-                          Delivered
-                        </option>
+                        <option value="delivered" className="bg-card text-foreground font-bold">Delivered</option>
+                        <option value="paid" className="bg-card text-foreground font-bold">Paid</option>
                       </select>
                       {order.approved && (
                         <div className="text-[8px] text-green-600 dark:text-green-400 font-extrabold mt-1 uppercase tracking-wider">
@@ -551,8 +554,8 @@ export const OrdersTab: React.FC = () => {
 
       {/* Creation/Editing Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="bg-card w-full max-w-2xl rounded-lg border border-border p-6 shadow-2xl animate-scale-up my-8 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 mt-16 sm:mt-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="bg-card w-full max-w-2xl rounded-lg border border-border p-4 sm:p-6 shadow-2xl animate-scale-up my-4 max-h-[calc(100vh-6rem)] sm:max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6 border-b border-border pb-3">
               <h2 className="text-lg font-bold font-display flex items-center gap-2">
                 <Package className="text-accent" />
@@ -762,6 +765,7 @@ export const OrdersTab: React.FC = () => {
                         <option value="manufacturing">Manufacturing Process</option>
                         <option value="completed">Completed</option>
                         <option value="delivered">Delivered</option>
+                        <option value="paid">Paid</option>
                       </select>
                     </div>
                   )}

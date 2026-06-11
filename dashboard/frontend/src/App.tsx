@@ -150,7 +150,7 @@ export const App: React.FC = () => {
                   onClick={() => handleSetTestCredentials("admin@ktmdecor.com", import.meta.env.VITE_SEED_ADMIN_PASSWORD || "uH9#fX8$mK2!vP5_wZ7*tQ3")}
                   className="px-3 py-2 text-[10px] text-left border border-border bg-background rounded hover:border-accent transition-all hover:bg-accent/5"
                 >
-                  <span className="font-bold text-accent block">Sagar (Admin)</span>
+                  <span className="font-bold text-accent block">Kishor (Admin)</span>
                   admin@ktmdecor.com
                 </button>
                 <button

@@ -25,26 +25,32 @@ export const OrderProgressTab: React.FC = () => {
     {
       id: "design",
       label: "Design Process",
-      color: "border-purple-500/20 bg-purple-500/5 text-purple-500",
+      color: "border-orange-500/20 bg-orange-500/5 text-orange-500",
       desc: "Client review & vector mockups"
     },
     {
       id: "manufacturing",
       label: "Manufacturing",
-      color: "border-amber-500/20 bg-amber-500/5 text-amber-500",
+      color: "border-red-500/20 bg-red-500/5 text-red-500",
       desc: "Acrylic cutting, neon bending & assembly"
     },
     {
       id: "completed",
       label: "Completed",
-      color: "border-blue-500/20 bg-blue-500/5 text-blue-500",
+      color: "border-purple-500/20 bg-purple-500/5 text-purple-500",
       desc: "Ready for delivery & installation"
     },
     {
       id: "delivered",
       label: "Delivered",
-      color: "border-green-500/20 bg-green-500/5 text-green-500",
+      color: "border-blue-500/20 bg-blue-500/5 text-blue-500",
       desc: "Received by client & payment verified"
+    },
+    {
+      id: "paid",
+      label: "Paid",
+      color: "border-green-500/20 bg-green-500/5 text-green-500",
+      desc: "Delivered and balance fully settled"
     }
   ];
 
@@ -52,7 +58,7 @@ export const OrderProgressTab: React.FC = () => {
     setErrorMsg("");
     setUpdatingId(orderId);
 
-    const stageOrder: Order["stage"][] = ["design", "manufacturing", "completed", "delivered"];
+    const stageOrder: Order["stage"][] = ["design", "manufacturing", "completed", "delivered", "paid"];
     const currentIndex = stageOrder.indexOf(currentStage);
     const nextIndex = direction === "forward" ? currentIndex + 1 : currentIndex - 1;
 
@@ -103,8 +109,9 @@ export const OrderProgressTab: React.FC = () => {
     }
   };
 
-  const calculateUrgency = (dateStr: string, approved: boolean) => {
-    if (approved) return { label: "Delivered", color: "bg-green-600 border-green-600 text-white" };
+  const calculateUrgency = (dateStr: string, approved: boolean, stage?: string) => {
+    if (stage === "paid") return { label: "Paid", color: "bg-green-600 border-green-600 text-white" };
+    if (approved || stage === "delivered") return { label: "Delivered", color: "bg-blue-600 border-blue-600 text-white" };
     if (!dateStr) return { label: "No Deadline", color: "bg-gray-150 text-gray-500 border-border" };
 
     const now = new Date();
@@ -148,7 +155,7 @@ export const OrderProgressTab: React.FC = () => {
       )}
 
       {/* Kanban Board Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
         {stages.map((stage) => {
           const stageOrders = orders.filter((o) => o.stage === stage.id);
 
@@ -175,14 +182,16 @@ export const OrderProgressTab: React.FC = () => {
                 ) : (
                   stageOrders.map((order) => {
                     const isUpdating = updatingId === order._id;
-                    const urgency = calculateUrgency(order.deliveryDate, order.approved);
+                    const urgency = calculateUrgency(order.deliveryDate, order.approved, order.stage);
 
                     return (
                       <div
                         key={order._id}
                         className={`p-3.5 bg-card border rounded-md shadow-sm space-y-3 transition-all relative ${
-                          order.approved
+                          order.stage === "paid"
                             ? "border-green-500/30 dark:border-green-500/20 bg-green-500/[0.01]"
+                            : order.stage === "delivered"
+                            ? "border-blue-500/30 dark:border-blue-500/20 bg-blue-500/[0.01]"
                             : "border-border hover:border-accent/50"
                         } ${isUpdating ? "opacity-55 pointer-events-none" : ""}`}
                       >
@@ -337,9 +346,15 @@ export const OrderProgressTab: React.FC = () => {
 
                           {/* Approved state indicator */}
                           {order.approved && stage.id === "delivered" && (
+                            <div className="p-1.5 bg-blue-600 border border-blue-600 text-white text-[9px] font-bold uppercase rounded text-center tracking-wide flex items-center justify-center gap-1 shadow-sm">
+                              <CheckCircle size={10} />
+                              Delivered & Approved
+                            </div>
+                          )}
+                          {order.approved && stage.id === "paid" && (
                             <div className="p-1.5 bg-green-600 border border-green-600 text-white text-[9px] font-bold uppercase rounded text-center tracking-wide flex items-center justify-center gap-1 shadow-sm">
                               <CheckCircle size={10} />
-                              Completed & Approved
+                              Paid & Approved
                             </div>
                           )}
 
@@ -356,8 +371,8 @@ export const OrderProgressTab: React.FC = () => {
                               </button>
                             )}
 
-                            {/* Only show next if not delivered (since delivered is terminal) */}
-                            {stage.id !== "delivered" && (
+                            {/* Only show next if not paid (since paid is terminal) */}
+                            {stage.id !== "paid" && (
                               <button
                                 onClick={() => handleMove(order._id, order.stage, "forward")}
                                 className="flex-1 py-1 px-2 border border-border hover:bg-border rounded text-[9px] font-bold text-muted hover:text-foreground transition-all flex items-center justify-center gap-1"

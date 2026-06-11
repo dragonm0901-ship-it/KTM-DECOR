@@ -478,7 +478,7 @@ const seedUsers = async () => {
     const adminExists = await User.findOne({ email: "admin@ktmdecor.com" });
     if (!adminExists) {
       await User.create({
-        name: "Sagar (Admin)",
+        name: "Kishor (Admin)",
         email: "admin@ktmdecor.com",
         password: process.env.SEED_ADMIN_PASSWORD || "adminpassword",
         role: "admin",
@@ -486,6 +486,11 @@ const seedUsers = async () => {
       console.log("  ↳ Created admin user: admin@ktmdecor.com");
     } else {
       await syncPasswordIfNeeded(adminExists, process.env.SEED_ADMIN_PASSWORD);
+      if (adminExists.name !== "Kishor (Admin)") {
+        adminExists.name = "Kishor (Admin)";
+        await adminExists.save();
+        console.log("  ↳ Updated admin user name to Kishor (Admin)");
+      }
     }
 
     // Seed Shared Staff Login user
@@ -1706,11 +1711,11 @@ app.put("/api/orders/:id/progress", protect, async (req, res) => {
     if (stage) order.stage = stage;
     if (assignee !== undefined) order.assignee = assignee || null;
 
-    // If explicitly moves it to delivered, approve it
-    if (stage === "delivered") {
+    // If explicitly moves it to delivered or paid, approve it
+    if (stage === "delivered" || stage === "paid") {
       order.approved = true;
-      order.approvedAt = new Date();
-    } else if (stage && stage !== "delivered") {
+      if (!order.approvedAt) order.approvedAt = new Date();
+    } else if (stage) {
       // If moving back, unapprove
       order.approved = false;
       order.approvedAt = undefined;

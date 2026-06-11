@@ -503,8 +503,8 @@ export const PurchaseTab: React.FC = () => {
       </div>
 
       {showModal && (
-        <div className="modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-card w-full max-w-2xl rounded-lg border border-border p-6 shadow-2xl animate-scale-up max-h-[90vh] overflow-y-auto">
+        <div className="modal-overlay fixed inset-0 mt-16 sm:mt-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4">
+          <div className="bg-card w-full max-w-2xl rounded-t-lg sm:rounded-lg border border-border p-4 sm:p-6 shadow-2xl animate-scale-up max-h-[calc(100vh-6rem)] sm:max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4 border-b border-border pb-2">
               <h2 className="text-lg font-bold font-display flex items-center gap-2">
                 <Briefcase className="text-accent" />
@@ -569,7 +569,7 @@ export const PurchaseTab: React.FC = () => {
                 <div className="space-y-2">
                   {itemsList.map((item, index) => (
                     <div key={index} className="grid grid-cols-12 gap-2 items-center bg-border/20 p-2.5 rounded border border-border/40">
-                      <div className="col-span-5">
+                      <div className="col-span-12 sm:col-span-5">
                         <input
                           type="text"
                           value={item.name}
@@ -579,7 +579,7 @@ export const PurchaseTab: React.FC = () => {
                           required
                         />
                       </div>
-                      <div className="col-span-2">
+                      <div className="col-span-4 sm:col-span-2">
                         <input
                           type="number"
                           value={item.quantity || ""}
@@ -590,7 +590,7 @@ export const PurchaseTab: React.FC = () => {
                           required
                         />
                       </div>
-                      <div className="col-span-2">
+                      <div className="col-span-4 sm:col-span-2">
                         <input
                           type="text"
                           value={item.unit}
@@ -600,7 +600,7 @@ export const PurchaseTab: React.FC = () => {
                           required
                         />
                       </div>
-                      <div className="col-span-2">
+                      <div className="col-span-3 sm:col-span-2">
                         <input
                           type="number"
                           value={item.price || ""}
@@ -611,7 +611,7 @@ export const PurchaseTab: React.FC = () => {
                           required
                         />
                       </div>
-                      <div className="col-span-1 text-center">
+                      <div className="col-span-1 sm:col-span-1 text-center">
                         <button
                           type="button"
                           disabled={itemsList.length === 1}
@@ -676,8 +676,8 @@ export const PurchaseTab: React.FC = () => {
       )}
 
       {viewingPurchase && (
-        <div className="modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-card w-full max-w-lg rounded-lg border border-border p-6 shadow-2xl animate-scale-up max-h-[85vh] overflow-y-auto">
+        <div className="modal-overlay fixed inset-0 mt-16 sm:mt-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-card w-full max-w-lg rounded-lg border border-border p-6 shadow-2xl animate-scale-up max-h-[calc(100vh-6rem)] sm:max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4 border-b border-border pb-2">
               <h2 className="text-lg font-bold font-display flex items-center gap-2">
                 <Eye className="text-accent" />

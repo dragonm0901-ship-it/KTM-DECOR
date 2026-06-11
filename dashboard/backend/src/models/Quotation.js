@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const QuotationItemSchema = new mongoose.Schema({
   description: { type: String, required: true },
+  size: { type: String, trim: true, default: "" },
   hsCode: { type: String, trim: true },
   quantity: { type: Number, required: true, min: 1 },
   rate: { type: Number, required: true, min: 0 },

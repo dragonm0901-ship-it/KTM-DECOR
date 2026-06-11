@@ -494,12 +494,12 @@ export const ProductManagement: React.FC = () => {
 
       {/* CREATE / EDIT DIALOG MODAL */}
       {modalOpen && (
-        <div className="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="modal-overlay fixed inset-0 mt-16 sm:mt-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
           {/* Overlay */}
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setModalOpen(false)} />
 
           {/* Form Card */}
-          <div className="bg-card border border-border rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto z-10 flex flex-col p-6 space-y-4 animate-slide-up relative">
+          <div className="bg-card border border-border rounded-xl shadow-2xl w-full max-w-2xl max-h-[calc(100vh-6rem)] sm:max-h-[90vh] overflow-y-auto z-10 flex flex-col p-6 space-y-4 animate-slide-up relative">
             <button
               onClick={() => setModalOpen(false)}
               className="p-1.5 rounded-full hover:bg-border text-muted hover:text-foreground absolute right-4 top-4"

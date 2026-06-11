@@ -89,7 +89,7 @@ export interface Order {
   orderFrom: "tiktok" | "instagram" | "whatsapp" | "direct";
   paymentMethod: "cash" | "online_banking" | "esewa" | "cheque";
   manufacturingNotes?: string;
-  stage: "design" | "manufacturing" | "completed" | "delivered";
+  stage: "design" | "manufacturing" | "completed" | "delivered" | "paid";
   approved: boolean;
   approvedAt?: string;
   deliveryDate: string;
@@ -195,6 +195,7 @@ export interface InventoryItem {
 export interface QuotationItem {
   _id?: string;
   description: string;
+  size?: string;
   hsCode?: string;
   quantity: number;
   rate: number;

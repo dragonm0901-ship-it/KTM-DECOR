@@ -85,7 +85,7 @@ export const QuotationTab: React.FC = () => {
   const [amountInWords, setAmountInWords] = useState("");
   const [remarks, setRemarks] = useState("Delivery And fitting charge is not included in this quotation.");
   const [items, setItems] = useState<QuotationItem[]>([
-    { description: "", quantity: 1, rate: 0, total: 0 }
+    { description: "", size: "", quantity: 1, rate: 0, total: 0 }
   ]);
   const [discount, setDiscount] = useState("0");
   const [tax, setTax] = useState("0"); // default 0% or VAT
@@ -112,7 +112,7 @@ export const QuotationTab: React.FC = () => {
 
   // Add Row
   const handleAddItemRow = () => {
-    setItems([...items, { description: "", quantity: 1, rate: 0, total: 0 }]);
+    setItems([...items, { description: "", size: "", quantity: 1, rate: 0, total: 0 }]);
   };
 
   // Remove Row
@@ -165,6 +165,7 @@ export const QuotationTab: React.FC = () => {
         remarks,
         items: items.map((item) => ({
           description: item.description,
+          size: item.size || "",
           quantity: Number(item.quantity),
           rate: Number(item.rate),
           total: Number(item.quantity) * Number(item.rate)
@@ -396,7 +397,7 @@ export const QuotationTab: React.FC = () => {
             setVoucherDate(new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }));
             setAmountInWords("");
             setRemarks("Delivery And fitting charge is not included in this quotation.");
-            setItems([{ description: "", quantity: 1, rate: 0, total: 0 }]);
+            setItems([{ description: "", size: "", quantity: 1, rate: 0, total: 0 }]);
             setDiscount("0");
             setTax("0");
             setStatus("draft");
@@ -564,8 +565,8 @@ export const QuotationTab: React.FC = () => {
 
       {/* Creation Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="bg-card w-full max-w-4xl rounded-lg border border-border p-6 shadow-2xl animate-scale-up my-8 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 mt-16 sm:mt-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="bg-card w-full max-w-4xl rounded-lg border border-border p-4 sm:p-6 shadow-2xl animate-scale-up my-4 max-h-[calc(100vh-6rem)] sm:max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4 border-b border-border pb-2">
               <h2 className="text-lg font-bold font-display flex items-center gap-2">
                 <FileText className="text-accent" />
@@ -717,18 +718,28 @@ export const QuotationTab: React.FC = () => {
                 <div className="space-y-2.5 max-h-[220px] overflow-y-auto pr-1">
                   {items.map((item, idx) => (
                     <div key={idx} className="grid grid-cols-12 gap-2 items-center bg-card border border-border p-2.5 rounded">
-                      <div className="col-span-7">
+                      <div className="col-span-12 sm:col-span-5">
                         <label className="block text-[8px] font-bold text-muted uppercase mb-0.5">Description *</label>
                         <input
                           type="text"
                           value={item.description}
                           onChange={(e) => handleItemRowChange(idx, "description", e.target.value)}
                           className="w-full px-2 py-1.5 border border-border rounded bg-background focus:outline-none text-xs font-semibold"
-                          placeholder="e.g. Golden SS Logo (4'*4') with lights"
+                          placeholder="e.g. Golden SS Logo with lights"
                           required
                         />
                       </div>
-                      <div className="col-span-1">
+                      <div className="col-span-4 sm:col-span-2">
+                        <label className="block text-[8px] font-bold text-muted uppercase mb-0.5">Size</label>
+                        <input
+                          type="text"
+                          value={item.size || ""}
+                          onChange={(e) => handleItemRowChange(idx, "size", e.target.value)}
+                          className="w-full px-2 py-1.5 border border-border rounded bg-background focus:outline-none text-xs font-semibold"
+                          placeholder="e.g. 4' x 4'"
+                        />
+                      </div>
+                      <div className="col-span-2 sm:col-span-1">
                         <label className="block text-[8px] font-bold text-muted uppercase mb-0.5">Qty *</label>
                         <input
                           type="number"
@@ -739,7 +750,7 @@ export const QuotationTab: React.FC = () => {
                           required
                         />
                       </div>
-                      <div className="col-span-2">
+                      <div className="col-span-3 sm:col-span-2">
                         <label className="block text-[8px] font-bold text-muted uppercase mb-0.5">Rate (Rs.) *</label>
                         <input
                           type="number"
@@ -750,20 +761,24 @@ export const QuotationTab: React.FC = () => {
                           required
                         />
                       </div>
-                      <div className="col-span-1 text-right font-extrabold text-xs px-2 pt-3.5">
-                        Rs. {(item.quantity * item.rate).toLocaleString()}
+                      <div className="col-span-2 sm:col-span-1 text-right font-extrabold text-xs px-2 pt-2 sm:pt-3.5 flex flex-col justify-end">
+                        <span className="block text-[8px] font-bold text-muted uppercase mb-0.5 sm:hidden">Total</span>
+                        <span className="inline-block pt-1 sm:pt-0">Rs. {(item.quantity * item.rate).toLocaleString()}</span>
                       </div>
-                      <div className="col-span-1 text-center pt-3">
-                        {items.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveItemRow(idx)}
-                            className="p-1.5 text-white bg-red-600 hover:bg-red-700 rounded shadow-sm"
-                            title="Remove item"
-                          >
-                            <X size={12} />
-                          </button>
-                        )}
+                      <div className="col-span-1 sm:col-span-1 text-center pt-2 sm:pt-3">
+                        <span className="block text-[8px] font-bold text-muted uppercase mb-0.5 sm:hidden">Del</span>
+                        <div className="pt-1 sm:pt-0 flex justify-center">
+                          {items.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveItemRow(idx)}
+                              className="p-1.5 text-white bg-red-600 hover:bg-red-700 rounded shadow-sm"
+                              title="Remove item"
+                            >
+                              <X size={12} />
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -858,8 +873,8 @@ export const QuotationTab: React.FC = () => {
 
       {/* Invoice Estimations Printable PDF Preview Modal */}
       {selectedQuotation && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="bg-card w-full max-w-3xl rounded-lg border border-border p-6 shadow-2xl animate-scale-up my-8 max-h-[95vh] overflow-y-auto">
+        <div className="fixed inset-0 mt-16 sm:mt-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="bg-card w-full max-w-3xl rounded-lg border border-border p-3 sm:p-6 shadow-2xl animate-scale-up my-4 max-h-[calc(100vh-6rem)] sm:max-h-[95vh] overflow-y-auto">
             
             {/* Modal Controls */}
             <div className="flex items-center justify-between mb-4 border-b border-border pb-2 screen-only">
@@ -885,7 +900,7 @@ export const QuotationTab: React.FC = () => {
             </div>
 
             {/* PRINT AREA */}
-            <div id="print-area" className="bg-white text-black p-8 rounded border border-gray-300 font-sans text-left space-y-6 select-text">
+            <div id="print-area" className="bg-white text-black p-4 sm:p-8 rounded border border-gray-300 font-sans text-left space-y-6 select-text">
               
               {/* Invoice Header */}
               <div className="flex justify-between items-center border-b border-gray-200 pb-4">
@@ -908,12 +923,12 @@ export const QuotationTab: React.FC = () => {
               </div>
 
               {/* Party & Voucher Details */}
-              <div className="flex justify-between items-start text-[11px] font-semibold text-gray-800 border-t border-b border-gray-200 py-3">
+              <div className="flex flex-col sm:flex-row justify-between items-start gap-2 sm:gap-0 text-[11px] font-semibold text-gray-800 border-t border-b border-gray-200 py-3">
                 <div className="flex gap-2">
                   <span className="text-gray-500 font-medium">Party:</span>
                   <span className="font-extrabold text-gray-950 text-xs">{selectedQuotation.clientName}</span>
                 </div>
-                <div className="space-y-1 text-right">
+                <div className="space-y-1 text-left sm:text-right">
                   <div>
                     <span className="text-gray-500 font-medium">Voucher No:</span>
                     <span className="ml-2 font-bold text-gray-950">{selectedQuotation.voucherNo || "—"}</span>
@@ -926,12 +941,13 @@ export const QuotationTab: React.FC = () => {
               </div>
 
               {/* Table */}
-              <div className="border border-gray-300 rounded overflow-hidden">
-                <table className="w-full text-[11px] text-left border-collapse">
+              <div className="overflow-x-auto w-full border border-gray-300 rounded">
+                <table className="w-full text-[11px] text-left border-collapse min-w-[600px]">
                   <thead>
                     <tr className="bg-[#FE914C] text-white font-bold border-b border-gray-300">
                       <th className="p-2.5 text-center border-r border-gray-300/30 w-12">S.N.</th>
                       <th className="p-2.5 border-r border-gray-300/30">Name</th>
+                      <th className="p-2.5 border-r border-gray-300/30 w-24">Size</th>
                       <th className="p-2.5 text-center border-r border-gray-300/30 w-16">Qty</th>
                       <th className="p-2.5 text-right border-r border-gray-300/30 w-28">Rate</th>
                       <th className="p-2.5 text-right w-28">Amount</th>
@@ -942,6 +958,7 @@ export const QuotationTab: React.FC = () => {
                       <tr key={idx} className="text-gray-900 bg-white">
                         <td className="p-2.5 text-center border-r border-gray-300 font-medium">{idx + 1}</td>
                         <td className="p-2.5 border-r border-gray-300 font-medium text-xs whitespace-pre-line">{item.description}</td>
+                        <td className="p-2.5 border-r border-gray-300 font-medium text-xs">{item.size || "—"}</td>
                         <td className="p-2.5 text-center border-r border-gray-300 font-bold">{item.quantity}</td>
                         <td className="p-2.5 text-right border-r border-gray-300">Rs. {item.rate.toLocaleString()}</td>
                         <td className="p-2.5 text-right font-bold">Rs. {item.total.toLocaleString()}</td>
