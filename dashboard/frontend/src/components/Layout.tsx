@@ -181,149 +181,143 @@ export const Layout: React.FC<LayoutProps> = ({
 
             {/* Notifications Dropdown */}
             {notifDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-80 sm:w-96 glass-panel rounded-lg shadow-xl border border-border overflow-hidden animate-slide-up">
-                <div className="p-3 border-b border-border flex items-center justify-between bg-card">
-                  <h3 className="font-semibold text-sm">Notifications</h3>
-                  <div className="flex items-center gap-2">
-                    {unreadCount > 0 && (
-                      <button
-                        onClick={handleMarkAllRead}
-                        className="text-xs text-accent hover:text-accent-dark font-medium"
-                      >
-                        Mark all as read
-                      </button>
+              <div className="fixed sm:absolute top-16 sm:top-auto left-0 sm:left-auto right-0 sm:right-0 mt-1 sm:mt-2 w-full sm:w-auto flex justify-center sm:block z-50">
+                <div className="w-[calc(100vw-32px)] sm:w-96 max-w-[340px] sm:max-w-none glass-panel rounded-lg shadow-xl border border-border overflow-hidden animate-slide-up">
+                  <div className="p-3 border-b border-border flex items-center justify-between bg-card">
+                    <h3 className="font-semibold text-sm">Notifications</h3>
+                    <div className="flex items-center gap-2">
+                      {unreadCount > 0 && (
+                        <button
+                          onClick={handleMarkAllRead}
+                          className="text-xs text-accent hover:text-accent-dark font-medium"
+                        >
+                          Mark all as read
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="max-h-80 overflow-y-auto divide-y divide-border">
+                    {notifications.length === 0 ? (
+                      <div className="p-8 text-center text-muted text-sm">
+                        No notifications yet
+                      </div>
+                    ) : (
+                      notifications.map((notif) => {
+                        const isRead =
+                          notif.recipient === null
+                            ? notif.readBy.includes(user?._id || "")
+                            : notif.read;
+
+                        return (
+                          <div
+                            key={notif._id || Math.random().toString()}
+                            onClick={() => {
+                              if (notif.type === "task_assigned") {
+                                setCurrentTab("tasks");
+                              } else if (notif.type === "marketing_deadline" || notif.type === "new_field_note") {
+                                setCurrentTab("field-notes");
+                              } else if (notif.type === "order_assigned" || notif.type === "new_order") {
+                                setCurrentTab("order-progress");
+                              } else if (notif.type === "new_quick_note") {
+                                setCurrentTab("overview");
+                              }
+                              setNotifDropdownOpen(false);
+                            }}
+                            className={`p-3 text-sm flex gap-3 cursor-pointer hover:bg-border/40 transition-colors ${
+                              isRead ? "opacity-60" : "bg-accent/5"
+                            }`}
+                          >
+                            <div className="mt-0.5 text-accent">
+                              {notif.type === "task_assigned" && (
+                                <CheckCircle2 size={16} className="text-green-500" />
+                              )}
+                              {notif.type === "marketing_deadline" && (
+                                <Calendar size={16} className="text-blue-500" />
+                              )}
+                              {notif.type === "system_announcement" && (
+                                <Megaphone size={16} className="text-accent" />
+                              )}
+                              {notif.type === "order_assigned" && (
+                                <Package size={16} className="text-amber-500 animate-pulse" />
+                              )}
+                              {notif.type === "new_order" && (
+                                <Package size={16} className="text-amber-500" />
+                              )}
+                              {notif.type === "new_field_note" && (
+                                <FileText size={16} className="text-blue-500" />
+                              )}
+                              {notif.type === "new_quick_note" && (
+                                <MessageSquare size={16} className="text-purple-500" />
+                              )}
+                            </div>
+                            <div className="flex-1">
+                              <p className="leading-snug">{notif.message}</p>
+                              <span className="text-xs text-muted mt-1 block">
+                                {new Date(notif.createdAt).toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit"
+                                })}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })
                     )}
                   </div>
-                </div>
 
-                <div className="max-h-80 overflow-y-auto divide-y divide-border">
-                  {notifications.length === 0 ? (
-                    <div className="p-8 text-center text-muted text-sm">
-                      No notifications yet
+                  {user?.role === "admin" && (
+                    <div className="p-2 bg-card border-t border-border">
+                      <button
+                        onClick={() => {
+                          setShowAnnouncementModal(true);
+                          setNotifDropdownOpen(false);
+                        }}
+                        className="w-full flex items-center justify-center gap-1.5 py-1.5 text-xs bg-accent text-white rounded font-medium hover:bg-accent-dark transition-colors"
+                      >
+                        <PlusCircle size={14} />
+                        Publish System Announcement
+                      </button>
                     </div>
-                  ) : (
-                    notifications.map((notif) => {
-                      const isRead =
-                        notif.recipient === null
-                          ? notif.readBy.includes(user?._id || "")
-                          : notif.read;
-
-                      return (
-                        <div
-                          key={notif._id || Math.random().toString()}
-                          onClick={() => {
-                            if (notif.type === "task_assigned") {
-                              setCurrentTab("tasks");
-                            } else if (notif.type === "marketing_deadline" || notif.type === "new_field_note") {
-                              setCurrentTab("field-notes");
-                            } else if (notif.type === "order_assigned" || notif.type === "new_order") {
-                              setCurrentTab("order-progress");
-                            } else if (notif.type === "new_quick_note") {
-                              setCurrentTab("overview");
-                            }
-                            setNotifDropdownOpen(false);
-                          }}
-                          className={`p-3 text-sm flex gap-3 cursor-pointer hover:bg-border/40 transition-colors ${
-                            isRead ? "opacity-60" : "bg-accent/5"
-                          }`}
-                        >
-                          <div className="mt-0.5 text-accent">
-                            {notif.type === "task_assigned" && (
-                              <CheckCircle2 size={16} className="text-green-500" />
-                            )}
-                            {notif.type === "marketing_deadline" && (
-                              <Calendar size={16} className="text-blue-500" />
-                            )}
-                            {notif.type === "system_announcement" && (
-                              <Megaphone size={16} className="text-accent" />
-                            )}
-                            {notif.type === "order_assigned" && (
-                              <Package size={16} className="text-amber-500 animate-pulse" />
-                            )}
-                            {notif.type === "new_order" && (
-                              <Package size={16} className="text-amber-500" />
-                            )}
-                            {notif.type === "new_field_note" && (
-                              <FileText size={16} className="text-blue-500" />
-                            )}
-                            {notif.type === "new_quick_note" && (
-                              <MessageSquare size={16} className="text-purple-500" />
-                            )}
-                          </div>
-                          <div className="flex-1">
-                            <p className="leading-snug">{notif.message}</p>
-                            <span className="text-xs text-muted mt-1 block">
-                              {new Date(notif.createdAt).toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit"
-                              })}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })
                   )}
                 </div>
-
-                {user?.role === "admin" && (
-                  <div className="p-2 bg-card border-t border-border">
-                    <button
-                      onClick={() => {
-                        setShowAnnouncementModal(true);
-                        setNotifDropdownOpen(false);
-                      }}
-                      className="w-full flex items-center justify-center gap-1.5 py-1.5 text-xs bg-accent text-white rounded font-medium hover:bg-accent-dark transition-colors"
-                    >
-                      <PlusCircle size={14} />
-                      Publish System Announcement
-                    </button>
-                  </div>
-                )}
               </div>
             )}
           </div>
 
-          {/* User Profile Info & Logout */}
-          <div className="flex items-center gap-3 border-l border-border pl-4">
-            {user?.email === "staff@ktmdecor.com" ? (
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-muted hidden md:inline uppercase tracking-wider">
-                  Working As:
-                </span>
-                <select
-                  value={activeStaffProfile?._id || ""}
-                  onChange={(e) => {
-                    const selected = users.find((u) => u._id === e.target.value);
-                    if (selected) setActiveStaffProfile(selected);
-                  }}
-                  className="px-2 py-1.5 border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-accent text-xs font-semibold max-w-[150px] transition-all cursor-pointer"
-                >
-                  {users
-                    .filter((u) => u.role !== "admin" && u.email !== "staff@ktmdecor.com")
-                    .map((u) => (
-                      <option key={u._id} value={u._id}>
-                        {u.name}
-                      </option>
-                    ))}
-                </select>
+          {/* User Profile Info (No Header Logout Button) */}
+          {user?.role === "admin" && (
+            <div className="text-right hidden sm:block border-l border-border pl-4">
+              <div className="font-semibold text-sm leading-none">{user?.name}</div>
+              <div className="text-xs text-muted mt-0.5 uppercase tracking-wider">
+                {user?.role}
               </div>
-            ) : (
-              <div className="text-right hidden sm:block">
-                <div className="font-semibold text-sm leading-none">{user?.name}</div>
-                <div className="text-xs text-muted mt-0.5 uppercase tracking-wider">
-                  {user?.role}
-                </div>
-              </div>
-            )}
-            <button
-              onClick={logout}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors shadow-sm text-xs font-bold uppercase tracking-wider"
-              title="Logout"
-            >
-              <span>Logout</span>
-              <LogOut size={16} />
-            </button>
-          </div>
+            </div>
+          )}
+
+          {user?.email === "staff@ktmdecor.com" && (
+            <div className="flex items-center gap-2 border-l border-border pl-4">
+              <span className="text-xs font-semibold text-muted hidden md:inline uppercase tracking-wider">
+                Working As:
+              </span>
+              <select
+                value={activeStaffProfile?._id || ""}
+                onChange={(e) => {
+                  const selected = users.find((u) => u._id === e.target.value);
+                  if (selected) setActiveStaffProfile(selected);
+                }}
+                className="px-2 py-1.5 border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-accent text-xs font-semibold max-w-[120px] sm:max-w-[150px] transition-all cursor-pointer"
+              >
+                {users
+                  .filter((u) => u.role !== "admin" && u.email !== "staff@ktmdecor.com")
+                  .map((u) => (
+                    <option key={u._id} value={u._id}>
+                      {u.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          )}
         </div>
       </header>
 
@@ -373,6 +367,19 @@ export const Layout: React.FC<LayoutProps> = ({
                 </div>
               ))}
             </nav>
+
+            <div className="px-4 space-y-2 mb-2">
+              <button
+                onClick={logout}
+                className={`w-full flex items-center justify-center gap-2 py-2 px-3 rounded-md bg-red-600 hover:bg-red-700 text-white transition-all shadow-sm text-xs font-bold uppercase tracking-wider ${
+                  !sidebarOpen && "aspect-square p-0"
+                }`}
+                title="Logout"
+              >
+                <LogOut size={16} className="flex-shrink-0" />
+                {sidebarOpen && <span>Logout</span>}
+              </button>
+            </div>
 
             <div className="px-4">
               <button
