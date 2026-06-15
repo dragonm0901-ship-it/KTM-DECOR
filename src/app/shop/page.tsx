@@ -26,9 +26,8 @@ export default function ShopPage() {
   const [priceRange, setPriceRange] = useState([0, 100000]);
   const [selectedBadge, setSelectedBadge] = useState("All");
   const [sortBy, setSortBy] = useState<"featured" | "price-low" | "price-high" | "name-az">("featured");
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>(PRODUCTS.slice(0, 12));
-  const [dbProducts, setDbProducts] = useState<Product[]>(PRODUCTS.slice(0, 12));
-  const [visibleCount, setVisibleCount] = useState(12);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>(PRODUCTS);
+  const [dbProducts, setDbProducts] = useState<Product[]>(PRODUCTS);
 
   // Mount logic: Fetch products from express backend
   useEffect(() => {
@@ -39,7 +38,7 @@ export default function ShopPage() {
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data) && data.length > 0) {
-            setDbProducts(data.slice(0, 12));
+            setDbProducts(data);
           }
         }
       } catch (err) {
@@ -103,8 +102,7 @@ export default function ShopPage() {
       result = [...result].sort((a, b) => a.name.localeCompare(b.name));
     }
 
-    setFilteredProducts(result.slice(0, 12));
-    setVisibleCount(12);
+    setFilteredProducts(result);
   }, [activeCategory, activeSubCategory, searchQuery, priceRange, selectedBadge, sortBy, dbProducts]);
 
   // Stagger GSAP Entrance animations on Filter Card Changes
@@ -358,7 +356,7 @@ export default function ShopPage() {
           {filteredProducts.length > 0 ? (
             <>
               <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-10 w-full">
-                {filteredProducts.slice(0, 12).map((product) => (
+                {filteredProducts.map((product) => (
                   <div key={product.id} className="shop-card group flex flex-col justify-between h-full bg-card/20 rounded-xl border border-border/60 hover:border-accent/40 shadow-md hover:shadow-2xl overflow-hidden transition-all duration-300">
                     
                     {/* Image Stage wrapper (Full-width inside Card, Square) */}

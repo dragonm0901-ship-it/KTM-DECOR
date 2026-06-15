@@ -324,12 +324,12 @@ export const Layout: React.FC<LayoutProps> = ({
       <div className="flex-1 flex relative overflow-hidden">
         {/* DESKTOP SIDEBAR */}
         <aside
-          className={`hidden md:flex flex-col border-r border-border glass-panel transition-all duration-300 ${
+          className={`hidden md:flex flex-col border-r border-border glass-panel transition-all duration-300 overflow-x-hidden ${
             sidebarOpen ? "w-64" : "w-16"
           }`}
         >
           <div className="flex-1 py-6 flex flex-col justify-between overflow-hidden">
-            <nav className="flex-1 px-2 space-y-4 overflow-y-auto pr-1">
+            <nav className="flex-1 px-2 space-y-4 overflow-y-auto overflow-x-hidden pr-1">
               {navigationCategories.map((cat, catIdx) => (
                 <div key={cat.title} className="space-y-1">
                   {sidebarOpen ? (

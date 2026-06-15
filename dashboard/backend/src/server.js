@@ -559,14 +559,19 @@ const seedUsers = async () => {
   }
 };
 
-// Seed default products if DB is empty (initializes the 122 static catalog items)
+// Seed default products if DB is empty (initializes the 12 premium shop catalog items)
 const seedProducts = async () => {
   try {
     const productCount = await Product.countDocuments();
-    if (productCount === 0) {
-      console.log("Seeding default product catalog (122 signs)...");
+    const hasOldSeed = productCount > 12 && (await Product.findOne({ id: "13" }));
+
+    if (productCount === 0 || hasOldSeed) {
+      if (hasOldSeed) {
+        console.log("Old 122-item seed detected. Clearing Product collection...");
+        await Product.deleteMany({});
+      }
+      console.log("Seeding default product catalog (12 premium signs)...");
       const products = [];
-      let globalId = 1;
 
       const CATEGORIES = [
         "Acrylic Backlit Signage",
@@ -690,58 +695,53 @@ const seedProducts = async () => {
         "Double Sided Round Light Board": "Ensure maximum foot-traffic views from both street directions with our heavy-duty projecting round light boxes. Built with waterproof metal frames and double-sided glowing acrylic faces to shine brightly through night storms."
       };
 
-      CATEGORIES.forEach((cat) => {
-        const subCats = SUB_CATEGORIES[cat] || [];
+      for (let i = 0; i < 12; i++) {
+        const cat = CATEGORIES[i % CATEGORIES.length];
+        const subCats = SUB_CATEGORIES[cat] || ["Standard"];
+        const subCategory = subCats[i % subCats.length];
         const baseDesc = BASE_DESCRIPTIONS[cat] || "Premium custom signage hand-built to order by KTM DECOR.";
         const baseSpecs = TECHNICAL_SPECS[cat] || ["Premium construction material", "High durability finish"];
-        
-        const itemsCount = (cat === "Neon Sign" || cat === "Acrylic Table Lamp") ? 13 : 12;
 
-        for (let index = 0; index < itemsCount; index++) {
-          const subCategory = subCats[index % subCats.length];
-          const priceFactor = ((index * 7 + cat.length * 3) % 17) + 1;
-          const price = Math.round((3500 + priceFactor * 4500) / 500) * 500;
+        // Distribute prices deterministically between Rs. 15,000 and Rs. 95,000
+        const priceFactor = ((i * 7 + cat.length * 3) % 17) + 1;
+        const price = Math.round((15000 + priceFactor * 4500) / 500) * 500;
 
-          let stockStatus = "In Stock";
-          if ((index + 5) % 8 === 0) {
-            stockStatus = "Low Stock";
-          } else if ((index + 7) % 9 === 0) {
-            stockStatus = "Custom Order Only";
-          }
-
-          let badge = undefined;
-          if (index === 0) badge = "Best Seller";
-          else if (index === 1 && cat === "Neon Sign") badge = "Hot Buy";
-          else if (index === 2) badge = "New";
-          else if (stockStatus === "Custom Order Only") badge = "Custom";
-
-          const name = `${cat} #${globalId}`;
-          const description = `${baseDesc} This product is custom engineered for ${subCategory.toLowerCase()} spaces. Features a durable framework and elegant finishes that deliver a premium architectural feel. Custom options available on request.`;
-
-          const specs = [
-            ...baseSpecs,
-            `Optimized dimensions for ${subCategory.toLowerCase()} applications`,
-            `Direct delivery available inside Kathmandu, Lalitpur, and Bhaktapur`
-          ];
-
-          products.push({
-            id: globalId.toString(),
-            name,
-            category: cat,
-            subCategory,
-            price,
-            image: "/images/placeholder.svg",
-            badge,
-            description,
-            specs,
-            stockStatus,
-            rating: 4.8,
-            reviewsCount: 15
-          });
-
-          globalId++;
+        let stockStatus = "In Stock";
+        if (i % 5 === 0) {
+          stockStatus = "Low Stock";
+        } else if (i % 7 === 0) {
+          stockStatus = "Custom Order Only";
         }
-      });
+
+        let badge = undefined;
+        if (i === 0 || i === 4) badge = "Best Seller";
+        else if (i === 1 || i === 8) badge = "New";
+        else if (stockStatus === "Custom Order Only") badge = "Custom";
+
+        const name = `${cat} Premium Design #${i + 1}`;
+        const description = `${baseDesc} This premium sign is custom engineered for ${subCategory.toLowerCase()} spaces. Built using heavy-duty materials with elegant finishes that deliver a premium, high-end architectural appeal. Custom options and sizing adjustments are available upon request.`;
+
+        const specs = [
+          ...baseSpecs,
+          `Optimized dimensions for ${subCategory.toLowerCase()} applications`,
+          `Direct delivery and professional mounting available inside Kathmandu Valley`
+        ];
+
+        products.push({
+          id: (i + 1).toString(),
+          name,
+          category: cat,
+          subCategory,
+          price,
+          image: "/images/placeholder.svg",
+          badge,
+          description,
+          specs,
+          stockStatus,
+          rating: 4.8,
+          reviewsCount: 15
+        });
+      }
 
       await Product.insertMany(products);
       console.log(`Seeded ${products.length} products into MongoDB successfully.`);
