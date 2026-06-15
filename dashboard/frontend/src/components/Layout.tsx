@@ -93,6 +93,7 @@ export const Layout: React.FC<LayoutProps> = ({
       title: "Core",
       items: [
         { id: "overview", label: "Overview", icon: LayoutDashboard },
+        { id: "calendar", label: "Calendar", icon: Calendar },
         { id: "tasks", label: "Tasks Board", icon: CheckSquare },
         { id: "field-notes", label: "Field Notes", icon: FileText }
       ]

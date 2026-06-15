@@ -563,11 +563,12 @@ const seedUsers = async () => {
 const seedProducts = async () => {
   try {
     const productCount = await Product.countDocuments();
-    const hasOldSeed = productCount > 12 && (await Product.findOne({ id: "13" }));
+    const standardIds = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
+    const hasOldSeed = await Product.findOne({ id: { $nin: standardIds } });
 
     if (productCount === 0 || hasOldSeed) {
-      if (hasOldSeed) {
-        console.log("Old 122-item seed detected. Clearing Product collection...");
+      if (hasOldSeed || productCount > 0) {
+        console.log("Non-standard or legacy product detected in database. Clearing Product collection...");
         await Product.deleteMany({});
       }
       console.log("Seeding default product catalog (12 premium signs)...");

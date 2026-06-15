@@ -13,6 +13,7 @@ import { ExpensesTab } from "./components/ExpensesTab";
 import { PurchaseTab } from "./components/PurchaseTab";
 import { InventoryTab } from "./components/InventoryTab";
 import { QuotationTab } from "./components/QuotationTab";
+import { CalendarTab } from "./components/CalendarTab";
 import { LogIn, KeyRound, Mail } from "./components/ui/solar-icons";
 
 export const App: React.FC = () => {
@@ -190,6 +191,9 @@ export const App: React.FC = () => {
           editingTask={editingTask}
           setEditingTask={setEditingTask}
         />
+      )}
+      {currentTab === "calendar" && (
+        <CalendarTab setCurrentTab={setCurrentTab} />
       )}
       {currentTab === "field-notes" && (
         <FieldNotes

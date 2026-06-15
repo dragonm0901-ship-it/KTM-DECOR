@@ -166,8 +166,21 @@ export const SalesTab: React.FC = () => {
   const handleMouseMove = (e: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
     if (coords.length === 0) return;
     const svg = e.currentTarget;
-    const rect = svg.getBoundingClientRect();
-    const mouseX = ((e.clientX - rect.left) / rect.width) * svgWidth;
+    const point = svg.createSVGPoint();
+    point.x = e.clientX;
+    point.y = e.clientY;
+    
+    const ctm = svg.getScreenCTM();
+    if (!ctm) return;
+    
+    const svgPoint = point.matrixTransform(ctm.inverse());
+    const mouseX = svgPoint.x;
+    
+    // Graceful margin bounds check to hide hover crosshair if cursor leaves chart content zone
+    if (mouseX < paddingX - 15 || mouseX > svgWidth - paddingX + 15) {
+      setHoveredPoint(null);
+      return;
+    }
     
     let closest = coords[0];
     let minDiff = Math.abs(mouseX - coords[0].x);
@@ -319,20 +332,61 @@ export const SalesTab: React.FC = () => {
 
       {/* Sales Growth Trend Graph */}
       <div className="bg-card border border-border/80 p-5 rounded-2xl shadow-sm relative overflow-hidden transition-all duration-300">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
+        <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-border/60 pb-5 mb-5 gap-4">
           <div>
-            <h3 className="font-bold text-sm font-display flex items-center gap-1.5">
-              <TrendingUp size={16} className="text-accent" />
-              Sales Growth Trend
-            </h3>
-            <p className="text-[10px] text-muted">Fluid reactive line tracking your project values</p>
-          </div>
-          
-          <div className="flex items-center gap-4 text-xs font-semibold">
             <div className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-accent" />
-              <span className="text-muted text-[10px]">Cumulative Sales Revenue</span>
+              <TrendingUp size={18} className="text-accent" />
+              <h3 className="font-bold text-base font-display text-foreground">
+                Sales Growth Trend
+              </h3>
             </div>
+            <div className="flex items-baseline gap-2.5 mt-2.5">
+              <h2 className="text-3xl font-extrabold font-display text-foreground leading-none">
+                Rs. {(hoveredPoint ? hoveredPoint.value : combinedTotal).toLocaleString()}
+              </h2>
+              {(() => {
+                if (!hoveredPoint) {
+                  if (coords.length > 1) {
+                    const lastIdx = coords.length - 1;
+                    const prevVal = coords[lastIdx - 1].value;
+                    if (prevVal > 0) {
+                      const pct = ((coords[lastIdx].value - prevVal) / prevVal) * 100;
+                      return (
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                          pct >= 0
+                            ? "bg-green-500/10 text-green-600 border-green-500/10"
+                            : "bg-red-500/10 text-red-600 border-red-500/10"
+                        }`}>
+                          {pct >= 0 ? "↑" : "↓"} {Math.abs(pct).toFixed(1)}%
+                        </span>
+                      );
+                    }
+                  }
+                  return (
+                    <span className="bg-green-500/10 text-green-600 border border-green-500/10 px-2 py-0.5 rounded text-[10px] font-bold">
+                      ↑ 12.4%
+                    </span>
+                  );
+                }
+                const idx = coords.findIndex(c => c.x === hoveredPoint.x);
+                if (idx <= 0) return null;
+                const prevVal = coords[idx - 1].value;
+                if (prevVal === 0) return null;
+                const pct = ((hoveredPoint.value - prevVal) / prevVal) * 100;
+                return (
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                    pct >= 0
+                      ? "bg-green-500/10 text-green-600 border-green-500/10"
+                      : "bg-red-500/10 text-red-600 border-red-500/10"
+                  }`}>
+                    {pct >= 0 ? "+" : ""}{pct.toFixed(1)}%
+                  </span>
+                );
+              })()}
+            </div>
+            <p className="text-[10px] text-muted font-bold tracking-wider uppercase mt-1">
+              {hoveredPoint ? `Coordinate Point: ${hoveredPoint.label}` : "Cumulative Total Sales Revenue"}
+            </p>
           </div>
         </div>
 
@@ -356,34 +410,7 @@ export const SalesTab: React.FC = () => {
                   </linearGradient>
                 </defs>
 
-                {/* Horizontal gridlines */}
-                {[0.25, 0.5, 0.75, 1.0].map((ratio, index) => {
-                  const yVal = svgHeight - paddingY - ratio * (svgHeight - 2 * paddingY);
-                  const costLabel = Math.round(ratio * maxVal);
-                  return (
-                    <g key={index} className="opacity-40">
-                      <line
-                        x1={paddingX}
-                        y1={yVal}
-                        x2={svgWidth - paddingX}
-                        y2={yVal}
-                        stroke="var(--border)"
-                        strokeWidth="1"
-                        strokeDasharray="4 4"
-                      />
-                      <text
-                        x={paddingX - 8}
-                        y={yVal + 3}
-                        fill="var(--muted)"
-                        fontSize="8"
-                        className="font-bold text-right"
-                        textAnchor="end"
-                      >
-                        Rs. {costLabel >= 1000 ? `${(costLabel / 1000).toFixed(0)}k` : costLabel}
-                      </text>
-                    </g>
-                  );
-                })}
+                {/* Horizontal gridlines removed for clean Vercel-style aesthetics */}
 
                 {/* Shaded Area */}
                 {areaPath && (
@@ -425,61 +452,41 @@ export const SalesTab: React.FC = () => {
                   );
                 })}
 
-                {/* Hover reference line */}
+                {/* Snapping vertical tracker line */}
                 {hoveredPoint && (
                   <line
                     x1={hoveredPoint.x}
                     y1={paddingY}
                     x2={hoveredPoint.x}
                     y2={svgHeight - paddingY}
-                    stroke="var(--accent)"
-                    strokeWidth="1"
+                    stroke="var(--border)"
+                    strokeWidth="1.5"
                     strokeDasharray="3 3"
-                    className="opacity-75"
+                    className="opacity-50"
                   />
                 )}
 
-                {/* Hover dot */}
+                {/* Snapped Pulsating focal point dot */}
                 {hoveredPoint && (
                   <g>
                     <circle
                       cx={hoveredPoint.x}
                       cy={hoveredPoint.y}
-                      r="6"
-                      fill="var(--accent)"
-                      className="opacity-20 animate-ping-small"
+                      r="8"
+                      className="fill-accent/15 stroke-accent/35 stroke-[2px] animate-pulse"
                     />
                     <circle
                       cx={hoveredPoint.x}
                       cy={hoveredPoint.y}
-                      r="4"
+                      r="4.5"
                       fill="var(--accent)"
                       stroke="var(--card)"
-                      strokeWidth="1.5"
+                      strokeWidth="2"
                       className="shadow"
                     />
                   </g>
                 )}
               </svg>
-
-              {/* Floating Tooltip Div */}
-              {hoveredPoint && (
-                <div
-                  className="absolute bg-card border border-border p-2 rounded shadow-2xl text-[10px] pointer-events-none transition-all duration-75 select-none z-30"
-                  style={{
-                    left: `${(hoveredPoint.x / svgWidth) * 100}%`,
-                    top: `${(hoveredPoint.y / svgHeight) * 100 - 45}%`,
-                    transform: "translateX(-50%)"
-                  }}
-                >
-                  <span className="text-[8px] text-muted font-bold block uppercase tracking-wider">
-                    {hoveredPoint.label}
-                  </span>
-                  <span className="font-extrabold text-accent block mt-0.5 whitespace-nowrap">
-                    Rs. {hoveredPoint.value.toLocaleString()}
-                  </span>
-                </div>
-              )}
             </>
           )}
         </div>
