@@ -58,6 +58,17 @@ const ProductSchema = new mongoose.Schema(
       type: Number,
       default: 15,
     },
+    image_urls: {
+      type: [String],
+      default: [],
+    },
+    variants: [
+      {
+        option_name: String,
+        price: Number,
+        compare_at_price: Number,
+      }
+    ],
   },
   {
     timestamps: true,

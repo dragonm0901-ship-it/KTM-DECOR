@@ -17,6 +17,186 @@ import {
 } from "@/components/ui/solar-icons";
 import { PRODUCTS, Product } from "@/data/shop-data";
 
+// ── CUSTOM GALLERY MAPPING FOR MAIN STOREFRONT ASSETS ──
+const GALLERY_MAPPING: Record<string, string[]> = {
+  "Acrylic Backlit Signage": [
+    "/images/light-boards-nivati.webp",
+    "/images/custom-decor-collage.webp",
+    "/images/workshop.webp"
+  ],
+  "Neon Sign": [
+    "/images/neon-momo.webp",
+    "/images/neon-taso.webp",
+    "/images/hero-04.webp"
+  ],
+  "3D Signage": [
+    "/images/3d-letters-salt.webp",
+    "/images/dimensional-ktm.webp",
+    "/images/custom-decor-collage.webp"
+  ],
+  "2D Board": [
+    "/images/custom-decor-collage.webp",
+    "/images/laser-cnc.webp",
+    "/images/light-boards-nivati.webp"
+  ],
+  "House/Office Nameplate": [
+    "/images/name-plates.webp",
+    "/images/dimensional-ktm.webp",
+    "/images/laser-cnc.webp"
+  ],
+  "Wooden Signage": [
+    "/images/laser-cnc.webp",
+    "/images/workshop.webp",
+    "/images/name-plates.webp"
+  ],
+  "2.5D Signage": [
+    "/images/dimensional-ktm.webp",
+    "/images/3d-letters-salt.webp",
+    "/images/custom-decor-collage.webp"
+  ],
+  "Acrylic Table Lamp": [
+    "/images/hero-04.webp",
+    "/images/neon-taso.webp",
+    "/images/neon-momo.webp"
+  ],
+  "3D Number Plate": [
+    "/images/about-hero.webp",
+    "/images/dimensional-ktm.webp",
+    "/images/3d-letters-salt.webp"
+  ],
+  "Double Sided Round Light Board": [
+    "/images/light-boards-nivati.webp",
+    "/images/custom-decor-collage.webp",
+    "/images/workshop.webp"
+  ]
+};
+
+const getGalleryUrls = (product: Product): string[] => {
+  if (product.image_urls && product.image_urls.length > 0) {
+    return product.image_urls;
+  }
+  const categoryImages = GALLERY_MAPPING[product.category] || [];
+  const gallery = [product.image];
+  categoryImages.forEach((img) => {
+    if (img !== product.image && !gallery.includes(img)) {
+      gallery.push(img);
+    }
+  });
+  return gallery;
+};
+
+interface ProductVariant {
+  option_name: string;
+  price: number;
+  compare_at_price?: number;
+}
+
+const getCategoryVariants = (category: string, basePrice: number): ProductVariant[] => {
+  if (category === "House/Office Nameplate") {
+    return [
+      { option_name: "Standard (12x6 inch)", price: basePrice, compare_at_price: Math.round((basePrice * 1.25) / 100) * 100 },
+      { option_name: "Executive (16x8 inch)", price: Math.round((basePrice * 1.4) / 100) * 100, compare_at_price: Math.round((basePrice * 1.8) / 100) * 100 },
+      { option_name: "Premium (20x10 inch)", price: Math.round((basePrice * 1.8) / 100) * 100, compare_at_price: Math.round((basePrice * 2.3) / 100) * 100 }
+    ];
+  }
+  if (category === "Acrylic Table Lamp") {
+    return [
+      { option_name: "Bedside Mini", price: basePrice, compare_at_price: Math.round((basePrice * 1.3) / 100) * 100 },
+      { option_name: "Desk Standard", price: Math.round((basePrice * 1.35) / 100) * 100, compare_at_price: Math.round((basePrice * 1.7) / 100) * 100 },
+      { option_name: "Lounge Premium", price: Math.round((basePrice * 1.7) / 100) * 100, compare_at_price: Math.round((basePrice * 2.2) / 100) * 100 }
+    ];
+  }
+  if (category === "3D Number Plate") {
+    return [
+      { option_name: "Bike Plate", price: basePrice, compare_at_price: Math.round((basePrice * 1.3) / 100) * 100 },
+      { option_name: "Car Standard", price: Math.round((basePrice * 1.5) / 100) * 100, compare_at_price: Math.round((basePrice * 1.9) / 100) * 100 },
+      { option_name: "Car Premium (Metal Frame)", price: Math.round((basePrice * 1.95) / 100) * 100, compare_at_price: Math.round((basePrice * 2.5) / 100) * 100 }
+    ];
+  }
+  
+  // Standard signage sizes
+  return [
+    { option_name: "1.5x1.5 feet", price: basePrice, compare_at_price: Math.round((basePrice * 1.3) / 100) * 100 },
+    { option_name: "2x2 feet", price: Math.round((basePrice * 1.45) / 100) * 100, compare_at_price: Math.round((basePrice * 1.85) / 100) * 100 },
+    { option_name: "2.5x2.5 feet", price: Math.round((basePrice * 1.8) / 100) * 100, compare_at_price: Math.round((basePrice * 2.3) / 100) * 100 },
+    { option_name: "3x3 feet", price: Math.round((basePrice * 2.25) / 100) * 100, compare_at_price: Math.round((basePrice * 3.0) / 100) * 100 }
+  ];
+};
+
+const getProductFeatures = (product: Product): string[] => {
+  const baseFeatures = [
+    "Crafted with high-grade, durable materials built to last.",
+    "Engineered using state-of-the-art CNC precision cutting technology.",
+    "Concealed wiring design offers a clean, architectural-grade installation.",
+    "Fully customizable sizes, colors, and layout configurations available."
+  ];
+  if (product.category === "Neon Sign") {
+    return [
+      "Low-voltage 12V silicon flex neon tubing runs cold and silent.",
+      "Mounted on high-clarity 6mm acrylic backing sheet.",
+      ...baseFeatures
+    ];
+  }
+  if (product.category === "Acrylic Backlit Signage" || product.category === "Double Sided Round Light Board") {
+    return [
+      "Equipped with high-efficiency uniform LED backlighting.",
+      "Even diffusion layout prevents shadows or light spots.",
+      ...baseFeatures
+    ];
+  }
+  return baseFeatures;
+};
+
+const getProductPerfectFor = (product: Product): string[] => {
+  const categoryPerfectFor: Record<string, string[]> = {
+    "Acrylic Backlit Signage": ["Reception areas", "Corporate offices", "Boutique storefronts", "Showrooms"],
+    "Neon Sign": ["Cafes and restaurants", "Creative studios", "Event backdrops", "Modern residential spaces"],
+    "3D Signage": ["Corporate headquarters", "Building facades", "Reception walls", "Retail showrooms"],
+    "2D Board": ["Directional directories", "Restaurant menus", "Safety notices", "Retail pricing boards"],
+    "House/Office Nameplate": ["Executive suites", "Residential entryways", "Meeting room signs", "Premium gifts"],
+    "Wooden Signage": ["Rustic cafes", "Eco-friendly retail concepts", "Custom office awards", "Home bars"],
+    "2.5D Signage": ["Modern office lounges", "Artistic feature walls", "Exhibition displays", "Premium showrooms"],
+    "Acrylic Table Lamp": ["Bedside lighting", "Office desks", "Accent display lighting", "Corporate gifts"],
+    "3D Number Plate": ["Luxury vehicles", "Premium motorbikes", "Club parking plaques", "Showroom cars"],
+    "Double Sided Round Light Board": ["Street projection signs", "Storefront brackets", "Under-canopy displays", "Night clubs"]
+  };
+  return categoryPerfectFor[product.category] || ["Corporate offices", "Retail outlets", "Custom installations"];
+};
+
+interface Review {
+  reviewer_name: string;
+  rating: number;
+  review_date: string;
+  review_text: string;
+  is_verified: boolean;
+}
+
+const getProductReviews = (product: Product): Review[] => {
+  return [
+    {
+      reviewer_name: "Aashish Shrestha",
+      rating: 5,
+      review_date: "2026-05-12",
+      review_text: "The craftsmanship is exceptional. It fits perfectly on our main wall. The ordering process was seamless and delivery inside Kathmandu was on time.",
+      is_verified: true
+    },
+    {
+      reviewer_name: "Pooja Gurung",
+      rating: 5,
+      review_date: "2026-04-28",
+      review_text: "Very satisfied with the build quality and attention to detail. The installation was neat and customer service was helpful throughout.",
+      is_verified: true
+    },
+    {
+      reviewer_name: "Saurav Joshi",
+      rating: 4,
+      review_date: "2026-03-15",
+      review_text: "Highly recommend KTM DECOR. Excellent service, responsive and professional. The signage looks very premium.",
+      is_verified: true
+    }
+  ];
+};
+
 export default function ProductDetailClient() {
   const params = useParams();
   const id = params?.id as string;
@@ -25,6 +205,13 @@ export default function ProductDetailClient() {
   const [quantity, setQuantity] = useState(1);
   const [addedPopup, setAddedPopup] = useState(false);
   const [allProducts, setAllProducts] = useState<Product[]>(PRODUCTS);
+
+  // CUSTOM STATE HOOKS FOR GALLERIES, VARIANTS AND TABS
+  const [selectedImage, setSelectedImage] = useState<string>("");
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
+  const [activeTab, setActiveTab] = useState<"details" | "reviews">("details");
+  const [variantsList, setVariantsList] = useState<ProductVariant[]>([]);
+  const [galleryUrls, setGalleryUrls] = useState<string[]>([]);
 
   // Fetch product detail on ID change
   useEffect(() => {
@@ -53,6 +240,20 @@ export default function ProductDetailClient() {
     };
     fetchDetail();
   }, [id]);
+
+  // Handle dynamic population when product resolves
+  useEffect(() => {
+    if (product) {
+      const urls = getGalleryUrls(product);
+      setGalleryUrls(urls);
+      setSelectedImage(urls[0] || product.image);
+      const vars = product.variants && product.variants.length > 0 
+        ? product.variants 
+        : getCategoryVariants(product.category, product.price);
+      setVariantsList(vars);
+      setSelectedVariant(vars[0] || null);
+    }
+  }, [product]);
 
   // Fetch all products for dynamic suggestions
   useEffect(() => {
@@ -92,11 +293,16 @@ export default function ProductDetailClient() {
   // Filter up to 4 suggested products from the same category (excluding current product)
   const suggestions = allProducts.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
 
-  // --- GLOBAL CART DISPATCH TRIGGER ---
+  // --- GLOBAL CART DISPATCH TRIGGER WITH OVERRIDDEN VARIANT PRICE & DETAILS ---
   const handleAddToCart = () => {
+    const customizedProduct = {
+      ...product,
+      name: selectedVariant ? `${product.name} (${selectedVariant.option_name})` : product.name,
+      price: selectedVariant ? selectedVariant.price : product.price,
+    };
     window.dispatchEvent(
       new CustomEvent("ktm-decor-add-to-cart", {
-        detail: { product, quantity }
+        detail: { product: customizedProduct, quantity }
       })
     );
     setAddedPopup(true);
@@ -105,30 +311,32 @@ export default function ProductDetailClient() {
 
   // --- DIRECT SINGLE ITEM WHATSAPP BUY NOW ---
   const handleWhatsAppBuyNow = () => {
-    const totalCost = product.price * quantity;
+    const activePrice = selectedVariant ? selectedVariant.price : product.price;
+    const activeName = selectedVariant ? `${product.name} (${selectedVariant.option_name})` : product.name;
+    const totalCost = activePrice * quantity;
     const shipping = totalCost >= 50000 ? 0 : 1500;
     const grandTotal = totalCost + shipping;
 
     const shippingText = shipping === 0 
-      ? "Rs. 0 (FREE Shipping Applied! 🎉)" 
+      ? "Rs. 0 (FREE Shipping Applied)" 
       : `Rs. ${shipping.toLocaleString()}`;
 
-    const message = `*KTM DECOR - DIRECT PRODUCT ORDER* 🛍️
+    const message = `KTM DECOR - DIRECT PRODUCT ORDER
 ------------------------------------------
-👋 Hi KTM DECOR! I would like to buy this product directly from your catalog.
+Hi KTM DECOR! I would like to buy this product directly from your catalog.
 
-*📦 PRODUCT DETAILS:*
-• *Product Name:* ${product.name}
-• *Category:* ${product.category} [${product.subCategory}]
-• *Quantity Ordered:* ${quantity}
+PRODUCT DETAILS:
+- Product Name: ${activeName}
+- Category: ${product.category} [${product.subCategory}]
+- Quantity Ordered: ${quantity}
 
-*💰 FINANCIAL SUMMARY:*
-• *Unit Price:* Rs. ${product.price.toLocaleString()} each
-• *Subtotal Cost:* Rs. ${totalCost.toLocaleString()}
-• *Standard Shipping:* ${shippingText}
-• *GRAND TOTAL COST:* Rs. ${grandTotal.toLocaleString()}
+FINANCIAL SUMMARY:
+- Unit Price: Rs. ${activePrice.toLocaleString()} each
+- Subtotal Cost: Rs. ${totalCost.toLocaleString()}
+- Standard Shipping: ${shippingText}
+- GRAND TOTAL COST: Rs. ${grandTotal.toLocaleString()}
 ------------------------------------------
-🚀 Please verify stock/color availability and let me know the estimated delivery and payment schedules!`;
+Please verify availability and let me know the estimated delivery and payment schedules!`;
 
     const encodedMessage = encodeURIComponent(message);
     const whatsappNumber = "9779706247439"; 
@@ -153,15 +361,45 @@ export default function ProductDetailClient() {
         {/* 2-Column Product Showcase */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
           
-          <div className="relative aspect-[4/5] rounded-[4px] overflow-hidden bg-card border border-border/80 shadow-sm w-full">
-            <Image 
-              src={product.image} 
-              alt={product.name}
-              fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
-              className="object-cover"
-              priority
-            />
+          {/* Left Column: Image Gallery Slider */}
+          <div className="space-y-4 w-full">
+            <div className="relative aspect-[4/5] rounded-[4px] overflow-hidden bg-card border border-border/80 shadow-sm w-full group">
+              <Image 
+                src={selectedImage || product.image} 
+                alt={product.name}
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                priority
+              />
+            </div>
+            
+            {galleryUrls.length > 1 && (
+              <div className="flex items-center gap-3 overflow-x-auto no-scrollbar py-1">
+                {galleryUrls.map((url, i) => {
+                  const isActive = url === selectedImage;
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => setSelectedImage(url)}
+                      className={`relative w-20 h-24 rounded-[4px] overflow-hidden bg-card border flex-shrink-0 transition-all ${
+                        isActive
+                          ? "border-accent shadow-sm scale-95"
+                          : "border-border/60 hover:border-accent/40"
+                      }`}
+                    >
+                      <Image
+                        src={url}
+                        alt={`${product.name} image thumbnail ${i + 1}`}
+                        fill
+                        sizes="80px"
+                        className="object-cover"
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Right Column: Dynamic Parameters & Actions */}
@@ -185,31 +423,58 @@ export default function ProductDetailClient() {
               </p>
             </div>
 
-            {/* Detailed technical specifications checklist */}
-            <div className="space-y-4 pt-2">
-              <h3 className="text-[10px] uppercase tracking-[0.2em] font-black text-foreground/50">Technical Specifications</h3>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs text-muted-foreground font-medium">
-                {product.specs.map((spec, i) => (
-                  <li key={i} className="flex items-start gap-2.5 leading-normal">
-                    <Check className="w-4 h-4 text-accent flex-shrink-0 mt-0.5 bg-accent/15 rounded-full p-0.5" />
-                    <span>{spec}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {/* Sizing / Variant Selector */}
+            {variantsList.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="text-[10px] uppercase tracking-[0.2em] font-black text-foreground/50">Select Dimensions</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  {variantsList.map((v) => {
+                    const isSelected = selectedVariant?.option_name === v.option_name;
+                    return (
+                      <button
+                        key={v.option_name}
+                        onClick={() => setSelectedVariant(v)}
+                        className={`flex items-center justify-between px-4 py-3.5 rounded-[4px] border transition-all text-left group ${
+                          isSelected
+                            ? "border-accent bg-accent/[0.03] text-foreground font-bold"
+                            : "border-border hover:border-accent/30 text-muted-foreground hover:bg-card/30"
+                        }`}
+                      >
+                        <span className="text-xs uppercase tracking-wide">{v.option_name}</span>
+                        {isSelected && (
+                          <Check className="w-4 h-4 text-accent animate-in fade-in zoom-in duration-200" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Dynamic Price Calculation card */}
             <div className="p-6 border border-border bg-card/40 rounded-lg space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-muted uppercase tracking-wider">Unit Price</span>
-                <span className="text-xs font-bold text-muted uppercase tracking-wider">Quantity Multiplier</span>
+                {selectedVariant?.compare_at_price && (
+                  <span className="text-[10px] font-black text-red-500 uppercase tracking-widest px-2.5 py-1 bg-red-500/10 border border-red-500/15 rounded-[3px]">
+                    Save Rs. {(selectedVariant.compare_at_price - selectedVariant.price).toLocaleString()}
+                  </span>
+                )}
               </div>
+              
               <div className="flex items-center justify-between">
-                <span className="text-2xl sm:text-3xl font-black text-foreground tracking-tighter">
-                  Rs. {(product.price * quantity).toLocaleString()}
-                </span>
+                <div className="flex items-baseline gap-2.5">
+                  <span className="text-2xl sm:text-3xl font-black text-foreground tracking-tighter">
+                    Rs. {((selectedVariant ? selectedVariant.price : product.price) * quantity).toLocaleString()}
+                  </span>
+                  {selectedVariant?.compare_at_price && (
+                    <span className="text-xs font-semibold text-muted line-through">
+                      Rs. {(selectedVariant.compare_at_price * quantity).toLocaleString()}
+                    </span>
+                  )}
+                </div>
                 
-                {/* Custom Stepper */}
+                {/* Stepper */}
                 <div className="flex items-center border border-border rounded bg-background">
                   <button 
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -230,8 +495,8 @@ export default function ProductDetailClient() {
               {/* Dynamic Shipping calculator tip */}
               <div className="flex justify-between items-center text-xs font-bold border-t border-border/30 pt-4 text-muted uppercase tracking-wider">
                 <span>Valley Shipping</span>
-                <span className={product.price * quantity >= 50000 ? "text-green-500 font-black tracking-widest text-[10px]" : "text-foreground font-black"}>
-                  {product.price * quantity >= 50000 ? "FREE Valley Delivery applied! 🎉" : "Rs. 1,500"}
+                <span className={((selectedVariant ? selectedVariant.price : product.price) * quantity) >= 50000 ? "text-green-500 font-black tracking-widest text-[10px]" : "text-foreground font-black"}>
+                  {((selectedVariant ? selectedVariant.price : product.price) * quantity) >= 50000 ? "FREE Valley Delivery applied" : "Rs. 1,500"}
                 </span>
               </div>
             </div>
@@ -268,11 +533,164 @@ export default function ProductDetailClient() {
 
         </div>
 
+        {/* Tabbed Content Sections */}
+        <div className="mt-16 border-b border-border/40">
+          <div className="flex space-x-8">
+            <button
+              onClick={() => setActiveTab("details")}
+              className={`pb-4 text-sm font-bold uppercase tracking-wider transition-all border-b-2 ${
+                activeTab === "details"
+                  ? "border-accent text-foreground"
+                  : "border-transparent text-muted hover:text-foreground"
+              }`}
+            >
+              Details
+            </button>
+            <button
+              onClick={() => setActiveTab("reviews")}
+              className={`pb-4 text-sm font-bold uppercase tracking-wider transition-all border-b-2 ${
+                activeTab === "reviews"
+                  ? "border-accent text-foreground"
+                  : "border-transparent text-muted hover:text-foreground"
+              }`}
+            >
+              Reviews ({getProductReviews(product).length})
+            </button>
+          </div>
+        </div>
+
+        {/* Tab Content Display */}
+        {activeTab === "details" ? (
+          <div className="py-8 space-y-8 animate-in fade-in duration-300">
+            <div className="space-y-4">
+              <h3 className="text-xs uppercase tracking-[0.2em] font-black text-muted-foreground/60">Product Features</h3>
+              <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {getProductFeatures(product).map((feature, i) => (
+                  <li key={i} className="flex items-start gap-3 text-sm text-muted-foreground font-medium">
+                    <div className="w-5 h-5 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0 mt-0.5 border border-accent/20">
+                      <Check className="w-3.5 h-3.5 text-accent" />
+                    </div>
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="space-y-4 pt-4 border-t border-border/10">
+              <h3 className="text-xs uppercase tracking-[0.2em] font-black text-muted-foreground/60">Perfect For</h3>
+              <div className="flex flex-wrap gap-2.5">
+                {getProductPerfectFor(product).map((venue, i) => (
+                  <span
+                    key={i}
+                    className="px-4 py-2 bg-card border border-border text-foreground text-[10px] font-bold uppercase tracking-wider rounded-[4px] shadow-sm"
+                  >
+                    {venue}
+                  </span>
+                ))}
+              </div>
+            </div>
+            
+            <div className="space-y-4 pt-4 border-t border-border/10">
+              <h3 className="text-xs uppercase tracking-[0.2em] font-black text-muted-foreground/60">Ordering & Fabrication Guarantee</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl font-medium">
+                Every sign from KTM DECOR is individually crafted in our Kathmandu workshop by skilled artisans. We source premium industrial-grade acrylics, robust low-voltage light fittings, and anti-corrosive backings to ensure longevity and superior performance. Standard fabrication cycles average 5 to 7 business days from design sign-off.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="py-8 space-y-8 animate-in fade-in duration-300">
+            {/* Rating summary */}
+            <div className="flex flex-col md:flex-row gap-6 md:items-center bg-card/30 border border-border/40 p-6 rounded-lg">
+              <div className="text-center md:border-r md:border-border/30 md:pr-8">
+                <div className="text-5xl font-black text-foreground tracking-tighter">4.9</div>
+                <div className="flex items-center justify-center gap-1 my-2">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 text-accent fill-accent" />
+                  ))}
+                </div>
+                <div className="text-[10px] uppercase font-bold tracking-widest text-muted">Based on {product.reviewsCount || 15} reviews</div>
+              </div>
+              
+              <div className="flex-1 space-y-2 max-w-md">
+                <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  <span className="w-12">5 Stars</span>
+                  <div className="flex-1 h-2 bg-border/40 rounded-full overflow-hidden">
+                    <div className="h-full bg-accent w-[92%]" />
+                  </div>
+                  <span className="w-8 text-right">92%</span>
+                </div>
+                <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  <span className="w-12">4 Stars</span>
+                  <div className="flex-1 h-2 bg-border/40 rounded-full overflow-hidden">
+                    <div className="h-full bg-accent w-[8%]" />
+                  </div>
+                  <span className="w-8 text-right">8%</span>
+                </div>
+                <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  <span className="w-12">3 Stars</span>
+                  <div className="flex-1 h-2 bg-border/40 rounded-full overflow-hidden">
+                    <div className="h-full bg-accent w-[0%]" />
+                  </div>
+                  <span className="w-8 text-right">0%</span>
+                </div>
+                <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  <span className="w-12">2 Stars</span>
+                  <div className="flex-1 h-2 bg-border/40 rounded-full overflow-hidden">
+                    <div className="h-full bg-accent w-[0%]" />
+                  </div>
+                  <span className="w-8 text-right">0%</span>
+                </div>
+                <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  <span className="w-12">1 Star</span>
+                  <div className="flex-1 h-2 bg-border/40 rounded-full overflow-hidden">
+                    <div className="h-full bg-accent w-[0%]" />
+                  </div>
+                  <span className="w-8 text-right">0%</span>
+                </div>
+              </div>
+            </div>
+
+            {/* List of customer reviews */}
+            <div className="space-y-6 divide-y divide-border/20">
+              {getProductReviews(product).map((review, i) => (
+                <div key={i} className={`space-y-2 ${i > 0 ? "pt-6" : ""}`}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-sm font-bold text-foreground block">{review.reviewer_name}</span>
+                      <span className="text-[10px] font-bold text-muted uppercase tracking-widest block mt-0.5">{review.review_date}</span>
+                    </div>
+                    <div className="flex items-center gap-0.5">
+                      {[...Array(5)].map((_, starIdx) => (
+                        <Star
+                          key={starIdx}
+                          className={`w-3.5 h-3.5 ${
+                            starIdx < review.rating ? "text-accent fill-accent" : "text-border/40"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {review.is_verified && (
+                    <span className="inline-flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest text-accent bg-accent/10 px-2 py-0.5 rounded">
+                      Verified Purchase
+                    </span>
+                  )}
+                  
+                  <p className="text-sm text-muted-foreground leading-relaxed font-medium">
+                    {review.review_text}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Suggested Products Section */}
         {suggestions.length > 0 && (
           <div className="mt-20 pt-16 border-t border-border/30">
             <h2 className="text-xl sm:text-2xl font-black uppercase tracking-widest text-foreground mb-8 flex items-center gap-2">
-              <Star className="w-5 h-5 text-accent animate-pulse fill-accent" /> Suggested Products
+              <Star className="w-5 h-5 text-accent fill-accent" /> Suggested Products
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
               {suggestions.map((p) => (
@@ -312,10 +730,10 @@ export default function ProductDetailClient() {
 
       {/* Added to cart notification popup */}
       {addedPopup && (
-        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[49] bg-green-600 border border-green-500 text-white px-6 py-3.5 rounded-lg shadow-2xl flex items-center gap-3 animate-bounce">
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[49] bg-green-600 border border-green-500 text-white px-6 py-3.5 rounded-lg shadow-2xl flex items-center gap-3">
           <Check className="w-4 h-4 bg-white/20 rounded-full p-0.5 flex-shrink-0" />
           <span className="text-xs font-bold tracking-wider uppercase truncate max-w-[240px]">
-            {product.name} added to cart!
+            {product.name} added to cart
           </span>
         </div>
       )}

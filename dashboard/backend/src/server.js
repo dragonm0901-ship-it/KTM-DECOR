@@ -563,186 +563,327 @@ const seedUsers = async () => {
 const seedProducts = async () => {
   try {
     const productCount = await Product.countDocuments();
-    const standardIds = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
-    const hasOldSeed = await Product.findOne({ id: { $nin: standardIds } });
+    const hasPlaceholder = await Product.findOne({ image: "/images/placeholder.svg" });
+    const hasLegacyName = await Product.findOne({ name: /Design #/ });
 
-    if (productCount === 0 || hasOldSeed) {
-      if (hasOldSeed || productCount > 0) {
-        console.log("Non-standard or legacy product detected in database. Clearing Product collection...");
-        await Product.deleteMany({});
-      }
-      console.log("Seeding default product catalog (12 premium signs)...");
-      const products = [];
+    if (productCount === 0 || hasPlaceholder || hasLegacyName) {
+      console.log("Legacy, placeholder or empty products detected. Re-seeding default product catalog (12 premium signs)...");
+      await Product.deleteMany({});
 
-      const CATEGORIES = [
-        "Acrylic Backlit Signage",
-        "Neon Sign",
-        "3D Signage",
-        "2D Board",
-        "House/Office Nameplate",
-        "Wooden Signage",
-        "2.5D Signage",
-        "Acrylic Table Lamp",
-        "3D Number Plate",
-        "Double Sided Round Light Board"
-      ];
-
-      const SUB_CATEGORIES = {
-        "Acrylic Backlit Signage": ["Lobby & Reception", "Corporate Office", "Retail Storefront", "Luxury Showrooms"],
-        "Neon Sign": ["Custom Script", "Bar & Restaurant", "Boutique & Salon", "Event Backdrop"],
-        "3D Signage": ["Brushed Metal", "Glowing Halo", "Block Acrylic", "Fabricated Steel"],
-        "2D Board": ["Directional & Directory", "Restaurant Menu", "Safety & Informational", "Exterior Panels"],
-        "House/Office Nameplate": ["Executive Desk", "Premium Residential", "Modern Metallic", "Glass Finish"],
-        "Wooden Signage": ["Laser Engraved", "Earthy Rustic Plank", "Live Edge Wood", "Wood-Acrylic Hybrid"],
-        "2.5D Signage": ["Multi-Layered relief", "Textured CNC Cut", "Geometric Art Panel", "Abstract Relief"],
-        "Acrylic Table Lamp": ["Branded Display Lamp", "3D Wireframe Illusion", "Bedside Glow Accent", "Minimalist Icon Lamp"],
-        "3D Number Plate": ["Luxury Car Plate", "Bike Number Plate", "Villa Address Plaque", "Floating Mount Plate"],
-        "Double Sided Round Light Board": ["Projecting Bracket Sign", "LED Rotating Box", "Vintage Flange Sign", "Urban Under-Canopy"]
-      };
-
-      const TECHNICAL_SPECS = {
-        "Acrylic Backlit Signage": [
-          "High-efficiency 12V backlighting LED strips",
-          "Sleek premium 8mm frosted cast acrylic faceplate",
-          "Heavy-duty aluminum backing panel for structural support",
-          "Standoff wall mounts & hardware fixtures included",
-          "Even diffusion layout prevents shadows or hot-spots",
-          "Over 45,000 hours estimated LED operational lifespan"
-        ],
-        "Neon Sign": [
-          "Heavy-duty low-voltage 12V silicon flex neon tubing",
-          "Contoured high-clarity 6mm transparent acrylic backing",
-          "Complete hanging wire setup & standoff mounting screws",
-          "Includes quiet solid-state 12V 5A power transformer",
-          "Safe to touch, low heat, absolutely hum-free operation",
-          "Flexible design adapts to any wall hanging structure"
-        ],
-        "3D Signage": [
-          "Heavy-duty 304 marine-grade anti-corrosive steel returns",
-          "Solid 20mm depth spacer pegs for floating shadow relief",
-          "Fully waterproof internal IP67 light modules",
-          "Precision waterjet-cut acrylic faceplate overlays",
-          "Direct-mount drilling guides for seamless setup",
-          "10-Year structural material warranty guarantee"
-        ],
-        "2D Board": [
-          "Durable commercial-grade ACP (Aluminum Composite Panel) backing",
-          "UV-resistant outdoor protective matte laminate wrap",
-          "Clean-cut router beveled borders for modern presentation",
-          "Pre-drilled heavy-load wall bracket screw eyelets",
-          "Resistant to high winds, heavy rain, and direct sunlight",
-          "Easy-wipe surface compatible with standard cleaning sprays"
-        ],
-        "House/Office Nameplate": [
-          "Laser-engraved polished solid brass or wood inserts",
-          "Float-mount polished edge glass spacer panel sets",
-          "Invisible rear mounting stud brackets with anchor screws",
-          "UV-sealed weatherproofing coating prevents tarnish/fade",
-          "Fits executive desk or outdoor brick wall mounting layouts",
-          "Beautiful gift packaging container included"
-        ],
-        "Wooden Signage": [
-          "Sustainably sourced premium walnut/oak wood blocks base",
-          "Precision CNC router deep engraving lines",
-          "Eco-friendly outdoor Danish oil moisture-proof finish",
-          "Integrated mounting hardware slots on rear panel",
-          "Natural woodgrain textures make every unit unique",
-          "Solid heavy-feel craftsmanship by master Nepalese artisans"
-        ],
-        "2.5D Signage": [
-          "Multi-layered laser-cut 3mm acrylic sheet panels",
-          "Textured relief CNC milling background finishes",
-          "Hand-assembled layered composite construction",
-          "Provides elegant dimensional depth profile details",
-          "Pre-applied industrial strength double-sided mounting adhesive",
-          "Spectacular visual changes under shifting ceiling lights"
-        ],
-        "Acrylic Table Lamp": [
-          "Laser-etched high-clarity 4mm acrylic graphic slide",
-          "Solid organic beechwood circular glowing light base",
-          "Multi-mode warm & cool white LED emitters",
-          "USB-powered layout with convenient inline switch control",
-          "Ultra-low power draw (under 3.5 Watts total)",
-          "Creates a mesmerizing glowing wireframe optical illusion"
-        ],
-        "3D Number Plate": [
-          "Embossed vacuum-formed acrylic block digits",
-          "Premium laser-cut carbon fiber weave backing board",
-          "Fully government-compliant size and font specifications",
-          "Heavy-duty waterproof double-sided foam mounting tape",
-          "Reflective high-visibility backing plate for night safety",
-          "Impact-resistant composite shield avoids chipping"
-        ],
-        "Double Sided Round Light Board": [
-          "Heavy-duty rustproof circular iron outer frame casing",
-          "Dual-sided high-opacity opal acrylic glowing panels",
-          "Extended steel projection arm brackets for wall mounting",
-          "Intense uniform internal daylight LED light array",
-          "Direct-wire AC 220V connection block ready",
-          "IP65 Certified fully dustproof and waterproof shell"
-        ]
-      };
-
-      const BASE_DESCRIPTIONS = {
-        "Acrylic Backlit Signage": "Transform your business front or reception desk with our premium backlit signage. Handcrafted from heavy cast acrylic and fitted with high-intensity uniform LED panels to offer a glowing architectural silhouette that commands attention.",
-        "Neon Sign": "Bring vibrant color and modern aesthetic energy to any room or commercial bar with our hand-bent glowing neon signs. Mounted on contoured clear acrylic backings, these low-voltage LED tubes run perfectly cold and completely silent.",
-        "3D Signage": "Add physical depth and structural branding authority with our heavy-duty fabricated 3D lettering signs. Combining stainless steel and block acrylic elements, these signs cast beautiful drop-shadows on corporate reception backdrops.",
-        "2D Board": "Clean, highly visible, and built to withstand the elements, our flat e-commerce 2D boards are ideal for retail pricing menus, company directional indexes, and regulatory safety displays. Features crisp beveled edges.",
-        "House/Office Nameplate": "Welcome guests or designate your workspace in premium style with our elegant custom nameplates. Blending natural wood inserts, glass frames, and polished brass plates for a timeless, executive presentation.",
-        "Wooden Signage": "Bring natural warmth and artisanal character to your brand with our CNC-carved solid timber signs. Sanded to a smooth furniture finish and treated with weatherproofing oils, these pieces showcase gorgeous, unique wood grains.",
-        "2.5D Signage": "A stunning cross between fine sculpture and modern signage, our 2.5D layered signs utilize overlapping panels and relief textures to create a spectacular physical depth layout that changes with ambient light angles.",
-        "Acrylic Table Lamp": "Light up your workspace or bedside table with our mesmerizing 3D-optical illusion acrylic lamps. Features a solid wood base with glowing warm LEDs that shine through a custom laser-etched pattern overlay.",
-        "3D Number Plate": "Stand out on the road or define your home address with our high-contrast 3D number plates. Fabricated with raised bold numbers on carbon fiber templates to ensure durability, high visibility, and luxury styles.",
-        "Double Sided Round Light Board": "Ensure maximum foot-traffic views from both street directions with our heavy-duty projecting round light boxes. Built with waterproof metal frames and double-sided glowing acrylic faces to shine brightly through night storms."
-      };
-
-      for (let i = 0; i < 12; i++) {
-        const cat = CATEGORIES[i % CATEGORIES.length];
-        const subCats = SUB_CATEGORIES[cat] || ["Standard"];
-        const subCategory = subCats[i % subCats.length];
-        const baseDesc = BASE_DESCRIPTIONS[cat] || "Premium custom signage hand-built to order by KTM DECOR.";
-        const baseSpecs = TECHNICAL_SPECS[cat] || ["Premium construction material", "High durability finish"];
-
-        // Distribute prices deterministically between Rs. 15,000 and Rs. 95,000
-        const priceFactor = ((i * 7 + cat.length * 3) % 17) + 1;
-        const price = Math.round((15000 + priceFactor * 4500) / 500) * 500;
-
-        let stockStatus = "In Stock";
-        if (i % 5 === 0) {
-          stockStatus = "Low Stock";
-        } else if (i % 7 === 0) {
-          stockStatus = "Custom Order Only";
-        }
-
-        let badge = undefined;
-        if (i === 0 || i === 4) badge = "Best Seller";
-        else if (i === 1 || i === 8) badge = "New";
-        else if (stockStatus === "Custom Order Only") badge = "Custom";
-
-        const name = `${cat} Premium Design #${i + 1}`;
-        const description = `${baseDesc} This premium sign is custom engineered for ${subCategory.toLowerCase()} spaces. Built using heavy-duty materials with elegant finishes that deliver a premium, high-end architectural appeal. Custom options and sizing adjustments are available upon request.`;
-
-        const specs = [
-          ...baseSpecs,
-          `Optimized dimensions for ${subCategory.toLowerCase()} applications`,
-          `Direct delivery and professional mounting available inside Kathmandu Valley`
-        ];
-
-        products.push({
-          id: (i + 1).toString(),
-          name,
-          category: cat,
-          subCategory,
-          price,
-          image: "/images/placeholder.svg",
-          badge,
-          description,
-          specs,
-          stockStatus,
+      const products = [
+        {
+          id: "1",
+          name: "Premium Custom Wooden Signage",
+          category: "Wooden Signage",
+          subCategory: "Laser Engraved",
+          price: 4000,
+          image: "/products/product_1_main.png",
+          badge: "Best Seller",
+          description: "Add warmth, charm and a natural touch to your brand with our Wooden Signage. Crafted from high-quality Saal Wood with precision finishing, these signs are perfect for creating a premium, earthy and timeless impression.",
+          specs: [
+            "High-quality seasoned Saal Wood construction",
+            "Matte, polish, stain, or natural oil finish options",
+            "Thickness ranges from 1 to 3 inches according to design",
+            "Laser engraved, CNC carved, or handcrafted lettering",
+            "Suitable for shops, boutiques, cafes, and rustic showrooms"
+          ],
+          stockStatus: "In Stock",
+          rating: 4.9,
+          reviewsCount: 28,
+          image_urls: ["/products/product_1_main.png", "/products/product_1_thumb.png"],
+          variants: [
+            { option_name: "2x1 feet (2 Sq.Ft.)", price: 4000, compare_at_price: 5200 },
+            { option_name: "2x2 feet (4 Sq.Ft.)", price: 8000, compare_at_price: 10400 },
+            { option_name: "3x2 feet (6 Sq.Ft.)", price: 12000, compare_at_price: 15600 },
+            { option_name: "4x3 feet (12 Sq.Ft.)", price: 24000, compare_at_price: 31200 }
+          ]
+        },
+        {
+          id: "2",
+          name: "Premium Acrylic Backlit Signage",
+          category: "Acrylic Backlit Signage",
+          subCategory: "Luxury Showrooms",
+          price: 3000,
+          image: "/products/product_2_main.png",
+          badge: "New",
+          description: "Illuminate your brand with our Acrylic Backlit Signage. The perfect combination of premium acrylic and LED backlighting that creates a stunning halo glow, ensuring high visibility and a premium look, day and night.",
+          specs: [
+            "Premium quality front and backlit cast acrylic faceplate",
+            "Uniform LED backlit modules (Warm or White options)",
+            "Thickness ranging from 5mm to 10mm as per design requirements",
+            "Includes low-voltage 12V power transformer",
+            "Designed for office receptions, retail stores, and clinics"
+          ],
+          stockStatus: "In Stock",
           rating: 4.8,
-          reviewsCount: 15
-        });
-      }
+          reviewsCount: 19,
+          image_urls: ["/products/product_2_main.png"],
+          variants: [
+            { option_name: "2x1 feet (2 Sq.Ft.)", price: 3000, compare_at_price: 3900 },
+            { option_name: "2x2 feet (4 Sq.Ft.)", price: 6000, compare_at_price: 7800 },
+            { option_name: "3x2 feet (6 Sq.Ft.)", price: 9000, compare_at_price: 11700 },
+            { option_name: "4x3 feet (12 Sq.Ft.)", price: 18000, compare_at_price: 23400 }
+          ]
+        },
+        {
+          id: "3",
+          name: "Premium 2.5D Layered Signage",
+          category: "2.5D Signage",
+          subCategory: "Corporate Office",
+          price: 4000,
+          image: "/products/product_3_main.png",
+          badge: "Custom",
+          description: "Make a lasting impression with our 2.5D Signage - the perfect blend of depth, dimension and style. Layered design creates a rich 3D effect with a premium finish. Ideal for office interiors and showrooms.",
+          specs: [
+            "High-quality layered acrylic and ACP composite construction",
+            "Thickness ranging from 10mm to 25mm for bold dimensional relief",
+            "Finish options include matte, glossy, or brushed metallic",
+            "Standoff spacers or flush wall mounting brackets included",
+            "Perfect for corporate branding, offices, and retail lobbies"
+          ],
+          stockStatus: "In Stock",
+          rating: 4.9,
+          reviewsCount: 14,
+          image_urls: ["/products/product_3_main.png"],
+          variants: [
+            { option_name: "2x1 feet (2 Sq.Ft.)", price: 4000, compare_at_price: 5200 },
+            { option_name: "2x2 feet (4 Sq.Ft.)", price: 8000, compare_at_price: 10400 },
+            { option_name: "3x2 feet (6 Sq.Ft.)", price: 12000, compare_at_price: 15600 },
+            { option_name: "4x3 feet (12 Sq.Ft.)", price: 24000, compare_at_price: 31200 }
+          ]
+        },
+        {
+          id: "4",
+          name: "Double Sided Projecting Light Board",
+          category: "Double Sided Round Light Board",
+          subCategory: "Retail Storefront",
+          price: 5500,
+          image: "/products/product_4_main.png",
+          badge: "Best Seller",
+          description: "Stand out day and night with our double sided round light boards. Perfect for shops, cafes, restaurants, salons and businesses that want maximum visibility from both directions.",
+          specs: [
+            "Double-sided illumination with dual opal acrylic panels",
+            "Heavy-duty rustproof circular iron outer frame casing",
+            "High-intensity internal LED modules with uniform diffusion",
+            "Low-voltage 12V power supply for high efficiency",
+            "IP65 certified fully waterproof and weatherproof seal"
+          ],
+          stockStatus: "In Stock",
+          rating: 4.8,
+          reviewsCount: 32,
+          image_urls: ["/products/product_4_main.png"],
+          variants: [
+            { option_name: "18 Inch Diameter", price: 5500, compare_at_price: 7150 },
+            { option_name: "24 Inch Diameter", price: 7500, compare_at_price: 9750 }
+          ]
+        },
+        {
+          id: "5",
+          name: "Custom LED Neon Sign",
+          category: "Neon Sign",
+          subCategory: "Custom Script",
+          price: 3200,
+          image: "/products/product_5_main.png",
+          badge: "New",
+          description: "Brighten your space with our custom LED Neon Signs. Hand-bent from low-voltage silicone flex tubing, these signs are completely silent, safe to touch, and run cold. Ideal for cafes, bedrooms, salons, and backdrop displays.",
+          specs: [
+            "Low-voltage 12V silicone flex neon tubing (safe to touch)",
+            "High-clarity transparent acrylic backing sheet (6mm)",
+            "Quiet solid-state power transformer and dimmer switch",
+            "Pre-drilled holes for hanging wires or standoff mounts",
+            "Over 50,000 hours estimated operational lifespan"
+          ],
+          stockStatus: "In Stock",
+          rating: 4.9,
+          reviewsCount: 45,
+          image_urls: ["/products/product_5_main.png"],
+          variants: [
+            { option_name: "2x1 feet (2 Sq.Ft.)", price: 3200, compare_at_price: 4160 },
+            { option_name: "2x2 feet (4 Sq.Ft.)", price: 6400, compare_at_price: 8320 },
+            { option_name: "3x2 feet (6 Sq.Ft.)", price: 9600, compare_at_price: 12480 },
+            { option_name: "4x2 feet (8 Sq.Ft.)", price: 12800, compare_at_price: 16640 }
+          ]
+        },
+        {
+          id: "6",
+          name: "Modern 2D LED Signboard",
+          category: "2D Board",
+          subCategory: "Directional & Directory",
+          price: 3375,
+          image: "/products/product_6_main.png",
+          description: "Sleek, stylish, and highly cost-effective, our flat 2D LED signboards feature laser-cut acrylic letters on a matte backing panel. Perfect for interior branding, reception desks, and building directory boards.",
+          specs: [
+            "Premium flat-cut acrylic letters on a composite panel backing",
+            "Front-glowing LED strip inserts for a crisp face glow",
+            "Ultra-slim profile design with beveled edges",
+            "Standoff wall mounts and anchor brackets included",
+            "Custom colors and brand matching options available"
+          ],
+          stockStatus: "In Stock",
+          rating: 4.7,
+          reviewsCount: 12,
+          image_urls: ["/products/product_6_main.png"],
+          variants: [
+            { option_name: "Small (1.5x1.5 feet)", price: 3375, compare_at_price: 4300 },
+            { option_name: "Medium (2x2 feet)", price: 6000, compare_at_price: 7800 },
+            { option_name: "Big (3x3 feet)", price: 9000, compare_at_price: 11700 }
+          ]
+        },
+        {
+          id: "7",
+          name: "Premium 3D Letter Signage",
+          category: "3D Signage",
+          subCategory: "Glowing Halo",
+          price: 10800,
+          image: "/products/product_7_main.png",
+          badge: "Custom",
+          description: "Give your brand a powerful and professional look with our premium 3D Letter Signage. Crafted with high-grade metal or thick block acrylic returns, these individual letters feature internal front, side, or backlighting for a breathtaking architectural appearance.",
+          specs: [
+            "Individually fabricated 3D letters from acrylic or aluminum",
+            "High-intensity internal IP67 waterproof LED modules (12V)",
+            "Front-glowing, side-glowing, or backlit halo light options",
+            "Standoff spacers for a beautiful floating shadow depth",
+            "Complete template guide for easy wall mounting installation"
+          ],
+          stockStatus: "In Stock",
+          rating: 4.9,
+          reviewsCount: 22,
+          image_urls: ["/products/product_7_main.png"],
+          variants: [
+            { option_name: "6 Inch Letters (Set of 10)", price: 10800, compare_at_price: 14000 },
+            { option_name: "8 Inch Letters (Set of 10)", price: 14400, compare_at_price: 18700 },
+            { option_name: "10 Inch Letters (Set of 10)", price: 18000, compare_at_price: 23400 }
+          ]
+        },
+        {
+          id: "8",
+          name: "Custom Laser & CNC Products",
+          category: "Laser & CNC Products",
+          subCategory: "Acrylic Products",
+          price: 1200,
+          image: "/products/product_8_main.png",
+          description: "We design, cut, and engrave a wide range of custom gifts, trophies, keychains, organizers, and home decor items. Using state-of-the-art laser and CNC cutters, we bring your custom illustrations to life on acrylic, wood, MDF, and metals.",
+          specs: [
+            "High-precision laser cutting and engraving finish",
+            "Materials: acrylic, solid wood, MDF, plywood, ACP, and leather",
+            "Completely custom layouts based on client artwork files",
+            "Premium polished edges and clean engraving lines",
+            "Fast fabrication turnaround for bulk orders"
+          ],
+          stockStatus: "In Stock",
+          rating: 4.8,
+          reviewsCount: 37,
+          image_urls: ["/products/product_8_main.png", "/products/product_8_thumb.png"],
+          variants: [
+            { option_name: "Acrylic Desk Organizer", price: 1200, compare_at_price: 1560 },
+            { option_name: "Wooden Trophy & Award", price: 1500, compare_at_price: 1950 },
+            { option_name: "Laser Engraved Nameplate", price: 2000, compare_at_price: 2600 },
+            { option_name: "Custom Keychains (Set of 50)", price: 2500, compare_at_price: 3250 }
+          ]
+        },
+        {
+          id: "9",
+          name: "Bespoke Customized Wall Clock",
+          category: "Customized Wall Clock",
+          subCategory: "Resin Ocean",
+          price: 3000,
+          image: "/products/product_9_main.png",
+          description: "Add elegance and artistic personality to your walls with our Customized Wall Clocks. Blending natural wood blocks, colored acrylics, and textured epoxy resin waves, each timepiece is hand-detailed by Nepalese artisans and fitted with silent quartz sweeps.",
+          specs: [
+            "Premium seasoned timber blocks combined with ocean epoxy resin",
+            "Silent-sweep quartz movement mechanisms (absolutely tick-free)",
+            "Backlit warm LED accent lighting ring (optional)",
+            "High-clarity acrylic mandala details or custom wooden cutouts",
+            "Available in sizes from 12 inch to 30 inch diameter"
+          ],
+          stockStatus: "In Stock",
+          rating: 4.9,
+          reviewsCount: 42,
+          image_urls: ["/products/product_9_main.png", "/products/product_9_thumb1.png", "/products/product_9_thumb2.png"],
+          variants: [
+            { option_name: "12 Inch Wooden Clock", price: 3000, compare_at_price: 3900 },
+            { option_name: "12 Inch Acrylic Clock", price: 3500, compare_at_price: 4550 },
+            { option_name: "12 Inch Resin Art Clock", price: 4500, compare_at_price: 5850 },
+            { option_name: "12 Inch Wood + Resin Clock", price: 5500, compare_at_price: 7150 },
+            { option_name: "16 Inch Wood + Resin Clock", price: 8000, compare_at_price: 10400 }
+          ]
+        },
+        {
+          id: "10",
+          name: "3D Vehicle Number Plate",
+          category: "3D Number Plate",
+          subCategory: "Luxury Car Plate",
+          price: 1200,
+          image: "/products/product_10_main.png",
+          badge: "New",
+          description: "Upgrade your vehicle's aesthetic with our premium 3D Number Plates. Constructed with bold raised acrylic letters on a matte Aluminum Composite Panel (ACP) base, these plates are completely weatherproof, impact resistant, and compliant with standard styling guidelines.",
+          specs: [
+            "Heavy-duty anti-corrosive ACP backing board (3mm)",
+            "Compliant embossed acrylic block digits (3mm thickness)",
+            "Waterproof double-sided mounting adhesive (requires no drill holes)",
+            "Fade-resistant finish that withstands direct Nepalese sunlight",
+            "Available in white base with red letters, or red base with white letters"
+          ],
+          stockStatus: "In Stock",
+          rating: 4.8,
+          reviewsCount: 26,
+          image_urls: ["/products/product_10_main.png", "/products/product_10_thumb.png"],
+          variants: [
+            { option_name: "Two Wheeler standard", price: 1200, compare_at_price: 1560 },
+            { option_name: "Four Wheeler standard", price: 2500, compare_at_price: 3250 }
+          ]
+        },
+        {
+          id: "11",
+          name: "Customized Home & Office Nameplate",
+          category: "House/Office Nameplate",
+          subCategory: "Premium Residential",
+          price: 2000,
+          image: "/images/name-plates.webp",
+          description: "Welcome guests in style with our bespoke customized nameplates. We combine brushed metallic ACP backings with glossy laser-cut acrylic lettering and warm lighting options to create a sophisticated, executive presentation for your home or corporate entrance.",
+          specs: [
+            "Premium acrylic face panel combined with metallic ACP backing",
+            "Laser-cut 3D lettering for elegant depth and visibility",
+            "Standoff brass spacers and screws included for firm mounting",
+            "Fully weatherproof and fade-resistant for outdoor exposure",
+            "Custom religious emblems, family logos, or office designations"
+          ],
+          stockStatus: "In Stock",
+          rating: 4.9,
+          reviewsCount: 31,
+          image_urls: ["/images/name-plates.webp", "/images/dimensional-ktm.webp", "/images/3d-letters-salt.webp"],
+          variants: [
+            { option_name: "Standard (12x6 inch)", price: 2000, compare_at_price: 2600 },
+            { option_name: "Executive (16x8 inch)", price: 2800, compare_at_price: 3640 },
+            { option_name: "Premium (20x10 inch)", price: 3600, compare_at_price: 4680 }
+          ]
+        },
+        {
+          id: "12",
+          name: "Bespoke Acrylic Table Lamp",
+          category: "Acrylic Table Lamp",
+          subCategory: "Branded Display Lamp",
+          price: 1800,
+          image: "/images/hero-04.webp",
+          description: "Add a soft ambient glow and a custom touch to your space with our Customized Acrylic Table Lamps. Built with a solid organic beechwood base and a high-clarity laser-etched acrylic plate, these lamps create beautiful line-art illusions, names, or corporate logos.",
+          specs: [
+            "Precision laser-etched high-clarity 4mm acrylic graphic slide",
+            "Solid polished beechwood circular base with built-in LEDs",
+            "Multi-mode USB powered warm white illumination with inline switch",
+            "Low-voltage operation (under 3.5 Watts total) safe for bedside use",
+            "Fully customizable with family names, line drawings, or logo prints"
+          ],
+          stockStatus: "In Stock",
+          rating: 4.8,
+          reviewsCount: 24,
+          image_urls: ["/images/hero-04.webp", "/images/neon-taso.webp", "/images/neon-momo.webp"],
+          variants: [
+            { option_name: "Bedside Mini", price: 1800, compare_at_price: 2340 },
+            { option_name: "Desk Standard", price: 2430, compare_at_price: 3150 },
+            { option_name: "Lounge Premium", price: 3060, compare_at_price: 3980 }
+          ]
+        }
+      ];
 
       await Product.insertMany(products);
       console.log(`Seeded ${products.length} products into MongoDB successfully.`);
