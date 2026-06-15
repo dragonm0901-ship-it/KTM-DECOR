@@ -149,6 +149,7 @@ export const Layout: React.FC<LayoutProps> = ({
           </span>
         </div>
 
+
         <div className="flex items-center gap-4">
           {/* Theme Toggle */}
           <button
@@ -324,7 +325,7 @@ export const Layout: React.FC<LayoutProps> = ({
       <div className="flex-1 flex relative overflow-hidden">
         {/* DESKTOP SIDEBAR */}
         <aside
-          className={`hidden md:flex flex-col border-r border-border glass-panel transition-all duration-300 overflow-x-hidden ${
+          className={`hidden md:flex flex-col border-r border-border bg-card transition-all duration-300 overflow-x-hidden ${
             sidebarOpen ? "w-64" : "w-16"
           }`}
         >
@@ -346,10 +347,10 @@ export const Layout: React.FC<LayoutProps> = ({
                       <button
                         key={item.id}
                         onClick={() => setCurrentTab(item.id)}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-all group relative ${
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium border transition-all group relative ${
                           isActive
-                            ? "bg-accent text-white shadow-md shadow-accent/15"
-                            : "text-muted hover:bg-border hover:text-foreground"
+                            ? "bg-accent/10 border-accent/15 text-accent font-bold shadow-sm"
+                            : "text-muted border-transparent hover:bg-border/50 hover:text-foreground"
                         }`}
                       >
                         <Icon size={20} className={isActive ? "" : "text-muted group-hover:text-foreground"} />
@@ -371,7 +372,7 @@ export const Layout: React.FC<LayoutProps> = ({
             <div className="px-4 space-y-2 mb-2">
               <button
                 onClick={logout}
-                className={`w-full flex items-center justify-center gap-2 py-2 px-3 rounded-md bg-red-600 hover:bg-red-700 text-white transition-all shadow-sm text-xs font-bold uppercase tracking-wider ${
+                className={`w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-red-600 hover:bg-red-700 text-white transition-all shadow-md shadow-red-500/10 text-xs font-bold uppercase tracking-wider ${
                   !sidebarOpen && "aspect-square p-0"
                 }`}
                 title="Logout"
@@ -384,7 +385,7 @@ export const Layout: React.FC<LayoutProps> = ({
             <div className="px-4">
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="w-full flex items-center justify-center p-2 rounded-md bg-border text-muted hover:text-foreground transition-colors"
+                className="w-full flex items-center justify-center p-2.5 rounded-xl bg-border/40 text-muted hover:text-foreground hover:bg-border/80 transition-colors"
                 aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
               >
                 {sidebarOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}

@@ -121,17 +121,17 @@ export const BinView: React.FC = () => {
       <div className="space-y-4">
         {activeTab === "orders" ? (
           (!binOrders || binOrders.length === 0) ? (
-            <div className="glass-panel p-12 text-center border-dashed border-2 border-border/60 rounded-lg max-w-lg mx-auto mt-6">
+            <div className="bg-card border border-border/80 border-dashed rounded-2xl shadow-sm p-12 text-center max-w-lg mx-auto mt-6">
               <Trash2 className="mx-auto text-muted/30 mb-3" size={48} />
               <h3 className="font-bold text-sm">Order Bin is Empty</h3>
-              <p className="text-xs text-muted mt-1">No soft-deleted orders are stored here.</p>
+              <p className="text-xs text-muted mt-1 font-medium">No soft-deleted orders are stored here.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {binOrders.map((order) => (
                 <div
                   key={order._id}
-                  className="bg-card border border-border p-5 rounded-lg flex flex-col justify-between shadow-sm relative group hover:border-accent/40 transition-colors"
+                  className="bg-card border border-border/80 p-5 rounded-2xl flex flex-col justify-between shadow-sm relative group hover:border-accent/40 transition-all duration-200"
                 >
                   <div className="space-y-3">
                     <div className="flex justify-between items-start gap-4">
@@ -190,17 +190,17 @@ export const BinView: React.FC = () => {
           )
         ) : activeTab === "tasks" ? (
           binTasks.length === 0 ? (
-            <div className="glass-panel p-12 text-center border-dashed border-2 border-border/60 rounded-lg max-w-lg mx-auto mt-6">
+            <div className="bg-card border border-border/80 border-dashed rounded-2xl shadow-sm p-12 text-center max-w-lg mx-auto mt-6">
               <Trash2 className="mx-auto text-muted/30 mb-3" size={48} />
               <h3 className="font-bold text-sm">Task Bin is Empty</h3>
-              <p className="text-xs text-muted mt-1">No soft-deleted tasks are stored here.</p>
+              <p className="text-xs text-muted mt-1 font-medium">No soft-deleted tasks are stored here.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {binTasks.map((task) => (
                 <div
                   key={task._id}
-                  className="bg-card border border-border p-5 rounded-lg flex flex-col justify-between shadow-sm relative group hover:border-accent/40 transition-colors"
+                  className="bg-card border border-border/80 p-5 rounded-2xl flex flex-col justify-between shadow-sm relative group hover:border-accent/40 transition-all duration-200"
                 >
                   <div className="space-y-3">
                     <div className="flex justify-between items-start gap-4">
@@ -247,10 +247,10 @@ export const BinView: React.FC = () => {
             </div>
           )
         ) : binCampaigns.length === 0 ? (
-          <div className="glass-panel p-12 text-center border-dashed border-2 border-border/60 rounded-lg max-w-lg mx-auto mt-6">
+          <div className="bg-card border border-border/80 border-dashed rounded-2xl shadow-sm p-12 text-center max-w-lg mx-auto mt-6">
             <Trash2 className="mx-auto text-muted/30 mb-3" size={48} />
             <h3 className="font-bold text-sm">Field Notes Bin is Empty</h3>
-            <p className="text-xs text-muted mt-1">No soft-deleted field notes are stored here.</p>
+            <p className="text-xs text-muted mt-1 font-medium">No soft-deleted field notes are stored here.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -258,7 +258,7 @@ export const BinView: React.FC = () => {
               return (
                 <div
                   key={item._id}
-                  className="bg-card border border-border p-5 rounded-lg flex flex-col justify-between shadow-sm relative group hover:border-accent/40 transition-colors"
+                  className="bg-card border border-border/80 p-5 rounded-2xl flex flex-col justify-between shadow-sm relative group hover:border-accent/40 transition-all duration-200"
                 >
                   <div className="space-y-3">
                     <div className="flex justify-between items-start gap-4">

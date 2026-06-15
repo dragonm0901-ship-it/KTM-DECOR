@@ -357,7 +357,7 @@ export const ExpensesTab: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-card p-4 rounded-lg border border-border">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-card p-5 rounded-2xl border border-border/80 shadow-sm">
         <div>
           <h1 className="text-2xl font-bold font-display flex items-center gap-2">
             <DollarSign className="text-accent" />
@@ -370,11 +370,11 @@ export const ExpensesTab: React.FC = () => {
 
         <div className="flex flex-wrap items-center gap-3 self-start md:self-auto">
           {/* Quick Statement Download */}
-          <div className="flex items-center gap-2 bg-border/20 p-2 rounded-md border border-border/40">
+          <div className="flex items-center gap-2 bg-border/20 p-2 rounded-xl border border-border/40">
             <select
               value={exportMonth}
               onChange={(e) => setExportMonth(e.target.value)}
-              className="bg-card border border-border text-foreground text-[11px] rounded px-2 py-1.5 focus:outline-none focus:border-accent font-semibold"
+              className="bg-card border border-border text-foreground text-[11px] rounded-xl px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent font-semibold cursor-pointer"
             >
               <option value="all">All Time</option>
               <option value="1">Jan</option>
@@ -393,7 +393,7 @@ export const ExpensesTab: React.FC = () => {
             <select
               value={exportYear}
               onChange={(e) => setExportYear(e.target.value)}
-              className="bg-card border border-border text-foreground text-[11px] rounded px-2 py-1.5 focus:outline-none focus:border-accent font-semibold"
+              className="bg-card border border-border text-foreground text-[11px] rounded-xl px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent font-semibold cursor-pointer"
             >
               <option value="2025">2025</option>
               <option value="2026">2026</option>
@@ -402,7 +402,7 @@ export const ExpensesTab: React.FC = () => {
             <button
               onClick={handleExportClick}
               disabled={exporting}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-accent/90 text-white text-[11px] rounded font-bold hover:bg-accent-dark transition-all disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-accent/90 text-white text-[11px] rounded-xl font-bold hover:bg-accent-dark transition-all disabled:opacity-50"
             >
               {exporting ? "Exporting..." : "Export CSV"}
             </button>
@@ -410,7 +410,7 @@ export const ExpensesTab: React.FC = () => {
 
           <button
             onClick={handleOpenAddModal}
-            className="flex items-center justify-center gap-1.5 py-2 px-4 bg-accent hover:bg-accent-dark text-white rounded font-bold text-xs transition-all shadow-md shadow-accent/15 self-start md:self-auto h-9"
+            className="flex items-center justify-center gap-1.5 py-2 px-4 bg-accent hover:bg-accent-dark text-white rounded-xl font-bold text-xs transition-all shadow-md shadow-accent/15 self-start md:self-auto h-9"
           >
             <Plus size={16} />
             Log New Expense
@@ -420,7 +420,7 @@ export const ExpensesTab: React.FC = () => {
 
       {/* Archived Monthly Statements */}
       {user?.role === "admin" && statementArchives.filter((a) => a.type === "expenses").length > 0 && (
-        <div className="bg-card border border-border p-4 rounded-lg">
+        <div className="bg-card border border-border/80 p-5 rounded-2xl shadow-sm">
           <h3 className="text-xs font-bold text-muted uppercase tracking-wider mb-3 flex items-center gap-2">
             <Calendar size={14} className="text-accent" />
             Archived Monthly Expenses Statements (CSV)
@@ -432,7 +432,7 @@ export const ExpensesTab: React.FC = () => {
                 <button
                   key={archive._id}
                   onClick={() => downloadArchive(archive._id, archive.filename)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded border border-border bg-background hover:bg-accent/[0.04] hover:border-accent/30 text-xs font-bold transition-all"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border bg-background hover:bg-accent/[0.04] hover:border-accent/30 text-xs font-bold transition-all"
                 >
                   <DollarSign size={12} className="text-accent" />
                   {archive.filename.replace("expenses_statement_", "").replace(".csv", "").replace("_", " ")}
@@ -445,7 +445,7 @@ export const ExpensesTab: React.FC = () => {
       {/* Pie Chart & Overall summary layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Total Overall Expenses Panel */}
-        <div className="glass-panel p-6 rounded-lg flex flex-col justify-between border border-border h-[220px]">
+        <div className="bg-card border border-border/80 p-6 rounded-2xl shadow-sm flex flex-col justify-between h-[220px]">
           <div className="flex items-center gap-4">
             <div className="h-12 w-12 rounded-lg bg-red-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
               <DollarSign size={22} />
@@ -485,7 +485,7 @@ export const ExpensesTab: React.FC = () => {
         </div>
 
         {/* Category Breakdown Donut Chart Panel */}
-        <div className="glass-panel p-5 rounded-lg flex items-center justify-around border border-border lg:col-span-2 h-[220px]">
+        <div className="bg-card border border-border/80 p-5 rounded-2xl shadow-sm flex items-center justify-around lg:col-span-2 h-[220px]">
           <div className="flex flex-col justify-center">
             <span className="text-[10px] text-muted uppercase font-bold tracking-wider mb-2">Expense Categories</span>
             <div className="space-y-2">
@@ -539,7 +539,7 @@ export const ExpensesTab: React.FC = () => {
       </div>
 
       {/* Double Line Graph: Sales vs Expenses Trend */}
-      <div className="glass-panel p-5 rounded-lg border border-border relative overflow-hidden transition-all duration-300">
+      <div className="bg-card border border-border/80 p-5 rounded-2xl shadow-sm relative overflow-hidden transition-all duration-300">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
           <div>
             <h3 className="font-bold text-sm font-display flex items-center gap-1.5">
@@ -720,13 +720,13 @@ export const ExpensesTab: React.FC = () => {
       </div>
 
       {/* Filter and Table */}
-      <div className="glass-panel p-4 rounded-lg flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="bg-card border border-border/80 p-4 rounded-2xl shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="relative w-full md:w-80">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-3 py-2 pl-9 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-xs"
+            className="w-full px-3 py-2 pl-9 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs"
             placeholder="Search expenses by title or description..."
           />
           <Search className="absolute left-3 top-2.5 h-4.5 w-4.5 text-muted" />
@@ -737,7 +737,7 @@ export const ExpensesTab: React.FC = () => {
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="px-2 py-1.5 border border-border rounded bg-background focus:outline-none text-xs font-semibold"
+            className="px-2 py-1.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer"
           >
             <option value="all">All Categories</option>
             <option value="salary">Salary & Wages</option>
@@ -750,7 +750,7 @@ export const ExpensesTab: React.FC = () => {
       </div>
 
       {/* Expenses Table */}
-      <div className="glass-panel rounded-lg overflow-hidden border border-border">
+      <div className="bg-card border border-border/80 rounded-2xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
@@ -840,7 +840,7 @@ export const ExpensesTab: React.FC = () => {
       {/* Log Expense Modal */}
       {showModal && (
         <div className="fixed inset-0 mt-16 sm:mt-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="bg-card w-full max-w-md rounded-lg border border-border p-6 shadow-2xl animate-scale-up max-h-[calc(100vh-6rem)] sm:max-h-none overflow-y-auto">
+          <div className="bg-card w-full max-w-md rounded-2xl border border-border/80 p-6 shadow-2xl animate-scale-up max-h-[calc(100vh-6rem)] sm:max-h-none overflow-y-auto">
             <div className="flex items-center justify-between mb-4 border-b border-border pb-2">
               <h2 className="text-lg font-bold font-display flex items-center gap-2">
                 <DollarSign className="text-accent" />
@@ -869,7 +869,7 @@ export const ExpensesTab: React.FC = () => {
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm"
+                  className="w-full px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-sm"
                   placeholder="e.g. Purchase of Red Neon Flex Coils"
                   required
                 />
@@ -882,7 +882,7 @@ export const ExpensesTab: React.FC = () => {
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value as any)}
-                  className="w-full px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm font-semibold"
+                  className="w-full px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-sm font-semibold cursor-pointer"
                 >
                   <option value="salary">Salary & Wages</option>
                   <option value="rent">Rent & Utilities</option>
@@ -901,7 +901,7 @@ export const ExpensesTab: React.FC = () => {
                     type="number"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
-                    className="w-full px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm font-bold text-red-500"
+                    className="w-full px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-sm font-bold text-red-500"
                     placeholder="Amount in Rs."
                     min="0"
                     required
@@ -915,7 +915,7 @@ export const ExpensesTab: React.FC = () => {
                     type="date"
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm font-semibold"
+                    className="w-full px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-sm font-semibold cursor-pointer"
                     required
                   />
                 </div>
@@ -928,7 +928,7 @@ export const ExpensesTab: React.FC = () => {
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full h-20 px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm resize-none"
+                  className="w-full h-20 px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-sm resize-none"
                   placeholder="Invoice number, merchant, payment specifics..."
                 />
               </div>
@@ -937,14 +937,14 @@ export const ExpensesTab: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 border border-border rounded text-xs hover:bg-border transition-colors font-semibold"
+                  className="px-4 py-2 border border-border rounded-xl text-xs hover:bg-border transition-colors font-semibold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-4 py-2 bg-accent text-white rounded text-xs hover:bg-accent-dark transition-colors shadow-md shadow-accent/15 font-bold disabled:opacity-50"
+                  className="px-4 py-2 bg-accent text-white rounded-xl text-xs hover:bg-accent-dark transition-colors shadow-md shadow-accent/15 font-bold disabled:opacity-50"
                 >
                   {submitting ? "Saving..." : editingExpense ? "Update Expense" : "Log Expense"}
                 </button>
@@ -957,7 +957,7 @@ export const ExpensesTab: React.FC = () => {
       {/* View Expense Detail Modal */}
       {viewingExpense && (
         <div className="fixed inset-0 mt-16 sm:mt-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="bg-card w-full max-w-md rounded-lg border border-border p-6 shadow-2xl animate-scale-up max-h-[calc(100vh-6rem)] sm:max-h-none overflow-y-auto">
+          <div className="bg-card w-full max-w-md rounded-2xl border border-border/80 p-6 shadow-2xl animate-scale-up max-h-[calc(100vh-6rem)] sm:max-h-none overflow-y-auto">
             <div className="flex items-center justify-between mb-4 border-b border-border pb-2">
               <h2 className="text-lg font-bold font-display flex items-center gap-2">
                 <Eye className="text-accent" />
@@ -1021,14 +1021,14 @@ export const ExpensesTab: React.FC = () => {
                     handleOpenEditModal(viewingExpense);
                     setViewingExpense(null);
                   }}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-amber-600 text-white rounded text-xs hover:bg-amber-700 transition-colors shadow-sm font-bold"
+                  className="flex items-center gap-1.5 px-4 py-2 bg-amber-600 text-white rounded-xl text-xs hover:bg-amber-700 transition-colors shadow-sm font-bold"
                 >
                   <Edit2 size={13} /> Edit Expense
                 </button>
               )}
               <button
                 onClick={() => setViewingExpense(null)}
-                className="px-4 py-2 border border-border rounded text-xs hover:bg-border transition-colors font-semibold"
+                className="px-4 py-2 border border-border rounded-xl text-xs hover:bg-border transition-colors font-semibold"
               >
                 Close
               </button>

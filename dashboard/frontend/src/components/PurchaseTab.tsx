@@ -306,40 +306,40 @@ export const PurchaseTab: React.FC = () => {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <div className="glass-panel p-5 rounded-lg flex items-center gap-4 border border-border">
-          <div className="h-12 w-12 rounded-lg bg-accent flex items-center justify-center text-white flex-shrink-0 shadow-sm">
+        <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-6 flex items-center gap-4">
+          <div className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center text-white flex-shrink-0 shadow-sm">
             <Briefcase size={22} />
           </div>
           <div>
             <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Total Purchases Cost</span>
             <h3 className="text-xl font-extrabold mt-1 text-foreground font-display">Rs. {totalPurchases.toLocaleString()}</h3>
-            <p className="text-[9px] text-muted mt-0.5">{purchases.length} vendor invoices</p>
+            <p className="text-[9px] text-muted mt-0.5 font-medium">{purchases.length} vendor invoices</p>
           </div>
         </div>
 
-        <div className="glass-panel p-5 rounded-lg flex items-center gap-4 border border-border">
-          <div className="h-12 w-12 rounded-lg bg-red-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
+        <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-6 flex items-center gap-4">
+          <div className="h-12 w-12 rounded-xl bg-red-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
             <SlidersHorizontal size={22} className="rotate-90" />
           </div>
           <div>
             <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Outstanding Vendor Dues</span>
             <h3 className="text-xl font-extrabold mt-1 text-red-500 font-display">Rs. {pendingPurchases.toLocaleString()}</h3>
-            <p className="text-[9px] text-muted mt-0.5">{purchases.filter((p) => p.status === "pending").length} unpaid invoices</p>
+            <p className="text-[9px] text-muted mt-0.5 font-medium">{purchases.filter((p) => p.status === "pending").length} unpaid invoices</p>
           </div>
         </div>
       </div>
 
       {/* Filter and Table */}
-      <div className="glass-panel p-4 rounded-lg flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-5 flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="relative w-full md:w-80">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-3 py-2 pl-9 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-xs"
+            className="w-full px-4 py-2.5 pl-10 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs transition-all duration-200"
             placeholder="Search by supplier name or items description..."
           />
-          <SlidersHorizontal className="absolute left-3 top-2.5 h-4.5 w-4.5 text-muted" />
+          <SlidersHorizontal className="absolute left-3.5 top-3.5 h-4.5 w-4.5 text-muted" />
         </div>
 
         <div className="flex items-center gap-2 text-xs w-full md:w-auto">
@@ -347,7 +347,7 @@ export const PurchaseTab: React.FC = () => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-2 py-1.5 border border-border rounded bg-background focus:outline-none text-xs font-semibold"
+            className="px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer transition-all duration-200"
           >
             <option value="all">All Invoices</option>
             <option value="paid">Paid</option>
@@ -358,7 +358,7 @@ export const PurchaseTab: React.FC = () => {
       </div>
 
       {/* Purchases Table */}
-      <div className="glass-panel rounded-lg overflow-hidden border border-border">
+      <div className="bg-card border border-border/80 rounded-2xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
@@ -462,7 +462,7 @@ export const PurchaseTab: React.FC = () => {
                     {expandedPurchaseId === purchase._id && purchase.items && purchase.items.length > 0 && (
                       <tr className="bg-border/5">
                         <td colSpan={7} className="p-4 border-b border-border">
-                          <div className="glass-panel p-4 rounded border border-border/80 max-w-2xl animate-fade-in">
+                          <div className="bg-card border border-border/80 p-5 rounded-2xl shadow-sm max-w-2xl animate-fade-in">
                             <h4 className="font-bold text-[10px] uppercase text-muted tracking-wider mb-2.5">
                               Itemized Invoice Breakdown
                             </h4>

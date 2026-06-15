@@ -375,7 +375,7 @@ export const QuotationTab: React.FC = () => {
       `}</style>
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-card p-5 rounded-2xl border border-border/80 shadow-sm">
         <div>
           <h1 className="text-2xl font-bold font-display flex items-center gap-2">
             <FileText className="text-accent" />
@@ -404,7 +404,7 @@ export const QuotationTab: React.FC = () => {
             setFormError("");
             setShowCreateModal(true);
           }}
-          className="flex items-center justify-center gap-1.5 py-2.5 px-4 bg-accent hover:bg-accent-dark text-white rounded font-bold text-xs transition-all shadow-md shadow-accent/15 self-start sm:self-auto"
+          className="flex items-center justify-center gap-1.5 py-2.5 px-4 bg-accent hover:bg-accent-dark text-white rounded-xl font-bold text-xs transition-all shadow-md shadow-accent/15 self-start sm:self-auto"
         >
           <Plus size={16} />
           Create Quotation
@@ -413,7 +413,7 @@ export const QuotationTab: React.FC = () => {
 
       {/* Summary Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="glass-panel p-5 rounded-lg flex items-center gap-4 border border-border">
+        <div className="bg-card border border-border/80 shadow-sm p-5 rounded-2xl flex items-center gap-4">
           <div className="h-12 w-12 rounded-lg bg-accent flex items-center justify-center text-white flex-shrink-0 shadow-sm">
             <FileText size={22} />
           </div>
@@ -424,7 +424,7 @@ export const QuotationTab: React.FC = () => {
           </div>
         </div>
 
-        <div className="glass-panel p-5 rounded-lg flex items-center gap-4 border border-border">
+        <div className="bg-card border border-border/80 shadow-sm p-5 rounded-2xl flex items-center gap-4">
           <div className="h-12 w-12 rounded-lg bg-green-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
             <CheckCircle size={22} />
           </div>
@@ -437,7 +437,7 @@ export const QuotationTab: React.FC = () => {
           </div>
         </div>
 
-        <div className="glass-panel p-5 rounded-lg flex items-center gap-4 border border-border">
+        <div className="bg-card border border-border/80 shadow-sm p-5 rounded-2xl flex items-center gap-4">
           <div className="h-12 w-12 rounded-lg bg-blue-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
             <DollarSign size={22} />
           </div>
@@ -452,13 +452,13 @@ export const QuotationTab: React.FC = () => {
       </div>
 
       {/* Filter and Table */}
-      <div className="glass-panel p-4 rounded-lg flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="bg-card border border-border/80 p-4 rounded-2xl shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="relative w-full md:w-80">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-3 py-2 pl-9 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-xs"
+            className="w-full px-3 py-2 pl-9 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs"
             placeholder="Search by client or project name..."
           />
           <Search className="absolute left-3 top-2.5 h-4.5 w-4.5 text-muted" />
@@ -469,7 +469,7 @@ export const QuotationTab: React.FC = () => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-2 py-1.5 border border-border rounded bg-background focus:outline-none text-xs font-semibold"
+            className="px-2 py-1.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer"
           >
             <option value="all">All Quotations</option>
             <option value="draft">Draft</option>
@@ -481,7 +481,7 @@ export const QuotationTab: React.FC = () => {
       </div>
 
       {/* Quotation Table */}
-      <div className="glass-panel rounded-lg overflow-hidden border border-border">
+      <div className="bg-card border border-border/80 rounded-2xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
@@ -524,7 +524,7 @@ export const QuotationTab: React.FC = () => {
                       <select
                         value={quote.status}
                         onChange={(e) => handleStatusChange(quote._id, e.target.value as any)}
-                        className={`px-2 py-1 text-[9px] font-bold rounded border uppercase cursor-pointer focus:outline-none ${getStatusBadge(quote.status)}`}
+                        className={`px-2.5 py-1 text-[9px] font-bold rounded-xl border uppercase cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent/20 ${getStatusBadge(quote.status)}`}
                       >
                         <option value="draft">Draft</option>
                         <option value="sent">Sent</option>
@@ -566,7 +566,7 @@ export const QuotationTab: React.FC = () => {
       {/* Creation Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 mt-16 sm:mt-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="bg-card w-full max-w-4xl rounded-lg border border-border p-4 sm:p-6 shadow-2xl animate-scale-up my-4 max-h-[calc(100vh-6rem)] sm:max-h-[90vh] overflow-y-auto">
+          <div className="bg-card w-full max-w-4xl rounded-2xl border border-border/80 p-4 sm:p-6 shadow-2xl animate-scale-up my-4 max-h-[calc(100vh-6rem)] sm:max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4 border-b border-border pb-2">
               <h2 className="text-lg font-bold font-display flex items-center gap-2">
                 <FileText className="text-accent" />
@@ -588,7 +588,7 @@ export const QuotationTab: React.FC = () => {
 
             <form onSubmit={handleAddSubmit} className="space-y-6 text-left">
               {/* QUOTATION VOUCHER INFO */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-border/10 p-4 rounded border border-border/60">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-border/10 p-4 rounded-xl border border-border/60">
                 <div>
                   <label className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1">
                     Voucher Number *
@@ -597,7 +597,7 @@ export const QuotationTab: React.FC = () => {
                     type="text"
                     value={voucherNo}
                     onChange={(e) => setVoucherNo(e.target.value)}
-                    className="w-full px-3 py-1.5 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm font-bold"
+                    className="w-full px-3 py-1.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-sm font-bold"
                     placeholder="e.g. 001"
                     required
                   />
@@ -610,7 +610,7 @@ export const QuotationTab: React.FC = () => {
                     type="text"
                     value={voucherDate}
                     onChange={(e) => setVoucherDate(e.target.value)}
-                    className="w-full px-3 py-1.5 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm font-bold"
+                    className="w-full px-3 py-1.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-sm font-bold"
                     placeholder="e.g. 2083 Jes 13"
                     required
                   />
@@ -618,7 +618,7 @@ export const QuotationTab: React.FC = () => {
               </div>
 
               {/* CLIENT DETAILS */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-border/20 p-4 rounded border border-border">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-border/20 p-4 rounded-xl border border-border/80">
                 <div className="space-y-3">
                   <h3 className="text-xs font-bold text-accent uppercase tracking-wider border-b border-border/50 pb-1">
                     Client Details (Party)
@@ -631,7 +631,7 @@ export const QuotationTab: React.FC = () => {
                       type="text"
                       value={clientName}
                       onChange={(e) => setClientName(e.target.value)}
-                      className="w-full px-3 py-1.5 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm"
+                      className="w-full px-3 py-1.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-sm"
                       placeholder="e.g. Ram Kumar"
                       required
                     />
@@ -645,7 +645,7 @@ export const QuotationTab: React.FC = () => {
                         type="text"
                         value={clientContact}
                         onChange={(e) => setClientContact(e.target.value)}
-                        className="w-full px-3 py-1.5 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm"
+                        className="w-full px-3 py-1.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-sm"
                         placeholder="e.g. 984XXXXXXX"
                       />
                     </div>
@@ -657,7 +657,7 @@ export const QuotationTab: React.FC = () => {
                         type="email"
                         value={clientEmail}
                         onChange={(e) => setClientEmail(e.target.value)}
-                        className="w-full px-3 py-1.5 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm"
+                        className="w-full px-3 py-1.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-sm"
                         placeholder="client@mail.com"
                       />
                     </div>
@@ -676,7 +676,7 @@ export const QuotationTab: React.FC = () => {
                       type="text"
                       value={projectName}
                       onChange={(e) => setProjectName(e.target.value)}
-                      className="w-full px-3 py-1.5 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm"
+                      className="w-full px-3 py-1.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-sm"
                       placeholder="e.g. LED Acrylic Sign Board for Cafe"
                       required
                     />
@@ -688,7 +688,7 @@ export const QuotationTab: React.FC = () => {
                     <select
                       value={status}
                       onChange={(e) => setStatus(e.target.value as any)}
-                      className="w-full px-3 py-1.5 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm font-semibold"
+                      className="w-full px-3 py-1.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-sm font-semibold cursor-pointer"
                     >
                       <option value="draft">Draft</option>
                       <option value="sent">Sent to Client</option>
@@ -717,14 +717,14 @@ export const QuotationTab: React.FC = () => {
 
                 <div className="space-y-2.5 max-h-[220px] overflow-y-auto pr-1">
                   {items.map((item, idx) => (
-                    <div key={idx} className="grid grid-cols-12 gap-2 items-center bg-card border border-border p-2.5 rounded">
+                    <div key={idx} className="grid grid-cols-12 gap-2 items-center bg-card border border-border/80 p-2.5 rounded-xl">
                       <div className="col-span-12 sm:col-span-5">
                         <label className="block text-[8px] font-bold text-muted uppercase mb-0.5">Description *</label>
                         <input
                           type="text"
                           value={item.description}
                           onChange={(e) => handleItemRowChange(idx, "description", e.target.value)}
-                          className="w-full px-2 py-1.5 border border-border rounded bg-background focus:outline-none text-xs font-semibold"
+                          className="w-full px-2 py-1.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold"
                           placeholder="e.g. Golden SS Logo with lights"
                           required
                         />
@@ -735,7 +735,7 @@ export const QuotationTab: React.FC = () => {
                           type="text"
                           value={item.size || ""}
                           onChange={(e) => handleItemRowChange(idx, "size", e.target.value)}
-                          className="w-full px-2 py-1.5 border border-border rounded bg-background focus:outline-none text-xs font-semibold"
+                          className="w-full px-2 py-1.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold"
                           placeholder="e.g. 4' x 4'"
                         />
                       </div>
@@ -745,7 +745,7 @@ export const QuotationTab: React.FC = () => {
                           type="number"
                           value={item.quantity}
                           onChange={(e) => handleItemRowChange(idx, "quantity", Number(e.target.value))}
-                          className="w-full px-2 py-1.5 border border-border rounded bg-background focus:outline-none text-xs text-center font-bold"
+                          className="w-full px-2 py-1.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs text-center font-bold"
                           min="1"
                           required
                         />
@@ -756,7 +756,7 @@ export const QuotationTab: React.FC = () => {
                           type="number"
                           value={item.rate}
                           onChange={(e) => handleItemRowChange(idx, "rate", Number(e.target.value))}
-                          className="w-full px-2 py-1.5 border border-border rounded bg-background focus:outline-none text-xs text-right font-bold"
+                          className="w-full px-2 py-1.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs text-right font-bold"
                           min="0"
                           required
                         />
@@ -772,7 +772,7 @@ export const QuotationTab: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => handleRemoveItemRow(idx)}
-                              className="p-1.5 text-white bg-red-600 hover:bg-red-700 rounded shadow-sm"
+                              className="p-1.5 text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-sm"
                               title="Remove item"
                             >
                               <X size={12} />
@@ -796,7 +796,7 @@ export const QuotationTab: React.FC = () => {
                       type="text"
                       value={amountInWords}
                       onChange={(e) => setAmountInWords(e.target.value)}
-                      className="w-full px-3 py-1.5 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-xs italic font-semibold text-accent"
+                      className="w-full px-3 py-1.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs italic font-semibold text-accent"
                       placeholder="Amount in Words"
                     />
                   </div>
@@ -807,14 +807,14 @@ export const QuotationTab: React.FC = () => {
                     <textarea
                       value={remarks}
                       onChange={(e) => setRemarks(e.target.value)}
-                      className="w-full h-16 px-3 py-1.5 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-xs resize-none font-semibold text-muted"
+                      className="w-full h-16 px-3 py-1.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs resize-none font-semibold text-muted"
                       placeholder="e.g. Delivery and fitting charge is not included"
                     />
                   </div>
                 </div>
 
                 <div className="flex justify-end items-start">
-                  <div className="w-72 bg-border/20 p-4 rounded border border-border space-y-2 text-xs">
+                  <div className="w-72 bg-border/20 p-4 rounded-xl border border-border/80 space-y-2 text-xs">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Subtotal:</span>
                       <span className="font-bold text-foreground">Rs. {subtotal.toLocaleString()}</span>
@@ -826,7 +826,7 @@ export const QuotationTab: React.FC = () => {
                         type="number"
                         value={discount}
                         onChange={(e) => setDiscount(e.target.value)}
-                        className="w-24 px-2 py-0.5 border border-border rounded bg-background text-right font-bold focus:ring-1 focus:ring-accent text-xs"
+                        className="w-24 px-2 py-1 border border-border rounded-xl bg-background text-right font-bold focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs"
                         min="0"
                       />
                     </div>
@@ -837,7 +837,7 @@ export const QuotationTab: React.FC = () => {
                         type="number"
                         value={tax}
                         onChange={(e) => setTax(e.target.value)}
-                        className="w-24 px-2 py-0.5 border border-border rounded bg-background text-right font-bold focus:ring-1 focus:ring-accent text-xs"
+                        className="w-24 px-2 py-1 border border-border rounded-xl bg-background text-right font-bold focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs"
                         min="0"
                       />
                     </div>
@@ -854,14 +854,14 @@ export const QuotationTab: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="px-5 py-2 border border-border rounded text-xs hover:bg-border transition-colors font-semibold"
+                  className="px-5 py-2 border border-border rounded-xl text-xs hover:bg-border transition-colors font-semibold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 bg-accent text-white rounded text-xs hover:bg-accent-dark transition-colors shadow-md shadow-accent/15 font-bold disabled:opacity-50"
+                  className="px-5 py-2 bg-accent text-white rounded-xl text-xs hover:bg-accent-dark transition-colors shadow-md shadow-accent/15 font-bold disabled:opacity-50"
                 >
                   {submitting ? "Saving Proposal..." : "Generate Proposal"}
                 </button>
@@ -874,7 +874,7 @@ export const QuotationTab: React.FC = () => {
       {/* Invoice Estimations Printable PDF Preview Modal */}
       {selectedQuotation && (
         <div className="fixed inset-0 mt-16 sm:mt-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="bg-card w-full max-w-3xl rounded-lg border border-border p-3 sm:p-6 shadow-2xl animate-scale-up my-4 max-h-[calc(100vh-6rem)] sm:max-h-[95vh] overflow-y-auto">
+          <div className="bg-card w-full max-w-3xl rounded-2xl border border-border/80 p-3 sm:p-6 shadow-2xl animate-scale-up my-4 max-h-[calc(100vh-6rem)] sm:max-h-[95vh] overflow-y-auto">
             
             {/* Modal Controls */}
             <div className="flex items-center justify-between mb-4 border-b border-border pb-2 screen-only">
@@ -1020,7 +1020,7 @@ export const QuotationTab: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setSelectedQuotation(null)}
-                className="px-5 py-2 bg-zinc-600 hover:bg-zinc-700 text-white rounded text-xs font-bold transition-all shadow shadow-zinc-500/10"
+                className="px-5 py-2 bg-zinc-600 hover:bg-zinc-700 text-white rounded-xl text-xs font-bold transition-all shadow shadow-zinc-500/10"
               >
                 Close Preview
               </button>

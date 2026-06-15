@@ -208,51 +208,51 @@ export const InventoryTab: React.FC = () => {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="glass-panel p-5 rounded-lg flex items-center gap-4 border border-border">
-          <div className="h-12 w-12 rounded-lg bg-blue-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
+        <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-6 flex items-center gap-4">
+          <div className="h-12 w-12 rounded-xl bg-blue-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
             <Package size={22} />
           </div>
           <div>
             <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Registered Materials</span>
             <h3 className="text-lg font-bold mt-1 text-foreground font-display">{totalItems} items</h3>
-            <p className="text-[9px] text-muted mt-0.5">Active items in inventory</p>
+            <p className="text-[9px] text-muted mt-0.5 font-medium">Active items in inventory</p>
           </div>
         </div>
 
-        <div className="glass-panel p-5 rounded-lg flex items-center gap-4 border border-border">
-          <div className="h-12 w-12 rounded-lg bg-amber-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
+        <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-6 flex items-center gap-4">
+          <div className="h-12 w-12 rounded-xl bg-amber-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
             <SlidersHorizontal size={22} />
           </div>
           <div>
             <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Low Stock Alerts</span>
             <h3 className="text-lg font-bold mt-1 text-amber-500 font-display">{lowStockItems} items</h3>
-            <p className="text-[9px] text-muted mt-0.5">Need replenishment soon</p>
+            <p className="text-[9px] text-muted mt-0.5 font-medium">Need replenishment soon</p>
           </div>
         </div>
 
-        <div className="glass-panel p-5 rounded-lg flex items-center gap-4 border border-border">
-          <div className="h-12 w-12 rounded-lg bg-red-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
+        <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-6 flex items-center gap-4">
+          <div className="h-12 w-12 rounded-xl bg-red-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
             <Minus size={22} />
           </div>
           <div>
             <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Out of Stock</span>
             <h3 className="text-lg font-bold mt-1 text-red-500 font-display">{outOfStockItems} items</h3>
-            <p className="text-[9px] text-muted mt-0.5">Production blocker risk</p>
+            <p className="text-[9px] text-muted mt-0.5 font-medium">Production blocker risk</p>
           </div>
         </div>
       </div>
 
       {/* Filter and Table */}
-      <div className="glass-panel p-4 rounded-lg flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-5 flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="relative w-full md:w-80">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-3 py-2 pl-9 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-xs"
+            className="w-full px-4 py-2.5 pl-10 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs transition-all duration-200"
             placeholder="Search materials by name or category..."
           />
-          <Search className="absolute left-3 top-2.5 h-4.5 w-4.5 text-muted" />
+          <Search className="absolute left-3.5 top-3.5 h-4.5 w-4.5 text-muted" />
         </div>
 
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto text-xs font-semibold">
@@ -262,7 +262,7 @@ export const InventoryTab: React.FC = () => {
             <select
               value={selectedCategoryFilter}
               onChange={(e) => setSelectedCategoryFilter(e.target.value)}
-              className="px-2 py-1.5 border border-border rounded bg-background focus:outline-none text-xs font-semibold"
+              className="px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer transition-all duration-200"
             >
               <option value="all">All Categories</option>
               {existingCategories.map((cat) => (
@@ -279,7 +279,7 @@ export const InventoryTab: React.FC = () => {
             <select
               value={stockFilter}
               onChange={(e) => setStockFilter(e.target.value)}
-              className="px-2 py-1.5 border border-border rounded bg-background focus:outline-none text-xs font-semibold"
+              className="px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer transition-all duration-200"
             >
               <option value="all">All Statuses</option>
               <option value="in">In Stock Only</option>
@@ -291,7 +291,7 @@ export const InventoryTab: React.FC = () => {
       </div>
 
       {/* Inventory List Table */}
-      <div className="glass-panel rounded-lg overflow-hidden border border-border">
+      <div className="bg-card border border-border/80 rounded-2xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>

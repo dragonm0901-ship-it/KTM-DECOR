@@ -298,16 +298,16 @@ export const OrdersTab: React.FC = () => {
       </div>
 
       {/* Filter Bar */}
-      <div className="glass-panel p-4 rounded-lg flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-5 flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="relative w-full md:w-80">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-3 py-2 pl-9 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-xs"
+            className="w-full px-4 py-2.5 pl-10 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs transition-all duration-200"
             placeholder="Search by customer, address, product, or assignee..."
           />
-          <Search className="absolute left-3 top-2.5 h-4.5 w-4.5 text-muted" />
+          <Search className="absolute left-3.5 top-3.5 h-4.5 w-4.5 text-muted" />
         </div>
 
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
@@ -317,7 +317,7 @@ export const OrdersTab: React.FC = () => {
             <select
               value={sourceFilter}
               onChange={(e) => setSourceFilter(e.target.value)}
-              className="px-2 py-1.5 border border-border rounded bg-background focus:outline-none text-xs font-semibold"
+              className="px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer transition-all duration-200"
             >
               <option value="all">All Sources</option>
               <option value="tiktok">Tiktok</option>
@@ -333,7 +333,7 @@ export const OrdersTab: React.FC = () => {
             <select
               value={stageFilter}
               onChange={(e) => setStageFilter(e.target.value)}
-              className="px-2 py-1.5 border border-border rounded bg-background focus:outline-none text-xs font-semibold"
+              className="px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer transition-all duration-200"
             >
               <option value="all">All Stages</option>
               <option value="design">Design</option>
@@ -347,7 +347,7 @@ export const OrdersTab: React.FC = () => {
       </div>
 
       {/* Table List */}
-      <div className="glass-panel rounded-lg overflow-hidden border border-border">
+      <div className="bg-card border border-border/80 rounded-2xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>

@@ -205,19 +205,19 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
       </div>
 
       {/* FILTER BAR */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-5 flex flex-col sm:flex-row gap-4">
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search by task title or assignee..."
-          className="flex-1 px-4 py-2 border border-border rounded-md bg-card focus:outline-none focus:ring-1 focus:ring-accent text-sm"
+          className="flex-1 px-4 py-2.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs transition-all duration-200"
         />
 
         <select
           value={filterPriority}
           onChange={(e) => setFilterPriority(e.target.value)}
-          className="px-4 py-2 border border-border rounded-md bg-card focus:outline-none focus:ring-1 focus:ring-accent text-sm font-semibold cursor-pointer"
+          className="px-4 py-2.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer transition-all duration-200"
         >
           <option value="all">All Priorities</option>
           <option value="high">High Priority</option>
@@ -229,7 +229,7 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
           <select
             value={showAllStaffTasks ? "all" : "mine"}
             onChange={(e) => setShowAllStaffTasks(e.target.value === "all")}
-            className="px-4 py-2 border border-border rounded-md bg-card focus:outline-none focus:ring-1 focus:ring-accent text-sm font-semibold cursor-pointer"
+            className="px-4 py-2.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer transition-all duration-200"
           >
             <option value="mine">My Tasks ({activeStaffProfile?.name.split(" ")[0] || "Select Profile"})</option>
             <option value="all">All Staff Tasks</option>
@@ -247,7 +247,7 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
                 key={col.id}
                 onDragOver={onDragOver}
                 onDrop={(e) => onDrop(e, col.id)}
-                className={`rounded-lg p-4 flex flex-col h-[550px] md:h-[calc(100vh-270px)] min-h-[400px] border border-border/60 ${col.bg} board-column w-[88vw] md:w-auto shrink-0 snap-center`}
+                className={`border border-border/80 rounded-2xl shadow-sm p-5 flex flex-col h-[550px] md:h-[calc(100vh-270px)] min-h-[400px] board-column w-[88vw] md:w-auto shrink-0 snap-center ${col.bg}`}
                 style={{
                   contentVisibility: "auto",
                   containIntrinsicSize: "auto 300px auto 600px"
@@ -406,7 +406,7 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
         </div>
       ) : (
         /* DETAILED LIST VIEW */
-        <div className="glass-panel rounded-lg overflow-hidden border border-border shadow-md">
+        <div className="bg-card border border-border/80 rounded-2xl shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm border-collapse">
               <thead>

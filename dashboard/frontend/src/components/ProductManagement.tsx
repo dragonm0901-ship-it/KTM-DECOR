@@ -288,10 +288,9 @@ export const ProductManagement: React.FC = () => {
       </div>
 
       {/* FILTER CONTROLS BAR */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Search */}
         <div className="relative group">
-          <Search className="absolute left-3 top-2.5 h-4.5 w-4.5 text-muted group-focus-within:text-accent transition-colors" />
           <input
             type="text"
             placeholder="Search catalog products..."
@@ -300,8 +299,9 @@ export const ProductManagement: React.FC = () => {
               setSearchQuery(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-full pl-10 pr-4 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm"
+            className="w-full pl-10 pr-4 py-2.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs transition-all duration-200"
           />
+          <Search className="absolute left-3.5 top-3.5 h-4.5 w-4.5 text-muted group-focus-within:text-accent transition-colors" />
         </div>
 
         {/* Category Filter */}
@@ -311,7 +311,7 @@ export const ProductManagement: React.FC = () => {
             setSelectedCategory(e.target.value);
             setCurrentPage(1);
           }}
-          className="px-3 py-2 border border-border bg-card rounded text-sm focus:outline-none focus:ring-1 focus:ring-accent text-foreground font-semibold"
+          className="px-3 py-2 border border-border bg-background rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-foreground font-semibold cursor-pointer transition-all duration-200"
         >
           <option value="All">All Categories</option>
           {CATEGORIES.map((cat) => (
@@ -328,7 +328,7 @@ export const ProductManagement: React.FC = () => {
             setSelectedStock(e.target.value);
             setCurrentPage(1);
           }}
-          className="px-3 py-2 border border-border bg-card rounded text-sm focus:outline-none focus:ring-1 focus:ring-accent text-foreground font-semibold"
+          className="px-3 py-2 border border-border bg-background rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-foreground font-semibold cursor-pointer transition-all duration-200"
         >
           <option value="All">All Stock Statuses</option>
           <option value="In Stock">In Stock</option>
@@ -338,7 +338,7 @@ export const ProductManagement: React.FC = () => {
       </div>
 
       {/* CATALOG DATA TABLE */}
-      <div className="glass-panel rounded-lg overflow-x-auto border border-border">
+      <div className="bg-card border border-border/80 rounded-2xl shadow-sm overflow-hidden overflow-x-auto">
         {paginatedProducts.length === 0 ? (
           <div className="p-12 text-center text-muted">
             <ImageIcon className="mx-auto text-muted/30 mb-3" size={48} />

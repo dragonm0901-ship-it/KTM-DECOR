@@ -217,7 +217,7 @@ export const SalesTab: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-card p-4 rounded-lg border border-border">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-card p-5 rounded-2xl border border-border/80 shadow-sm">
         <div>
           <h1 className="text-2xl font-bold font-display flex items-center gap-2">
             <TrendingUp className="text-accent" />
@@ -229,11 +229,11 @@ export const SalesTab: React.FC = () => {
         </div>
 
         {/* Quick Statement Download */}
-        <div className="flex items-center gap-2 self-start md:self-auto bg-border/20 p-2 rounded-md border border-border/40">
+        <div className="flex items-center gap-2 self-start md:self-auto bg-border/20 p-2 rounded-xl border border-border/40">
           <select
             value={exportMonth}
             onChange={(e) => setExportMonth(e.target.value)}
-            className="bg-card border border-border text-foreground text-[11px] rounded px-2 py-1.5 focus:outline-none focus:border-accent font-semibold"
+            className="bg-card border border-border text-foreground text-[11px] rounded-xl px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent font-semibold cursor-pointer"
           >
             <option value="all">All Time</option>
             <option value="1">Jan</option>
@@ -252,7 +252,7 @@ export const SalesTab: React.FC = () => {
           <select
             value={exportYear}
             onChange={(e) => setExportYear(e.target.value)}
-            className="bg-card border border-border text-foreground text-[11px] rounded px-2 py-1.5 focus:outline-none focus:border-accent font-semibold"
+            className="bg-card border border-border text-foreground text-[11px] rounded-xl px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent font-semibold cursor-pointer"
           >
             <option value="2025">2025</option>
             <option value="2026">2026</option>
@@ -261,7 +261,7 @@ export const SalesTab: React.FC = () => {
           <button
             onClick={handleExportClick}
             disabled={exporting}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-accent text-white text-[11px] rounded font-bold hover:bg-accent-dark transition-all disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-accent text-white text-[11px] rounded-xl font-bold hover:bg-accent-dark transition-all disabled:opacity-50"
           >
             {exporting ? "Exporting..." : "Export CSV"}
           </button>
@@ -270,7 +270,7 @@ export const SalesTab: React.FC = () => {
 
       {/* Archived Monthly Statements */}
       {user?.role === "admin" && statementArchives.filter((a) => a.type === "sales").length > 0 && (
-        <div className="bg-card border border-border p-4 rounded-lg">
+        <div className="bg-card border border-border/80 p-5 rounded-2xl shadow-sm">
           <h3 className="text-xs font-bold text-muted uppercase tracking-wider mb-3 flex items-center gap-2">
             <Calendar size={14} className="text-accent" />
             Archived Monthly Sales Statements (CSV)
@@ -282,7 +282,7 @@ export const SalesTab: React.FC = () => {
                 <button
                   key={archive._id}
                   onClick={() => downloadArchive(archive._id, archive.filename)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded border border-border bg-background hover:bg-accent/[0.04] hover:border-accent/30 text-xs font-bold transition-all"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border bg-background hover:bg-accent/[0.04] hover:border-accent/30 text-xs font-bold transition-all"
                 >
                   <TrendingUp size={12} className="text-accent" />
                   {archive.filename.replace("sales_statement_", "").replace(".csv", "").replace("_", " ")}
@@ -294,7 +294,7 @@ export const SalesTab: React.FC = () => {
 
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <div className="glass-panel p-5 rounded-lg flex items-center gap-4 border border-border bg-green-600/[0.02] border-green-500/20">
+        <div className="bg-card border border-border/80 shadow-sm p-5 rounded-2xl flex items-center gap-4 bg-green-600/[0.02] border-green-500/20">
           <div className="h-12 w-12 rounded-lg bg-green-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
             <TrendingUp size={22} />
           </div>
@@ -305,7 +305,7 @@ export const SalesTab: React.FC = () => {
           </div>
         </div>
 
-        <div className="glass-panel p-5 rounded-lg flex items-center gap-4 border border-border bg-red-600/[0.02] border-red-500/20">
+        <div className="bg-card border border-border/80 shadow-sm p-5 rounded-2xl flex items-center gap-4 bg-red-600/[0.02] border-red-500/20">
           <div className="h-12 w-12 rounded-lg bg-red-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
             <DollarSign size={22} className="text-white" />
           </div>
@@ -318,7 +318,7 @@ export const SalesTab: React.FC = () => {
       </div>
 
       {/* Sales Growth Trend Graph */}
-      <div className="glass-panel p-5 rounded-lg border border-border relative overflow-hidden transition-all duration-300">
+      <div className="bg-card border border-border/80 p-5 rounded-2xl shadow-sm relative overflow-hidden transition-all duration-300">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
           <div>
             <h3 className="font-bold text-sm font-display flex items-center gap-1.5">
@@ -487,7 +487,7 @@ export const SalesTab: React.FC = () => {
 
       {/* Completed Sign Orders Awaiting Approval */}
       {pendingApprovalOrders.length > 0 && (
-        <div className="glass-panel p-5 rounded-lg border border-amber-500/20 bg-amber-500/[0.02] space-y-4">
+        <div className="bg-card border border-border/80 p-5 rounded-2xl shadow-sm border-amber-500/20 bg-amber-500/[0.02] space-y-4">
           <div className="flex items-center justify-between border-b border-border/60 pb-2.5">
             <h3 className="font-bold text-sm font-display text-amber-500 flex items-center gap-2">
               <Package size={16} />
@@ -502,7 +502,7 @@ export const SalesTab: React.FC = () => {
             {pendingApprovalOrders.map((order) => (
               <div
                 key={order._id}
-                className="bg-card border border-border p-4 rounded-lg flex flex-col justify-between gap-3 shadow-sm hover:border-amber-500/30 transition-all"
+                className="bg-card border border-border/80 p-4 rounded-2xl flex flex-col justify-between gap-3 shadow-sm hover:border-amber-500/30 transition-all"
               >
                 <div className="flex justify-between items-start gap-3">
                   <div>
@@ -541,7 +541,7 @@ export const SalesTab: React.FC = () => {
                           }
                         }
                       }}
-                      className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded text-[10px] font-bold transition-all flex items-center gap-1 shadow-sm shadow-green-500/10"
+                      className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-xl text-[10px] font-bold transition-all flex items-center gap-1 shadow-sm shadow-green-500/10"
                     >
                       <CheckCircle size={10} />
                       Approve & Log Sale
@@ -560,13 +560,13 @@ export const SalesTab: React.FC = () => {
       )}
 
       {/* Filter and Ledger */}
-      <div className="glass-panel p-4 rounded-lg flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="bg-card border border-border/80 p-4 rounded-2xl shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="relative w-full md:w-80">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-3 py-2 pl-9 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-xs"
+            className="w-full px-3 py-2 pl-9 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs"
             placeholder="Search by client or product..."
           />
           <Search className="absolute left-3 top-2.5 h-4.5 w-4.5 text-muted" />
@@ -579,7 +579,7 @@ export const SalesTab: React.FC = () => {
             <select
               value={methodFilter}
               onChange={(e) => setMethodFilter(e.target.value)}
-              className="px-2 py-1.5 border border-border rounded bg-background focus:outline-none text-xs font-semibold"
+              className="px-2.5 py-1.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer"
             >
               <option value="all">All Methods</option>
               <option value="cash">Cash</option>
@@ -595,7 +595,7 @@ export const SalesTab: React.FC = () => {
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="px-2 py-1.5 border border-border rounded bg-background focus:outline-none text-xs font-semibold"
+              className="px-2.5 py-1.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer"
             >
               <option value="all">All Sources</option>
               <option value="order">Sign Orders</option>
@@ -606,7 +606,7 @@ export const SalesTab: React.FC = () => {
       </div>
 
       {/* Unified Sales Ledger Table */}
-      <div className="glass-panel rounded-lg overflow-hidden border border-border">
+      <div className="bg-card border border-border/80 rounded-2xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>

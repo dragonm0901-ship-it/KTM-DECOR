@@ -162,7 +162,7 @@ export const OrderProgressTab: React.FC = () => {
           return (
             <div
               key={stage.id}
-              className="glass-panel p-4 rounded-lg flex flex-col min-h-[500px] bg-card/60"
+              className="bg-card border border-border/80 p-5 rounded-2xl shadow-sm flex flex-col min-h-[500px]"
             >
               {/* Stage Header */}
               <div className="border-b border-border pb-3 mb-4">
@@ -175,7 +175,7 @@ export const OrderProgressTab: React.FC = () => {
               {/* Cards Container */}
               <div className="flex-1 overflow-y-auto space-y-3 pr-1 max-h-[600px]">
                 {stageOrders.length === 0 ? (
-                  <div className="h-full border border-dashed border-border/50 rounded-lg flex flex-col items-center justify-center text-center p-6 text-muted">
+                  <div className="h-full border border-dashed border-border/50 rounded-2xl flex flex-col items-center justify-center text-center p-6 text-muted">
                     <Package size={24} className="opacity-35 mb-1.5" />
                     <span className="text-[10px] uppercase font-bold tracking-wide">Empty Column</span>
                   </div>

@@ -153,7 +153,7 @@ export const FieldNotes: React.FC<FieldNotesProps> = ({
   return (
     <div className="space-y-6">
       {/* HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-card p-5 rounded-2xl border border-border/80 shadow-sm">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold font-display flex items-center gap-2">
             <FileText className="text-accent" />
@@ -168,7 +168,7 @@ export const FieldNotes: React.FC<FieldNotesProps> = ({
         {user?.role === "staff" && (
           <button
             onClick={handleOpenCreate}
-            className="flex items-center gap-1.5 px-4 py-2 bg-accent text-white rounded font-semibold text-sm hover:bg-accent-dark transition-colors shadow-md shadow-accent/15 self-start sm:self-auto"
+            className="flex items-center gap-1.5 px-4 py-2 bg-accent text-white rounded-xl font-semibold text-sm hover:bg-accent-dark transition-colors shadow-md shadow-accent/15 self-start sm:self-auto"
           >
             <Plus size={16} />
             Create Field Note
@@ -177,7 +177,7 @@ export const FieldNotes: React.FC<FieldNotesProps> = ({
       </div>
 
       {/* SEARCH & FILTERS BAR */}
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between border-b border-border pb-4">
+      <div className="bg-card border border-border/80 p-4 rounded-2xl shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
         {/* Search */}
         <div className="relative w-full md:max-w-md">
           <Search className="absolute left-3 top-2.5 text-muted" size={18} />
@@ -186,7 +186,7 @@ export const FieldNotes: React.FC<FieldNotesProps> = ({
             placeholder="Search field notes by title, district, town, description..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm"
+            className="w-full pl-10 pr-4 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-sm"
           />
         </div>
 
@@ -196,7 +196,7 @@ export const FieldNotes: React.FC<FieldNotesProps> = ({
           <select
             value={districtFilter}
             onChange={(e) => setDistrictFilter(e.target.value)}
-            className="px-3 py-1.5 border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-accent text-xs font-semibold cursor-pointer w-full md:w-48"
+            className="px-3 py-1.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer w-full md:w-48"
           >
             <option value="all">All Districts</option>
             {NEPAL_DISTRICTS.map((d) => (
@@ -210,7 +210,7 @@ export const FieldNotes: React.FC<FieldNotesProps> = ({
 
       {/* CARDS LISTING */}
       {filteredNotes.length === 0 ? (
-        <div className="text-center p-12 glass-panel rounded-lg text-muted text-sm border border-dashed border-border/80">
+        <div className="text-center p-12 bg-card rounded-2xl text-muted text-sm border border-dashed border-border/80 shadow-sm animate-fade-in">
           <FileText size={48} className="opacity-25 mx-auto mb-3" />
           No field notes logged for the selected criteria.
         </div>
@@ -223,12 +223,12 @@ export const FieldNotes: React.FC<FieldNotesProps> = ({
             return (
               <div
                 key={note._id}
-                className="glass-panel bg-card/40 border border-border p-5 rounded-lg shadow-sm flex flex-col justify-between space-y-4 hover:border-accent/40 transition-all group"
+                className="bg-card border border-border/80 p-5 rounded-2xl shadow-sm flex flex-col justify-between space-y-4 hover:border-accent/40 transition-all group"
               >
                 <div className="space-y-3">
                   {/* Fitting Spot Image */}
                   {note.fittingSpotImageUrl ? (
-                    <div className="h-44 rounded-md border border-border overflow-hidden bg-background relative">
+                    <div className="h-44 rounded-xl border border-border/60 overflow-hidden bg-background relative">
                       <img
                         src={note.fittingSpotImageUrl}
                         alt={note.title}
@@ -236,7 +236,7 @@ export const FieldNotes: React.FC<FieldNotesProps> = ({
                       />
                     </div>
                   ) : (
-                    <div className="h-44 rounded-md border border-dashed border-border bg-background/50 flex flex-col items-center justify-center text-center p-4 text-muted">
+                    <div className="h-44 rounded-xl border border-dashed border-border/80 bg-background/50 flex flex-col items-center justify-center text-center p-4 text-muted">
                       <Upload size={24} className="opacity-20 mb-1.5" />
                       <span className="text-[10px] font-bold uppercase tracking-wider">No Site Mockup Image</span>
                     </div>
@@ -292,7 +292,7 @@ export const FieldNotes: React.FC<FieldNotesProps> = ({
                             deleteFieldNote(note._id);
                           }
                         }}
-                        className="p-1.5 bg-red-600 hover:bg-red-700 text-white rounded transition-colors shadow-sm"
+                        className="p-1.5 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors shadow-sm"
                         title="Delete to Bin"
                       >
                         <Trash2 size={13} />
@@ -307,7 +307,7 @@ export const FieldNotes: React.FC<FieldNotesProps> = ({
                           setEditingCampaign(note);
                           setShowModal(true);
                         }}
-                        className="text-xs text-accent hover:text-accent-dark bg-accent/5 hover:bg-accent/10 border border-accent/25 px-3 py-1.5 rounded font-semibold transition-colors uppercase tracking-wider"
+                        className="text-xs text-accent hover:text-accent-dark bg-accent/5 hover:bg-accent/10 border border-accent/25 px-3 py-1.5 rounded-xl font-semibold transition-colors uppercase tracking-wider"
                       >
                         Edit Details
                       </button>
@@ -323,7 +323,7 @@ export const FieldNotes: React.FC<FieldNotesProps> = ({
       {/* CREATE/EDIT MODAL */}
       {showModal && (
         <div className="fixed inset-0 mt-16 sm:mt-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="bg-card w-full max-w-lg rounded-lg border border-border p-6 shadow-2xl animate-scale-up overflow-y-auto max-h-[calc(100vh-6rem)] sm:max-h-[90vh]">
+          <div className="bg-card w-full max-w-lg rounded-2xl border border-border/80 p-6 shadow-2xl animate-scale-up overflow-y-auto max-h-[calc(100vh-6rem)] sm:max-h-[90vh]">
             <div className="flex items-center justify-between mb-4 border-b border-border pb-2">
               <h2 className="text-lg font-bold font-display flex items-center gap-2">
                 <FileText className="text-accent" size={20} />
@@ -353,7 +353,7 @@ export const FieldNotes: React.FC<FieldNotesProps> = ({
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm"
+                  className="w-full px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-sm"
                   placeholder="e.g. Lobby neon sign placement mock"
                   required
                 />
@@ -375,12 +375,12 @@ export const FieldNotes: React.FC<FieldNotesProps> = ({
                       setDistrict(e.target.value);
                       setShowDistrictDropdown(true);
                     }}
-                    className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm"
+                    className="w-full px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-sm"
                     placeholder="Search Nepal district..."
                     required
                   />
                   {showDistrictDropdown && filteredDistricts.length > 0 && (
-                    <div className="absolute left-0 right-0 z-50 mt-1 max-h-40 overflow-y-auto bg-card border border-border rounded shadow-lg text-sm divide-y divide-border">
+                    <div className="absolute left-0 right-0 z-50 mt-1 max-h-40 overflow-y-auto bg-card border border-border/80 rounded-xl shadow-lg text-sm divide-y divide-border">
                       {filteredDistricts.map((d) => (
                         <div
                           key={d}
@@ -407,7 +407,7 @@ export const FieldNotes: React.FC<FieldNotesProps> = ({
                     type="text"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
-                    className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm"
+                    className="w-full px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-sm"
                     placeholder="e.g. Balkot Ward-3 near school"
                     required
                   />
@@ -423,7 +423,7 @@ export const FieldNotes: React.FC<FieldNotesProps> = ({
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm"
+                  className="w-full px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-sm"
                   placeholder="client@example.com"
                 />
               </div>
@@ -434,7 +434,7 @@ export const FieldNotes: React.FC<FieldNotesProps> = ({
                   Fitting Spot Location Mockup Image
                 </label>
                 <div className="flex gap-4 items-center mt-1">
-                  <label className="flex flex-col items-center justify-center border border-dashed border-border rounded px-4 py-3 hover:bg-border/40 cursor-pointer transition-colors bg-background shrink-0">
+                  <label className="flex flex-col items-center justify-center border border-dashed border-border/80 rounded-xl px-4 py-3 hover:bg-border/40 cursor-pointer transition-colors bg-background shrink-0">
                     <Upload size={18} className="text-accent" />
                     <span className="text-[10px] font-bold uppercase mt-1">Select File</span>
                     <input
@@ -445,7 +445,7 @@ export const FieldNotes: React.FC<FieldNotesProps> = ({
                     />
                   </label>
                   {fittingSpotImageUrl ? (
-                    <div className="h-16 w-24 relative rounded border border-border overflow-hidden bg-background">
+                    <div className="h-16 w-24 relative rounded-xl border border-border/80 overflow-hidden bg-background">
                       <img src={fittingSpotImageUrl} alt="Upload preview" className="w-full h-full object-cover" />
                       <button
                         type="button"
@@ -470,7 +470,7 @@ export const FieldNotes: React.FC<FieldNotesProps> = ({
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full h-28 p-3 border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-accent resize-none text-sm"
+                  className="w-full h-28 p-3 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent resize-none text-sm"
                   placeholder="Enter detailed measurements, surface type (wood, cement, glass), wall bracket spacing, or general installation notes..."
                   required
                 />
@@ -481,13 +481,13 @@ export const FieldNotes: React.FC<FieldNotesProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 border border-border rounded text-sm hover:bg-border transition-colors font-medium text-muted hover:text-foreground"
+                  className="px-4 py-2 border border-border rounded-xl text-sm hover:bg-border transition-colors font-medium text-muted hover:text-foreground"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-accent text-white rounded text-sm hover:bg-accent-dark transition-colors shadow-md shadow-accent/15 font-bold uppercase tracking-wider"
+                  className="px-4 py-2 bg-accent text-white rounded-xl text-sm hover:bg-accent-dark transition-colors shadow-md shadow-accent/15 font-bold uppercase tracking-wider"
                 >
                   {editingCampaign ? "Save Note" : "Create Note"}
                 </button>

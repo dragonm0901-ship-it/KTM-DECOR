@@ -1,9 +1,9 @@
 :root {
-  --background: #F2F2F2;
+  --background: #F8F9FB;
   --card: #FFFFFF;
-  --foreground: #000000;
-  --muted: #666666;
-  --border: rgba(0, 0, 0, 0.08);
+  --foreground: #0F172A;
+  --muted: #64748B;
+  --border: #E2E8F0;
   --primary: #FE914C;
   --accent: #FE914C;
   --accent-light: #FFA46A;
@@ -11,9 +11,9 @@
 }
 
 .dark {
-  --background: #050505;
-  --card: #0F0F0F;
-  --foreground: #F2F2F2;
-  --muted: #A1A1AA;
-  --border: rgba(255, 255, 255, 0.1);
+  --background: #090D16;
+  --card: #131A26;
+  --foreground: #F1F5F9;
+  --muted: #94A3B8;
+  --border: #1E293B;
 }
