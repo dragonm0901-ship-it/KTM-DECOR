@@ -301,7 +301,7 @@ export const ProductManagement: React.FC = () => {
             }}
             className="w-full pl-10 pr-4 py-2.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs transition-all duration-200"
           />
-          <Search className="absolute left-3.5 top-3.5 h-4.5 w-4.5 text-muted group-focus-within:text-accent transition-colors" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-muted group-focus-within:text-accent transition-colors" />
         </div>
 
         {/* Category Filter */}
@@ -346,7 +346,7 @@ export const ProductManagement: React.FC = () => {
             <p className="text-xs text-muted mt-1">Try resetting filters or search query.</p>
           </div>
         ) : (
-          <table className="w-full text-left border-collapse min-w-[700px]">
+          <table className="w-full text-left border-collapse min-w-[850px]">
             <thead>
               <tr className="border-b border-border/80 bg-muted/20 text-xs font-bold text-muted uppercase tracking-wider">
                 <th className="p-4 w-20">Preview</th>
@@ -494,12 +494,12 @@ export const ProductManagement: React.FC = () => {
 
       {/* CREATE / EDIT DIALOG MODAL */}
       {modalOpen && (
-        <div className="modal-overlay fixed inset-0 mt-16 sm:mt-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center p-4 pt-20 sm:p-4 overflow-y-auto">
           {/* Overlay */}
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setModalOpen(false)} />
 
           {/* Form Card */}
-          <div className="bg-card border border-border rounded-xl shadow-2xl w-full max-w-2xl max-h-[calc(100vh-6rem)] sm:max-h-[90vh] overflow-y-auto z-10 flex flex-col p-6 space-y-4 animate-slide-up relative">
+          <div className="bg-card border border-border rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] sm:max-h-[90vh] overflow-y-auto z-10 flex flex-col p-6 space-y-4 animate-slide-up relative">
             <button
               onClick={() => setModalOpen(false)}
               className="p-1.5 rounded-full hover:bg-border text-muted hover:text-foreground absolute right-4 top-4"

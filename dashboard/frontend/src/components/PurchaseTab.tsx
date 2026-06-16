@@ -360,7 +360,7 @@ export const PurchaseTab: React.FC = () => {
       {/* Purchases Table */}
       <div className="bg-card border border-border/80 rounded-2xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full text-left text-xs border-collapse min-w-[850px]">
             <thead>
               <tr className="bg-card text-muted border-b border-border uppercase font-semibold tracking-wider text-[10px]">
                 <th className="p-4">Date</th>
@@ -503,8 +503,8 @@ export const PurchaseTab: React.FC = () => {
       </div>
 
       {showModal && (
-        <div className="modal-overlay fixed inset-0 mt-16 sm:mt-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4">
-          <div className="bg-card w-full max-w-2xl rounded-t-lg sm:rounded-lg border border-border p-4 sm:p-6 shadow-2xl animate-scale-up max-h-[calc(100vh-6rem)] sm:max-h-[90vh] overflow-y-auto">
+        <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4 pt-20 sm:p-4 overflow-y-auto">
+          <div className="bg-card w-full max-w-2xl rounded-lg border border-border p-4 sm:p-6 shadow-2xl animate-scale-up max-h-[85vh] sm:max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4 border-b border-border pb-2">
               <h2 className="text-lg font-bold font-display flex items-center gap-2">
                 <Briefcase className="text-accent" />
@@ -676,8 +676,8 @@ export const PurchaseTab: React.FC = () => {
       )}
 
       {viewingPurchase && (
-        <div className="modal-overlay fixed inset-0 mt-16 sm:mt-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-card w-full max-w-lg rounded-lg border border-border p-6 shadow-2xl animate-scale-up max-h-[calc(100vh-6rem)] sm:max-h-[85vh] overflow-y-auto">
+        <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4 pt-20 sm:p-4 overflow-y-auto">
+          <div className="bg-card w-full max-w-lg rounded-lg border border-border p-6 shadow-2xl animate-scale-up max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4 border-b border-border pb-2">
               <h2 className="text-lg font-bold font-display flex items-center gap-2">
                 <Eye className="text-accent" />
@@ -730,28 +730,30 @@ export const PurchaseTab: React.FC = () => {
               {viewingPurchase.items && viewingPurchase.items.length > 0 ? (
                 <div className="border-t border-border pt-3">
                   <span className="text-[10px] text-muted uppercase font-bold tracking-wider block mb-2">Itemized Invoice Breakdown</span>
-                  <table className="w-full text-left text-xs border-collapse">
-                    <thead>
-                      <tr className="text-muted border-b border-border/60 uppercase font-semibold text-[9px]">
-                        <th className="pb-2">Material / Item</th>
-                        <th className="pb-2 text-center">Qty</th>
-                        <th className="pb-2 text-right">Unit Price</th>
-                        <th className="pb-2 text-right">Subtotal</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border/40">
-                      {viewingPurchase.items.map((item, index) => (
-                        <tr key={index} className="text-foreground">
-                          <td className="py-2 font-semibold">{item.name}</td>
-                          <td className="py-2 text-center font-bold">
-                            {item.quantity} <span className="text-[9px] font-normal text-muted">{item.unit}</span>
-                          </td>
-                          <td className="py-2 text-right">Rs. {item.price.toLocaleString()}</td>
-                          <td className="py-2 text-right font-bold">Rs. {(item.quantity * item.price).toLocaleString()}</td>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs border-collapse min-w-[600px]">
+                      <thead>
+                        <tr className="text-muted border-b border-border/60 uppercase font-semibold text-[9px]">
+                          <th className="pb-2">Material / Item</th>
+                          <th className="pb-2 text-center">Qty</th>
+                          <th className="pb-2 text-right">Unit Price</th>
+                          <th className="pb-2 text-right">Subtotal</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="divide-y divide-border/40">
+                        {viewingPurchase.items.map((item, index) => (
+                          <tr key={index} className="text-foreground">
+                            <td className="py-2 font-semibold">{item.name}</td>
+                            <td className="py-2 text-center font-bold">
+                              {item.quantity} <span className="text-[9px] font-normal text-muted">{item.unit}</span>
+                            </td>
+                            <td className="py-2 text-right">Rs. {item.price.toLocaleString()}</td>
+                            <td className="py-2 text-right font-bold">Rs. {(item.quantity * item.price).toLocaleString()}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               ) : (
                 <div className="border-t border-border pt-3">

@@ -216,6 +216,20 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
     return matchesSearch && isInWeek;
   });
 
+  // Group events by day and hour slot to compute offsets and width division
+  const slotGroups: Record<string, CalendarEvent[]> = {};
+  filteredEvents.forEach((ev) => {
+    const evHour = ev.displayHour;
+    if (evHour < START_HOUR || evHour > END_HOUR) return;
+    const dayNum = ev.date.getDay();
+    const colIdx = dayNum === 0 ? 6 : dayNum - 1;
+    const key = `${colIdx}-${evHour}`;
+    if (!slotGroups[key]) {
+      slotGroups[key] = [];
+    }
+    slotGroups[key].push(ev);
+  });
+
   // Render header values
   const monthAbbr = currentDate.toLocaleDateString([], { month: "short" });
   const dayOfMonth = currentDate.getDate();
@@ -329,19 +343,19 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
       </div>
 
       {/* CALENDAR WEEK GRID CONTAINER */}
-      <div className="bg-card border border-border/80 rounded-2xl shadow-sm overflow-hidden p-5">
-        <div className="min-w-[800px] overflow-x-auto">
+      <div className="bg-card border border-border/80 rounded-2xl shadow-sm overflow-hidden p-2 sm:p-5">
+        <div className="w-full min-w-0 md:min-w-[800px] overflow-x-auto">
           {/* Day Grid Header */}
           <div className="flex border-b border-border/60 pb-3">
-            <div className="w-16 flex-shrink-0" /> {/* Time column blank */}
+            <div className="w-10 sm:w-16 flex-shrink-0" /> {/* Time column blank */}
             {daysOfWeek.map((day, idx) => {
               const isToday = day.toDateString() === new Date().toDateString();
               return (
                 <div key={idx} className="flex-1 text-center select-none">
-                  <span className="text-[10px] font-bold text-muted uppercase tracking-widest block">
+                  <span className="text-[8px] sm:text-[10px] font-bold text-muted uppercase tracking-widest block">
                     {day.toLocaleDateString([], { weekday: "short" })}
                   </span>
-                  <span className={`mt-1 inline-flex items-center justify-center h-8 w-8 rounded-full text-xs font-extrabold ${
+                  <span className={`mt-1 inline-flex items-center justify-center h-6 w-6 sm:h-8 sm:w-8 rounded-full text-[9px] sm:text-xs font-extrabold ${
                     isToday
                       ? "bg-foreground text-background dark:bg-accent dark:text-white shadow-sm"
                       : "text-foreground"
@@ -365,7 +379,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
                   style={{ top: `${topVal}px`, height: `${ROW_HEIGHT}px` }}
                 >
                   {/* Hour text label */}
-                  <div className="w-16 pr-3 -mt-2 text-right text-[10px] font-extrabold text-muted/60 uppercase select-none">
+                  <div className="w-10 sm:w-16 pr-1 sm:pr-3 -mt-2 text-right text-[8px] sm:text-[10px] font-extrabold text-muted/60 uppercase select-none truncate">
                     {formatHour(hour)}
                   </div>
                   {/* Read-only day slots */}
@@ -380,7 +394,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
             })}
 
             {/* Absolute Event Cards Layer */}
-            <div className="absolute inset-0 pl-16 pointer-events-none">
+            <div className="absolute inset-0 pl-10 sm:pl-16 pointer-events-none">
               <div className="relative w-full h-full">
                 {filteredEvents.map((ev) => {
                   const evDate = ev.date;
@@ -393,9 +407,15 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
                   const dayNum = evDate.getDay();
                   const colIdx = dayNum === 0 ? 6 : dayNum - 1;
 
+                  const key = `${colIdx}-${evHour}`;
+                  const slotEvents = slotGroups[key] || [ev];
+                  const eventIdxInSlot = slotEvents.findIndex(item => item.id === ev.id && item.type === ev.type);
+                  const slotCount = slotEvents.length;
+
                   const cardTop = (evHour - START_HOUR) * ROW_HEIGHT;
-                  const cardLeft = (colIdx / 7) * 100;
-                  const cardWidth = 100 / 7;
+                  const baseWidth = 100 / 7;
+                  const finalWidth = baseWidth / slotCount;
+                  const cardLeft = ((colIdx / 7) * 100) + (eventIdxInSlot * finalWidth);
 
                   const timeStr = evDate.toLocaleTimeString([], {
                     hour: "2-digit",
@@ -409,29 +429,29 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
                         e.stopPropagation();
                         setSelectedEvent(ev);
                       }}
-                      className={`absolute pointer-events-auto cursor-pointer p-2 rounded-xl border flex flex-col justify-between transition-all duration-200 hover:scale-[1.02] hover:shadow-md hover:z-10 group select-none ${ev.colorClass}`}
+                      className={`absolute pointer-events-auto cursor-pointer p-1 sm:p-2 rounded-lg sm:rounded-xl border flex flex-col justify-between transition-all duration-200 hover:scale-[1.02] hover:shadow-md hover:z-10 group select-none ${ev.colorClass}`}
                       style={{
                         top: `${cardTop + 4}px`,
-                        left: `calc(${cardLeft}% + 4px)`,
-                        width: `calc(${cardWidth}% - 8px)`,
+                        left: `calc(${cardLeft}% + 2px)`,
+                        width: `calc(${finalWidth}% - 4px)`,
                         height: `${ROW_HEIGHT - 8}px`
                       }}
                     >
                       <div className="overflow-hidden">
-                        <span className={`text-[9px] font-extrabold flex items-center gap-1 ${ev.textColorClass}`}>
-                          {ev.type === "task" && <CheckSquare size={10} />}
-                          {ev.type === "order" && <Package size={10} />}
-                          {ev.type === "field-note" && <FileText size={10} />}
-                          {ev.type === "expense" && <DollarSign size={10} />}
-                          {ev.type === "sale" && <TrendingUp size={10} />}
-                          {timeStr}
+                        <span className={`text-[7px] sm:text-[9px] font-extrabold flex items-center gap-0.5 sm:gap-1 ${ev.textColorClass}`}>
+                          {ev.type === "task" && <CheckSquare size={8} className="sm:w-2.5 sm:h-2.5" />}
+                          {ev.type === "order" && <Package size={8} className="sm:w-2.5 sm:h-2.5" />}
+                          {ev.type === "field-note" && <FileText size={8} className="sm:w-2.5 sm:h-2.5" />}
+                          {ev.type === "expense" && <DollarSign size={8} className="sm:w-2.5 sm:h-2.5" />}
+                          {ev.type === "sale" && <TrendingUp size={8} className="sm:w-2.5 sm:h-2.5" />}
+                          <span className="truncate">{timeStr}</span>
                         </span>
-                        <h4 className="text-[10px] font-bold text-foreground leading-tight mt-0.5 truncate group-hover:text-accent transition-colors">
+                        <h4 className="text-[7px] sm:text-[10px] font-bold text-foreground leading-tight mt-0.5 truncate group-hover:text-accent transition-colors">
                           {ev.title}
                         </h4>
                       </div>
-                      <span className="text-[8px] text-muted truncate opacity-80">
-                        {ev.type === "field-note" ? "FITTING NOTE" : ev.type.toUpperCase()}
+                      <span className="text-[6px] sm:text-[8px] text-muted truncate opacity-80 uppercase">
+                        {ev.type === "field-note" ? "FIT NOTE" : ev.type}
                       </span>
                     </div>
                   );
@@ -445,7 +465,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
                 className="absolute left-0 right-0 flex items-center pointer-events-none z-10"
                 style={{ top: `${redLineTop}px` }}
               >
-                <div className="w-16 text-right pr-2 text-[9px] font-extrabold text-red-500 bg-card rounded p-0.5 shadow-sm border border-red-500/10 select-none">
+                <div className="w-10 sm:w-16 text-right pr-1 sm:pr-2 text-[7px] sm:text-[9px] font-extrabold text-red-500 bg-card rounded p-0.5 shadow-sm border border-red-500/10 select-none truncate">
                   {now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </div>
                 <div className="flex-1 border-t-2 border-dotted border-red-500 relative">
@@ -459,7 +479,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
 
       {/* EVENT DETAILS VIEW POPUP */}
       {selectedEvent && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 mt-16 sm:mt-0">
+        <div className="modal-overlay fixed inset-0 bg-background/80 backdrop-blur-sm flex items-start sm:items-center justify-center z-50 p-4 pt-20 sm:p-4 overflow-y-auto">
           <div className="bg-card border border-border/80 w-full max-w-md rounded-2xl shadow-xl p-6 relative">
             <button
               onClick={() => setSelectedEvent(null)}

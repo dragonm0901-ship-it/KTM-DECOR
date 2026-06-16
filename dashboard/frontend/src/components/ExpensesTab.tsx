@@ -729,7 +729,7 @@ export const ExpensesTab: React.FC = () => {
             className="w-full px-3 py-2 pl-9 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs"
             placeholder="Search expenses by title or description..."
           />
-          <Search className="absolute left-3 top-2.5 h-4.5 w-4.5 text-muted" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-muted" />
         </div>
 
         <div className="flex items-center gap-2 text-xs w-full md:w-auto">
@@ -752,7 +752,7 @@ export const ExpensesTab: React.FC = () => {
       {/* Expenses Table */}
       <div className="bg-card border border-border/80 rounded-2xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full text-left text-xs border-collapse min-w-[800px]">
             <thead>
               <tr className="bg-card text-muted border-b border-border uppercase font-semibold tracking-wider text-[10px]">
                 <th className="p-4">Date</th>
@@ -839,8 +839,8 @@ export const ExpensesTab: React.FC = () => {
 
       {/* Log Expense Modal */}
       {showModal && (
-        <div className="fixed inset-0 mt-16 sm:mt-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="bg-card w-full max-w-md rounded-2xl border border-border/80 p-6 shadow-2xl animate-scale-up max-h-[calc(100vh-6rem)] sm:max-h-none overflow-y-auto">
+        <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4 pt-20 sm:p-4 overflow-y-auto">
+          <div className="bg-card w-full max-w-md rounded-2xl border border-border/80 p-6 shadow-2xl animate-scale-up max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4 border-b border-border pb-2">
               <h2 className="text-lg font-bold font-display flex items-center gap-2">
                 <DollarSign className="text-accent" />
@@ -956,8 +956,8 @@ export const ExpensesTab: React.FC = () => {
 
       {/* View Expense Detail Modal */}
       {viewingExpense && (
-        <div className="fixed inset-0 mt-16 sm:mt-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="bg-card w-full max-w-md rounded-2xl border border-border/80 p-6 shadow-2xl animate-scale-up max-h-[calc(100vh-6rem)] sm:max-h-none overflow-y-auto">
+        <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4 pt-20 sm:p-4 overflow-y-auto">
+          <div className="bg-card w-full max-w-md rounded-2xl border border-border/80 p-6 shadow-2xl animate-scale-up max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4 border-b border-border pb-2">
               <h2 className="text-lg font-bold font-display flex items-center gap-2">
                 <Eye className="text-accent" />

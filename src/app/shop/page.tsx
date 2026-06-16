@@ -29,6 +29,15 @@ export default function ShopPage() {
   const [filteredProducts, setFilteredProducts] = useState<Product[]>(PRODUCTS);
   const [dbProducts, setDbProducts] = useState<Product[]>(PRODUCTS);
 
+  // Category Selection Popup States
+  const [isCategoryPopupOpen, setIsCategoryPopupOpen] = useState(false);
+  const [tempCategory, setTempCategory] = useState("All");
+
+  const openCategoryPopup = () => {
+    setTempCategory(activeCategory);
+    setIsCategoryPopupOpen(true);
+  };
+
   // Mount logic: Fetch products from express backend
   useEffect(() => {
     const fetchCatalog = async () => {
@@ -47,6 +56,21 @@ export default function ShopPage() {
     };
     fetchCatalog();
   }, []);
+
+  // Prevent background scrolling when modal is open
+  useEffect(() => {
+    if (isCategoryPopupOpen) {
+      document.documentElement.style.overflow = "hidden";
+      document.body.style.overflow = "hidden";
+    } else {
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
+    };
+  }, [isCategoryPopupOpen]);
   
   // UI Panels states
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -165,28 +189,32 @@ export default function ShopPage() {
 
         {/* ── SLEEK TOP FILTER & CATEGORY TOOLBAR ── */}
         <div className="flex flex-col gap-5 mb-10 border-b border-border/30 pb-6 w-full">
-          {/* Categories List (Horizontal Scrolling Scrollbar-free Row) */}
-          <div className="w-full overflow-x-auto no-scrollbar py-1">
-            <div className="flex items-center gap-2.5 w-max">
-              {CATEGORIES.map((cat) => {
-                const isSelected = activeCategory === cat;
-                return (
-                  <button
-                    key={cat}
-                    onClick={() => {
-                      setActiveCategory(cat);
-                      setActiveSubCategory(null);
-                    }}
-                    className={`px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all border ${
-                      isSelected 
-                        ? "bg-accent border-accent text-white shadow-md shadow-accent/20" 
-                        : "bg-card border-border hover:bg-border/60 text-muted"
-                    }`}
+          {/* Category Selector Button */}
+          <div className="flex items-center justify-between w-full">
+            <div className="flex flex-col gap-1.5 w-full sm:w-auto">
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-muted block mb-1">Active Category:</span>
+              <button
+                onClick={openCategoryPopup}
+                className="flex items-center justify-between sm:justify-start gap-3 px-5 py-3.5 bg-card border border-border hover:border-accent/40 rounded-md text-xs font-bold uppercase tracking-wider transition-all group text-foreground w-full sm:w-auto hover:bg-card/85 active:scale-[0.98]"
+              >
+                <div className="flex items-center gap-2.5">
+                  <Filter className="w-4 h-4 text-accent" />
+                  <span>{activeCategory}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[11px] text-muted font-bold font-sans">
+                    ({getProductCountByCategory(activeCategory)} items)
+                  </span>
+                  <svg 
+                    className="w-4 h-4 text-muted group-hover:text-accent transition-transform duration-300" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
                   >
-                    {cat} {cat !== "All" && `(${getProductCountByCategory(cat)})`}
-                  </button>
-                );
-              })}
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </button>
             </div>
           </div>
 
@@ -452,6 +480,85 @@ export default function ShopPage() {
         </div>
 
       </div>
+
+      {/* ── CATEGORY SELECTION POPUP MODAL ── */}
+      {isCategoryPopupOpen && (
+        <div 
+          className="fixed inset-0 bg-black/65 backdrop-blur-sm z-[999] flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => setIsCategoryPopupOpen(false)}
+          data-lenis-prevent
+        >
+          <div 
+            className="bg-card border border-border w-full max-w-md md:max-w-3xl rounded-lg p-6 md:p-8 shadow-2xl flex flex-col max-h-[85vh] md:max-h-[90vh] animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-border/40 pb-4 mb-5">
+              <div className="flex items-center gap-2">
+                <Filter className="w-4 h-4 text-accent" />
+                <h3 className="text-sm md:text-base font-black uppercase tracking-wider text-foreground">Select Category</h3>
+              </div>
+              <div className="flex items-center gap-3.5">
+                <button
+                  onClick={() => setTempCategory("All")}
+                  className="text-[10px] md:text-xs font-bold text-accent hover:underline uppercase tracking-wider cursor-pointer"
+                >
+                  Reset
+                </button>
+                <button 
+                  onClick={() => setIsCategoryPopupOpen(false)}
+                  className="p-1 text-muted hover:text-foreground transition-colors rounded hover:bg-border/30"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Category List */}
+            <div className="flex-1 overflow-y-auto pr-1 grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3 max-h-[50vh] md:max-h-[60vh] no-scrollbar">
+              {CATEGORIES.map((cat) => {
+                const isSelected = tempCategory === cat;
+                return (
+                  <button
+                    key={cat}
+                    onClick={() => setTempCategory(cat)}
+                    className={`w-full flex items-center justify-between px-4 py-3.5 rounded-[4px] border text-xs font-bold uppercase tracking-wider transition-all text-left ${
+                      isSelected
+                        ? "bg-accent border-accent text-white shadow-md shadow-accent/15"
+                        : "bg-background border-border/60 hover:border-accent/40 text-muted-foreground hover:text-foreground hover:bg-card/50"
+                    }`}
+                  >
+                    <span>{cat}</span>
+                    <span className={`text-[10px] font-sans font-bold ${isSelected ? "text-white/80" : "text-muted"}`}>
+                      {getProductCountByCategory(cat)} items
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Footer Action Controls */}
+            <div className="flex items-center gap-3 border-t border-border/40 pt-5 mt-5">
+              <button
+                onClick={() => setIsCategoryPopupOpen(false)}
+                className="flex-1 py-3.5 border border-border hover:bg-border/30 text-xs font-extrabold uppercase tracking-wider rounded transition-colors text-muted-foreground hover:text-foreground active:scale-[0.98]"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setActiveCategory(tempCategory);
+                  setActiveSubCategory(null);
+                  setIsCategoryPopupOpen(false);
+                }}
+                className="flex-1 py-3.5 bg-accent hover:bg-accent/90 text-white text-xs font-extrabold uppercase tracking-wider rounded transition-colors shadow-lg shadow-accent/15 active:scale-[0.98]"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

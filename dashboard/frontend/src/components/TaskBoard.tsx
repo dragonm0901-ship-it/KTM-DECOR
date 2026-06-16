@@ -49,8 +49,6 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
   const [assigneeId, setAssigneeId] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [priority, setPriority] = useState<Task["priority"]>("medium");
-  const [totalCost, setTotalCost] = useState<number>(0);
-  const [prepaidCost, setPrepaidCost] = useState<number>(0);
 
   const openCreateModal = () => {
     setEditingTask(null);
@@ -60,8 +58,6 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
     setAssigneeId(assignable[0]?._id || "");
     setDueDate(new Date(Date.now() + 86400000).toISOString().split("T")[0]);
     setPriority("medium");
-    setTotalCost(0);
-    setPrepaidCost(0);
     setShowModal(true);
   };
 
@@ -72,8 +68,6 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
     setAssigneeId(task.assignee?._id || "");
     setDueDate(new Date(task.dueDate).toISOString().split("T")[0]);
     setPriority(task.priority);
-    setTotalCost(task.totalCost || 0);
-    setPrepaidCost(task.prepaidCost || 0);
     setShowModal(true);
   };
 
@@ -85,8 +79,8 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
       assignee: assigneeId,
       dueDate,
       priority,
-      totalCost,
-      prepaidCost
+      totalCost: 0,
+      prepaidCost: 0
     };
 
     if (editingTask) {
@@ -300,14 +294,6 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
                         {task.description || "No description provided."}
                       </p>
 
-                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] mt-2 border-t border-border/40 pt-2 font-semibold">
-                        <span>Total: <strong className="text-foreground">Rs. {task.totalCost || 0}</strong></span>
-                        <span className="text-muted">•</span>
-                        <span>Prepaid: <strong className="text-green-500">Rs. {task.prepaidCost || 0}</strong></span>
-                        <span className="text-muted">•</span>
-                        <span>Remaining: <strong className="text-amber-500">Rs. {task.remainingCost || 0}</strong></span>
-                      </div>
-
                       <div className="mt-3 flex flex-col gap-2">
                         {/* Assignee & Dates */}
                         <div className="flex items-center justify-between text-[10px] text-muted">
@@ -408,7 +394,7 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
         /* DETAILED LIST VIEW */
         <div className="bg-card border border-border/80 rounded-2xl shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm border-collapse">
+            <table className="w-full text-left text-sm border-collapse min-w-[800px]">
               <thead>
                 <tr className="bg-card border-b border-border text-muted font-display font-semibold text-xs uppercase tracking-wider">
                   <th className="p-4 w-12">Pin</th>
@@ -416,7 +402,6 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
                   <th className="p-4">Assignee</th>
                   <th className="p-4">Due Date</th>
                   <th className="p-4">Priority</th>
-                  <th className="p-4">Finances</th>
                   <th className="p-4">Status</th>
                   {user?.role === "admin" && <th className="p-4 text-right">Actions</th>}
                 </tr>
@@ -424,7 +409,7 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
               <tbody className="divide-y divide-border">
                 {filteredTasks.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="p-8 text-center text-muted">
+                    <td colSpan={7} className="p-8 text-center text-muted">
                       No tasks matching filters found.
                     </td>
                   </tr>
@@ -472,11 +457,6 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
                         >
                           {task.priority}
                         </span>
-                      </td>
-                      <td className="p-4 text-xs font-semibold whitespace-nowrap">
-                        <div className="text-muted">Total: <span className="text-foreground font-bold">Rs. {task.totalCost || 0}</span></div>
-                        <div className="text-muted">Prepaid: <span className="text-green-600">Rs. {task.prepaidCost || 0}</span></div>
-                        <div className="text-muted">Remaining: <span className="text-amber-600">Rs. {task.remainingCost || 0}</span></div>
                       </td>
                       <td className="p-4">
                         {user?.role === "admin" || task.assignee?._id !== (user?.email === "staff@ktmdecor.com" ? activeStaffProfile?._id : user?._id) ? (
@@ -531,8 +511,8 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
       )}
 
       {showModal && (
-        <div className="modal-overlay fixed inset-0 mt-16 sm:mt-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4">
-          <div className="bg-card w-full max-w-md rounded-t-lg sm:rounded-lg border border-border p-4 sm:p-6 shadow-2xl animate-scale-up max-h-[calc(100vh-6rem)] sm:max-h-[90vh] overflow-y-auto">
+        <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4 pt-20 sm:p-4 overflow-y-auto">
+          <div className="bg-card w-full max-w-md rounded-lg border border-border p-4 sm:p-6 shadow-2xl animate-scale-up max-h-[85vh] sm:max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4 border-b border-border pb-2">
               <h2 className="text-lg font-bold font-display flex items-center gap-2">
                 {editingTask ? <Edit2 size={20} className="text-accent" /> : <Plus size={20} className="text-accent" />}
@@ -608,35 +588,7 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1">
-                    Total Cost (Rs.)
-                  </label>
-                  <input
-                    type="number"
-                    value={totalCost}
-                    onChange={(e) => setTotalCost(Number(e.target.value) || 0)}
-                    className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm"
-                    min="0"
-                    placeholder="0"
-                  />
-                </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1">
-                    Prepaid Cost (Rs.)
-                  </label>
-                  <input
-                    type="number"
-                    value={prepaidCost}
-                    onChange={(e) => setPrepaidCost(Number(e.target.value) || 0)}
-                    className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm"
-                    min="0"
-                    placeholder="0"
-                  />
-                </div>
-              </div>
 
               <div>
                 <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1">

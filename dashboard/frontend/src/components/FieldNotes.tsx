@@ -180,7 +180,7 @@ export const FieldNotes: React.FC<FieldNotesProps> = ({
       <div className="bg-card border border-border/80 p-4 rounded-2xl shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
         {/* Search */}
         <div className="relative w-full md:max-w-md">
-          <Search className="absolute left-3 top-2.5 text-muted" size={18} />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
           <input
             type="text"
             placeholder="Search field notes by title, district, town, description..."
@@ -322,8 +322,8 @@ export const FieldNotes: React.FC<FieldNotesProps> = ({
 
       {/* CREATE/EDIT MODAL */}
       {showModal && (
-        <div className="fixed inset-0 mt-16 sm:mt-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="bg-card w-full max-w-lg rounded-2xl border border-border/80 p-6 shadow-2xl animate-scale-up overflow-y-auto max-h-[calc(100vh-6rem)] sm:max-h-[90vh]">
+        <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4 pt-20 sm:p-4 overflow-y-auto">
+          <div className="bg-card w-full max-w-lg rounded-2xl border border-border/80 p-6 shadow-2xl animate-scale-up overflow-y-auto max-h-[85vh] sm:max-h-[90vh]">
             <div className="flex items-center justify-between mb-4 border-b border-border pb-2">
               <h2 className="text-lg font-bold font-display flex items-center gap-2">
                 <FileText className="text-accent" size={20} />
