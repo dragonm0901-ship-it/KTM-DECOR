@@ -306,7 +306,7 @@ app.use(async (req, res, next) => {
   try {
     await connectDB();
     if (!seeded) {
-      runSeeds().catch((err) => console.error("Database background seeding error:", err));
+      await runSeeds();
     }
     next();
   } catch (err) {
