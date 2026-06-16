@@ -554,8 +554,8 @@ export const OrdersTab: React.FC = () => {
 
       {/* Creation/Editing Modal */}
       {showModal && (
-        <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4 overflow-y-auto">
-          <div className="bg-card w-full max-w-2xl rounded-lg border border-border p-4 sm:p-6 shadow-2xl animate-scale-up my-4 max-h-[calc(100dvh-32px)] sm:max-h-[90vh] overflow-y-auto">
+        <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm pt-10 sm:pt-0 px-2 pb-6 sm:p-4 overflow-y-auto">
+          <div className="bg-card w-full max-w-2xl rounded-lg border border-border p-3 sm:p-6 shadow-2xl animate-scale-up mt-1 mb-4 sm:my-4 max-h-[40vh] sm:max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6 border-b border-border pb-3">
               <h2 className="text-lg font-bold font-display flex items-center gap-2">
                 <Package className="text-accent" />
