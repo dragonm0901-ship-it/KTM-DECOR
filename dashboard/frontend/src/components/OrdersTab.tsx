@@ -554,8 +554,8 @@ export const OrdersTab: React.FC = () => {
 
       {/* Creation/Editing Modal */}
       {showModal && (
-        <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4 pt-20 sm:p-4 overflow-y-auto">
-          <div className="bg-card w-full max-w-2xl rounded-lg border border-border p-4 sm:p-6 shadow-2xl animate-scale-up my-4 max-h-[85vh] sm:max-h-[90vh] overflow-y-auto">
+        <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4 overflow-y-auto">
+          <div className="bg-card w-full max-w-2xl rounded-lg border border-border p-4 sm:p-6 shadow-2xl animate-scale-up my-4 max-h-[calc(100dvh-32px)] sm:max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6 border-b border-border pb-3">
               <h2 className="text-lg font-bold font-display flex items-center gap-2">
                 <Package className="text-accent" />
@@ -831,22 +831,21 @@ export const OrdersTab: React.FC = () => {
                     2. Client & Sales Channel
                   </h3>
 
-                  <div>
-                    <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1.5">
-                      Customer Name *
-                    </label>
-                    <input
-                      type="text"
-                      value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
-                      className="w-full px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm disabled:opacity-75 disabled:bg-border/10"
-                      placeholder="e.g. Ram Prasad"
-                      required
-                      disabled={user?.role !== "admin"}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1.5">
+                        Customer Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={customerName}
+                        onChange={(e) => setCustomerName(e.target.value)}
+                        className="w-full px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm disabled:opacity-75 disabled:bg-border/10"
+                        placeholder="e.g. Ram Prasad"
+                        required
+                        disabled={user?.role !== "admin"}
+                      />
+                    </div>
                     <div>
                       <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1.5">
                         Contact Number *
@@ -861,6 +860,23 @@ export const OrdersTab: React.FC = () => {
                         disabled={user?.role !== "admin"}
                       />
                     </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1.5">
+                      Customer Address *
+                    </label>
+                    <textarea
+                      value={customerAddress}
+                      onChange={(e) => setCustomerAddress(e.target.value)}
+                      className="w-full h-12 px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm resize-none disabled:opacity-75 disabled:bg-border/10"
+                      placeholder="e.g. New Baneshwor, Kathmandu"
+                      required
+                      disabled={user?.role !== "admin"}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1.5">
                         Email Address
@@ -874,38 +890,23 @@ export const OrdersTab: React.FC = () => {
                         disabled={user?.role !== "admin"}
                       />
                     </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1.5">
-                      Customer Address *
-                    </label>
-                    <textarea
-                      value={customerAddress}
-                      onChange={(e) => setCustomerAddress(e.target.value)}
-                      className="w-full h-16 px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm resize-none disabled:opacity-75 disabled:bg-border/10"
-                      placeholder="e.g. New Baneshwor, Kathmandu (Near Civil Hospital)"
-                      required
-                      disabled={user?.role !== "admin"}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1.5">
-                      Order Placed From *
-                    </label>
-                    <select
-                      value={orderFrom}
-                      onChange={(e) => setOrderFrom(e.target.value as any)}
-                      className="w-full px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm font-semibold disabled:opacity-75 disabled:bg-border/10"
-                      required
-                      disabled={user?.role !== "admin"}
-                    >
-                      <option value="direct">Direct Order (Physical Store)</option>
-                      <option value="tiktok">Tiktok</option>
-                      <option value="instagram">Instagram</option>
-                      <option value="whatsapp">WhatsApp</option>
-                    </select>
+                    <div>
+                      <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1.5">
+                        Order Placed From *
+                      </label>
+                      <select
+                        value={orderFrom}
+                        onChange={(e) => setOrderFrom(e.target.value as any)}
+                        className="w-full px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm font-semibold disabled:opacity-75 disabled:bg-border/10 cursor-pointer"
+                        required
+                        disabled={user?.role !== "admin"}
+                      >
+                        <option value="direct">Direct Order</option>
+                        <option value="tiktok">Tiktok</option>
+                        <option value="instagram">Instagram</option>
+                        <option value="whatsapp">WhatsApp</option>
+                      </select>
+                    </div>
                   </div>
 
                   <div>
@@ -915,7 +916,7 @@ export const OrdersTab: React.FC = () => {
                     <select
                       value={paymentMethod}
                       onChange={(e) => setPaymentMethod(e.target.value as any)}
-                      className="w-full px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm font-semibold disabled:opacity-75 disabled:bg-border/10"
+                      className="w-full px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm font-semibold disabled:opacity-75 disabled:bg-border/10 cursor-pointer"
                       required
                       disabled={user?.role !== "admin"}
                     >

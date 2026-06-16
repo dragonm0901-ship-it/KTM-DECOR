@@ -565,8 +565,8 @@ export const QuotationTab: React.FC = () => {
 
       {/* Creation Modal */}
       {showCreateModal && (
-        <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4 pt-20 sm:p-4 overflow-y-auto">
-          <div className="bg-card w-full max-w-4xl rounded-2xl border border-border/80 p-4 sm:p-6 shadow-2xl animate-scale-up my-4 max-h-[85vh] sm:max-h-[90vh] overflow-y-auto">
+        <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4 overflow-y-auto">
+          <div className="bg-card w-full max-w-4xl rounded-2xl border border-border/80 p-3 sm:p-6 shadow-2xl animate-scale-up my-4 max-h-[calc(100dvh-32px)] sm:max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4 border-b border-border pb-2">
               <h2 className="text-lg font-bold font-display flex items-center gap-2">
                 <FileText className="text-accent" />
@@ -588,7 +588,7 @@ export const QuotationTab: React.FC = () => {
 
             <form onSubmit={handleAddSubmit} className="space-y-6 text-left">
               {/* QUOTATION VOUCHER INFO */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-border/10 p-4 rounded-xl border border-border/60">
+              <div className="grid grid-cols-2 gap-3 bg-border/10 p-3 rounded-xl border border-border/60">
                 <div>
                   <label className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1">
                     Voucher Number *
@@ -668,33 +668,35 @@ export const QuotationTab: React.FC = () => {
                   <h3 className="text-xs font-bold text-accent uppercase tracking-wider border-b border-border/50 pb-1">
                     Project Info & Status
                   </h3>
-                  <div>
-                    <label className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1">
-                      Project / Design Title *
-                    </label>
-                    <input
-                      type="text"
-                      value={projectName}
-                      onChange={(e) => setProjectName(e.target.value)}
-                      className="w-full px-3 py-1.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-sm"
-                      placeholder="e.g. LED Acrylic Sign Board for Cafe"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1">
-                      Quotation Status
-                    </label>
-                    <select
-                      value={status}
-                      onChange={(e) => setStatus(e.target.value as any)}
-                      className="w-full px-3 py-1.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-sm font-semibold cursor-pointer"
-                    >
-                      <option value="draft">Draft</option>
-                      <option value="sent">Sent to Client</option>
-                      <option value="accepted">Accepted</option>
-                      <option value="rejected">Rejected</option>
-                    </select>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1">
+                        Project / Design Title *
+                      </label>
+                      <input
+                        type="text"
+                        value={projectName}
+                        onChange={(e) => setProjectName(e.target.value)}
+                        className="w-full px-3 py-1.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-sm"
+                        placeholder="e.g. LED Cafe Sign"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[9px] font-bold text-muted uppercase tracking-wider mb-1">
+                        Quotation Status
+                      </label>
+                      <select
+                        value={status}
+                        onChange={(e) => setStatus(e.target.value as any)}
+                        className="w-full px-3 py-1.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-sm font-semibold cursor-pointer"
+                      >
+                        <option value="draft">Draft</option>
+                        <option value="sent">Sent to Client</option>
+                        <option value="accepted">Accepted</option>
+                        <option value="rejected">Rejected</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -873,8 +875,8 @@ export const QuotationTab: React.FC = () => {
 
       {/* Invoice Estimations Printable PDF Preview Modal */}
       {selectedQuotation && (
-        <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4 pt-20 sm:p-4 overflow-y-auto">
-          <div className="bg-card w-full max-w-3xl rounded-2xl border border-border/80 p-3 sm:p-6 shadow-2xl animate-scale-up my-4 max-h-[85vh] sm:max-h-[95vh] overflow-y-auto">
+        <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4 overflow-y-auto">
+          <div className="bg-card w-full max-w-3xl rounded-2xl border border-border/80 p-3 sm:p-6 shadow-2xl animate-scale-up my-4 max-h-[calc(100dvh-32px)] sm:max-h-[95vh] overflow-y-auto">
             
             {/* Modal Controls */}
             <div className="flex items-center justify-between mb-4 border-b border-border pb-2 screen-only">
