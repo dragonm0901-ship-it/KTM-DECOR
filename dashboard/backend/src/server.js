@@ -565,9 +565,13 @@ const seedProducts = async () => {
     const productCount = await Product.countDocuments();
     const hasPlaceholder = await Product.findOne({ image: "/images/placeholder.svg" });
     const hasLegacyName = await Product.findOne({ name: /Design #/ });
+    const hasLegacyOrPlaceholderImg = await Product.findOne({ image: /^\/images\/(light-boards-nivati|custom-decor-collage|workshop|neon-momo|neon-taso|hero-04|3d-letters-salt|dimensional-ktm|laser-cnc|name-plates|about-hero)\.webp/ });
+    const lacksImageUrls = await Product.findOne({ $or: [{ image_urls: { $exists: false } }, { image_urls: { $size: 0 } }] });
+    const lacksVariants = await Product.findOne({ $or: [{ variants: { $exists: false } }, { variants: { $size: 0 } }] });
+    const countMismatch = productCount !== 12;
 
-    if (productCount === 0 || hasPlaceholder || hasLegacyName) {
-      console.log("Legacy, placeholder or empty products detected. Re-seeding default product catalog (12 premium signs)...");
+    if (productCount === 0 || hasPlaceholder || hasLegacyName || hasLegacyOrPlaceholderImg || lacksImageUrls || lacksVariants || countMismatch) {
+      console.log("Legacy, placeholder, incomplete, or outdated products detected. Re-seeding default product catalog (12 premium signs)...");
       await Product.deleteMany({});
 
       const products = [
