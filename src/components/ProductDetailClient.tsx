@@ -16,6 +16,38 @@ import {
   Package
 } from "@/components/ui/solar-icons";
 import { PRODUCTS, Product } from "@/data/shop-data";
+import { CATALOG_DETAILS } from "@/data/catalog-details";
+import {
+  Leaf,
+  Sun,
+  Wrench,
+  Gem,
+  ShieldCheck,
+  Sparkles,
+  Settings,
+  Ruler,
+  Gift,
+  Clock,
+  Eye,
+  Infinity as InfinityIcon,
+  Home,
+  Monitor,
+  Coffee,
+  Camera,
+  ShoppingBag as BagIcon,
+  Heart,
+  Truck,
+  CloudRain,
+  BedDouble,
+  Star as LucideStar,
+  Layers,
+  Lightbulb,
+  Plug,
+  Clock as ClockIcon,
+  Wrench as WrenchIcon,
+  ShieldAlert,
+  Palette
+} from "lucide-react";
 
 // ── CUSTOM GALLERY MAPPING FOR MAIN STOREFRONT ASSETS ──
 const GALLERY_MAPPING: Record<string, string[]> = {
@@ -197,6 +229,119 @@ const getProductReviews = (product: Product): Review[] => {
   ];
 };
 
+// Helper to render flyer feature icons
+const renderFeatureIcon = (icon: string) => {
+  const props = { className: "w-5 h-5 text-accent" };
+  switch (icon) {
+    case "leaf": return <Leaf {...props} />;
+    case "sun": return <Sun {...props} />;
+    case "wrench": return <Wrench {...props} />;
+    case "diamond": return <Gem {...props} />;
+    case "shield": return <ShieldCheck {...props} />;
+    case "sparkles": return <Sparkles {...props} />;
+    case "settings": return <Settings {...props} />;
+    case "ruler": return <Ruler {...props} />;
+    case "gift": return <Gift {...props} />;
+    case "clock": return <Clock {...props} />;
+    case "eye": return <Eye {...props} />;
+    case "infinity": return <InfinityIcon {...props} />;
+    default: return <Sparkles {...props} />;
+  }
+};
+
+// Helper to render ideal-for icons
+const renderIdealForIcon = (icon: string) => {
+  const props = { className: "w-8 h-8 text-accent mb-2" };
+  switch (icon) {
+    case "house": return <Home {...props} />;
+    case "monitor": return <Monitor {...props} />;
+    case "coffee": return <Coffee {...props} />;
+    case "gift": return <Gift {...props} />;
+    case "camera": return <Camera {...props} />;
+    case "bag": return <BagIcon {...props} />;
+    case "settings": return <Settings {...props} />;
+    case "heart": return <Heart {...props} />;
+    case "truck": return <Truck {...props} />;
+    case "cloud": return <CloudRain {...props} />;
+    case "bed": return <BedDouble {...props} />;
+    default: return <Home {...props} />;
+  }
+};
+
+// Helper to render spec icons
+const getSpecIcon = (key: string) => {
+  const props = { className: "w-4 h-4 text-accent/80" };
+  const lowerKey = key.toLowerCase();
+  if (lowerKey.includes("material") || lowerKey.includes("base")) return <Layers {...props} />;
+  if (lowerKey.includes("light") || lowerKey.includes("glow") || lowerKey.includes("lighting")) return <Lightbulb {...props} />;
+  if (lowerKey.includes("power") || lowerKey.includes("voltage")) return <Plug {...props} />;
+  if (lowerKey.includes("thickness") || lowerKey.includes("dimensions")) return <Ruler {...props} />;
+  if (lowerKey.includes("color")) return <Palette {...props} />;
+  if (lowerKey.includes("installation") || lowerKey.includes("mounting")) return <WrenchIcon {...props} />;
+  if (lowerKey.includes("lifespan") || lowerKey.includes("durability")) return <ClockIcon {...props} />;
+  return <ShieldAlert {...props} />;
+};
+
+// Retrieve catalog-details matching product ID, fallback if missing
+const getCatalogDetails = (product: Product) => {
+  if (CATALOG_DETAILS[product.id]) {
+    return CATALOG_DETAILS[product.id];
+  }
+  
+  const specMap: Record<string, string> = {};
+  if (product.specs && product.specs.length > 0) {
+    product.specs.forEach((spec) => {
+      const idx = spec.indexOf(":");
+      if (idx !== -1) {
+        const key = spec.substring(0, idx).trim();
+        const val = spec.substring(idx + 1).trim();
+        specMap[key] = val;
+      } else {
+        specMap[spec.slice(0, 15)] = spec;
+      }
+    });
+  } else {
+    specMap["Material"] = "Premium Quality Materials";
+    specMap["Installation"] = "Wall Mounted / Custom";
+    specMap["Lifespan"] = "5+ Years";
+  }
+
+  const fallbackFeatures = [
+    {
+      title: "PREMIUM QUALITY",
+      description: "Crafted with industrial-grade materials built for longevity.",
+      icon: "diamond" as const
+    },
+    {
+      title: "FULLY CUSTOMIZED",
+      description: "Tailored to your specific brand, logo, and design requirements.",
+      icon: "wrench" as const
+    },
+    {
+      title: "DURABLE & RELIABLE",
+      description: "Designed for reliable, long-lasting performance.",
+      icon: "shield" as const
+    }
+  ];
+
+  return {
+    titleWhite1: product.name.split(" ")[0] || "CUSTOM",
+    titleGold: product.name.split(" ").slice(1).join(" ") || "PRODUCT",
+    description: product.description,
+    startingPrice: `Rs. ${product.price.toLocaleString()}`,
+    priceNote: "Price varies according to size and custom design.",
+    customDesignNote: "Custom Design Your Text, Logo or Artwork",
+    features: fallbackFeatures,
+    specsTable: specMap,
+    idealFor: [
+      { label: "OFFICES & WORKSPACES", icon: "monitor" as const },
+      { label: "SHOPS & CAFES", icon: "coffee" as const },
+      { label: "HOMES", icon: "house" as const }
+    ],
+    quote: `${product.name.toUpperCase()} ADDS A PREMIUM AND PROFESSIONAL FINISH TO ANY SPACE.`
+  };
+};
+
 export default function ProductDetailClient() {
   const params = useParams();
   const id = params?.id as string;
@@ -348,14 +493,16 @@ Please verify availability and let me know the estimated delivery and payment sc
       <div className="max-w-[1200px] mx-auto">
         
         {/* Breadcrumb Navigation */}
-        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted mb-8 border-b border-border/20 pb-4">
-          <Link href="/shop" className="hover:text-accent transition-colors flex items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted mb-8 border-b border-border/20 pb-4">
+          <Link href="/shop" className="hover:text-accent transition-colors flex items-center gap-1.5 flex-shrink-0">
             <ArrowLeft className="w-3.5 h-3.5" /> Back to Shop
           </Link>
-          <ChevronRight className="w-3 h-3 text-muted/40" />
-          <span className="text-muted/60">{product.category}</span>
-          <ChevronRight className="w-3 h-3 text-muted/40" />
-          <span className="text-foreground">{product.name}</span>
+          <ChevronRight className="w-3 h-3 text-muted/40 flex-shrink-0" />
+          <span className="text-muted/60 flex-shrink-0">{product.category}</span>
+          <ChevronRight className="w-3 h-3 text-muted/40 flex-shrink-0" />
+          <span className="text-foreground truncate max-w-[130px] sm:max-w-none" title={product.name}>
+            {product.name}
+          </span>
         </div>
 
         {/* 2-Column Product Showcase */}
@@ -410,9 +557,16 @@ Please verify availability and let me know the estimated delivery and payment sc
               <span className="text-xs font-black text-accent uppercase tracking-[0.25em] block">
                 {product.subCategory}
               </span>
-              <h1 className="text-3xl md:text-5xl font-extrabold tracking-tighter text-foreground leading-[1.1]">
-                {product.name}
-              </h1>
+              {(() => {
+                const catDetails = getCatalogDetails(product);
+                return (
+                  <h1 className="text-3xl md:text-5xl font-display font-black tracking-tighter text-foreground leading-[1.1] uppercase">
+                    {catDetails.titleWhite1}{" "}
+                    <span className="text-accent">{catDetails.titleGold}</span>
+                    {catDetails.titleWhite2 && ` ${catDetails.titleWhite2}`}
+                  </h1>
+                );
+              })()}
             </div>
 
             {/* Description Text */}
@@ -422,6 +576,45 @@ Please verify availability and let me know the estimated delivery and payment sc
                 {product.description}
               </p>
             </div>
+
+            {/* Flyer Price Badge */}
+            {(() => {
+              const catDetails = getCatalogDetails(product);
+              const priceText = catDetails.startingPrice.replace("Rs.", "").replace("NPR", "").split("/")[0].trim();
+              const suffixText = catDetails.startingPrice.split("/")[1] || "Piece";
+              return (
+                <div className="bg-card/35 border border-border/40 rounded-lg p-5 space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <span className="text-[10px] uppercase font-black text-muted tracking-widest block mb-1.5">
+                        STARTING PRICE
+                      </span>
+                      <div className="relative inline-flex items-baseline bg-gradient-to-r from-accent to-accent-light text-black px-5 py-2.5 font-display font-black text-2xl rounded-r-lg skew-x-[-12deg] shadow-lg shadow-accent/20">
+                        <span className="skew-x-[12deg] text-base font-bold mr-1">Rs.</span>
+                        <span className="skew-x-[12deg] text-3xl tracking-tighter">
+                          {priceText}
+                        </span>
+                        <span className="skew-x-[12deg] text-xs font-bold uppercase ml-1 opacity-75">
+                          / {suffixText}
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground mt-2 font-medium">
+                        {catDetails.priceNote}
+                      </p>
+                    </div>
+                    
+                    <div className="flex items-start gap-2.5 max-w-[200px] border border-accent/20 bg-accent/5 p-2.5 rounded-lg">
+                      <div className="w-8 h-8 rounded-full bg-accent/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <LucideStar className="w-4 h-4 text-accent fill-accent" />
+                      </div>
+                      <span className="text-[10px] font-bold text-accent uppercase tracking-wider leading-relaxed">
+                        {catDetails.customDesignNote}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Sizing / Variant Selector */}
             {variantsList.length > 0 && (
@@ -561,42 +754,105 @@ Please verify availability and let me know the estimated delivery and payment sc
 
         {/* Tab Content Display */}
         {activeTab === "details" ? (
-          <div className="py-8 space-y-8 animate-in fade-in duration-300">
-            <div className="space-y-4">
-              <h3 className="text-xs uppercase tracking-[0.2em] font-black text-muted-foreground/60">Product Features</h3>
-              <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {getProductFeatures(product).map((feature, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-muted-foreground font-medium">
-                    <div className="w-5 h-5 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0 mt-0.5 border border-accent/20">
-                      <Check className="w-3.5 h-3.5 text-accent" />
-                    </div>
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          (() => {
+            const catDetails = getCatalogDetails(product);
+            return (
+              <div className="py-8 space-y-12 animate-in fade-in duration-300">
+                {/* Features (Circular Cards) */}
+                <div className="space-y-6">
+                  <h3 className="text-sm uppercase tracking-[0.2em] font-black text-accent border-b border-accent/20 pb-2 flex items-center gap-2">
+                    <Sparkles className="w-4 h-4" /> key features
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {catDetails.features.map((feature, i) => (
+                      <div key={i} className="flex items-start gap-4 p-5 rounded-lg bg-card/25 border border-border/40 hover:border-accent/30 transition-all group">
+                        <div className="w-12 h-12 rounded-full border border-accent/30 bg-accent/5 flex items-center justify-center flex-shrink-0 group-hover:border-accent/80 group-hover:bg-accent/10 transition-all shadow-[0_0_10px_rgba(254,145,76,0.05)]">
+                          {renderFeatureIcon(feature.icon)}
+                        </div>
+                        <div>
+                          <h4 className="font-display font-black text-accent text-sm tracking-wider uppercase">
+                            {feature.title}
+                          </h4>
+                          <p className="text-xs sm:text-sm text-muted mt-1 leading-relaxed font-medium">
+                            {feature.description}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
-            <div className="space-y-4 pt-4 border-t border-border/10">
-              <h3 className="text-xs uppercase tracking-[0.2em] font-black text-muted-foreground/60">Perfect For</h3>
-              <div className="flex flex-wrap gap-2.5">
-                {getProductPerfectFor(product).map((venue, i) => (
-                  <span
-                    key={i}
-                    className="px-4 py-2 bg-card border border-border text-foreground text-[10px] font-bold uppercase tracking-wider rounded-[4px] shadow-sm"
-                  >
-                    {venue}
-                  </span>
-                ))}
+                {/* Bottom Grid: Specs & Ideal For */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 pt-4 border-t border-border/10">
+                  {/* Material & Features Table */}
+                  <div className="space-y-6">
+                    <h3 className="text-sm uppercase tracking-[0.2em] font-black text-accent border-b border-accent/20 pb-2 flex items-center gap-2">
+                      <Layers className="w-4 h-4" /> material & features
+                    </h3>
+                    <div className="border border-border/40 rounded-lg overflow-hidden bg-card/10">
+                      <table className="w-full text-left border-collapse">
+                        <tbody>
+                          {Object.entries(catDetails.specsTable).map(([key, val], idx) => (
+                            <tr key={key} className={`border-b border-border/15 hover:bg-card/20 transition-all ${idx % 2 === 0 ? "bg-card/5" : ""}`}>
+                              <td className="px-4 py-3 text-xs sm:text-sm font-bold text-accent uppercase tracking-wider flex items-center gap-2.5">
+                                {getSpecIcon(key)}
+                                <span>{key}</span>
+                              </td>
+                              <td className="px-4 py-3 text-xs sm:text-sm text-foreground font-medium">
+                                {val}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Ideal For Grid */}
+                  <div className="space-y-6 flex flex-col justify-between">
+                    <div>
+                      <h3 className="text-sm uppercase tracking-[0.2em] font-black text-accent border-b border-accent/20 pb-2 flex items-center gap-2">
+                        <Home className="w-4 h-4" /> ideal for
+                      </h3>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-6">
+                        {catDetails.idealFor.map((item, i) => (
+                          <div key={i} className="flex flex-col items-center justify-center p-4 rounded-lg bg-card/20 border border-border/40 hover:border-accent/40 text-center transition-all group">
+                            <div className="w-14 h-14 rounded-full border border-border/80 flex items-center justify-center bg-card/40 group-hover:border-accent group-hover:scale-105 transition-all">
+                              {renderIdealForIcon(item.icon)}
+                            </div>
+                            <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-muted group-hover:text-accent mt-3 transition-colors">
+                              {item.label}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Quote Star Banner */}
+                    <div className="mt-8 relative overflow-hidden border border-[#fe914c]/20 bg-[#fe914c]/[0.02] p-6 rounded-lg shadow-inner">
+                      <div className="absolute top-0 right-0 w-24 h-24 bg-accent/5 rounded-full blur-2xl -mr-8 -mt-8" />
+                      <div className="flex items-start gap-4">
+                        <div className="w-10 h-10 rounded-full bg-accent/15 border border-accent/20 flex items-center justify-center flex-shrink-0 shadow-lg shadow-accent/10 mt-1">
+                          <LucideStar className="w-5 h-5 text-accent fill-accent" />
+                        </div>
+                        <p className="text-xs sm:text-sm font-display font-black text-foreground leading-relaxed uppercase tracking-wider">
+                          {catDetails.quote}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Fabrication Guarantee */}
+                <div className="space-y-4 pt-6 border-t border-border/10">
+                  <h3 className="text-xs uppercase tracking-[0.2em] font-black text-accent">Ordering & Fabrication Guarantee</h3>
+                  <p className="text-xs sm:text-sm text-muted leading-relaxed max-w-3xl font-medium">
+                    Every sign from KTM DECOR is individually crafted in our Kathmandu workshop by skilled artisans. We source premium industrial-grade acrylics, robust low-voltage light fittings, and anti-corrosive backings to ensure longevity and superior performance. Standard fabrication cycles average 5 to 7 business days from design sign-off.
+                  </p>
+                </div>
               </div>
-            </div>
-            
-            <div className="space-y-4 pt-4 border-t border-border/10">
-              <h3 className="text-xs uppercase tracking-[0.2em] font-black text-muted-foreground/60">Ordering & Fabrication Guarantee</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl font-medium">
-                Every sign from KTM DECOR is individually crafted in our Kathmandu workshop by skilled artisans. We source premium industrial-grade acrylics, robust low-voltage light fittings, and anti-corrosive backings to ensure longevity and superior performance. Standard fabrication cycles average 5 to 7 business days from design sign-off.
-              </p>
-            </div>
-          </div>
+            );
+          })()
         ) : (
           <div className="py-8 space-y-8 animate-in fade-in duration-300">
             {/* Rating summary */}

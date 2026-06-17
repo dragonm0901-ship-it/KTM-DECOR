@@ -151,8 +151,8 @@ export default function ShopPage() {
   };
 
   return (
-    <div className="min-h-screen pt-28 md:pt-36 lg:pt-44 pb-20 px-4 sm:px-6 lg:px-8 bg-background text-foreground w-full">
-      <div className="w-full max-w-none">
+    <div className="min-h-screen pt-28 md:pt-36 lg:pt-44 pb-20 px-6 md:px-12 bg-background text-foreground">
+      <div className="max-w-7xl mx-auto w-full">
         
         {/* ── HEADER ROW ── */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 mb-12 border-b border-border/40 pb-8">
