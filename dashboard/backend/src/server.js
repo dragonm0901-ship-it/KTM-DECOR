@@ -2266,17 +2266,30 @@ app.post("/api/quotations", protect, admin, async (req, res) => {
 });
 
 app.put("/api/quotations/:id", protect, admin, async (req, res) => {
-  const { status } = req.body;
+  const { status, clientName, clientEmail, clientContact, projectName, voucherNo, voucherDate, items, discount, tax, amountInWords, remarks, grandTotal } = req.body;
   try {
     const quotation = await Quotation.findById(req.params.id);
     if (!quotation) return res.status(404).json({ message: "Quotation not found" });
 
-    quotation.status = status || quotation.status;
+    if (clientName !== undefined) quotation.clientName = clientName;
+    if (clientEmail !== undefined) quotation.clientEmail = clientEmail;
+    if (clientContact !== undefined) quotation.clientContact = clientContact;
+    if (projectName !== undefined) quotation.projectName = projectName;
+    if (voucherNo !== undefined) quotation.voucherNo = voucherNo;
+    if (voucherDate !== undefined) quotation.voucherDate = voucherDate;
+    if (items !== undefined) quotation.items = items;
+    if (discount !== undefined) quotation.discount = discount;
+    if (tax !== undefined) quotation.tax = tax;
+    if (amountInWords !== undefined) quotation.amountInWords = amountInWords;
+    if (remarks !== undefined) quotation.remarks = remarks;
+    if (grandTotal !== undefined) quotation.grandTotal = grandTotal;
+    if (status !== undefined) quotation.status = status;
+
     await quotation.save();
 
     const populatedQuotation = await Quotation.findById(quotation._id).populate("createdBy", "name role");
     triggerPusher("quotation_updated", populatedQuotation);
-    await logActivity(req.user._id, "Quotation Updated", `Updated quotation status for "${quotation.clientName}" to ${status.toUpperCase()}`);
+    await logActivity(req.user._id, "Quotation Updated", `Updated quotation details for "${quotation.clientName}" on project "${quotation.projectName}"`);
 
     res.json(populatedQuotation);
   } catch (error) {

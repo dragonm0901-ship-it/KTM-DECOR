@@ -9,7 +9,8 @@ import {
   Calendar,
   DollarSign,
   CheckCircle,
-  Download
+  Download,
+  Edit2
 } from "./ui/solar-icons";
 
 // Helper function to convert numbers to Indian/Nepalese system words (Lakhs, Thousands, Rupees)
@@ -70,10 +71,11 @@ const numberToWords = (num: number): string => {
 };
 
 export const QuotationTab: React.FC = () => {
-  const { quotations, createQuotation, updateQuotationStatus, deleteQuotation, user } = useStore();
+  const { quotations, createQuotation, updateQuotation, updateQuotationStatus, deleteQuotation, user } = useStore();
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedQuotation, setSelectedQuotation] = useState<Quotation | null>(null);
+  const [editingQuotationId, setEditingQuotationId] = useState<string | null>(null);
 
   // Form States
   const [clientName, setClientName] = useState("");
@@ -154,7 +156,7 @@ export const QuotationTab: React.FC = () => {
 
     setSubmitting(true);
     try {
-      await createQuotation({
+      const payload = {
         clientName,
         clientEmail,
         clientContact,
@@ -174,13 +176,38 @@ export const QuotationTab: React.FC = () => {
         tax: taxPercent,
         grandTotal,
         status
-      });
+      };
+      
+      if (editingQuotationId) {
+        await updateQuotation(editingQuotationId, payload);
+      } else {
+        await createQuotation(payload);
+      }
       setShowCreateModal(false);
+      setEditingQuotationId(null);
     } catch (err: any) {
-      setFormError(err.message || "Failed to create quotation.");
+      setFormError(err.message || "Failed to save quotation.");
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleEditClick = (quote: Quotation) => {
+    setEditingQuotationId(quote._id);
+    setClientName(quote.clientName);
+    setClientEmail(quote.clientEmail || "");
+    setClientContact(quote.clientContact || "");
+    setProjectName(quote.projectName);
+    setVoucherNo(quote.voucherNo || "");
+    setVoucherDate(quote.voucherDate || "");
+    setAmountInWords(quote.amountInWords || "");
+    setRemarks(quote.remarks || "");
+    setItems(quote.items.map(item => ({ ...item })));
+    setDiscount(quote.discount.toString());
+    setTax(quote.tax.toString());
+    setStatus(quote.status);
+    setFormError("");
+    setShowCreateModal(true);
   };
 
   // Status adjustment
@@ -388,6 +415,7 @@ export const QuotationTab: React.FC = () => {
 
         <button
           onClick={() => {
+            setEditingQuotationId(null);
             setClientName("");
             setClientEmail("");
             setClientContact("");
@@ -538,6 +566,13 @@ export const QuotationTab: React.FC = () => {
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         <button
+                          onClick={() => handleEditClick(quote)}
+                          className="p-1.5 bg-[#FE914C] rounded text-white hover:bg-[#E2752D] transition-colors shadow-sm"
+                          title="Edit Quotation"
+                        >
+                          <Edit2 size={14} />
+                        </button>
+                        <button
                           onClick={() => setSelectedQuotation(quote)}
                           className="p-1.5 bg-blue-600 rounded text-white hover:bg-blue-700 transition-colors shadow-sm"
                           title="Generate printable invoice estimate layout"
@@ -570,7 +605,7 @@ export const QuotationTab: React.FC = () => {
             <div className="flex items-center justify-between mb-4 border-b border-border pb-2">
               <h2 className="text-lg font-bold font-display flex items-center gap-2">
                 <FileText className="text-accent" />
-                Generate Price Proposal Estimation
+                {editingQuotationId ? "Edit Price Proposal Estimation" : "Generate Price Proposal Estimation"}
               </h2>
               <button
                 onClick={() => setShowCreateModal(false)}
@@ -865,7 +900,7 @@ export const QuotationTab: React.FC = () => {
                   disabled={submitting}
                   className="px-5 py-2 bg-accent text-white rounded-xl text-xs hover:bg-accent-dark transition-colors shadow-md shadow-accent/15 font-bold disabled:opacity-50"
                 >
-                  {submitting ? "Saving Proposal..." : "Generate Proposal"}
+                  {submitting ? "Saving Proposal..." : editingQuotationId ? "Save Changes" : "Generate Proposal"}
                 </button>
               </div>
             </form>
@@ -926,9 +961,18 @@ export const QuotationTab: React.FC = () => {
 
               {/* Party & Voucher Details */}
               <div className="flex flex-col sm:flex-row justify-between items-start gap-2 sm:gap-0 text-[11px] font-semibold text-gray-800 border-t border-b border-gray-200 py-3">
-                <div className="flex gap-2">
-                  <span className="text-gray-500 font-medium">Party:</span>
-                  <span className="font-extrabold text-gray-950 text-xs">{selectedQuotation.clientName}</span>
+                <div className="flex flex-col gap-1">
+                  <div className="flex gap-2">
+                    <span className="text-gray-500 font-medium">Party:</span>
+                    <span className="font-extrabold text-gray-950 text-xs">{selectedQuotation.clientName}</span>
+                  </div>
+                  {(selectedQuotation.clientContact || selectedQuotation.clientEmail) && (
+                    <div className="text-gray-600 font-medium text-[10px]">
+                      {selectedQuotation.clientContact && <span>{selectedQuotation.clientContact}</span>}
+                      {selectedQuotation.clientContact && selectedQuotation.clientEmail && <span> • </span>}
+                      {selectedQuotation.clientEmail && <span>{selectedQuotation.clientEmail}</span>}
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-1 text-left sm:text-right">
                   <div>

@@ -324,7 +324,8 @@ interface DashboardState {
 
   // Quotations
   fetchQuotations: () => Promise<void>;
-  createQuotation: (data: any) => Promise<void>;
+  createQuotation: (data: Partial<Quotation>) => Promise<void>;
+  updateQuotation: (id: string, data: Partial<Quotation>) => Promise<void>;
   updateQuotationStatus: (id: string, status: Quotation["status"]) => Promise<void>;
   deleteQuotation: (id: string) => Promise<void>;
   
@@ -1611,6 +1612,29 @@ export const useStore = create<DashboardState>((set, get) => ({
       });
     } catch (err) {
       console.error("Create quotation failed:", err);
+      throw err;
+    }
+  },
+
+  updateQuotation: async (quotationId, quotationData) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/quotations/${quotationId}`, {
+        method: "PUT",
+        headers: {
+          ...getHeaders(token),
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(quotationData),
+      });
+      if (!res.ok) throw new Error("Quotation update failed");
+      const updatedQuotation = await res.json();
+      set((state) => {
+        const filtered = state.quotations.filter((q) => q._id !== quotationId);
+        return { quotations: [updatedQuotation, ...filtered] };
+      });
+    } catch (err) {
+      console.error("Update quotation failed:", err);
       throw err;
     }
   },
