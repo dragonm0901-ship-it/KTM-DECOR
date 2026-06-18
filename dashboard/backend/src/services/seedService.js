@@ -533,7 +533,8 @@ export const runSeeds = async () => {
     const seedMeta = await metaCollection.findOne({ key: "seeded_v1" });
     if (seedMeta) {
       seeded = true;
-      console.log("Database already seeded (verified by system_metas).");
+      console.log("Database already seeded (verified by system_metas). Syncing users...");
+      await seedUsers();
       return;
     }
 
@@ -557,7 +558,8 @@ export const runSeeds = async () => {
       // Catch duplicate key error (code 11000) indicating another concurrent process won the race
       if (innerError.code === 11000) {
         seeded = true;
-        console.log("Database already seeded (concurrency lock conflict resolved).");
+        console.log("Database already seeded (concurrency lock conflict resolved). Syncing users...");
+        await seedUsers();
         return;
       }
       throw innerError;
