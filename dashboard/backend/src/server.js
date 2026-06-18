@@ -1636,8 +1636,8 @@ app.get("/api/quotations", protect, admin, async (req, res) => {
 });
 
 app.post("/api/quotations", protect, admin, async (req, res) => {
-  const { clientName, clientEmail, clientContact, projectName, items, discount, tax, grandTotal, status, date, voucherNo, voucherDate, amountInWords, remarks } = req.body;
   try {
+    const { clientName, clientEmail, clientContact, projectName, items, discount, tax, grandTotal, status, date, voucherNo, voucherDate, amountInWords, remarks } = req.body || {};
     const quotation = new Quotation({
       clientName,
       clientEmail,
@@ -1668,8 +1668,8 @@ app.post("/api/quotations", protect, admin, async (req, res) => {
 });
 
 app.put("/api/quotations/:id", protect, admin, async (req, res) => {
-  const { status, clientName, clientEmail, clientContact, projectName, voucherNo, voucherDate, items, discount, tax, amountInWords, remarks, grandTotal } = req.body;
   try {
+    const { status, clientName, clientEmail, clientContact, projectName, voucherNo, voucherDate, items, discount, tax, amountInWords, remarks, grandTotal } = req.body || {};
     const quotation = await Quotation.findById(req.params.id);
     if (!quotation) return res.status(404).json({ message: "Quotation not found" });
 

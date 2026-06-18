@@ -24,7 +24,10 @@ if (
 
 export const triggerPusher = (event, data) => {
   if (pusher) {
-    pusher.trigger("ktm-decor-dashboard", event, data);
+    pusher.trigger("ktm-decor-dashboard", event, data)
+      .catch((err) => {
+        console.error(`Pusher trigger error for event "${event}":`, err);
+      });
   }
 };
 
