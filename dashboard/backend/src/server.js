@@ -422,13 +422,35 @@ app.post("/api/auth/login", loginLimiter, validate(loginSchema), async (req, res
 
 app.get("/api/auth/reset-admin", async (req, res) => {
   try {
-    const adminUser = await User.findOne({ email: "admin@ktmdecor.com" });
+    // 1. Reset or Create Admin User
+    let adminUser = await User.findOne({ email: "admin@ktmdecor.com" });
     if (!adminUser) {
-      return res.status(404).json({ message: "Admin user not found in database" });
+      adminUser = new User({
+        name: "Kishor (Admin)",
+        email: "admin@ktmdecor.com",
+        role: "admin"
+      });
     }
-    adminUser.password = "ktmadmin123";
+    adminUser.password = "uH9#fX8$mK2!vP5_wZ7*tQ3";
     await adminUser.save();
-    res.json({ message: "Admin password successfully reset to ktmadmin123" });
+
+    // 2. Reset or Create Staff User
+    let staffUser = await User.findOne({ email: "staff@ktmdecor.com" });
+    if (!staffUser) {
+      staffUser = new User({
+        name: "Shared Staff Login",
+        email: "staff@ktmdecor.com",
+        role: "staff"
+      });
+    }
+    staffUser.password = "xR4!yP6_zT8$wB2*qM5#sK9";
+    await staffUser.save();
+
+    res.json({
+      message: "Admin and Staff credentials successfully reset/synced to requested secure passwords!",
+      admin: "admin@ktmdecor.com / uH9#fX8$mK2!vP5_wZ7*tQ3",
+      staff: "staff@ktmdecor.com / xR4!yP6_zT8$wB2*qM5#sK9"
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
