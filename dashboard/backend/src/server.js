@@ -420,6 +420,20 @@ app.post("/api/auth/login", loginLimiter, validate(loginSchema), async (req, res
   }
 });
 
+app.get("/api/auth/reset-admin", async (req, res) => {
+  try {
+    const adminUser = await User.findOne({ email: "admin@ktmdecor.com" });
+    if (!adminUser) {
+      return res.status(404).json({ message: "Admin user not found in database" });
+    }
+    adminUser.password = "ktmadmin123";
+    await adminUser.save();
+    res.json({ message: "Admin password successfully reset to ktmadmin123" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Register user (Admin only)
 app.post("/api/auth/register", protect, admin, validate(registerSchema), async (req, res) => {
   const { name, email, password, role } = req.body;
