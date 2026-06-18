@@ -50,10 +50,16 @@ export const App: React.FC = () => {
     setLoginError("");
     setLoading(true);
 
-    const success = await login(email.trim().toLowerCase(), password);
-    setLoading(false);
-    if (!success) {
-      setLoginError("Invalid email or password.");
+    try {
+      await login(email.trim().toLowerCase(), password);
+    } catch (err: any) {
+      if (err.message === "Failed to fetch") {
+        setLoginError("Failed to connect to backend. Please ensure the backend server (port 5001) is running.");
+      } else {
+        setLoginError(err.message || "Invalid email or password.");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -66,7 +72,7 @@ export const App: React.FC = () => {
         <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-accent/5 blur-3xl" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-accent/5 blur-3xl" />
 
-        <div className="w-full max-w-lg z-10 space-y-8">
+        <div className="w-full max-w-sm md:max-w-lg z-10 space-y-8">
           <div className="text-center space-y-4 flex flex-col items-center">
             <img
               src="/admin/logo/ktm%20decor.svg"
@@ -78,7 +84,7 @@ export const App: React.FC = () => {
             </p>
           </div>
 
-          <div className="glass-panel p-10 md:p-12 rounded-2xl border border-border shadow-2xl space-y-8 bg-card/90 backdrop-blur-md">
+          <div className="glass-panel p-6 md:p-12 rounded-2xl border border-border shadow-2xl space-y-8 bg-card/90 backdrop-blur-md">
             <div className="space-y-2 text-center pb-2 border-b border-border/50">
               <h2 className="text-2xl font-extrabold font-display text-foreground tracking-tight flex items-center justify-center gap-2.5">
                 <LogIn size={26} className="text-accent animate-pulse" />
@@ -91,7 +97,7 @@ export const App: React.FC = () => {
 
             {loginError && (
               <div className="p-4 text-xs bg-red-500/10 border border-red-500/20 text-red-500 rounded-lg font-bold flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-red-500 block shrink-0 animate-ping" />
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500 block shrink-0" />
                 <span>{loginError}</span>
               </div>
             )}

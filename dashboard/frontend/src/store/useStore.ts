@@ -762,7 +762,7 @@ export const useStore = create<DashboardState>((set, get) => ({
       return true;
     } catch (error) {
       console.error("Login failure:", error);
-      return false;
+      throw error;
     }
   },
 
