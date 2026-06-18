@@ -49,4 +49,7 @@ const FieldNoteSchema = new mongoose.Schema(
   }
 );
 
+FieldNoteSchema.index({ deleted: 1, createdAt: -1 });
+FieldNoteSchema.index({ deletedAt: 1 }, { expireAfterSeconds: 604800 });
+
 export default mongoose.model("FieldNote", FieldNoteSchema);

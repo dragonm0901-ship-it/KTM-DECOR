@@ -142,27 +142,29 @@ export const App: React.FC = () => {
               </button>
             </form>
 
-            <div className="border-t border-border/80 pt-4 mt-6">
-              <span className="text-[10px] font-bold text-muted uppercase tracking-wider block mb-2">
-                Click credentials to test:
-              </span>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => handleSetTestCredentials("admin@ktmdecor.com", import.meta.env.VITE_SEED_ADMIN_PASSWORD || "uH9#fX8$mK2!vP5_wZ7*tQ3")}
-                  className="px-3 py-2 text-[10px] text-left border border-border bg-background rounded hover:border-accent transition-all hover:bg-accent/5"
-                >
-                  <span className="font-bold text-accent block">Kishor (Admin)</span>
-                  admin@ktmdecor.com
-                </button>
-                <button
-                  onClick={() => handleSetTestCredentials("staff@ktmdecor.com", import.meta.env.VITE_SEED_STAFF_PASSWORD || "xR4!yP6_zT8$wB2*qM5#sK9")}
-                  className="px-3 py-2 text-[10px] text-left border border-border bg-background rounded hover:border-accent transition-all hover:bg-accent/5"
-                >
-                  <span className="font-bold text-accent block">Shared Staff Login</span>
-                  staff@ktmdecor.com
-                </button>
+            {import.meta.env.DEV && (
+              <div className="border-t border-border/80 pt-4 mt-6">
+                <span className="text-[10px] font-bold text-muted uppercase tracking-wider block mb-2">
+                  Click credentials to test (DEV ONLY):
+                </span>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => handleSetTestCredentials("admin@ktmdecor.com", "uH9#fX8$mK2!vP5_wZ7*tQ3")}
+                    className="px-3 py-2 text-[10px] text-left border border-border bg-background rounded hover:border-accent transition-all hover:bg-accent/5"
+                  >
+                    <span className="font-bold text-accent block">Kishor (Admin)</span>
+                    admin@ktmdecor.com
+                  </button>
+                  <button
+                    onClick={() => handleSetTestCredentials("staff@ktmdecor.com", "xR4!yP6_zT8$wB2*qM5#sK9")}
+                    className="px-3 py-2 text-[10px] text-left border border-border bg-background rounded hover:border-accent transition-all hover:bg-accent/5"
+                  >
+                    <span className="font-bold text-accent block">Shared Staff Login</span>
+                    staff@ktmdecor.com
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

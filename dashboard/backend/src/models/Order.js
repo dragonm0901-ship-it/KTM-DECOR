@@ -144,4 +144,8 @@ OrderSchema.pre("save", function (next) {
   next();
 });
 
+OrderSchema.index({ deleted: 1, createdAt: -1 });
+OrderSchema.index({ approved: 1, deleted: 1 });
+OrderSchema.index({ deletedAt: 1 }, { expireAfterSeconds: 604800 });
+
 export default mongoose.model("Order", OrderSchema);
