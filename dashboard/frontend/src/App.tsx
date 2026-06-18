@@ -53,13 +53,8 @@ export const App: React.FC = () => {
     const success = await login(email.trim().toLowerCase(), password);
     setLoading(false);
     if (!success) {
-      setLoginError("Invalid email or password. Hint: check pre-filled test users.");
+      setLoginError("Invalid email or password.");
     }
-  };
-
-  const handleSetTestCredentials = (testEmail: string, testPass: string) => {
-    setEmail(testEmail);
-    setPassword(testPass);
   };
 
   // Auth Guard
@@ -71,37 +66,43 @@ export const App: React.FC = () => {
         <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-accent/5 blur-3xl" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-accent/5 blur-3xl" />
 
-        <div className="w-full max-w-md z-10 space-y-6">
+        <div className="w-full max-w-lg z-10 space-y-8">
           <div className="text-center space-y-4 flex flex-col items-center">
             <img
               src="/admin/logo/ktm%20decor.svg"
               alt="KTM DECOR"
-              className="h-16 w-auto object-contain dark:invert dark:hue-rotate-180"
+              className="h-20 w-auto object-contain dark:invert dark:hue-rotate-180 transition-transform duration-300 hover:scale-105"
             />
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+            <p className="text-sm font-bold uppercase tracking-widest text-accent">
               Admin & Staff Work Station
             </p>
           </div>
 
-          <div className="glass-panel p-8 rounded-xl border border-border shadow-2xl space-y-6 bg-card/85">
-            <h2 className="text-lg font-bold font-display text-foreground flex items-center gap-2">
-              <LogIn size={20} className="text-accent" />
-              Sign in to Dashboard
-            </h2>
+          <div className="glass-panel p-10 md:p-12 rounded-2xl border border-border shadow-2xl space-y-8 bg-card/90 backdrop-blur-md">
+            <div className="space-y-2 text-center pb-2 border-b border-border/50">
+              <h2 className="text-2xl font-extrabold font-display text-foreground tracking-tight flex items-center justify-center gap-2.5">
+                <LogIn size={26} className="text-accent animate-pulse" />
+                Sign In
+              </h2>
+              <p className="text-xs text-muted font-medium uppercase tracking-wider">
+                KTM DECOR Enterprise Work Station
+              </p>
+            </div>
 
             {loginError && (
-              <div className="p-3 text-xs bg-red-500/10 border border-red-500/20 text-red-500 rounded font-semibold">
-                {loginError}
+              <div className="p-4 text-xs bg-red-500/10 border border-red-500/20 text-red-500 rounded-lg font-bold flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500 block shrink-0 animate-ping" />
+                <span>{loginError}</span>
               </div>
             )}
 
-            <form onSubmit={handleLoginSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">
-                  Email address
+            <form onSubmit={handleLoginSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-muted uppercase tracking-widest">
+                  Email Address
                 </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-2.5 h-4.5 w-4.5 text-muted" />
+                <div className="relative group">
+                  <Mail className="absolute left-4 top-3.5 h-5 w-5 text-muted group-focus-within:text-accent transition-colors duration-200" />
                   <input
                     type="email"
                     value={email}
@@ -109,62 +110,58 @@ export const App: React.FC = () => {
                     autoCapitalize="none"
                     autoCorrect="off"
                     spellCheck="false"
-                    className="w-full pl-10 pr-4 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm"
-                    placeholder="name@ktmdecor.com"
+                    className="w-full pl-12 pr-4 py-3.5 border border-border rounded-lg bg-background/50 focus:bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-base transition-all duration-200"
+                    placeholder="yourname@ktmdecor.com"
                     required
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-muted uppercase tracking-widest">
                   Password
                 </label>
-                <div className="relative">
-                  <KeyRound className="absolute left-3 top-2.5 h-4.5 w-4.5 text-muted" />
+                <div className="relative group">
+                  <KeyRound className="absolute left-4 top-3.5 h-5 w-5 text-muted group-focus-within:text-accent transition-colors duration-200" />
                   <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm"
+                    className="w-full pl-12 pr-4 py-3.5 border border-border rounded-lg bg-background/50 focus:bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-base transition-all duration-200"
                     placeholder="••••••••"
                     required
                   />
                 </div>
               </div>
 
+              <div className="flex items-center justify-between text-xs pt-1">
+                <label className="flex items-center gap-2 cursor-pointer font-semibold text-muted hover:text-foreground select-none">
+                  <input 
+                    type="checkbox" 
+                    className="w-4 h-4 rounded border-border text-accent focus:ring-accent/30 accent-accent cursor-pointer"
+                  />
+                  <span>Remember this station</span>
+                </label>
+                <a href="#" className="font-bold text-accent hover:text-accent-dark transition-colors">
+                  Forgot password?
+                </a>
+              </div>
+
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 bg-accent hover:bg-accent-dark text-white rounded font-bold text-sm transition-all shadow-md shadow-accent/20 flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full py-3.5 bg-accent hover:bg-accent-dark text-white rounded-lg font-bold text-base transition-all shadow-lg hover:shadow-accent/30 flex items-center justify-center gap-2 disabled:opacity-50 active:scale-[0.98]"
               >
-                {loading ? "Authenticating..." : "Login to Work Station"}
+                {loading ? (
+                  <>
+                    <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Authenticating...</span>
+                  </>
+                ) : (
+                  "Access Work Station"
+                )}
               </button>
             </form>
-
-            {import.meta.env.DEV && (
-              <div className="border-t border-border/80 pt-4 mt-6">
-                <span className="text-[10px] font-bold text-muted uppercase tracking-wider block mb-2">
-                  Click credentials to test (DEV ONLY):
-                </span>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => handleSetTestCredentials("admin@ktmdecor.com", "uH9#fX8$mK2!vP5_wZ7*tQ3")}
-                    className="px-3 py-2 text-[10px] text-left border border-border bg-background rounded hover:border-accent transition-all hover:bg-accent/5"
-                  >
-                    <span className="font-bold text-accent block">Kishor (Admin)</span>
-                    admin@ktmdecor.com
-                  </button>
-                  <button
-                    onClick={() => handleSetTestCredentials("staff@ktmdecor.com", "xR4!yP6_zT8$wB2*qM5#sK9")}
-                    className="px-3 py-2 text-[10px] text-left border border-border bg-background rounded hover:border-accent transition-all hover:bg-accent/5"
-                  >
-                    <span className="font-bold text-accent block">Shared Staff Login</span>
-                    staff@ktmdecor.com
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
