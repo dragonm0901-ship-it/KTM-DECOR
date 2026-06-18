@@ -43,4 +43,6 @@ const NotificationSchema = new mongoose.Schema(
   }
 );
 
+NotificationSchema.index({ recipient: 1, read: 1, createdAt: -1 });
+
 export default mongoose.model("Notification", NotificationSchema);

@@ -3,15 +3,25 @@ import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
-import Pusher from "pusher";
 import bcrypt from "bcryptjs";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import ExcelJS from "exceljs";
+import helmet from "helmet";
+import mongoSanitize from "express-mongo-sanitize";
+import { rateLimit } from "express-rate-limit";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Config & Services & Middlewares
+import { connectDB } from "./config/db.js";
+import { triggerPusher } from "./config/pusher.js";
+import { logActivity } from "./services/activityLogger.js";
+import { runSeeds } from "./services/seedService.js";
+import { buildStatementWorkbook } from "./services/exportService.js";
+import { errorHandler } from "./middleware/errorHandler.js";
 
 // Models
 import User from "./models/User.js";
@@ -31,10 +41,50 @@ import MonthlyStatement from "./models/MonthlyStatement.js";
 
 // Middleware
 import { protect, admin } from "./middleware/auth.js";
+import {
+  validate,
+  loginSchema,
+  registerSchema,
+  createTaskSchema,
+  updateTaskSchema,
+  fieldNoteSchema
+} from "./middleware/validation.js";
 
 dotenv.config();
 
+const SHARED_STAFF_EMAIL = process.env.SHARED_STAFF_EMAIL || "staff@ktmdecor.com";
+
 const app = express();
+
+// Apply Helmet for security headers (customized for API service)
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false,
+}));
+
+// Apply Mongo Sanitize to prevent NoSQL injection
+app.use(mongoSanitize());
+
+// Define global rate limiter (100 requests per minute)
+const globalLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Too many requests from this IP, please try again later." }
+});
+
+// Define auth login rate limiter (5 attempts per 15 minutes)
+export const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Too many login attempts from this IP, please try again after 15 minutes." }
+});
+
+// Apply global rate limiter to all requests
+app.use(globalLimiter);
 
 // Configure CORS (support local dev + vercel subdomains and previews)
 const allowedOrigins = [
@@ -55,7 +105,9 @@ app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
-      const isAllowed = allowedOrigins.some((allowed) => allowed === origin || origin.endsWith(".vercel.app"));
+      const isAllowed = allowedOrigins.some((allowed) => allowed === origin) || 
+                        (/^https:\/\/ktm-decor-admin(-[a-zA-Z0-9-]+)?\.vercel\.app$/.test(origin)) ||
+                        (/^https:\/\/ktm-decor-site(-[a-zA-Z0-9-]+)?\.vercel\.app$/.test(origin));
       if (isAllowed) {
         callback(null, true);
       } else {
@@ -71,39 +123,6 @@ app.use(express.urlencoded({ limit: "15mb", extended: true }));
 // Connection to MongoDB
 const PORT = process.env.PORT || 5001;
 const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI || "mongodb://localhost:27017/ktm_decor_dashboard";
-
-// Database Connection Caching for Serverless
-let cachedDb = null;
-let connectionPromise = null;
-
-const connectDB = async () => {
-  if (mongoose.connection?.readyState === 1) return mongoose.connection;
-  if (mongoose.connection?.readyState === 2) {
-    if (connectionPromise) {
-      return connectionPromise;
-    }
-  }
-
-  if (!MONGO_URI) throw new Error("MONGO_URI or MONGODB_URI environment variable is not defined");
-  mongoose.set("strictQuery", true);
-
-  connectionPromise = mongoose.connect(MONGO_URI, {
-    serverSelectionTimeoutMS: 5000,
-  }).then((conn) => {
-    connectionPromise = null;
-    cachedDb = conn;
-    // Auto-generate missing monthly statements for previous month
-    generateMissingPreviousMonthStatements().catch((err) => {
-      console.error("Auto statement generation error:", err);
-    });
-    return conn;
-  }).catch((err) => {
-    connectionPromise = null;
-    throw err;
-  });
-
-  return connectionPromise;
-};
 
 // Sync manual registry order to Sales ledger
 async function syncOrderSale(order, userId) {
@@ -153,51 +172,8 @@ async function syncOrderSale(order, userId) {
   }
 }
 
-// Sync existing approved orders with sales collection on startup
-async function syncExistingApprovedOrders() {
-  try {
-    const approvedOrders = await Order.find({ approved: true, deleted: { $ne: true } });
-    let createdCount = 0;
-    for (const order of approvedOrders) {
-      const existingSale = await Sale.findOne({ orderId: order._id });
-      if (!existingSale) {
-        const sale = new Sale({
-          clientName: order.customerName,
-          productName: order.productName,
-          amount: order.totalPrice,
-          date: order.approvedAt || order.updatedAt || new Date(),
-          paymentMethod: order.paymentMethod || "cash",
-          notes: order.manufacturingNotes || `Automatic sale from approved order: ${order.productName}`,
-          createdBy: order.createdBy,
-          orderId: order._id
-        });
-        await sale.save();
-        createdCount++;
-      }
-    }
-    if (createdCount > 0) {
-      console.log(`Synced database: created ${createdCount} missing Sales records for approved orders.`);
-    }
-  } catch (err) {
-    console.error("Error syncing existing approved orders with sales:", err);
-  }
-}
-
-// Seeding Caching
-let seeded = false;
-const runSeeds = async () => {
-  if (seeded) return;
-  // Let errors bubble up to database middleware so it fails gracefully with a 500 status code
-  await seedUsers();
-  await seedProducts();
-  await seedInventoryItems();
-  await syncExistingApprovedOrders();
-  seeded = true;
-  console.log("Database seeded successfully");
-};
-
 // Diagnostic endpoint to check configuration status
-app.get("/api/auth/status", async (req, res) => {
+app.get("/api/auth/status", protect, admin, async (req, res) => {
   const states = {
     0: "disconnected",
     1: "connected",
@@ -305,9 +281,7 @@ app.get("/api/auth/status", async (req, res) => {
 app.use(async (req, res, next) => {
   try {
     await connectDB();
-    if (!seeded) {
-      await runSeeds();
-    }
+    await runSeeds();
     next();
   } catch (err) {
     console.error("Database middleware connection error:", err);
@@ -329,7 +303,7 @@ app.get("/api/bootstrap", protect, async (req, res) => {
     // 1. Build tasks query
     let taskQuery = { deleted: { $ne: true } };
     if (userRole !== "admin") {
-      if (userEmail === "staff@ktmdecor.com") {
+      if (userEmail === SHARED_STAFF_EMAIL) {
         const staffUsers = await User.find({ role: "staff" }).select("_id");
         const staffIds = staffUsers.map((u) => u._id);
         taskQuery = { assignee: { $in: [userId, ...staffIds] }, deleted: { $ne: true } };
@@ -340,7 +314,7 @@ app.get("/api/bootstrap", protect, async (req, res) => {
 
     // 2. Build notifications query
     let notifQuery = {};
-    if (userEmail === "staff@ktmdecor.com") {
+    if (userEmail === SHARED_STAFF_EMAIL) {
       const staffUsers = await User.find({ role: "staff" }).select("_id");
       const staffIds = staffUsers.map((u) => u._id);
       notifQuery = {
@@ -361,39 +335,45 @@ app.get("/api/bootstrap", protect, async (req, res) => {
       tasks: Task.find(taskQuery)
         .populate("assignee", "name email role")
         .populate("createdBy", "name role")
-        .sort({ pinned: -1, createdAt: -1 }),
-      users: User.find({}).select("name email role"),
-      notifications: Notification.find(notifQuery).sort({ createdAt: -1 }),
+        .sort({ pinned: -1, createdAt: -1 })
+        .lean(),
+      users: User.find({}).select("name email role").lean(),
+      notifications: Notification.find(notifQuery).sort({ createdAt: -1 }).lean(),
       campaigns: FieldNote.find({ deleted: { $ne: true } })
         .populate("createdBy", "name role")
-        .sort({ createdAt: -1 }),
+        .sort({ createdAt: -1 })
+        .lean(),
       activities: ActivityLog.find({})
         .populate("user", "name email role")
         .sort({ createdAt: -1 })
-        .limit(30),
-      products: Product.find({}).sort({ createdAt: -1 }),
+        .limit(30)
+        .lean(),
+      products: Product.find({}).sort({ createdAt: -1 }).lean(),
       orders: Order.find({ deleted: { $ne: true } })
         .populate("createdBy", "name role")
         .populate("assignee", "name email role")
-        .sort({ createdAt: -1 }),
+        .sort({ createdAt: -1 })
+        .lean(),
       inventoryItems: InventoryItem.find({})
         .populate("createdBy", "name role")
-        .sort({ name: 1 }),
+        .sort({ name: 1 })
+        .lean(),
       quickNotes: QuickNote.find({})
         .populate("createdBy", "name role")
-        .sort({ createdAt: -1 }),
+        .sort({ createdAt: -1 })
+        .lean(),
     };
 
     // 4. Inject admin-only data
     if (userRole === "admin") {
-      promises.sales = Sale.find({}).populate("createdBy", "name role").populate("orderId").sort({ date: -1 });
-      promises.expenses = Expense.find({}).populate("createdBy", "name role").sort({ date: -1 });
-      promises.purchases = Purchase.find({}).populate("createdBy", "name role").sort({ date: -1 });
-      promises.quotations = Quotation.find({}).populate("createdBy", "name role").sort({ date: -1 });
+      promises.sales = Sale.find({}).populate("createdBy", "name role").populate("orderId").sort({ date: -1 }).lean();
+      promises.expenses = Expense.find({}).populate("createdBy", "name role").sort({ date: -1 }).lean();
+      promises.purchases = Purchase.find({}).populate("createdBy", "name role").sort({ date: -1 }).lean();
+      promises.quotations = Quotation.find({}).populate("createdBy", "name role").sort({ date: -1 }).lean();
       
-      promises.binTasks = Task.find({ deleted: true }).populate("assignee", "name email role").populate("createdBy", "name role");
-      promises.binCampaigns = FieldNote.find({ deleted: true }).populate("createdBy", "name role");
-      promises.binOrders = Order.find({ deleted: true }).populate("assignee", "name email role").populate("createdBy", "name role");
+      promises.binTasks = Task.find({ deleted: true }).populate("assignee", "name email role").populate("createdBy", "name role").lean();
+      promises.binCampaigns = FieldNote.find({ deleted: true }).populate("createdBy", "name role").lean();
+      promises.binOrders = Order.find({ deleted: true }).populate("assignee", "name email role").populate("createdBy", "name role").lean();
     }
 
     // 5. Query all collections concurrently
@@ -412,596 +392,18 @@ app.get("/api/bootstrap", protect, async (req, res) => {
   }
 });
 
-// Initialize Pusher Client
-let pusher = null;
-if (
-  process.env.PUSHER_APP_ID &&
-  process.env.PUSHER_KEY &&
-  process.env.PUSHER_SECRET &&
-  process.env.PUSHER_CLUSTER
-) {
-  pusher = new Pusher({
-    appId: process.env.PUSHER_APP_ID,
-    key: process.env.PUSHER_KEY,
-    secret: process.env.PUSHER_SECRET,
-    cluster: process.env.PUSHER_CLUSTER,
-    useTLS: true,
-  });
-  console.log("Pusher real-time client initialized.");
-} else {
-  console.warn("Pusher credentials missing. Real-time updates will be simulated locally.");
-}
-
-// Helper to broadcast events via Pusher
-const triggerPusher = (event, data) => {
-  if (pusher) {
-    pusher.trigger("ktm-dashboard", event, data).catch((err) => {
-      console.error(`Pusher trigger error for event ${event}:`, err);
-    });
-  } else {
-    console.log(`[Simulated Real-time Broadcast] Event: ${event}`);
-  }
-};
-
-// Helper to log activities and emit real-time logs
-const logActivity = async (userId, action, details) => {
-  try {
-    const log = await ActivityLog.create({ user: userId, action, details });
-    const populatedLog = await log.populate("user", "name email role");
-    triggerPusher("new_activity", populatedLog);
-    return populatedLog;
-  } catch (error) {
-    console.error("Error logging activity:", error);
-  }
-};
-
-// Helper: only update a user's password if the stored hash doesn't match the env variable.
-// This prevents the double-hashing bug that corrupts credentials on every cold start.
-const syncPasswordIfNeeded = async (user, envPassword) => {
-  if (!envPassword) return false;
-  const alreadyMatches = await bcrypt.compare(envPassword, user.password);
-  if (alreadyMatches) return false;
-  // Password mismatch — update it (pre-save hook will hash it)
-  user.password = envPassword;
-  await user.save();
-  console.log(`  ↳ Password synced for ${user.email}`);
-  return true;
-};
-
-// Seed default users if DB is empty
-const seedUsers = async () => {
-  try {
-    // Delete old test users
-    await User.deleteMany({ email: { $in: ["rohan@ktmdecor.com", "anjali@ktmdecor.com"] } });
-
-    // Seed Admin
-    const adminExists = await User.findOne({ email: "admin@ktmdecor.com" });
-    if (!adminExists) {
-      await User.create({
-        name: "Kishor (Admin)",
-        email: "admin@ktmdecor.com",
-        password: process.env.SEED_ADMIN_PASSWORD || "adminpassword",
-        role: "admin",
-      });
-      console.log("  ↳ Created admin user: admin@ktmdecor.com");
-    } else {
-      await syncPasswordIfNeeded(adminExists, process.env.SEED_ADMIN_PASSWORD);
-      if (adminExists.name !== "Kishor (Admin)") {
-        adminExists.name = "Kishor (Admin)";
-        await adminExists.save();
-        console.log("  ↳ Updated admin user name to Kishor (Admin)");
-      }
-    }
-
-    // Seed Shared Staff Login user
-    const sharedStaffExists = await User.findOne({ email: "staff@ktmdecor.com" });
-    if (!sharedStaffExists) {
-      await User.create({
-        name: "Shared Staff Login",
-        email: "staff@ktmdecor.com",
-        password: process.env.SEED_STAFF_PASSWORD || "staffpassword",
-        role: "staff",
-      });
-      console.log("  ↳ Created shared staff user: staff@ktmdecor.com");
-    } else {
-      await syncPasswordIfNeeded(sharedStaffExists, process.env.SEED_STAFF_PASSWORD);
-    }
-
-    // Seed the 6 Nepali staff members
-    const nepaliStaff = [
-      { name: "Sandip Thapa", email: "sandip@ktmdecor.com" },
-      { name: "Biraj Shrestha", email: "biraj@ktmdecor.com" },
-      { name: "Anup Adhikari", email: "anup@ktmdecor.com" },
-      { name: "Niran Tamang", email: "niran@ktmdecor.com" },
-      { name: "Sujan Maharjan", email: "sujan@ktmdecor.com" },
-      { name: "Kiran Bhattarai", email: "kiran@ktmdecor.com" },
-    ];
-
-    for (const s of nepaliStaff) {
-      const exists = await User.findOne({ email: s.email });
-      if (!exists) {
-        await User.create({
-          name: s.name,
-          email: s.email,
-          password: process.env.SEED_STAFF_PASSWORD || "staffpassword",
-          role: "staff",
-        });
-      } else {
-        await syncPasswordIfNeeded(exists, process.env.SEED_STAFF_PASSWORD);
-      }
-    }
-
-    // Clean up or reassign tasks/notifications referencing deleted users (e.g. rohan or anjali)
-    const validUsers = await User.find({}).select("_id");
-    const validUserIds = validUsers.map((u) => u._id.toString());
-    const sandip = await User.findOne({ email: "sandip@ktmdecor.com" });
-
-    if (sandip) {
-      // Reassign orphan tasks to Sandip Thapa
-      await Task.updateMany(
-        { $or: [{ assignee: { $nin: validUserIds } }, { assignee: null }] },
-        { assignee: sandip._id }
-      );
-      // Reassign orphan notifications to Sandip Thapa
-      await Notification.updateMany(
-        { recipient: { $nin: [...validUserIds, null] } },
-        { recipient: sandip._id }
-      );
-    } else {
-      // Fallback: Delete orphans if Sandip does not exist
-      await Task.deleteMany({ assignee: { $nin: validUserIds } });
-      await Notification.deleteMany({ recipient: { $nin: [...validUserIds, null] } });
-    }
-
-    console.log("User seeding and verification completed successfully.");
-  } catch (error) {
-    console.error("Error seeding users:", error);
-  }
-};
-
-// Seed default products if DB is empty (initializes the 12 premium shop catalog items)
-const seedProducts = async () => {
-  try {
-    const productCount = await Product.countDocuments();
-    const hasPlaceholder = await Product.findOne({ image: "/images/placeholder.svg" });
-    const hasLegacyName = await Product.findOne({ name: /Design #/ });
-    const hasLegacyOrPlaceholderImg = await Product.findOne({ image: /^\/images\/(light-boards-nivati|custom-decor-collage|workshop|neon-momo|neon-taso|hero-04|3d-letters-salt|dimensional-ktm|laser-cnc|name-plates|about-hero)\.webp/ });
-    const lacksImageUrls = await Product.findOne({ $or: [{ image_urls: { $exists: false } }, { image_urls: { $size: 0 } }] });
-    const lacksVariants = await Product.findOne({ $or: [{ variants: { $exists: false } }, { variants: { $size: 0 } }] });
-    const countMismatch = productCount !== 12;
-
-    if (productCount === 0 || hasPlaceholder || hasLegacyName || hasLegacyOrPlaceholderImg || lacksImageUrls || lacksVariants || countMismatch) {
-      console.log("Legacy, placeholder, incomplete, or outdated products detected. Re-seeding default product catalog (12 premium signs)...");
-      await Product.deleteMany({});
-
-      const products = [
-        {
-          id: "1",
-          name: "Premium Custom Wooden Signage",
-          category: "Wooden Signage",
-          subCategory: "Laser Engraved",
-          price: 4000,
-          image: "/products/product_1_main.png",
-          badge: "Best Seller",
-          description: "Add warmth, charm and a natural touch to your brand with our Wooden Signage. Crafted from high-quality Saal Wood with precision finishing, these signs are perfect for creating a premium, earthy and timeless impression.",
-          specs: [
-            "High-quality seasoned Saal Wood construction",
-            "Matte, polish, stain, or natural oil finish options",
-            "Thickness ranges from 1 to 3 inches according to design",
-            "Laser engraved, CNC carved, or handcrafted lettering",
-            "Suitable for shops, boutiques, cafes, and rustic showrooms"
-          ],
-          stockStatus: "In Stock",
-          rating: 4.9,
-          reviewsCount: 28,
-          image_urls: ["/products/product_1_main.png", "/products/product_1_thumb.png"],
-          variants: [
-            { option_name: "2x1 feet (2 Sq.Ft.)", price: 4000, compare_at_price: 5200 },
-            { option_name: "2x2 feet (4 Sq.Ft.)", price: 8000, compare_at_price: 10400 },
-            { option_name: "3x2 feet (6 Sq.Ft.)", price: 12000, compare_at_price: 15600 },
-            { option_name: "4x3 feet (12 Sq.Ft.)", price: 24000, compare_at_price: 31200 }
-          ]
-        },
-        {
-          id: "2",
-          name: "Premium Acrylic Backlit Signage",
-          category: "Acrylic Backlit Signage",
-          subCategory: "Luxury Showrooms",
-          price: 3000,
-          image: "/products/product_2_main.png",
-          badge: "New",
-          description: "Illuminate your brand with our Acrylic Backlit Signage. The perfect combination of premium acrylic and LED backlighting that creates a stunning halo glow, ensuring high visibility and a premium look, day and night.",
-          specs: [
-            "Premium quality front and backlit cast acrylic faceplate",
-            "Uniform LED backlit modules (Warm or White options)",
-            "Thickness ranging from 5mm to 10mm as per design requirements",
-            "Includes low-voltage 12V power transformer",
-            "Designed for office receptions, retail stores, and clinics"
-          ],
-          stockStatus: "In Stock",
-          rating: 4.8,
-          reviewsCount: 19,
-          image_urls: ["/products/product_2_main.png"],
-          variants: [
-            { option_name: "2x1 feet (2 Sq.Ft.)", price: 3000, compare_at_price: 3900 },
-            { option_name: "2x2 feet (4 Sq.Ft.)", price: 6000, compare_at_price: 7800 },
-            { option_name: "3x2 feet (6 Sq.Ft.)", price: 9000, compare_at_price: 11700 },
-            { option_name: "4x3 feet (12 Sq.Ft.)", price: 18000, compare_at_price: 23400 }
-          ]
-        },
-        {
-          id: "3",
-          name: "Premium 2.5D Layered Signage",
-          category: "2.5D Signage",
-          subCategory: "Corporate Office",
-          price: 4000,
-          image: "/products/product_3_main.png",
-          badge: "Custom",
-          description: "Make a lasting impression with our 2.5D Signage - the perfect blend of depth, dimension and style. Layered design creates a rich 3D effect with a premium finish. Ideal for office interiors and showrooms.",
-          specs: [
-            "High-quality layered acrylic and ACP composite construction",
-            "Thickness ranging from 10mm to 25mm for bold dimensional relief",
-            "Finish options include matte, glossy, or brushed metallic",
-            "Standoff spacers or flush wall mounting brackets included",
-            "Perfect for corporate branding, offices, and retail lobbies"
-          ],
-          stockStatus: "In Stock",
-          rating: 4.9,
-          reviewsCount: 14,
-          image_urls: ["/products/product_3_main.png"],
-          variants: [
-            { option_name: "2x1 feet (2 Sq.Ft.)", price: 4000, compare_at_price: 5200 },
-            { option_name: "2x2 feet (4 Sq.Ft.)", price: 8000, compare_at_price: 10400 },
-            { option_name: "3x2 feet (6 Sq.Ft.)", price: 12000, compare_at_price: 15600 },
-            { option_name: "4x3 feet (12 Sq.Ft.)", price: 24000, compare_at_price: 31200 }
-          ]
-        },
-        {
-          id: "4",
-          name: "Double Sided Projecting Light Board",
-          category: "Double Sided Round Light Board",
-          subCategory: "Retail Storefront",
-          price: 5500,
-          image: "/products/product_4_main.png",
-          badge: "Best Seller",
-          description: "Stand out day and night with our double sided round light boards. Perfect for shops, cafes, restaurants, salons and businesses that want maximum visibility from both directions.",
-          specs: [
-            "Double-sided illumination with dual opal acrylic panels",
-            "Heavy-duty rustproof circular iron outer frame casing",
-            "High-intensity internal LED modules with uniform diffusion",
-            "Low-voltage 12V power supply for high efficiency",
-            "IP65 certified fully waterproof and weatherproof seal"
-          ],
-          stockStatus: "In Stock",
-          rating: 4.8,
-          reviewsCount: 32,
-          image_urls: ["/products/product_4_main.png"],
-          variants: [
-            { option_name: "18 Inch Diameter", price: 5500, compare_at_price: 7150 },
-            { option_name: "24 Inch Diameter", price: 7500, compare_at_price: 9750 }
-          ]
-        },
-        {
-          id: "5",
-          name: "Custom LED Neon Sign",
-          category: "Neon Sign",
-          subCategory: "Custom Script",
-          price: 3200,
-          image: "/products/product_5_main.png",
-          badge: "New",
-          description: "Brighten your space with our custom LED Neon Signs. Hand-bent from low-voltage silicone flex tubing, these signs are completely silent, safe to touch, and run cold. Ideal for cafes, bedrooms, salons, and backdrop displays.",
-          specs: [
-            "Low-voltage 12V silicone flex neon tubing (safe to touch)",
-            "High-clarity transparent acrylic backing sheet (6mm)",
-            "Quiet solid-state power transformer and dimmer switch",
-            "Pre-drilled holes for hanging wires or standoff mounts",
-            "Over 50,000 hours estimated operational lifespan"
-          ],
-          stockStatus: "In Stock",
-          rating: 4.9,
-          reviewsCount: 45,
-          image_urls: ["/products/product_5_main.png"],
-          variants: [
-            { option_name: "2x1 feet (2 Sq.Ft.)", price: 3200, compare_at_price: 4160 },
-            { option_name: "2x2 feet (4 Sq.Ft.)", price: 6400, compare_at_price: 8320 },
-            { option_name: "3x2 feet (6 Sq.Ft.)", price: 9600, compare_at_price: 12480 },
-            { option_name: "4x2 feet (8 Sq.Ft.)", price: 12800, compare_at_price: 16640 }
-          ]
-        },
-        {
-          id: "6",
-          name: "Modern 2D LED Signboard",
-          category: "2D Board",
-          subCategory: "Directional & Directory",
-          price: 3375,
-          image: "/products/product_6_main.png",
-          description: "Sleek, stylish, and highly cost-effective, our flat 2D LED signboards feature laser-cut acrylic letters on a matte backing panel. Perfect for interior branding, reception desks, and building directory boards.",
-          specs: [
-            "Premium flat-cut acrylic letters on a composite panel backing",
-            "Front-glowing LED strip inserts for a crisp face glow",
-            "Ultra-slim profile design with beveled edges",
-            "Standoff wall mounts and anchor brackets included",
-            "Custom colors and brand matching options available"
-          ],
-          stockStatus: "In Stock",
-          rating: 4.7,
-          reviewsCount: 12,
-          image_urls: ["/products/product_6_main.png"],
-          variants: [
-            { option_name: "Small (1.5x1.5 feet)", price: 3375, compare_at_price: 4300 },
-            { option_name: "Medium (2x2 feet)", price: 6000, compare_at_price: 7800 },
-            { option_name: "Big (3x3 feet)", price: 9000, compare_at_price: 11700 }
-          ]
-        },
-        {
-          id: "7",
-          name: "Premium 3D Letter Signage",
-          category: "3D Signage",
-          subCategory: "Glowing Halo",
-          price: 10800,
-          image: "/products/product_7_main.png",
-          badge: "Custom",
-          description: "Give your brand a powerful and professional look with our premium 3D Letter Signage. Crafted with high-grade metal or thick block acrylic returns, these individual letters feature internal front, side, or backlighting for a breathtaking architectural appearance.",
-          specs: [
-            "Individually fabricated 3D letters from acrylic or aluminum",
-            "High-intensity internal IP67 waterproof LED modules (12V)",
-            "Front-glowing, side-glowing, or backlit halo light options",
-            "Standoff spacers for a beautiful floating shadow depth",
-            "Complete template guide for easy wall mounting installation"
-          ],
-          stockStatus: "In Stock",
-          rating: 4.9,
-          reviewsCount: 22,
-          image_urls: ["/products/product_7_main.png"],
-          variants: [
-            { option_name: "6 Inch Letters (Set of 10)", price: 10800, compare_at_price: 14000 },
-            { option_name: "8 Inch Letters (Set of 10)", price: 14400, compare_at_price: 18700 },
-            { option_name: "10 Inch Letters (Set of 10)", price: 18000, compare_at_price: 23400 }
-          ]
-        },
-        {
-          id: "8",
-          name: "Custom Laser & CNC Products",
-          category: "Laser & CNC Products",
-          subCategory: "Acrylic Products",
-          price: 1200,
-          image: "/products/product_8_main.png",
-          description: "We design, cut, and engrave a wide range of custom gifts, trophies, keychains, organizers, and home decor items. Using state-of-the-art laser and CNC cutters, we bring your custom illustrations to life on acrylic, wood, MDF, and metals.",
-          specs: [
-            "High-precision laser cutting and engraving finish",
-            "Materials: acrylic, solid wood, MDF, plywood, ACP, and leather",
-            "Completely custom layouts based on client artwork files",
-            "Premium polished edges and clean engraving lines",
-            "Fast fabrication turnaround for bulk orders"
-          ],
-          stockStatus: "In Stock",
-          rating: 4.8,
-          reviewsCount: 37,
-          image_urls: ["/products/product_8_main.png", "/products/product_8_thumb.png"],
-          variants: [
-            { option_name: "Acrylic Desk Organizer", price: 1200, compare_at_price: 1560 },
-            { option_name: "Wooden Trophy & Award", price: 1500, compare_at_price: 1950 },
-            { option_name: "Laser Engraved Nameplate", price: 2000, compare_at_price: 2600 },
-            { option_name: "Custom Keychains (Set of 50)", price: 2500, compare_at_price: 3250 }
-          ]
-        },
-        {
-          id: "9",
-          name: "Bespoke Customized Wall Clock",
-          category: "Customized Wall Clock",
-          subCategory: "Resin Ocean",
-          price: 3000,
-          image: "/products/product_9_main.png",
-          description: "Add elegance and artistic personality to your walls with our Customized Wall Clocks. Blending natural wood blocks, colored acrylics, and textured epoxy resin waves, each timepiece is hand-detailed by Nepalese artisans and fitted with silent quartz sweeps.",
-          specs: [
-            "Premium seasoned timber blocks combined with ocean epoxy resin",
-            "Silent-sweep quartz movement mechanisms (absolutely tick-free)",
-            "Backlit warm LED accent lighting ring (optional)",
-            "High-clarity acrylic mandala details or custom wooden cutouts",
-            "Available in sizes from 12 inch to 30 inch diameter"
-          ],
-          stockStatus: "In Stock",
-          rating: 4.9,
-          reviewsCount: 42,
-          image_urls: ["/products/product_9_main.png", "/products/product_9_thumb1.png", "/products/product_9_thumb2.png"],
-          variants: [
-            { option_name: "12 Inch Wooden Clock", price: 3000, compare_at_price: 3900 },
-            { option_name: "12 Inch Acrylic Clock", price: 3500, compare_at_price: 4550 },
-            { option_name: "12 Inch Resin Art Clock", price: 4500, compare_at_price: 5850 },
-            { option_name: "12 Inch Wood + Resin Clock", price: 5500, compare_at_price: 7150 },
-            { option_name: "16 Inch Wood + Resin Clock", price: 8000, compare_at_price: 10400 }
-          ]
-        },
-        {
-          id: "10",
-          name: "3D Vehicle Number Plate",
-          category: "3D Number Plate",
-          subCategory: "Luxury Car Plate",
-          price: 1200,
-          image: "/products/product_10_main.png",
-          badge: "New",
-          description: "Upgrade your vehicle's aesthetic with our premium 3D Number Plates. Constructed with bold raised acrylic letters on a matte Aluminum Composite Panel (ACP) base, these plates are completely weatherproof, impact resistant, and compliant with standard styling guidelines.",
-          specs: [
-            "Heavy-duty anti-corrosive ACP backing board (3mm)",
-            "Compliant embossed acrylic block digits (3mm thickness)",
-            "Waterproof double-sided mounting adhesive (requires no drill holes)",
-            "Fade-resistant finish that withstands direct Nepalese sunlight",
-            "Available in white base with red letters, or red base with white letters"
-          ],
-          stockStatus: "In Stock",
-          rating: 4.8,
-          reviewsCount: 26,
-          image_urls: ["/products/product_10_main.png", "/products/product_10_thumb.png"],
-          variants: [
-            { option_name: "Two Wheeler standard", price: 1200, compare_at_price: 1560 },
-            { option_name: "Four Wheeler standard", price: 2500, compare_at_price: 3250 }
-          ]
-        },
-        {
-          id: "11",
-          name: "Customized Home & Office Nameplate",
-          category: "House/Office Nameplate",
-          subCategory: "Premium Residential",
-          price: 2000,
-          image: "/images/name-plates.webp",
-          description: "Welcome guests in style with our bespoke customized nameplates. We combine brushed metallic ACP backings with glossy laser-cut acrylic lettering and warm lighting options to create a sophisticated, executive presentation for your home or corporate entrance.",
-          specs: [
-            "Premium acrylic face panel combined with metallic ACP backing",
-            "Laser-cut 3D lettering for elegant depth and visibility",
-            "Standoff brass spacers and screws included for firm mounting",
-            "Fully weatherproof and fade-resistant for outdoor exposure",
-            "Custom religious emblems, family logos, or office designations"
-          ],
-          stockStatus: "In Stock",
-          rating: 4.9,
-          reviewsCount: 31,
-          image_urls: ["/images/name-plates.webp", "/images/dimensional-ktm.webp", "/images/3d-letters-salt.webp"],
-          variants: [
-            { option_name: "Standard (12x6 inch)", price: 2000, compare_at_price: 2600 },
-            { option_name: "Executive (16x8 inch)", price: 2800, compare_at_price: 3640 },
-            { option_name: "Premium (20x10 inch)", price: 3600, compare_at_price: 4680 }
-          ]
-        },
-        {
-          id: "12",
-          name: "Bespoke Acrylic Table Lamp",
-          category: "Acrylic Table Lamp",
-          subCategory: "Branded Display Lamp",
-          price: 1800,
-          image: "/images/hero-04.webp",
-          description: "Add a soft ambient glow and a custom touch to your space with our Customized Acrylic Table Lamps. Built with a solid organic beechwood base and a high-clarity laser-etched acrylic plate, these lamps create beautiful line-art illusions, names, or corporate logos.",
-          specs: [
-            "Precision laser-etched high-clarity 4mm acrylic graphic slide",
-            "Solid polished beechwood circular base with built-in LEDs",
-            "Multi-mode USB powered warm white illumination with inline switch",
-            "Low-voltage operation (under 3.5 Watts total) safe for bedside use",
-            "Fully customizable with family names, line drawings, or logo prints"
-          ],
-          stockStatus: "In Stock",
-          rating: 4.8,
-          reviewsCount: 24,
-          image_urls: ["/images/hero-04.webp", "/images/neon-taso.webp", "/images/neon-momo.webp"],
-          variants: [
-            { option_name: "Bedside Mini", price: 1800, compare_at_price: 2340 },
-            { option_name: "Desk Standard", price: 2430, compare_at_price: 3150 },
-            { option_name: "Lounge Premium", price: 3060, compare_at_price: 3980 }
-          ]
-        }
-      ];
-
-      await Product.insertMany(products);
-      console.log(`Seeded ${products.length} products into MongoDB successfully.`);
-    }
-  } catch (error) {
-    console.error("Error seeding products:", error);
-  }
-};
-
-// Seed default inventory items if DB is empty (initializes items from JSON file)
-const seedInventoryItems = async () => {
-  try {
-    // Find an admin user to assign as creator
-    const adminUser = await User.findOne({ role: "admin" });
-    if (!adminUser) {
-      console.warn("Skipping inventory seeding: no admin user found.");
-      return;
-    }
-
-    // Resolve and read seed file
-    const pathsToTry = [
-      path.join(__dirname, "inventorySeed.json"),
-      path.join(process.cwd(), "dashboard/backend/src/inventorySeed.json"),
-      path.join(process.cwd(), "src/inventorySeed.json")
-    ];
-    let seedFilePath = "";
-    for (const p of pathsToTry) {
-      if (fs.existsSync(p)) {
-        seedFilePath = p;
-        break;
-      }
-    }
-
-    if (!seedFilePath) {
-      console.warn("Skipping inventory seeding: inventorySeed.json not found in paths:", pathsToTry);
-      return;
-    }
-
-    const rawData = fs.readFileSync(seedFilePath, "utf8");
-    const seedData = JSON.parse(rawData);
-
-    // Fetch existing items to prevent seeding duplicates
-    const existingItems = await InventoryItem.find({});
-    const existingNames = new Set(existingItems.map(item => item.name.toLowerCase().trim()));
-
-    const itemsToInsert = [];
-    seedData.forEach((item) => {
-      if (item && item.name && item.name.trim() && item.category && item.unit) {
-        const normalizedName = item.name.toLowerCase().trim();
-        if (!existingNames.has(normalizedName)) {
-          itemsToInsert.push({
-            ...item,
-            createdBy: adminUser._id
-          });
-          existingNames.add(normalizedName);
-        }
-      }
-    });
-
-    if (itemsToInsert.length > 0) {
-      await InventoryItem.insertMany(itemsToInsert);
-      console.log(`Seeded ${itemsToInsert.length} new inventory items into MongoDB successfully.`);
-    }
-
-    // Self-healing database cleanup of any pre-existing duplicates (common on serverless production wakeups)
-    const allItems = await InventoryItem.find({});
-    const grouped = {};
-    allItems.forEach(item => {
-      const key = item.name.toLowerCase().trim();
-      if (!grouped[key]) {
-        grouped[key] = [];
-      }
-      grouped[key].push(item);
-    });
-
-    let deletedCount = 0;
-    for (const key in grouped) {
-      const group = grouped[key];
-      if (group.length > 1) {
-        // Sort: highest stock quantity first, or most recently updated if equal
-        group.sort((a, b) => {
-          if (b.quantity !== a.quantity) {
-            return b.quantity - a.quantity;
-          }
-          return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
-        });
-
-        // Keep the best item (index 0), delete the rest
-        const idsToDelete = group.slice(1).map(item => item._id);
-        await InventoryItem.deleteMany({ _id: { $in: idsToDelete } });
-        deletedCount += idsToDelete.length;
-      }
-    }
-
-    if (deletedCount > 0) {
-      console.log(`Self-healing cleanup: Deleted ${deletedCount} duplicate inventory items from database.`);
-    }
-  } catch (error) {
-    console.error("Error seeding or cleaning inventory items:", error);
-  }
-};
-
 // ─── AUTH ENDPOINTS ─────────────────────────────────────────
 
 
 // Login endpoint
-app.post("/api/auth/login", async (req, res) => {
+app.post("/api/auth/login", loginLimiter, validate(loginSchema), async (req, res) => {
   const { email, password } = req.body;
   try {
     const normalizedEmail = email ? email.toLowerCase().trim() : "";
     const user = await User.findOne({ email: normalizedEmail });
     if (user && (await user.comparePassword(password))) {
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-        expiresIn: "30d",
+        expiresIn: "1d",
       });
       res.json({
         _id: user._id,
@@ -1019,7 +421,7 @@ app.post("/api/auth/login", async (req, res) => {
 });
 
 // Register user (Admin only)
-app.post("/api/auth/register", protect, admin, async (req, res) => {
+app.post("/api/auth/register", protect, admin, validate(registerSchema), async (req, res) => {
   const { name, email, password, role } = req.body;
   try {
     const userExists = await User.findOne({ email });
@@ -1061,7 +463,7 @@ app.get("/api/tasks", protect, async (req, res) => {
   try {
     let query = { deleted: { $ne: true } };
     if (req.user.role !== "admin") {
-      if (req.user.email === "staff@ktmdecor.com") {
+      if (req.user.email === SHARED_STAFF_EMAIL) {
         // Shared staff login: can view all staff-assigned tasks
         const staffUsers = await User.find({ role: "staff" }).select("_id");
         const staffIds = staffUsers.map((u) => u._id);
@@ -1081,7 +483,7 @@ app.get("/api/tasks", protect, async (req, res) => {
 });
 
 // Create task (Admin only)
-app.post("/api/tasks", protect, admin, async (req, res) => {
+app.post("/api/tasks", protect, admin, validate(createTaskSchema), async (req, res) => {
   const { title, description, assignee, dueDate, priority, totalCost, prepaidCost } = req.body;
   try {
     const computedTotal = Number(totalCost) || 0;
@@ -1126,17 +528,17 @@ app.post("/api/tasks", protect, admin, async (req, res) => {
 });
 
 // Update task (Admin can change everything, Staff can only change status of their tasks)
-app.put("/api/tasks/:id", protect, async (req, res) => {
+app.put("/api/tasks/:id", protect, validate(updateTaskSchema), async (req, res) => {
   const { title, description, assignee, dueDate, priority, status, totalCost, prepaidCost } = req.body;
   try {
-    const task = await Task.findById(req.id || req.params.id);
+    const task = await Task.findById(req.params.id);
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
     }
 
     // Role verification
     if (req.user.role !== "admin") {
-      if (req.user.email === "staff@ktmdecor.com") {
+      if (req.user.email === SHARED_STAFF_EMAIL) {
         // Shared staff login: verify the assignee is indeed a staff member
         const taskAssignee = await User.findById(task.assignee);
         if (!taskAssignee || taskAssignee.role !== "staff") {
@@ -1252,7 +654,7 @@ app.delete("/api/tasks/:id", protect, admin, async (req, res) => {
 app.get("/api/notifications", protect, async (req, res) => {
   try {
     let query = {};
-    if (req.user.email === "staff@ktmdecor.com") {
+    if (req.user.email === SHARED_STAFF_EMAIL) {
       const staffUsers = await User.find({ role: "staff" }).select("_id");
       const staffIds = staffUsers.map((u) => u._id);
       query = {
@@ -1279,7 +681,7 @@ app.put("/api/notifications/read", protect, async (req, res) => {
   const { assigneeId } = req.body;
   try {
     // For direct notifications
-    if (req.user.email === "staff@ktmdecor.com" && assigneeId) {
+    if (req.user.email === SHARED_STAFF_EMAIL && assigneeId) {
       // Mark read only for the active staff persona
       await Notification.updateMany({ recipient: assigneeId, read: false }, { read: true });
     } else {
@@ -1287,7 +689,7 @@ app.put("/api/notifications/read", protect, async (req, res) => {
     }
 
     // For global system announcements, add user/persona ID to readBy array
-    const readerId = (req.user.email === "staff@ktmdecor.com" && assigneeId) ? assigneeId : req.user._id;
+    const readerId = (req.user.email === SHARED_STAFF_EMAIL && assigneeId) ? assigneeId : req.user._id;
     await Notification.updateMany(
       { recipient: null, readBy: { $ne: readerId } },
       { $addToSet: { readBy: readerId } }
@@ -1334,7 +736,7 @@ app.get("/api/campaigns", protect, async (req, res) => {
 });
 
 // Create field note (Staff only!)
-app.post("/api/campaigns", protect, async (req, res) => {
+app.post("/api/campaigns", protect, validate(fieldNoteSchema), async (req, res) => {
   const { title, description, district, location, fittingSpotImageUrl, email } = req.body;
   try {
     // Only staff, not admins
@@ -1372,7 +774,7 @@ app.post("/api/campaigns", protect, async (req, res) => {
 });
 
 // Update field note (Admins or the owner staff member)
-app.put("/api/campaigns/:id", protect, async (req, res) => {
+app.put("/api/campaigns/:id", protect, validate(fieldNoteSchema), async (req, res) => {
   const { title, description, district, location, fittingSpotImageUrl, email } = req.body;
   try {
     const fieldNote = await FieldNote.findById(req.params.id);
@@ -2370,6 +1772,12 @@ app.delete("/api/notes/:id", protect, async (req, res) => {
     if (!note) {
       return res.status(404).json({ message: "Note not found" });
     }
+
+    // Authorization: Admin can delete any note, staff can only delete notes they created.
+    if (req.user.role !== "admin" && note.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not authorized to delete this note" });
+    }
+
     await QuickNote.deleteOne({ _id: req.params.id });
 
     // Broadcast delete event via Pusher!
@@ -2394,220 +1802,11 @@ function getPreviousMonthAndYear() {
   return { month, year };
 }
 
-// Helper to generate CSV text content for a statement type, month, and year
+// Helper to generate CSV text content for a statement type, month, and year using dry exportService
 async function generateStatementCSVText(type, month, year) {
-  let dateFilter = {};
-  const mNum = parseInt(month, 10);
-  const yNum = parseInt(year, 10);
-  const startOfMonth = new Date(Date.UTC(yNum, mNum - 1, 1, 0, 0, 0));
-  const endOfMonth = new Date(Date.UTC(yNum, mNum, 0, 23, 59, 59, 999));
-  dateFilter = { date: { $gte: startOfMonth, $lte: endOfMonth } };
-
-  let sales = [];
-  let expenses = [];
-  let purchases = [];
-
-  if (type === "all" || type === "sales") {
-    sales = await Sale.find(dateFilter).sort({ date: 1 });
-  }
-  if (type === "all" || type === "expenses") {
-    expenses = await Expense.find(dateFilter).sort({ date: 1 });
-  }
-  if (type === "all" || type === "purchases") {
-    purchases = await Purchase.find(dateFilter).sort({ date: 1 });
-  }
-
-  const monthNames = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
-  const periodLabel = `${monthNames[mNum - 1]}_${yNum}`;
-  const cleanPeriodLabel = periodLabel.replace(/_/g, " ");
-
-  const workbook = new ExcelJS.Workbook();
-
-  if (type === "all") {
-    const sheet = workbook.addWorksheet("Combined Statement");
-    
-    sheet.addRow(["KTM DECOR - COMBINED STATEMENT"]);
-    sheet.addRow(["Statement Period:", cleanPeriodLabel]);
-    sheet.addRow(["Exported On:", new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString()]);
-    sheet.addRow([]);
-    
-    sheet.addRow(["METRIC SUMMARY", "AMOUNT (Rs.)", "RECORDS COUNT"]);
-    
-    const totalSales = sales.reduce((sum, s) => sum + s.amount, 0);
-    const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
-    const totalPurchases = purchases.reduce((sum, p) => sum + p.amount, 0);
-    const netProfit = totalSales - totalExpenses - totalPurchases;
-    
-    sheet.addRow(["Total Sales Revenue", totalSales, sales.length]);
-    sheet.addRow(["Total Expenses Value", totalExpenses, expenses.length]);
-    sheet.addRow(["Total Purchases Value", totalPurchases, purchases.length]);
-    sheet.addRow(["NET OPERATING PROFIT / (LOSS)", netProfit, ""]);
-    sheet.addRow([]);
-    
-    sheet.addRow(["SALES LEDGER"]);
-    sheet.addRow(["S.N.", "Date", "Client Name", "Product", "Payment Method", "Amount (Rs.)", "Notes"]);
-    sales.forEach((s, idx) => {
-      sheet.addRow([
-        idx + 1,
-        new Date(s.date).toLocaleDateString(),
-        s.clientName,
-        s.productName,
-        s.paymentMethod.toUpperCase(),
-        s.amount,
-        s.notes || ""
-      ]);
-    });
-    sheet.addRow(["TOTAL", "", "", "", "", totalSales, ""]);
-    sheet.addRow([]);
-    
-    sheet.addRow(["EXPENSES LOG"]);
-    sheet.addRow(["S.N.", "Date", "Expense Item", "Category", "Amount (Rs.)", "Description"]);
-    expenses.forEach((e, idx) => {
-      sheet.addRow([
-        idx + 1,
-        new Date(e.date).toLocaleDateString(),
-        e.title,
-        e.category.toUpperCase(),
-        e.amount,
-        e.description || ""
-      ]);
-    });
-    sheet.addRow(["TOTAL", "", "", "", totalExpenses, ""]);
-    sheet.addRow([]);
-    
-    sheet.addRow(["PURCHASES LEDGER"]);
-    sheet.addRow(["S.N.", "Date", "Supplier", "Purchase Details", "Status", "Amount (Rs.)"]);
-    purchases.forEach((p, idx) => {
-      sheet.addRow([
-        idx + 1,
-        new Date(p.date).toLocaleDateString(),
-        p.supplier,
-        p.itemDetails,
-        p.status.toUpperCase(),
-        p.amount
-      ]);
-    });
-    sheet.addRow(["TOTAL", "", "", "", "", totalPurchases]);
-
-    const csvBuffer = await workbook.csv.writeBuffer();
-    return csvBuffer.toString("utf-8");
-  }
-
-  if (type === "sales") {
-    const salesSheet = workbook.addWorksheet("Sales Ledger");
-    salesSheet.columns = [
-      { header: "S.N.", key: "sn" },
-      { header: "Date", key: "date" },
-      { header: "Client Name", key: "clientName" },
-      { header: "Product", key: "productName" },
-      { header: "Payment Method", key: "paymentMethod" },
-      { header: "Amount (Rs.)", key: "amount" },
-      { header: "Notes", key: "notes" }
-    ];
-
-    sales.forEach((s, idx) => {
-      salesSheet.addRow({
-        sn: idx + 1,
-        date: new Date(s.date).toLocaleDateString(),
-        clientName: s.clientName,
-        productName: s.productName,
-        paymentMethod: s.paymentMethod.toUpperCase(),
-        amount: s.amount,
-        notes: s.notes || ""
-      });
-    });
-
-    const totalAmount = sales.reduce((sum, s) => sum + s.amount, 0);
-    salesSheet.addRow({
-      sn: "TOTAL",
-      date: "",
-      clientName: "",
-      productName: "",
-      paymentMethod: "",
-      amount: totalAmount,
-      notes: ""
-    });
-
-    const csvBuffer = await workbook.csv.writeBuffer();
-    return csvBuffer.toString("utf-8");
-  }
-
-  if (type === "expenses") {
-    const expensesSheet = workbook.addWorksheet("Expenses Log");
-    expensesSheet.columns = [
-      { header: "S.N.", key: "sn" },
-      { header: "Date", key: "date" },
-      { header: "Expense Item", key: "title" },
-      { header: "Category", key: "category" },
-      { header: "Amount (Rs.)", key: "amount" },
-      { header: "Description", key: "description" }
-    ];
-
-    expenses.forEach((e, idx) => {
-      expensesSheet.addRow({
-        sn: idx + 1,
-        date: new Date(e.date).toLocaleDateString(),
-        title: e.title,
-        category: e.category.toUpperCase(),
-        amount: e.amount,
-        description: e.description || ""
-      });
-    });
-
-    const totalAmount = expenses.reduce((sum, e) => sum + e.amount, 0);
-    expensesSheet.addRow({
-      sn: "TOTAL",
-      date: "",
-      title: "",
-      category: "",
-      amount: totalAmount,
-      description: ""
-    });
-
-    const csvBuffer = await workbook.csv.writeBuffer();
-    return csvBuffer.toString("utf-8");
-  }
-
-  if (type === "purchases") {
-    const purchasesSheet = workbook.addWorksheet("Purchases Ledger");
-    purchasesSheet.columns = [
-      { header: "S.N.", key: "sn" },
-      { header: "Date", key: "date" },
-      { header: "Supplier", key: "supplier" },
-      { header: "Purchase Details", key: "details" },
-      { header: "Status", key: "status" },
-      { header: "Amount (Rs.)", key: "amount" }
-    ];
-
-    purchases.forEach((p, idx) => {
-      purchasesSheet.addRow({
-        sn: idx + 1,
-        date: new Date(p.date).toLocaleDateString(),
-        supplier: p.supplier,
-        details: p.itemDetails,
-        status: p.status.toUpperCase(),
-        amount: p.amount
-      });
-    });
-
-    const totalAmount = purchases.reduce((sum, p) => sum + p.amount, 0);
-    purchasesSheet.addRow({
-      sn: "TOTAL",
-      date: "",
-      supplier: "",
-      details: "",
-      status: "",
-      amount: totalAmount
-    });
-
-    const csvBuffer = await workbook.csv.writeBuffer();
-    return csvBuffer.toString("utf-8");
-  }
-
-  return "";
+  const { workbook } = await buildStatementWorkbook(type, month, year);
+  const csvBuffer = await workbook.csv.writeBuffer();
+  return csvBuffer.toString("utf-8");
 }
 
 // Function to generate and save missing statements for the previous month
@@ -2642,245 +1841,42 @@ async function generateMissingPreviousMonthStatements() {
   }
 }
 
+// Cron job endpoint to trigger statement generation stateless-ly (triggered by Vercel Cron or external scheduler)
+app.get("/api/cron/generate-statements", async (req, res) => {
+  const cronSecret = process.env.CRON_SECRET;
+  const authHeader = req.headers.authorization;
+  const isVercelCron = req.headers["x-vercel-cron"] === "1";
+  
+  if (cronSecret && authHeader !== `Bearer ${cronSecret}` && !isVercelCron) {
+    return res.status(401).json({ message: "Unauthorized cron trigger" });
+  }
+
+  try {
+    await generateMissingPreviousMonthStatements();
+    res.json({ message: "Monthly statements checked and generated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Export monthly or all-time statements (Admin only) - Beautifully formatted with ExcelJS
 app.get("/api/export/statement", protect, admin, async (req, res) => {
   const { type = "all", month = "all", year = new Date().getFullYear().toString() } = req.query;
 
   try {
-    let dateFilter = {};
-    if (month !== "all") {
-      const mNum = parseInt(month, 10);
-      const yNum = parseInt(year, 10);
-      const startOfMonth = new Date(Date.UTC(yNum, mNum - 1, 1, 0, 0, 0));
-      const endOfMonth = new Date(Date.UTC(yNum, mNum, 0, 23, 59, 59, 999));
-      dateFilter = { date: { $gte: startOfMonth, $lte: endOfMonth } };
-    }
-
-    // Fetch data
-    let sales = [];
-    let expenses = [];
-    let purchases = [];
-
-    if (type === "all" || type === "sales") {
-      sales = await Sale.find(dateFilter).sort({ date: 1 });
-    }
-    if (type === "all" || type === "expenses") {
-      expenses = await Expense.find(dateFilter).sort({ date: 1 });
-    }
-    if (type === "all" || type === "purchases") {
-      purchases = await Purchase.find(dateFilter).sort({ date: 1 });
-    }
-
-    // Month Label
-    const monthNames = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December"
-    ];
-    const periodLabel = month === "all" ? "All_Time" : `${monthNames[parseInt(month, 10) - 1]}_${year}`;
-    const cleanPeriodLabel = periodLabel.replace(/_/g, " ");
-
-    const workbook = new ExcelJS.Workbook();
-
+    const { workbook, periodLabel } = await buildStatementWorkbook(type, month, year);
+    
+    let filename;
     if (type === "all") {
-      const sheet = workbook.addWorksheet("Combined Statement");
-      
-      sheet.addRow(["KTM DECOR - COMBINED STATEMENT"]);
-      sheet.addRow(["Statement Period:", cleanPeriodLabel]);
-      sheet.addRow(["Exported On:", new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString()]);
-      sheet.addRow([]); // Blank row
-      
-      // Summary Overview
-      sheet.addRow(["METRIC SUMMARY", "AMOUNT (Rs.)", "RECORDS COUNT"]);
-      
-      const totalSales = sales.reduce((sum, s) => sum + s.amount, 0);
-      const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
-      const totalPurchases = purchases.reduce((sum, p) => sum + p.amount, 0);
-      const netProfit = totalSales - totalExpenses - totalPurchases;
-      
-      sheet.addRow(["Total Sales Revenue", totalSales, sales.length]);
-      sheet.addRow(["Total Expenses Value", totalExpenses, expenses.length]);
-      sheet.addRow(["Total Purchases Value", totalPurchases, purchases.length]);
-      sheet.addRow(["NET OPERATING PROFIT / (LOSS)", netProfit, ""]);
-      sheet.addRow([]); // Blank row
-      
-      // Sales Ledger
-      sheet.addRow(["SALES LEDGER"]);
-      sheet.addRow(["S.N.", "Date", "Client Name", "Product", "Payment Method", "Amount (Rs.)", "Notes"]);
-      sales.forEach((s, idx) => {
-        sheet.addRow([
-          idx + 1,
-          new Date(s.date).toLocaleDateString(),
-          s.clientName,
-          s.productName,
-          s.paymentMethod.toUpperCase(),
-          s.amount,
-          s.notes || ""
-        ]);
-      });
-      sheet.addRow(["TOTAL", "", "", "", "", totalSales, ""]);
-      sheet.addRow([]); // Blank row
-      
-      // Expenses Log
-      sheet.addRow(["EXPENSES LOG"]);
-      sheet.addRow(["S.N.", "Date", "Expense Item", "Category", "Amount (Rs.)", "Description"]);
-      expenses.forEach((e, idx) => {
-        sheet.addRow([
-          idx + 1,
-          new Date(e.date).toLocaleDateString(),
-          e.title,
-          e.category.toUpperCase(),
-          e.amount,
-          e.description || ""
-        ]);
-      });
-      sheet.addRow(["TOTAL", "", "", "", totalExpenses, ""]);
-      sheet.addRow([]); // Blank row
-      
-      // Purchases Ledger
-      sheet.addRow(["PURCHASES LEDGER"]);
-      sheet.addRow(["S.N.", "Date", "Supplier", "Purchase Details", "Status", "Amount (Rs.)"]);
-      purchases.forEach((p, idx) => {
-        sheet.addRow([
-          idx + 1,
-          new Date(p.date).toLocaleDateString(),
-          p.supplier,
-          p.itemDetails,
-          p.status.toUpperCase(),
-          p.amount
-        ]);
-      });
-      sheet.addRow(["TOTAL", "", "", "", "", totalPurchases]);
-
-      const filename = `combined_statement_${periodLabel}.csv`;
-      res.setHeader("Content-Type", "text/csv");
-      res.setHeader("Content-Disposition", `attachment; filename=${filename}`);
-      await workbook.csv.write(res);
-      res.end();
-      return;
+      filename = `combined_statement_${periodLabel}.csv`;
+    } else {
+      filename = `${type}_statement_${periodLabel}.csv`;
     }
 
-    if (type === "sales") {
-      const salesSheet = workbook.addWorksheet("Sales Ledger");
-      salesSheet.columns = [
-        { header: "S.N.", key: "sn" },
-        { header: "Date", key: "date" },
-        { header: "Client Name", key: "clientName" },
-        { header: "Product", key: "productName" },
-        { header: "Payment Method", key: "paymentMethod" },
-        { header: "Amount (Rs.)", key: "amount" },
-        { header: "Notes", key: "notes" }
-      ];
-
-      sales.forEach((s, idx) => {
-        salesSheet.addRow({
-          sn: idx + 1,
-          date: new Date(s.date).toLocaleDateString(),
-          clientName: s.clientName,
-          productName: s.productName,
-          paymentMethod: s.paymentMethod.toUpperCase(),
-          amount: s.amount,
-          notes: s.notes || ""
-        });
-      });
-
-      const totalAmount = sales.reduce((sum, s) => sum + s.amount, 0);
-      salesSheet.addRow({
-        sn: "TOTAL",
-        date: "",
-        clientName: "",
-        productName: "",
-        paymentMethod: "",
-        amount: totalAmount,
-        notes: ""
-      });
-
-      const filename = `sales_statement_${periodLabel}.csv`;
-      res.setHeader("Content-Type", "text/csv");
-      res.setHeader("Content-Disposition", `attachment; filename=${filename}`);
-      await workbook.csv.write(res);
-      res.end();
-      return;
-    }
-
-    if (type === "expenses") {
-      const expensesSheet = workbook.addWorksheet("Expenses Log");
-      expensesSheet.columns = [
-        { header: "S.N.", key: "sn" },
-        { header: "Date", key: "date" },
-        { header: "Expense Item", key: "title" },
-        { header: "Category", key: "category" },
-        { header: "Amount (Rs.)", key: "amount" },
-        { header: "Description", key: "description" }
-      ];
-
-      expenses.forEach((e, idx) => {
-        expensesSheet.addRow({
-          sn: idx + 1,
-          date: new Date(e.date).toLocaleDateString(),
-          title: e.title,
-          category: e.category.toUpperCase(),
-          amount: e.amount,
-          description: e.description || ""
-        });
-      });
-
-      const totalAmount = expenses.reduce((sum, e) => sum + e.amount, 0);
-      expensesSheet.addRow({
-        sn: "TOTAL",
-        date: "",
-        title: "",
-        category: "",
-        amount: totalAmount,
-        description: ""
-      });
-
-      const filename = `expenses_statement_${periodLabel}.csv`;
-      res.setHeader("Content-Type", "text/csv");
-      res.setHeader("Content-Disposition", `attachment; filename=${filename}`);
-      await workbook.csv.write(res);
-      res.end();
-      return;
-    }
-
-    if (type === "purchases") {
-      const purchasesSheet = workbook.addWorksheet("Purchases Ledger");
-      purchasesSheet.columns = [
-        { header: "S.N.", key: "sn" },
-        { header: "Date", key: "date" },
-        { header: "Supplier", key: "supplier" },
-        { header: "Purchase Details", key: "details" },
-        { header: "Status", key: "status" },
-        { header: "Amount (Rs.)", key: "amount" }
-      ];
-
-      purchases.forEach((p, idx) => {
-        purchasesSheet.addRow({
-          sn: idx + 1,
-          date: new Date(p.date).toLocaleDateString(),
-          supplier: p.supplier,
-          details: p.itemDetails,
-          status: p.status.toUpperCase(),
-          amount: p.amount
-        });
-      });
-
-      const totalAmount = purchases.reduce((sum, p) => sum + p.amount, 0);
-      purchasesSheet.addRow({
-        sn: "TOTAL",
-        date: "",
-        supplier: "",
-        details: "",
-        status: "",
-        amount: totalAmount
-      });
-
-      const filename = `purchases_statement_${periodLabel}.csv`;
-      res.setHeader("Content-Type", "text/csv");
-      res.setHeader("Content-Disposition", `attachment; filename=${filename}`);
-      await workbook.csv.write(res);
-      res.end();
-      return;
-    }
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", `attachment; filename=${filename}`);
+    await workbook.csv.write(res);
+    res.end();
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -2986,5 +1982,8 @@ if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
     }
   }, 24 * 60 * 60 * 1000);
 }
+
+// Global error handling middleware
+app.use(errorHandler);
 
 export default app;

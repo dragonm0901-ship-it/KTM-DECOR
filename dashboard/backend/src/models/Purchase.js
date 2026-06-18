@@ -46,5 +46,7 @@ const PurchaseSchema = new mongoose.Schema(
   }
 );
 
+PurchaseSchema.index({ date: -1 });
+
 const Purchase = mongoose.model("Purchase", PurchaseSchema);
 export default Purchase;

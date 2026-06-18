@@ -65,4 +65,7 @@ const TaskSchema = new mongoose.Schema(
   }
 );
 
+TaskSchema.index({ deleted: 1, assignee: 1 });
+TaskSchema.index({ pinned: -1, createdAt: -1 });
+
 export default mongoose.model("Task", TaskSchema);
