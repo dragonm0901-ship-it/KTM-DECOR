@@ -235,6 +235,29 @@ export interface Attendance {
   updatedAt?: string;
 }
 
+export interface Salary {
+  _id: string;
+  user: User;
+  month: number;
+  year: number;
+  baseSalary: number;
+  presentDays: number;
+  absentDays: number;
+  bonus: number;
+  deductions: number;
+  calculatedSalary: number;
+  finalSalary: number;
+  status: "pending" | "paid";
+  paymentDate?: string;
+  paymentMethod?: "cash" | "online_banking" | "esewa" | "cheque" | "other";
+  notes?: string;
+  linkedExpense?: string;
+  createdBy: User;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+
 interface DashboardState {
   user: User | null;
   token: string | null;
@@ -254,6 +277,7 @@ interface DashboardState {
   inventoryItems: InventoryItem[];
   quotations: Quotation[];
   attendanceLogs: Attendance[];
+  salaries: Salary[];
   pusher: Pusher | null;
   theme: "light" | "dark";
   focusMode: boolean;
@@ -266,6 +290,10 @@ interface DashboardState {
   logAttendance: (data: { user?: string; date: string; status: string; checkIn?: string | null; checkOut?: string | null; notes?: string }) => Promise<void>;
   updateAttendance: (id: string, data: { status: string; checkIn?: string | null; checkOut?: string | null; notes?: string }) => Promise<void>;
   deleteAttendance: (id: string) => Promise<void>;
+  fetchSalaries: () => Promise<void>;
+  createSalary: (data: any) => Promise<void>;
+  updateSalary: (id: string, data: any) => Promise<void>;
+  deleteSalary: (id: string) => Promise<void>;
   bootstrap: () => Promise<void>;
   setActiveStaffProfile: (profile: User | null) => void;
   login: (email: string, password: string) => Promise<boolean>;
@@ -428,6 +456,7 @@ export const useStore = create<DashboardState>((set, get) => ({
   inventoryItems: [],
   quotations: [],
   attendanceLogs: [],
+  salaries: [],
   pusher: null,
   theme: (localStorage.getItem("theme") as "light" | "dark") || "light",
   focusMode: false,
@@ -735,6 +764,26 @@ export const useStore = create<DashboardState>((set, get) => ({
         }));
       });
 
+      channel.bind("salary_created", (newSalary: Salary) => {
+        set((state) => {
+          const filtered = state.salaries.filter((s) => s._id !== newSalary._id);
+          return { salaries: [newSalary, ...filtered].sort((a, b) => b.year - a.year || b.month - a.month) };
+        });
+      });
+
+      channel.bind("salary_updated", (updatedSalary: Salary) => {
+        set((state) => {
+          const filtered = state.salaries.filter((s) => s._id !== updatedSalary._id);
+          return { salaries: [updatedSalary, ...filtered].sort((a, b) => b.year - a.year || b.month - a.month) };
+        });
+      });
+
+      channel.bind("salary_deleted", (deletedSalaryId: string) => {
+        set((state) => ({
+          salaries: state.salaries.filter((s) => s._id !== deletedSalaryId),
+        }));
+      });
+
       set({ pusher });
     }
   },
@@ -758,6 +807,7 @@ export const useStore = create<DashboardState>((set, get) => ({
           orders: data.orders || [],
           inventoryItems: data.inventoryItems || [],
           quickNotes: Array.isArray(data.quickNotes) ? data.quickNotes : [],
+          salaries: data.salaries || [],
           ...(user.role === "admin" ? {
             sales: data.sales || [],
             expenses: data.expenses || [],
@@ -1939,6 +1989,93 @@ export const useStore = create<DashboardState>((set, get) => ({
       }));
     } catch (err) {
       console.error("Delete attendance failed:", err);
+      throw err;
+    }
+  },
+
+  fetchSalaries: async () => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/salaries`, {
+        headers: getHeaders(token),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        set({ salaries: data });
+      }
+    } catch (err) {
+      console.error("Fetch salaries failed:", err);
+    }
+  },
+
+  createSalary: async (salaryData) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/salaries`, {
+        method: "POST",
+        headers: {
+          ...getHeaders(token),
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(salaryData),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({ message: "Salary processing failed" }));
+        throw new Error(errData.message || "Salary processing failed");
+      }
+      const newSalary = await res.json();
+      set((state) => {
+        const filtered = state.salaries.filter((s) => s._id !== newSalary._id);
+        return { salaries: [newSalary, ...filtered].sort((a, b) => b.year - a.year || b.month - a.month) };
+      });
+    } catch (err) {
+      console.error("Create salary failed:", err);
+      throw err;
+    }
+  },
+
+  updateSalary: async (id, salaryData) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/salaries/${id}`, {
+        method: "PUT",
+        headers: {
+          ...getHeaders(token),
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(salaryData),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({ message: "Salary update failed" }));
+        throw new Error(errData.message || "Salary update failed");
+      }
+      const updatedSalary = await res.json();
+      set((state) => {
+        const filtered = state.salaries.filter((s) => s._id !== id);
+        return { salaries: [updatedSalary, ...filtered].sort((a, b) => b.year - a.year || b.month - a.month) };
+      });
+    } catch (err) {
+      console.error("Update salary failed:", err);
+      throw err;
+    }
+  },
+
+  deleteSalary: async (id) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/salaries/${id}`, {
+        method: "DELETE",
+        headers: getHeaders(token),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({ message: "Salary deletion failed" }));
+        throw new Error(errData.message || "Salary deletion failed");
+      }
+      set((state) => ({
+        salaries: state.salaries.filter((s) => s._id !== id),
+      }));
+    } catch (err) {
+      console.error("Delete salary failed:", err);
       throw err;
     }
   },

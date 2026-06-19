@@ -39,6 +39,7 @@ import Quotation from "./models/Quotation.js";
 import QuickNote from "./models/QuickNote.js";
 import MonthlyStatement from "./models/MonthlyStatement.js";
 import Attendance from "./models/Attendance.js";
+import Salary from "./models/Salary.js";
 
 // Middleware
 import { protect, admin } from "./middleware/auth.js";
@@ -50,7 +51,9 @@ import {
   updateTaskSchema,
   fieldNoteSchema,
   attendanceSchema,
-  updateAttendanceSchema
+  updateAttendanceSchema,
+  createSalarySchema,
+  updateSalarySchema
 } from "./middleware/validation.js";
 
 dotenv.config();
@@ -396,6 +399,21 @@ app.get("/api/bootstrap", protect, async (req, res) => {
       promises.binTasks = Task.find({ deleted: true }).populate("assignee", "name email role").populate("createdBy", "name role").limit(100).lean();
       promises.binCampaigns = FieldNote.find({ deleted: true }).populate("createdBy", "name role").limit(100).lean();
       promises.binOrders = Order.find({ deleted: true }).populate("assignee", "name email role").populate("createdBy", "name role").limit(100).lean();
+    }
+
+    // 4b. Inject salaries based on permission
+    if (userRole === "admin" || userEmail === SHARED_STAFF_EMAIL) {
+      promises.salaries = Salary.find({})
+        .populate("user", "name email role baseSalary")
+        .sort({ year: -1, month: -1 })
+        .limit(300)
+        .lean();
+    } else {
+      promises.salaries = Salary.find({ user: userId })
+        .populate("user", "name email role baseSalary")
+        .sort({ year: -1, month: -1 })
+        .limit(50)
+        .lean();
     }
 
     // 5. Query all collections concurrently
@@ -2158,6 +2176,245 @@ app.delete("/api/attendance/:id", protect, admin, async (req, res) => {
     );
 
     res.json({ message: "Attendance record deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// ─── SALARY ENDPOINTS ──────────────────────────────────────────
+
+// Get salary records
+app.get("/api/salaries", protect, async (req, res) => {
+  try {
+    let query = {};
+    if (req.user.role !== "admin" && req.user.email !== SHARED_STAFF_EMAIL) {
+      query = { user: req.user._id };
+    }
+    const salaries = await Salary.find(query)
+      .populate("user", "name email role baseSalary")
+      .populate("createdBy", "name role")
+      .sort({ year: -1, month: -1 });
+    res.json(salaries);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Process/Create a salary record (Admin only)
+app.post("/api/salaries", protect, admin, validate(createSalarySchema), async (req, res) => {
+  const {
+    user,
+    month,
+    year,
+    baseSalary,
+    presentDays,
+    absentDays,
+    bonus,
+    deductions,
+    calculatedSalary,
+    finalSalary,
+    status,
+    paymentDate,
+    paymentMethod,
+    notes,
+  } = req.body;
+
+  try {
+    // Check if salary record already exists
+    const exists = await Salary.findOne({ user, month, year });
+    if (exists) {
+      return res.status(400).json({ message: "Salary record already processed for this staff member in the specified month." });
+    }
+
+    const staffUser = await User.findById(user);
+    if (!staffUser) {
+      return res.status(404).json({ message: "Staff user not found" });
+    }
+
+    let newExpense = null;
+    if (status === "paid") {
+      const monthName = new Date(year, month - 1, 1).toLocaleString("default", { month: "long" });
+      newExpense = new Expense({
+        title: `Salary Payment - ${staffUser.name} (${monthName} ${year})`,
+        category: "salary",
+        amount: finalSalary,
+        date: paymentDate ? new Date(paymentDate).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+        description: `Salary payment for ${staffUser.name} (${monthName} ${year}). Present: ${presentDays} days, Absent: ${absentDays} days. Note: ${notes || "None"}`,
+        createdBy: req.user._id,
+      });
+      await newExpense.save();
+      triggerPusher("expense_created", newExpense);
+    }
+
+    const salary = new Salary({
+      user,
+      month,
+      year,
+      baseSalary,
+      presentDays,
+      absentDays,
+      bonus,
+      deductions,
+      calculatedSalary,
+      finalSalary,
+      status,
+      paymentDate: status === "paid" ? (paymentDate ? new Date(paymentDate) : new Date()) : undefined,
+      paymentMethod: status === "paid" ? paymentMethod : undefined,
+      notes,
+      linkedExpense: newExpense ? newExpense._id : undefined,
+      createdBy: req.user._id,
+    });
+
+    await salary.save();
+
+    const populatedSalary = await Salary.findById(salary._id)
+      .populate("user", "name email role baseSalary")
+      .populate("createdBy", "name role");
+
+    // Sync in real-time
+    triggerPusher("salary_created", populatedSalary);
+
+    // Log Activity
+    const monthName = new Date(year, month - 1, 1).toLocaleString("default", { month: "long" });
+    await logActivity(
+      req.user._id,
+      "Salary Generated",
+      `Generated ${status.toUpperCase()} salary of Rs. ${finalSalary.toLocaleString()} for ${staffUser.name} for ${monthName} ${year}`
+    );
+
+    res.status(201).json(populatedSalary);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Update a salary record (Admin only)
+app.put("/api/salaries/:id", protect, admin, validate(updateSalarySchema), async (req, res) => {
+  const { bonus, deductions, finalSalary, status, paymentDate, paymentMethod, notes } = req.body;
+  try {
+    const salary = await Salary.findById(req.params.id);
+    if (!salary) {
+      return res.status(404).json({ message: "Salary record not found" });
+    }
+
+    const staffUser = await User.findById(salary.user);
+    if (!staffUser) {
+      return res.status(404).json({ message: "Staff user not found" });
+    }
+
+    const oldStatus = salary.status;
+    const oldExpenseId = salary.linkedExpense;
+
+    // Update core fields
+    if (bonus !== undefined) salary.bonus = bonus;
+    if (deductions !== undefined) salary.deductions = deductions;
+    if (finalSalary !== undefined) salary.finalSalary = finalSalary;
+    if (status !== undefined) salary.status = status;
+    if (notes !== undefined) salary.notes = notes;
+
+    const monthName = new Date(salary.year, salary.month - 1, 1).toLocaleString("default", { month: "long" });
+
+    let newExpenseId = oldExpenseId;
+
+    if (salary.status === "paid") {
+      salary.paymentDate = paymentDate ? new Date(paymentDate) : (salary.paymentDate || new Date());
+      if (paymentMethod) salary.paymentMethod = paymentMethod;
+
+      const expenseDate = salary.paymentDate.toISOString().split("T")[0];
+      const expenseTitle = `Salary Payment - ${staffUser.name} (${monthName} ${salary.year})`;
+      const expenseDesc = `Salary payment for ${staffUser.name} (${monthName} ${salary.year}). Present: ${salary.presentDays} days, Absent: ${salary.absentDays} days. Note: ${salary.notes || "None"}`;
+
+      if (oldStatus === "pending") {
+        // Transition from pending to paid: Create new expense
+        const newExpense = new Expense({
+          title: expenseTitle,
+          category: "salary",
+          amount: salary.finalSalary,
+          date: expenseDate,
+          description: expenseDesc,
+          createdBy: req.user._id,
+        });
+        await newExpense.save();
+        newExpenseId = newExpense._id;
+        triggerPusher("expense_created", newExpense);
+      } else if (oldExpenseId) {
+        // Stay paid, update existing expense
+        const existingExpense = await Expense.findById(oldExpenseId);
+        if (existingExpense) {
+          existingExpense.amount = salary.finalSalary;
+          existingExpense.date = expenseDate;
+          existingExpense.description = expenseDesc;
+          existingExpense.title = expenseTitle;
+          await existingExpense.save();
+          triggerPusher("expense_updated", existingExpense);
+        }
+      }
+    } else {
+      // Status is pending
+      salary.paymentDate = undefined;
+      salary.paymentMethod = undefined;
+      newExpenseId = undefined;
+
+      if (oldStatus === "paid" && oldExpenseId) {
+        // Transition from paid to pending: Delete old expense
+        await Expense.findByIdAndDelete(oldExpenseId);
+        newExpenseId = undefined;
+        triggerPusher("expense_deleted", oldExpenseId);
+      }
+    }
+
+    salary.linkedExpense = newExpenseId;
+    await salary.save();
+
+    const populatedSalary = await Salary.findById(salary._id)
+      .populate("user", "name email role baseSalary")
+      .populate("createdBy", "name role");
+
+    // Sync in real-time
+    triggerPusher("salary_updated", populatedSalary);
+
+    // Log Activity
+    await logActivity(
+      req.user._id,
+      "Salary Updated",
+      `Updated salary details for ${staffUser.name} for ${monthName} ${salary.year} (Status: ${salary.status.toUpperCase()})`
+    );
+
+    res.json(populatedSalary);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Delete a salary record (Admin only)
+app.delete("/api/salaries/:id", protect, admin, async (req, res) => {
+  try {
+    const salary = await Salary.findById(req.params.id);
+    if (!salary) {
+      return res.status(404).json({ message: "Salary record not found" });
+    }
+
+    const staffUser = await User.findById(salary.user);
+    const monthName = new Date(salary.year, salary.month - 1, 1).toLocaleString("default", { month: "long" });
+
+    if (salary.linkedExpense) {
+      await Expense.findByIdAndDelete(salary.linkedExpense);
+      triggerPusher("expense_deleted", salary.linkedExpense);
+    }
+
+    await Salary.findByIdAndDelete(req.params.id);
+
+    // Sync in real-time
+    triggerPusher("salary_deleted", req.params.id);
+
+    // Log Activity
+    await logActivity(
+      req.user._id,
+      "Salary Deleted",
+      `Deleted salary record for ${staffUser?.name || "Staff"} for ${monthName} ${salary.year}`
+    );
+
+    res.json({ message: "Salary record deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useStore, Attendance, User as StoreUser } from "../store/useStore";
+import { useStore, Attendance, Salary, User as StoreUser } from "../store/useStore";
 import {
   Calendar,
   Clock,
@@ -11,7 +11,9 @@ import {
   TrendingUp,
   User as UserIcon,
   CheckCircle2,
-  FileText
+  FileText,
+  Edit2,
+  Trash2
 } from "./ui/solar-icons";
 
 export const StaffManagement: React.FC = () => {
@@ -20,11 +22,15 @@ export const StaffManagement: React.FC = () => {
     activeStaffProfile,
     users,
     attendanceLogs,
+    salaries,
     fetchUsers,
     fetchAttendanceLogs,
     logAttendance,
     updateAttendance,
-    deleteAttendance
+    deleteAttendance,
+    createSalary,
+    updateSalary,
+    deleteSalary
   } = useStore();
 
   // Active staff member (supports direct login or shared staff login persona)
@@ -59,6 +65,29 @@ export const StaffManagement: React.FC = () => {
   const [modalCheckOut, setModalCheckOut] = useState<string>("");
   const [modalNotes, setModalNotes] = useState<string>("");
   const [errorMsg, setErrorMsg] = useState<string>("");
+
+  // Salary Modal & Form States
+  const [showSalaryModal, setShowSalaryModal] = useState<boolean>(false);
+  const [selectedSalaryUser, setSelectedSalaryUser] = useState<StoreUser | null>(null);
+  const [salaryBase, setSalaryBase] = useState<number>(30000);
+  const [salaryPresentDays, setSalaryPresentDays] = useState<number>(0);
+  const [salaryAbsentDays, setSalaryAbsentDays] = useState<number>(0);
+  const [salaryBonus, setSalaryBonus] = useState<number>(0);
+  const [salaryDeductions, setSalaryDeductions] = useState<number>(0);
+  const [salaryFinal, setSalaryFinal] = useState<number>(0);
+  const [salaryStatus, setSalaryStatus] = useState<"pending" | "paid">("pending");
+  const [salaryPaymentMethod, setSalaryPaymentMethod] = useState<"cash" | "online_banking" | "esewa" | "cheque" | "other">("cash");
+  const [salaryPaymentDate, setSalaryPaymentDate] = useState<string>(new Date().toISOString().slice(0, 10));
+  const [salaryNotes, setSalaryNotes] = useState<string>("");
+  const [editingSalaryRecord, setEditingSalaryRecord] = useState<Salary | null>(null);
+  const [salaryFormError, setSalaryFormError] = useState<string>("");
+  const [salarySubmitting, setSalarySubmitting] = useState<boolean>(false);
+
+  // Historical Salary Log Filter States
+  const [historySearchQuery, setHistorySearchQuery] = useState<string>("");
+  const [historyStatusFilter, setHistoryStatusFilter] = useState<string>("all");
+  const [historyMonthFilter, setHistoryMonthFilter] = useState<string>("all");
+  const [historyYearFilter, setHistoryYearFilter] = useState<string>("all");
 
   // Bulk logging state
   const [bulkDate, setBulkDate] = useState<string>(new Date().toISOString().slice(0, 10));
@@ -634,6 +663,131 @@ export const StaffManagement: React.FC = () => {
     );
   };
 
+  // Helper to open Salary modal for creating a new record
+  const openCreateSalaryModal = (staff: StoreUser) => {
+    setSalaryFormError("");
+    setEditingSalaryRecord(null);
+    setSelectedSalaryUser(staff);
+    
+    const stats = getUserMonthlyStats(staff._id);
+    const base = staff.baseSalary || 30000;
+    const dailyRate = base / (stats.totalWorkingDays || 30);
+    const calculatedDeductions = Math.round(stats.offDays * dailyRate);
+    const net = Math.max(0, Math.round(base - calculatedDeductions));
+
+    setSalaryBase(base);
+    setSalaryPresentDays(stats.presentCredit);
+    setSalaryAbsentDays(stats.offDays);
+    setSalaryBonus(0);
+    setSalaryDeductions(calculatedDeductions);
+    setSalaryFinal(net);
+    setSalaryStatus("pending");
+    setSalaryPaymentMethod("cash");
+    setSalaryPaymentDate(new Date().toISOString().slice(0, 10));
+    setSalaryNotes("");
+    
+    setShowSalaryModal(true);
+  };
+
+  // Helper to open Salary modal for editing an existing record
+  const openEditSalaryModal = (record: Salary) => {
+    setSalaryFormError("");
+    setEditingSalaryRecord(record);
+    setSelectedSalaryUser(record.user);
+    
+    setSalaryBase(record.baseSalary);
+    setSalaryPresentDays(record.presentDays);
+    setSalaryAbsentDays(record.absentDays);
+    setSalaryBonus(record.bonus);
+    setSalaryDeductions(record.deductions);
+    setSalaryFinal(record.finalSalary);
+    setSalaryStatus(record.status);
+    setSalaryPaymentMethod(record.paymentMethod || "cash");
+    setSalaryPaymentDate(record.paymentDate ? record.paymentDate.slice(0, 10) : new Date().toISOString().slice(0, 10));
+    setSalaryNotes(record.notes || "");
+    
+    setShowSalaryModal(true);
+  };
+
+  // Handle salary calculation changes when bonus, deductions, base salary are edited in form
+  useEffect(() => {
+    const calculated = salaryBase - salaryDeductions + salaryBonus;
+    setSalaryFinal(Math.max(0, calculated));
+  }, [salaryBase, salaryDeductions, salaryBonus]);
+
+  // Save or Update Salary Record
+  const handleSaveSalary = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSalaryFormError("");
+    setSalarySubmitting(true);
+    
+    if (!selectedSalaryUser) {
+      setSalaryFormError("No employee selected.");
+      setSalarySubmitting(false);
+      return;
+    }
+
+    try {
+      if (editingSalaryRecord) {
+        await updateSalary(editingSalaryRecord._id, {
+          bonus: Number(salaryBonus),
+          deductions: Number(salaryDeductions),
+          finalSalary: Number(salaryFinal),
+          status: salaryStatus,
+          paymentDate: salaryStatus === "paid" ? salaryPaymentDate : null,
+          paymentMethod: salaryStatus === "paid" ? salaryPaymentMethod : null,
+          notes: salaryNotes
+        });
+      } else {
+        await createSalary({
+          user: selectedSalaryUser._id,
+          month: selectedMonth,
+          year: selectedYear,
+          baseSalary: Number(salaryBase),
+          presentDays: Number(salaryPresentDays),
+          absentDays: Number(salaryAbsentDays),
+          bonus: Number(salaryBonus),
+          deductions: Number(salaryDeductions),
+          calculatedSalary: salaryBase - salaryDeductions + salaryBonus,
+          finalSalary: Number(salaryFinal),
+          status: salaryStatus,
+          paymentDate: salaryStatus === "paid" ? salaryPaymentDate : null,
+          paymentMethod: salaryStatus === "paid" ? salaryPaymentMethod : null,
+          notes: salaryNotes
+        });
+      }
+      setShowSalaryModal(false);
+    } catch (err: any) {
+      setSalaryFormError(err.message || "Failed to process salary record.");
+    } finally {
+      setSalarySubmitting(false);
+    }
+  };
+
+  // Quick Pay handler
+  const handleQuickPaySalary = async (record: Salary, paymentMethodSelected: typeof salaryPaymentMethod) => {
+    try {
+      await updateSalary(record._id, {
+        status: "paid",
+        paymentDate: new Date().toISOString(),
+        paymentMethod: paymentMethodSelected
+      });
+    } catch (err: any) {
+      alert("Failed to pay salary: " + err.message);
+    }
+  };
+
+  // Delete Salary record
+  const handleDeleteSalaryRecord = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this salary record? This will also remove the corresponding transaction in the Expenses Log if it was marked as Paid.")) return;
+    try {
+      await deleteSalary(id);
+      setShowSalaryModal(false);
+    } catch (err: any) {
+      alert("Failed to delete salary record: " + err.message);
+    }
+  };
+
   const staffList = users.filter(u => u.role === "staff" && u.email !== "staff@ktmdecor.com");
   const selectedStaffUser = users.find(u => u._id === selectedAdminStaffId);
 
@@ -800,11 +954,16 @@ export const StaffManagement: React.FC = () => {
                 const dailyRate = baseSalary / stats.totalWorkingDays;
                 const calculatedSalary = baseSalary - (stats.offDays * dailyRate);
 
+                const salaryRecord = salaries.find(sal => {
+                  const isCorrectUser = sal.user?._id === activeStaff._id || (sal.user as any) === activeStaff._id;
+                  return isCorrectUser && sal.month === selectedMonth && sal.year === selectedYear;
+                });
+
                 return (
                   <div className="space-y-4">
                     <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-muted">
                       <span>Base Monthly Salary:</span>
-                      <span className="text-foreground">Rs. {baseSalary.toLocaleString()}</span>
+                      <span className="text-foreground">Rs. {(salaryRecord ? salaryRecord.baseSalary : baseSalary).toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-muted">
                       <span>Working Days:</span>
@@ -812,29 +971,67 @@ export const StaffManagement: React.FC = () => {
                     </div>
                     <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-muted border-b border-border/50 pb-2.5">
                       <span>Days Worked:</span>
-                      <span className="text-green-500">{stats.presentCredit} Days</span>
+                      <span className="text-green-500">{(salaryRecord ? salaryRecord.presentDays : stats.presentCredit)} Days</span>
                     </div>
                     <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-muted">
                       <span>Days Off / Absents:</span>
-                      <span className="text-red-500">{stats.offDays} Days</span>
+                      <span className="text-red-500">{(salaryRecord ? salaryRecord.absentDays : stats.offDays)} Days</span>
                     </div>
+
+                    {salaryRecord && (
+                      <>
+                        <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-muted">
+                          <span>Bonus Awarded:</span>
+                          <span className="text-green-500">+Rs. {salaryRecord.bonus.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-muted">
+                          <span>Deductions Applied:</span>
+                          <span className="text-red-500">-Rs. {salaryRecord.deductions.toLocaleString()}</span>
+                        </div>
+                      </>
+                    )}
+
                     <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-muted">
                       <span>Attendance Pct %:</span>
                       <span className="text-accent">{stats.workingDaysPercent.toFixed(1)}%</span>
                     </div>
+
                     <div className="bg-muted/15 p-4 rounded-xl border border-border/60 flex justify-between items-center mt-4">
                       <div className="text-left">
                         <p className="text-[10px] text-muted font-extrabold uppercase tracking-widest">
-                          Payout Est.
+                          {salaryRecord ? "Official Payout" : "Estimated Payout"}
                         </p>
                         <p className="text-lg font-black text-foreground mt-0.5">
-                          Rs. {Math.max(0, Math.round(calculatedSalary)).toLocaleString()}
+                          Rs. {salaryRecord ? salaryRecord.finalSalary.toLocaleString() : Math.max(0, Math.round(calculatedSalary)).toLocaleString()}
                         </p>
                       </div>
-                      <span className="text-[10px] font-bold text-muted bg-card px-2.5 py-1.5 rounded-lg border border-border shadow-sm uppercase tracking-wider">
-                        -{stats.offDays} Days Off
+                      <span className={`text-[10px] font-bold px-2.5 py-1.5 rounded-lg border shadow-sm uppercase tracking-wider ${
+                        salaryRecord
+                          ? salaryRecord.status === "paid"
+                            ? "bg-green-500/10 text-green-500 border-green-500/20"
+                            : "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                          : "bg-card border-border text-muted"
+                      }`}>
+                        {salaryRecord
+                          ? salaryRecord.status === "paid"
+                            ? "Paid"
+                            : "Pending Approved"
+                          : `Estimate • -${stats.offDays} Days`}
                       </span>
                     </div>
+
+                    {salaryRecord?.notes && (
+                      <div className="bg-muted/5 p-3 rounded-xl border border-border/50 text-[11px] text-muted italic">
+                        <span className="font-bold uppercase text-[9px] block not-italic tracking-wider text-muted/70 mb-0.5">Payroll Notes:</span>
+                        "{salaryRecord.notes}"
+                      </div>
+                    )}
+
+                    {!salaryRecord && (
+                      <p className="text-[10px] text-muted/70 text-center leading-relaxed italic">
+                        Official payroll has not been finalized yet for this period. The above is a real-time estimate based on attendance logs.
+                      </p>
+                    )}
                   </div>
                 );
               })()}
@@ -1035,6 +1232,11 @@ export const StaffManagement: React.FC = () => {
                         const dailyRate = baseSalary / stats.totalWorkingDays;
                         const calculatedSalary = Math.max(0, Math.round(baseSalary - (stats.offDays * dailyRate)));
 
+                        const salaryRecord = salaries.find(sal => {
+                          const isCorrectUser = sal.user?._id === s._id || (sal.user as any) === s._id;
+                          return isCorrectUser && sal.month === selectedMonth && sal.year === selectedYear;
+                        });
+
                         return (
                           <tr key={s._id} className="hover:bg-border/20 transition-colors">
                             <td className="py-3.5 px-4">
@@ -1042,16 +1244,16 @@ export const StaffManagement: React.FC = () => {
                               <p className="text-[10px] text-muted">{s.email}</p>
                             </td>
                             <td className="py-3.5 px-4 font-bold text-foreground">
-                              Rs. {baseSalary.toLocaleString()}
+                              Rs. {(salaryRecord ? salaryRecord.baseSalary : baseSalary).toLocaleString()}
                             </td>
                             <td className="py-3.5 px-4 text-center text-muted">
                               {stats.totalWorkingDays}
                             </td>
                             <td className="py-3.5 px-4 text-center text-green-500 font-bold">
-                              {stats.presentCredit}
+                              {salaryRecord ? salaryRecord.presentDays : stats.presentCredit}
                             </td>
                             <td className="py-3.5 px-4 text-center text-red-500 font-bold">
-                              {stats.offDays}
+                              {salaryRecord ? salaryRecord.absentDays : stats.offDays}
                             </td>
                             <td className="py-3.5 px-4 text-center font-bold">
                               <span className={`px-2 py-0.5 rounded text-[10px] ${
@@ -1064,19 +1266,80 @@ export const StaffManagement: React.FC = () => {
                                 {stats.workingDaysPercent.toFixed(1)}%
                               </span>
                             </td>
-                            <td className="py-3.5 px-4 text-right text-sm font-black text-foreground">
-                              Rs. {calculatedSalary.toLocaleString()}
-                            </td>
                             <td className="py-3.5 px-4 text-right">
-                              <button
-                                onClick={() => {
-                                  setSelectedAdminStaffId(s._id);
-                                  setAdminTab("calendar");
-                                }}
-                                className="px-3 py-1.5 bg-muted/20 hover:bg-accent/15 hover:text-accent rounded-lg text-[10px] font-bold uppercase transition-all"
-                              >
-                                View Calendar
-                              </button>
+                              <p className="text-sm font-black text-foreground">
+                                Rs. {salaryRecord ? salaryRecord.finalSalary.toLocaleString() : calculatedSalary.toLocaleString()}
+                              </p>
+                              <div className="mt-1 flex justify-end">
+                                {salaryRecord ? (
+                                  salaryRecord.status === "paid" ? (
+                                    <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-green-500/10 text-green-500 border border-green-500/20">
+                                      Paid ({salaryRecord.paymentMethod})
+                                    </span>
+                                  ) : (
+                                    <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                                      Pending
+                                    </span>
+                                  )
+                                ) : (
+                                  <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-zinc-500/10 text-zinc-500 border border-zinc-500/20">
+                                    Unprocessed
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="py-3.5 px-4">
+                              <div className="flex items-center justify-end gap-2">
+                                {salaryRecord ? (
+                                  <>
+                                    {salaryRecord.status === "pending" && (
+                                      <button
+                                        onClick={() => {
+                                          const method = window.prompt("Enter Payment Method (cash, online_banking, esewa, cheque, other):", "online_banking");
+                                          if (method) {
+                                            const normMethod = ["cash", "online_banking", "esewa", "cheque", "other"].includes(method) ? method : "other";
+                                            handleQuickPaySalary(salaryRecord, normMethod as any);
+                                          }
+                                        }}
+                                        className="px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-[10px] font-bold uppercase transition-all"
+                                      >
+                                        Pay
+                                      </button>
+                                    )}
+                                    <button
+                                      onClick={() => openEditSalaryModal(salaryRecord)}
+                                      className="p-1.5 hover:bg-muted text-accent hover:text-accent-dark rounded transition-all"
+                                      title="Edit Salary Details"
+                                    >
+                                      <Edit2 size={14} />
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteSalaryRecord(salaryRecord._id)}
+                                      className="p-1.5 hover:bg-red-500/10 text-red-500 hover:text-red-700 rounded transition-all"
+                                      title="Delete Salary Record"
+                                    >
+                                      <Trash2 size={14} />
+                                    </button>
+                                  </>
+                                ) : (
+                                  <button
+                                    onClick={() => openCreateSalaryModal(s)}
+                                    className="px-3 py-1.5 bg-accent hover:bg-accent-dark text-white rounded-lg text-[10px] font-bold uppercase transition-all"
+                                  >
+                                    Generate
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => {
+                                    setSelectedAdminStaffId(s._id);
+                                    setAdminTab("calendar");
+                                  }}
+                                  className="px-2.5 py-1.5 bg-muted/20 hover:bg-border text-muted hover:text-foreground rounded-lg text-[10px] font-bold uppercase transition-all"
+                                  title="View Detailed Calendar"
+                                >
+                                  Calendar
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         );
@@ -1200,6 +1463,165 @@ export const StaffManagement: React.FC = () => {
                     );
                   })}
                 </div>
+              </div>
+              {/* Processed Salary Log (History) */}
+              <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden p-4 sm:p-6 mt-6">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-border/60 pb-4 mb-4">
+                  <div>
+                    <h3 className="font-bold text-base font-display">Processed Salary Logs</h3>
+                    <p className="text-[11px] text-muted font-semibold uppercase mt-0.5 tracking-wider">
+                      Search and manage historically processed staff salary records
+                    </p>
+                  </div>
+                  
+                  <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                    {/* Search Input */}
+                    <div className="relative w-full sm:w-48">
+                      <input
+                        type="text"
+                        value={historySearchQuery}
+                        onChange={(e) => setHistorySearchQuery(e.target.value)}
+                        className="w-full px-3 py-1.5 border border-border rounded-xl bg-background/50 focus:outline-none focus:ring-1 focus:ring-accent text-xs font-semibold"
+                        placeholder="Search employee..."
+                      />
+                    </div>
+
+                    {/* Status filter */}
+                    <select
+                      value={historyStatusFilter}
+                      onChange={(e) => setHistoryStatusFilter(e.target.value)}
+                      className="px-2 py-1.5 border border-border rounded-xl bg-background text-xs font-semibold cursor-pointer focus:outline-none"
+                    >
+                      <option value="all">All Statuses</option>
+                      <option value="paid">Paid</option>
+                      <option value="pending">Pending</option>
+                    </select>
+
+                    {/* Month filter */}
+                    <select
+                      value={historyMonthFilter}
+                      onChange={(e) => setHistoryMonthFilter(e.target.value)}
+                      className="px-2 py-1.5 border border-border rounded-xl bg-background text-xs font-semibold cursor-pointer focus:outline-none"
+                    >
+                      <option value="all">All Months</option>
+                      {months.map((m) => (
+                        <option key={m.value} value={m.value.toString()}>
+                          {m.name}
+                        </option>
+                      ))}
+                    </select>
+
+                    {/* Year filter */}
+                    <select
+                      value={historyYearFilter}
+                      onChange={(e) => setHistoryYearFilter(e.target.value)}
+                      className="px-2 py-1.5 border border-border rounded-xl bg-background text-xs font-semibold cursor-pointer focus:outline-none"
+                    >
+                      <option value="all">All Years</option>
+                      <option value="2025">2025</option>
+                      <option value="2026">2026</option>
+                      <option value="2027">2027</option>
+                    </select>
+                  </div>
+                </div>
+
+                {(() => {
+                  const filteredSalaries = salaries.filter((sal) => {
+                    const staffName = sal.user?.name || "";
+                    const matchesSearch = staffName.toLowerCase().includes(historySearchQuery.toLowerCase());
+                    const matchesStatus = historyStatusFilter === "all" || sal.status === historyStatusFilter;
+                    const matchesMonth = historyMonthFilter === "all" || sal.month.toString() === historyMonthFilter;
+                    const matchesYear = historyYearFilter === "all" || sal.year.toString() === historyYearFilter;
+                    return matchesSearch && matchesStatus && matchesMonth && matchesYear;
+                  });
+
+                  return (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse min-w-[700px]">
+                        <thead>
+                          <tr className="border-b border-border/80 text-[10px] font-extrabold uppercase tracking-widest text-muted">
+                            <th className="py-2.5 px-3">Period</th>
+                            <th className="py-2.5 px-3">Employee</th>
+                            <th className="py-2.5 px-3 text-right">Base Salary</th>
+                            <th className="py-2.5 px-3 text-right">Bonus</th>
+                            <th className="py-2.5 px-3 text-right">Deductions</th>
+                            <th className="py-2.5 px-3 text-right">Final Amount</th>
+                            <th className="py-2.5 px-3 text-center">Status</th>
+                            <th className="py-2.5 px-3">Payment Info</th>
+                            <th className="py-2.5 px-3 text-right">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border/60 text-xs font-semibold text-foreground">
+                          {filteredSalaries.length === 0 ? (
+                            <tr>
+                              <td colSpan={9} className="py-8 text-center text-muted italic">
+                                No processed salary records matching filters.
+                              </td>
+                            </tr>
+                          ) : (
+                            filteredSalaries.map((sal) => {
+                              const monthName = months.find((m) => m.value === sal.month)?.name || `Month ${sal.month}`;
+                              return (
+                                <tr key={sal._id} className="hover:bg-border/20 transition-colors">
+                                  <td className="py-3 px-3 font-bold">
+                                    {monthName} {sal.year}
+                                  </td>
+                                  <td className="py-3 px-3">
+                                    <p className="font-bold text-foreground">{sal.user?.name || "Staff"}</p>
+                                    <p className="text-[9px] text-muted">{sal.user?.email || ""}</p>
+                                  </td>
+                                  <td className="py-3 px-3 text-right">Rs. {sal.baseSalary.toLocaleString()}</td>
+                                  <td className="py-3 px-3 text-right text-green-500">+Rs. {sal.bonus.toLocaleString()}</td>
+                                  <td className="py-3 px-3 text-right text-red-500">-Rs. {sal.deductions.toLocaleString()}</td>
+                                  <td className="py-3 px-3 text-right font-black text-sm text-foreground">
+                                    Rs. {sal.finalSalary.toLocaleString()}
+                                  </td>
+                                  <td className="py-3 px-3 text-center">
+                                    <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${
+                                      sal.status === "paid"
+                                        ? "bg-green-500/10 text-green-500 border border-green-500/20"
+                                        : "bg-amber-500/10 text-amber-500 border border-amber-500/20"
+                                    }`}>
+                                      {sal.status}
+                                    </span>
+                                  </td>
+                                  <td className="py-3 px-3 text-muted text-[10px]">
+                                    {sal.status === "paid" ? (
+                                      <>
+                                        <p className="font-bold text-foreground uppercase text-[9px] tracking-wider">{sal.paymentMethod?.replace("_", " ")}</p>
+                                        <p>{sal.paymentDate ? new Date(sal.paymentDate).toLocaleDateString() : ""}</p>
+                                      </>
+                                    ) : (
+                                      "—"
+                                    )}
+                                  </td>
+                                  <td className="py-3 px-3 text-right">
+                                    <div className="flex items-center justify-end gap-1.5">
+                                      <button
+                                        onClick={() => openEditSalaryModal(sal)}
+                                        className="p-1 hover:bg-muted text-accent rounded transition-all"
+                                        title="Edit Salary Logs"
+                                      >
+                                        <Edit2 size={13} />
+                                      </button>
+                                      <button
+                                        onClick={() => handleDeleteSalaryRecord(sal._id)}
+                                        className="p-1 hover:bg-red-500/10 text-red-500 rounded transition-all"
+                                        title="Delete Salary Log"
+                                      >
+                                        <Trash2 size={13} />
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                            })
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           )}
@@ -1561,6 +1983,228 @@ export const StaffManagement: React.FC = () => {
                       Save Changes
                     </button>
                   )}
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ─── PROCESS / EDIT SALARY MODAL ─── */}
+      {showSalaryModal && selectedSalaryUser && (
+        <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4 pt-20 sm:p-4 overflow-y-auto">
+          <div className="bg-card w-full max-w-md rounded-2xl border border-border p-6 shadow-2xl animate-scale-up max-h-[90vh] overflow-y-auto relative">
+            <button
+              onClick={() => setShowSalaryModal(false)}
+              className="absolute top-4 right-4 p-1 rounded-full hover:bg-border text-muted hover:text-foreground transition-all"
+            >
+              <X size={18} />
+            </button>
+
+            <div className="flex items-center gap-2 mb-4 border-b border-border pb-2.5">
+              <DollarSign className="text-accent" size={20} />
+              <h2 className="text-base font-bold font-display">
+                {editingSalaryRecord ? "Edit Processed Salary" : "Process Monthly Salary"}
+              </h2>
+            </div>
+
+            <div className="bg-muted/10 p-3 rounded-xl border border-border/50 text-xs font-semibold space-y-1 mb-4">
+              <p><span className="text-muted">Staff Member:</span> <span className="font-bold text-foreground">{selectedSalaryUser.name}</span></p>
+              <p><span className="text-muted">Role:</span> <span className="font-bold text-foreground uppercase tracking-wide text-[10px]">{selectedSalaryUser.role}</span></p>
+              <p>
+                <span className="text-muted">Period:</span>{" "}
+                <span className="font-bold text-foreground">
+                  {months.find((m) => m.value === selectedMonth)?.name} {selectedYear}
+                </span>
+              </p>
+            </div>
+
+            {salaryFormError && (
+              <div className="p-3 mb-4 text-xs bg-red-500/10 border border-red-500/20 text-red-500 rounded-lg font-bold flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500 block shrink-0" />
+                <span>{salaryFormError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSaveSalary} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold text-muted uppercase tracking-widest">
+                    Base Salary
+                  </label>
+                  <input
+                    type="number"
+                    value={salaryBase}
+                    onChange={(e) => setSalaryBase(Number(e.target.value))}
+                    className="w-full px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold"
+                    required
+                    min={0}
+                    disabled={!!editingSalaryRecord}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold text-muted uppercase tracking-widest">
+                    Days Present
+                  </label>
+                  <input
+                    type="number"
+                    value={salaryPresentDays}
+                    onChange={(e) => setSalaryPresentDays(Number(e.target.value))}
+                    className="w-full px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold"
+                    required
+                    min={0}
+                    disabled={!!editingSalaryRecord}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold text-muted uppercase tracking-widest">
+                    Days Absent / Off
+                  </label>
+                  <input
+                    type="number"
+                    value={salaryAbsentDays}
+                    onChange={(e) => setSalaryAbsentDays(Number(e.target.value))}
+                    className="w-full px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold"
+                    required
+                    min={0}
+                    disabled={!!editingSalaryRecord}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold text-muted uppercase tracking-widest">
+                    Bonus
+                  </label>
+                  <input
+                    type="number"
+                    value={salaryBonus}
+                    onChange={(e) => setSalaryBonus(Number(e.target.value))}
+                    className="w-full px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold"
+                    min={0}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold text-muted uppercase tracking-widest">
+                    Deductions
+                  </label>
+                  <input
+                    type="number"
+                    value={salaryDeductions}
+                    onChange={(e) => setSalaryDeductions(Number(e.target.value))}
+                    className="w-full px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold"
+                    min={0}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold text-muted uppercase tracking-widest">
+                    Final Paid Salary
+                  </label>
+                  <input
+                    type="number"
+                    value={salaryFinal}
+                    onChange={(e) => setSalaryFinal(Number(e.target.value))}
+                    className="w-full px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold font-bold text-accent"
+                    required
+                    min={0}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold text-muted uppercase tracking-widest">
+                    Payment Status
+                  </label>
+                  <select
+                    value={salaryStatus}
+                    onChange={(e) => setSalaryStatus(e.target.value as any)}
+                    className="w-full px-3 py-2 border border-border rounded-xl bg-background text-xs font-semibold cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent"
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="paid">Paid</option>
+                  </select>
+                </div>
+
+                {salaryStatus === "paid" && (
+                  <div className="space-y-1">
+                    <label className="block text-[10px] font-bold text-muted uppercase tracking-widest">
+                      Payment Method
+                    </label>
+                    <select
+                      value={salaryPaymentMethod}
+                      onChange={(e) => setSalaryPaymentMethod(e.target.value as any)}
+                      className="w-full px-3 py-2 border border-border rounded-xl bg-background text-xs font-semibold cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent"
+                    >
+                      <option value="cash">Cash</option>
+                      <option value="online_banking">Online Banking</option>
+                      <option value="esewa">eSewa</option>
+                      <option value="cheque">Cheque</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                )}
+              </div>
+
+              {salaryStatus === "paid" && (
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold text-muted uppercase tracking-widest">
+                    Payment Date
+                  </label>
+                  <input
+                    type="date"
+                    value={salaryPaymentDate}
+                    onChange={(e) => setSalaryPaymentDate(e.target.value)}
+                    className="w-full px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold"
+                    required
+                  />
+                </div>
+              )}
+
+              <div className="space-y-1">
+                <label className="block text-[10px] font-bold text-muted uppercase tracking-widest">
+                  Notes / Remarks
+                </label>
+                <textarea
+                  value={salaryNotes}
+                  onChange={(e) => setSalaryNotes(e.target.value)}
+                  className="w-full h-16 p-3 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent resize-none text-xs font-semibold"
+                  placeholder="Enter details like bonus reason, deductions explanation, check number, etc."
+                />
+              </div>
+
+              <div className="flex justify-between items-center gap-3 pt-3 border-t border-border mt-6">
+                {editingSalaryRecord ? (
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteSalaryRecord(editingSalaryRecord._id)}
+                    className="px-4 py-2 border border-red-500/20 text-red-500 hover:bg-red-500/10 rounded-xl text-xs font-bold transition-all uppercase tracking-wider"
+                  >
+                    Delete
+                  </button>
+                ) : (
+                  <div />
+                )}
+
+                <div className="flex gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setShowSalaryModal(false)}
+                    className="px-4 py-2 border border-border rounded-xl text-xs font-bold hover:bg-muted/30 transition-all text-muted"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={salarySubmitting}
+                    className="px-4 py-2 bg-accent hover:bg-accent-dark text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-accent/15 uppercase tracking-wider disabled:opacity-50"
+                  >
+                    {salarySubmitting ? "Saving..." : "Save Record"}
+                  </button>
                 </div>
               </div>
             </form>

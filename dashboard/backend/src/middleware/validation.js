@@ -101,3 +101,33 @@ export const updateAttendanceSchema = z.object({
   checkOut: z.string().refine((val) => !val || !isNaN(Date.parse(val)), { message: "Invalid checkOut timestamp" }).nullable().optional(),
   notes: z.string().optional(),
 });
+
+// Create Salary Schema
+export const createSalarySchema = z.object({
+  user: mongoIdSchema,
+  month: z.number({ required_error: "Month is required" }).min(1).max(12),
+  year: z.number({ required_error: "Year is required" }),
+  baseSalary: z.number({ required_error: "Base salary is required" }).nonnegative(),
+  presentDays: z.number({ required_error: "Present days are required" }).nonnegative(),
+  absentDays: z.number({ required_error: "Absent days are required" }).nonnegative(),
+  bonus: z.number().nonnegative().optional().default(0),
+  deductions: z.number().nonnegative().optional().default(0),
+  calculatedSalary: z.number({ required_error: "Calculated salary is required" }).nonnegative(),
+  finalSalary: z.number({ required_error: "Final salary is required" }).nonnegative(),
+  status: z.enum(["pending", "paid"]).optional().default("pending"),
+  paymentDate: z.string().refine((val) => !val || !isNaN(Date.parse(val)), { message: "Invalid payment date" }).nullable().optional(),
+  paymentMethod: z.enum(["cash", "online_banking", "esewa", "cheque", "other"]).nullable().optional(),
+  notes: z.string().optional().default(""),
+});
+
+// Update Salary Schema
+export const updateSalarySchema = z.object({
+  bonus: z.number().nonnegative().optional(),
+  deductions: z.number().nonnegative().optional(),
+  finalSalary: z.number().nonnegative().optional(),
+  status: z.enum(["pending", "paid"]).optional(),
+  paymentDate: z.string().refine((val) => !val || !isNaN(Date.parse(val)), { message: "Invalid payment date" }).nullable().optional(),
+  paymentMethod: z.enum(["cash", "online_banking", "esewa", "cheque", "other"]).nullable().optional(),
+  notes: z.string().optional(),
+});
+
