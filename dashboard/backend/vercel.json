@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "regions": ["bom1"],
   "builds": [
     {
       "src": "src/server.js",
@@ -12,6 +13,12 @@
       "dest": "src/server.js"
     }
   ],
+  "functions": {
+    "src/server.js": {
+      "memory": 1024,
+      "maxDuration": 30
+    }
+  },
   "crons": [
     {
       "path": "/api/cron/generate-statements",

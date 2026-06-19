@@ -8,21 +8,37 @@ import InventoryItem from "../models/InventoryItem.js";
 import Order from "../models/Order.js";
 import Sale from "../models/Sale.js";
 
+import crypto from "crypto";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const SHARED_STAFF_EMAIL = process.env.SHARED_STAFF_EMAIL || "staff@ktmdecor.com";
 
+// ─── FAST PASSWORD SYNC ────────────────────────────────────────
+// Instead of bcrypt.compare() (~400ms per call), we use a fast SHA-256 fingerprint
+// of the env password. If the fingerprint matches, the password hasn't changed.
+// This saves ~2-4 seconds on cold starts (11 users × 400ms = 4.4s saved).
+const getPasswordFingerprint = (password) => {
+  if (!password) return "";
+  return crypto.createHash("sha256").update(password).digest("hex").slice(0, 16);
+};
+
 const syncPasswordIfNeeded = async (user, envPassword) => {
   if (!envPassword) return false;
-  const isMatched = await user.comparePassword(envPassword);
-  if (!isMatched) {
-    user.password = envPassword;
-    await user.save();
-    console.log(`  ↳ Password synced for ${user.email}`);
-    return true;
+  
+  // Fast check: compare SHA-256 fingerprint instead of bcrypt
+  const envFingerprint = getPasswordFingerprint(envPassword);
+  if (user.passwordSyncHash === envFingerprint) {
+    return false; // Password unchanged, skip expensive bcrypt rehash
   }
-  return false;
+  
+  // Password changed — update with bcrypt hash (via pre-save hook) + store fingerprint
+  user.password = envPassword;
+  user.passwordSyncHash = envFingerprint;
+  await user.save();
+  console.log(`  ↳ Password synced for ${user.email}`);
+  return true;
 };
 
 export const seedUsers = async () => {

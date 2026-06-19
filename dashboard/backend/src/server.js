@@ -282,11 +282,21 @@ app.get("/api/auth/status", protect, admin, async (req, res) => {
   });
 });
 
-// Middleware to ensure database connection in serverless environment
+// ─── SERVERLESS CONNECTION MIDDLEWARE ───────────────────────────
+// Only ensures DB connection. Seeds are decoupled to run once, not per-request.
+let seedsTriggered = false;
 app.use(async (req, res, next) => {
   try {
     await connectDB();
-    await runSeeds();
+    // Trigger seeds once after first connection, but don't block the request
+    if (!seedsTriggered) {
+      seedsTriggered = true;
+      // Fire-and-forget: seeds run in background, not blocking the response
+      runSeeds().catch((err) => {
+        seedsTriggered = false; // Allow retry on next request
+        console.error("Background seed initialization error:", err);
+      });
+    }
     next();
   } catch (err) {
     console.error("Database middleware connection error:", err);
@@ -305,27 +315,30 @@ app.get("/api/bootstrap", protect, async (req, res) => {
     const userEmail = req.user.email;
     const userId = req.user._id;
 
+    // ─── PRE-FETCH: Single staff user query, reused for tasks + notifications ───
+    let staffUserIds = null;
+    if (userRole !== "admin" && userEmail === SHARED_STAFF_EMAIL) {
+      const staffUsers = await User.find({ role: "staff" }).select("_id").lean();
+      staffUserIds = staffUsers.map((u) => u._id);
+    }
+
     // 1. Build tasks query
     let taskQuery = { deleted: { $ne: true } };
     if (userRole !== "admin") {
-      if (userEmail === SHARED_STAFF_EMAIL) {
-        const staffUsers = await User.find({ role: "staff" }).select("_id");
-        const staffIds = staffUsers.map((u) => u._id);
-        taskQuery = { assignee: { $in: [userId, ...staffIds] }, deleted: { $ne: true } };
+      if (staffUserIds) {
+        taskQuery = { assignee: { $in: [userId, ...staffUserIds] }, deleted: { $ne: true } };
       } else {
         taskQuery = { assignee: userId, deleted: { $ne: true } };
       }
     }
 
-    // 2. Build notifications query
+    // 2. Build notifications query (reuses staffUserIds — no duplicate query)
     let notifQuery = {};
-    if (userEmail === SHARED_STAFF_EMAIL) {
-      const staffUsers = await User.find({ role: "staff" }).select("_id");
-      const staffIds = staffUsers.map((u) => u._id);
+    if (staffUserIds) {
       notifQuery = {
         $or: [
           { recipient: userId },
-          { recipient: { $in: staffIds } },
+          { recipient: { $in: staffUserIds } },
           { recipient: null }
         ]
       };
@@ -335,29 +348,32 @@ app.get("/api/bootstrap", protect, async (req, res) => {
       };
     }
 
-    // 3. Define parallel database queries
+    // 3. Define parallel database queries with limits for serverless performance
     const promises = {
       tasks: Task.find(taskQuery)
         .populate("assignee", "name email role")
         .populate("createdBy", "name role")
         .sort({ pinned: -1, createdAt: -1 })
+        .limit(200)
         .lean(),
-      users: User.find({}).select("name email role").lean(),
-      notifications: Notification.find(notifQuery).sort({ createdAt: -1 }).lean(),
+      users: User.find({}).select("name email role baseSalary").lean(),
+      notifications: Notification.find(notifQuery).sort({ createdAt: -1 }).limit(100).lean(),
       campaigns: FieldNote.find({ deleted: { $ne: true } })
         .populate("createdBy", "name role")
         .sort({ createdAt: -1 })
+        .limit(200)
         .lean(),
       activities: ActivityLog.find({})
         .populate("user", "name email role")
         .sort({ createdAt: -1 })
         .limit(30)
         .lean(),
-      products: Product.find({}).sort({ createdAt: -1 }).lean(),
+      products: Product.find({}).sort({ createdAt: -1 }).limit(100).lean(),
       orders: Order.find({ deleted: { $ne: true } })
         .populate("createdBy", "name role")
         .populate("assignee", "name email role")
         .sort({ createdAt: -1 })
+        .limit(300)
         .lean(),
       inventoryItems: InventoryItem.find({})
         .populate("createdBy", "name role")
@@ -366,19 +382,20 @@ app.get("/api/bootstrap", protect, async (req, res) => {
       quickNotes: QuickNote.find({})
         .populate("createdBy", "name role")
         .sort({ createdAt: -1 })
+        .limit(50)
         .lean(),
     };
 
-    // 4. Inject admin-only data
+    // 4. Inject admin-only data (with limits)
     if (userRole === "admin") {
-      promises.sales = Sale.find({}).populate("createdBy", "name role").populate("orderId").sort({ date: -1 }).lean();
-      promises.expenses = Expense.find({}).populate("createdBy", "name role").sort({ date: -1 }).lean();
-      promises.purchases = Purchase.find({}).populate("createdBy", "name role").sort({ date: -1 }).lean();
-      promises.quotations = Quotation.find({}).populate("createdBy", "name role").sort({ date: -1 }).lean();
+      promises.sales = Sale.find({}).populate("createdBy", "name role").populate("orderId").sort({ date: -1 }).limit(500).lean();
+      promises.expenses = Expense.find({}).populate("createdBy", "name role").sort({ date: -1 }).limit(500).lean();
+      promises.purchases = Purchase.find({}).populate("createdBy", "name role").sort({ date: -1 }).limit(300).lean();
+      promises.quotations = Quotation.find({}).populate("createdBy", "name role").sort({ date: -1 }).limit(200).lean();
       
-      promises.binTasks = Task.find({ deleted: true }).populate("assignee", "name email role").populate("createdBy", "name role").lean();
-      promises.binCampaigns = FieldNote.find({ deleted: true }).populate("createdBy", "name role").lean();
-      promises.binOrders = Order.find({ deleted: true }).populate("assignee", "name email role").populate("createdBy", "name role").lean();
+      promises.binTasks = Task.find({ deleted: true }).populate("assignee", "name email role").populate("createdBy", "name role").limit(100).lean();
+      promises.binCampaigns = FieldNote.find({ deleted: true }).populate("createdBy", "name role").limit(100).lean();
+      promises.binOrders = Order.find({ deleted: true }).populate("assignee", "name email role").populate("createdBy", "name role").limit(100).lean();
     }
 
     // 5. Query all collections concurrently

@@ -29,6 +29,11 @@ const UserSchema = new mongoose.Schema(
       type: Number,
       default: 30000,
     },
+    // Fast fingerprint of the env password to avoid expensive bcrypt.compare() during seed sync
+    passwordSyncHash: {
+      type: String,
+      default: "",
+    },
   },
   {
     timestamps: true,
