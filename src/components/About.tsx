@@ -60,7 +60,7 @@ export default function About() {
         className="founder-section relative py-20 md:py-32 px-4 sm:px-6 md:px-12 overflow-hidden transition-all duration-700"
       >
         {/* Background Image of Patan Durbar Square */}
-        <div className="absolute inset-0 z-0 pointer-events-none select-none transition-all duration-1000 dark:opacity-40 transition-opacity duration-500">
+        <div className="absolute inset-0 z-0 pointer-events-none select-none transition-all duration-1000 dark:opacity-40">
           <Image
             src="/images/about-hero.webp"
             alt="Patan Durbar Square Background"

@@ -8,6 +8,7 @@ export interface User {
   name: string;
   email: string;
   role: "admin" | "staff";
+  baseSalary?: number;
 }
 
 export interface Task {
@@ -222,6 +223,18 @@ export interface Quotation {
   createdAt: string;
 }
 
+export interface Attendance {
+  _id: string;
+  user: User;
+  date: string;
+  status: "present" | "absent" | "half_day" | "leave";
+  checkIn?: string;
+  checkOut?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
 interface DashboardState {
   user: User | null;
   token: string | null;
@@ -240,6 +253,7 @@ interface DashboardState {
   purchases: Purchase[];
   inventoryItems: InventoryItem[];
   quotations: Quotation[];
+  attendanceLogs: Attendance[];
   pusher: Pusher | null;
   theme: "light" | "dark";
   focusMode: boolean;
@@ -248,6 +262,10 @@ interface DashboardState {
   
   // Actions
   init: () => void;
+  fetchAttendanceLogs: (userId?: string, month?: number, year?: number) => Promise<void>;
+  logAttendance: (data: { user?: string; date: string; status: string; checkIn?: string | null; checkOut?: string | null; notes?: string }) => Promise<void>;
+  updateAttendance: (id: string, data: { status: string; checkIn?: string | null; checkOut?: string | null; notes?: string }) => Promise<void>;
+  deleteAttendance: (id: string) => Promise<void>;
   bootstrap: () => Promise<void>;
   setActiveStaffProfile: (profile: User | null) => void;
   login: (email: string, password: string) => Promise<boolean>;
@@ -409,6 +427,7 @@ export const useStore = create<DashboardState>((set, get) => ({
   purchases: [],
   inventoryItems: [],
   quotations: [],
+  attendanceLogs: [],
   pusher: null,
   theme: (localStorage.getItem("theme") as "light" | "dark") || "light",
   focusMode: false,
@@ -700,6 +719,19 @@ export const useStore = create<DashboardState>((set, get) => ({
       channel.bind("note_deleted", (deletedNoteId: string) => {
         set((state) => ({
           quickNotes: (Array.isArray(state.quickNotes) ? state.quickNotes : []).filter((n) => n._id !== deletedNoteId),
+        }));
+      });
+
+      channel.bind("attendance_updated", (updatedAttendance: Attendance) => {
+        set((state) => {
+          const filtered = state.attendanceLogs.filter((a) => a._id !== updatedAttendance._id);
+          return { attendanceLogs: [...filtered, updatedAttendance].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()) };
+        });
+      });
+
+      channel.bind("attendance_deleted", (deletedAttendanceId: string) => {
+        set((state) => ({
+          attendanceLogs: state.attendanceLogs.filter((a) => a._id !== deletedAttendanceId),
         }));
       });
 
@@ -1821,6 +1853,92 @@ export const useStore = create<DashboardState>((set, get) => ({
       window.URL.revokeObjectURL(url);
     } catch (err) {
       console.error("Download archive failed:", err);
+      throw err;
+    }
+  },
+
+  fetchAttendanceLogs: async (userId, month, year) => {
+    const { token } = get();
+    try {
+      let queryParams = new URLSearchParams();
+      if (userId) queryParams.append("userId", userId);
+      if (month) queryParams.append("month", month.toString());
+      if (year) queryParams.append("year", year.toString());
+      
+      const res = await fetch(`${API_URL}/api/attendance?${queryParams.toString()}`, {
+        headers: getHeaders(token),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        set({ attendanceLogs: data });
+      }
+    } catch (err) {
+      console.error("Fetch attendance logs failed:", err);
+    }
+  },
+
+  logAttendance: async (attendanceData) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/attendance`, {
+        method: "POST",
+        headers: getHeaders(token),
+        body: JSON.stringify(attendanceData),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({ message: "Unknown error" }));
+        throw new Error(errData.message || "Failed to log attendance");
+      }
+      const data = await res.json();
+      set((state) => {
+        const filtered = state.attendanceLogs.filter((a) => a._id !== data._id);
+        return { attendanceLogs: [...filtered, data].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()) };
+      });
+    } catch (err) {
+      console.error("Log attendance failed:", err);
+      throw err;
+    }
+  },
+
+  updateAttendance: async (id, attendanceData) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/attendance/${id}`, {
+        method: "PUT",
+        headers: getHeaders(token),
+        body: JSON.stringify(attendanceData),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({ message: "Unknown error" }));
+        throw new Error(errData.message || "Failed to update attendance");
+      }
+      const data = await res.json();
+      set((state) => {
+        const filtered = state.attendanceLogs.filter((a) => a._id !== data._id);
+        return { attendanceLogs: [...filtered, data].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()) };
+      });
+    } catch (err) {
+      console.error("Update attendance failed:", err);
+      throw err;
+    }
+  },
+
+  deleteAttendance: async (id) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/attendance/${id}`, {
+        method: "DELETE",
+        headers: getHeaders(token),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({ message: "Unknown error" }));
+        throw new Error(errData.message || "Failed to delete attendance");
+      }
+      set((state) => ({
+        attendanceLogs: state.attendanceLogs.filter((a) => a._id !== id),
+      }));
+    } catch (err) {
+      console.error("Delete attendance failed:", err);
       throw err;
     }
   },

@@ -38,6 +38,7 @@ import InventoryItem from "./models/InventoryItem.js";
 import Quotation from "./models/Quotation.js";
 import QuickNote from "./models/QuickNote.js";
 import MonthlyStatement from "./models/MonthlyStatement.js";
+import Attendance from "./models/Attendance.js";
 
 // Middleware
 import { protect, admin } from "./middleware/auth.js";
@@ -47,7 +48,9 @@ import {
   registerSchema,
   createTaskSchema,
   updateTaskSchema,
-  fieldNoteSchema
+  fieldNoteSchema,
+  attendanceSchema,
+  updateAttendanceSchema
 } from "./middleware/validation.js";
 
 dotenv.config();
@@ -1954,6 +1957,190 @@ app.get("/api/export/inventory", protect, async (req, res) => {
     res.setHeader("Content-Disposition", `attachment; filename=${filename}`);
     await workbook.csv.write(res);
     res.end();
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// ─── ATTENDANCE ENDPOINTS ──────────────────────────────────────
+
+// Get attendance logs
+app.get("/api/attendance", protect, async (req, res) => {
+  const { userId, month, year } = req.query;
+  try {
+    let query = {};
+
+    // Determine target user
+    let targetUserId = req.user._id;
+    if (req.user.role === "admin" || req.user.email === SHARED_STAFF_EMAIL) {
+      if (userId) {
+        targetUserId = new mongoose.Types.ObjectId(userId);
+      } else if (req.user.role !== "admin") {
+        return res.status(400).json({ message: "userId is required for staff persona query" });
+      } else {
+        // Admin querying without userId: fetch all attendance
+        targetUserId = null;
+      }
+    } else {
+      // Direct staff role is forced to their own ID
+      targetUserId = req.user._id;
+    }
+
+    if (targetUserId) {
+      query.user = targetUserId;
+    }
+
+    // Filter by month/year if provided
+    if (month && year) {
+      const parsedMonth = parseInt(month) - 1; // JS Month is 0-indexed
+      const parsedYear = parseInt(year);
+      const startDate = new Date(Date.UTC(parsedYear, parsedMonth, 1));
+      const endDate = new Date(Date.UTC(parsedYear, parsedMonth + 1, 1));
+      query.date = { $gte: startDate, $lt: endDate };
+    }
+
+    const logs = await Attendance.find(query)
+      .populate("user", "name email role baseSalary")
+      .sort({ date: 1 });
+      
+    res.json(logs);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Create or update daily attendance log
+app.post("/api/attendance", protect, validate(attendanceSchema), async (req, res) => {
+  const { user: reqUser, date: reqDate, status, checkIn, checkOut, notes } = req.body;
+  try {
+    let targetUserId = req.user._id;
+
+    // Authorization check: only admin or shared-staff can log attendance for others
+    if (reqUser && reqUser !== req.user._id.toString()) {
+      if (req.user.role === "admin" || req.user.email === SHARED_STAFF_EMAIL) {
+        targetUserId = new mongoose.Types.ObjectId(reqUser);
+      } else {
+        return res.status(403).json({ message: "Not authorized to log attendance for other users" });
+      }
+    }
+
+    // Normalize date to midnight UTC
+    const normalizedDate = new Date(reqDate);
+    normalizedDate.setUTCHours(0, 0, 0, 0);
+
+    // Check if record already exists for this user and date
+    let attendance = await Attendance.findOne({ user: targetUserId, date: normalizedDate });
+
+    if (attendance) {
+      // Update existing record
+      attendance.status = status || attendance.status;
+      if (req.body.hasOwnProperty("checkIn")) {
+        attendance.checkIn = checkIn ? new Date(checkIn) : undefined;
+      }
+      if (req.body.hasOwnProperty("checkOut")) {
+        attendance.checkOut = checkOut ? new Date(checkOut) : undefined;
+      }
+      attendance.notes = notes !== undefined ? notes : attendance.notes;
+      await attendance.save();
+    } else {
+      // Create new record
+      attendance = new Attendance({
+        user: targetUserId,
+        date: normalizedDate,
+        status,
+        checkIn: checkIn ? new Date(checkIn) : undefined,
+        checkOut: checkOut ? new Date(checkOut) : undefined,
+        notes,
+      });
+      await attendance.save();
+    }
+
+    const populatedAttendance = await Attendance.findById(attendance._id).populate(
+      "user",
+      "name email role baseSalary"
+    );
+
+    // Sync in real-time
+    triggerPusher("attendance_updated", populatedAttendance);
+
+    // Log Activity
+    const dateStr = normalizedDate.toLocaleDateString();
+    await logActivity(
+      req.user._id,
+      "Attendance Logged",
+      `Logged attendance for ${populatedAttendance.user?.name || "Staff"} on ${dateStr} as ${status.toUpperCase()}`
+    );
+
+    res.status(201).json(populatedAttendance);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Update attendance record (Admin only)
+app.put("/api/attendance/:id", protect, admin, validate(updateAttendanceSchema), async (req, res) => {
+  const { status, checkIn, checkOut, notes } = req.body;
+  try {
+    const attendance = await Attendance.findById(req.params.id);
+    if (!attendance) {
+      return res.status(404).json({ message: "Attendance record not found" });
+    }
+
+    attendance.status = status || attendance.status;
+    if (req.body.hasOwnProperty("checkIn")) {
+      attendance.checkIn = checkIn ? new Date(checkIn) : undefined;
+    }
+    if (req.body.hasOwnProperty("checkOut")) {
+      attendance.checkOut = checkOut ? new Date(checkOut) : undefined;
+    }
+    attendance.notes = notes !== undefined ? notes : attendance.notes;
+
+    await attendance.save();
+
+    const populatedAttendance = await Attendance.findById(attendance._id).populate(
+      "user",
+      "name email role baseSalary"
+    );
+
+    // Sync in real-time
+    triggerPusher("attendance_updated", populatedAttendance);
+
+    // Log Activity
+    const dateStr = new Date(attendance.date).toLocaleDateString();
+    await logActivity(
+      req.user._id,
+      "Attendance Updated",
+      `Updated attendance for ${populatedAttendance.user?.name || "Staff"} on ${dateStr} to ${status.toUpperCase()}`
+    );
+
+    res.json(populatedAttendance);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Delete attendance record (Admin only)
+app.delete("/api/attendance/:id", protect, admin, async (req, res) => {
+  try {
+    const attendance = await Attendance.findById(req.params.id).populate("user", "name");
+    if (!attendance) {
+      return res.status(404).json({ message: "Attendance record not found" });
+    }
+
+    await Attendance.findByIdAndDelete(req.params.id);
+
+    // Sync in real-time
+    triggerPusher("attendance_deleted", req.params.id);
+
+    // Log Activity
+    const dateStr = new Date(attendance.date).toLocaleDateString();
+    await logActivity(
+      req.user._id,
+      "Attendance Deleted",
+      `Deleted attendance record for ${attendance.user?.name || "Staff"} on ${dateStr}`
+    );
+
+    res.json({ message: "Attendance record deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

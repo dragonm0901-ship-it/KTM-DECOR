@@ -14,6 +14,7 @@ import { PurchaseTab } from "./components/PurchaseTab";
 import { InventoryTab } from "./components/InventoryTab";
 import { QuotationTab } from "./components/QuotationTab";
 import { CalendarTab } from "./components/CalendarTab";
+import { StaffManagement } from "./components/StaffManagement";
 import { LogIn, KeyRound, Mail } from "./components/ui/solar-icons";
 
 export const App: React.FC = () => {
@@ -234,6 +235,9 @@ export const App: React.FC = () => {
       )}
       {currentTab === "quotation" && user?.role === "admin" && (
         <QuotationTab />
+      )}
+      {currentTab === "staff-management" && (
+        <StaffManagement />
       )}
     </Layout>
   );

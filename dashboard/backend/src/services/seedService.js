@@ -62,6 +62,47 @@ export const seedUsers = async () => {
     } else {
       await syncPasswordIfNeeded(sharedStaffExists, process.env.SEED_STAFF_PASSWORD);
     }
+
+    // Seed 9 Staff Members
+    const staffMembers = [
+      { name: "Ramesh Thapa", email: "ramesh@ktmdecor.com", baseSalary: 30000 },
+      { name: "Sita Sharma", email: "sita@ktmdecor.com", baseSalary: 32000 },
+      { name: "Gopal BK", email: "gopal@ktmdecor.com", baseSalary: 28000 },
+      { name: "Gita Adhikari", email: "gita@ktmdecor.com", baseSalary: 35000 },
+      { name: "Hari Karki", email: "hari@ktmdecor.com", baseSalary: 29000 },
+      { name: "Maya Tamang", email: "maya@ktmdecor.com", baseSalary: 31000 },
+      { name: "Sunil Shrestha", email: "sunil@ktmdecor.com", baseSalary: 33000 },
+      { name: "Pooja Chaudhary", email: "pooja@ktmdecor.com", baseSalary: 30000 },
+      { name: "Anil Gurung", email: "anil@ktmdecor.com", baseSalary: 34000 }
+    ];
+
+    const allowedEmails = [
+      SHARED_STAFF_EMAIL,
+      ...staffMembers.map(s => s.email)
+    ];
+
+    // Clean up any legacy staff users not in our seeded 9 staff list or shared staff login
+    await User.deleteMany({ role: "staff", email: { $nin: allowedEmails } });
+
+    for (const staff of staffMembers) {
+      const exists = await User.findOne({ email: staff.email });
+      if (!exists) {
+        await User.create({
+          name: staff.name,
+          email: staff.email,
+          password: process.env.SEED_STAFF_PASSWORD || "staffpassword",
+          role: "staff",
+          baseSalary: staff.baseSalary
+        });
+        console.log(`  ↳ Created staff member: ${staff.name}`);
+      } else {
+        if (exists.baseSalary === undefined || exists.baseSalary !== staff.baseSalary) {
+          exists.baseSalary = staff.baseSalary;
+          await exists.save();
+        }
+        await syncPasswordIfNeeded(exists, process.env.SEED_STAFF_PASSWORD);
+      }
+    }
   } catch (error) {
     console.error("Error seeding users:", error);
   }

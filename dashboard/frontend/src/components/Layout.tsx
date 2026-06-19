@@ -23,7 +23,8 @@ import {
   FileText,
   DollarSign,
   Menu,
-  MessageSquare
+  MessageSquare,
+  User
 } from "./ui/solar-icons";
 
 interface LayoutProps {
@@ -95,7 +96,8 @@ export const Layout: React.FC<LayoutProps> = ({
         { id: "overview", label: "Overview", icon: LayoutDashboard },
         { id: "calendar", label: "Calendar", icon: Calendar },
         { id: "tasks", label: "Tasks Board", icon: CheckSquare },
-        { id: "field-notes", label: "Field Notes", icon: FileText }
+        { id: "field-notes", label: "Field Notes", icon: FileText },
+        { id: "staff-management", label: user?.role === "admin" ? "Staff Management" : "Attendance", icon: User }
       ]
     },
     {

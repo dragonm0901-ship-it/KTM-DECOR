@@ -80,3 +80,24 @@ export const fieldNoteSchema = z.object({
   fittingSpotImageUrl: z.string().url({ message: "Invalid image URL" }).or(z.literal("")).optional().default(""),
   email: z.string().email({ message: "Invalid email" }).or(z.literal("")).optional().default(""),
 });
+
+// Create/Update Attendance Schema
+export const attendanceSchema = z.object({
+  user: mongoIdSchema.optional(),
+  date: z.string({ required_error: "Date is required" })
+    .refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date format" }),
+  status: z.enum(["present", "absent", "half_day", "leave"], { required_error: "Status is required" }),
+  checkIn: z.string().refine((val) => !val || !isNaN(Date.parse(val)), { message: "Invalid checkIn timestamp" }).nullable().optional(),
+  checkOut: z.string().refine((val) => !val || !isNaN(Date.parse(val)), { message: "Invalid checkOut timestamp" }).nullable().optional(),
+  notes: z.string().optional().default(""),
+});
+
+// Update Attendance Schema
+export const updateAttendanceSchema = z.object({
+  user: mongoIdSchema.optional(),
+  date: z.string().refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date format" }).optional(),
+  status: z.enum(["present", "absent", "half_day", "leave"]).optional(),
+  checkIn: z.string().refine((val) => !val || !isNaN(Date.parse(val)), { message: "Invalid checkIn timestamp" }).nullable().optional(),
+  checkOut: z.string().refine((val) => !val || !isNaN(Date.parse(val)), { message: "Invalid checkOut timestamp" }).nullable().optional(),
+  notes: z.string().optional(),
+});

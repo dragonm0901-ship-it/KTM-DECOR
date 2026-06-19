@@ -25,6 +25,10 @@ const UserSchema = new mongoose.Schema(
       enum: ["admin", "staff"],
       default: "staff",
     },
+    baseSalary: {
+      type: Number,
+      default: 30000,
+    },
   },
   {
     timestamps: true,
