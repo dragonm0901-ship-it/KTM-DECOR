@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 import Pusher from "pusher-js";
 
 const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? "" : "http://localhost:5001");
@@ -437,7 +438,9 @@ const getSafeToken = () => {
   }
 };
 
-export const useStore = create<DashboardState>((set, get) => ({
+export const useStore = create<DashboardState>()(
+  persist(
+    (set, get) => ({
   user: getSafeLocalStorage("user"),
   token: getSafeToken(),
   users: [],
@@ -2079,4 +2082,36 @@ export const useStore = create<DashboardState>((set, get) => ({
       throw err;
     }
   },
-}));
+}),
+{
+  name: "ktm-decor-dashboard-storage",
+  storage: createJSONStorage(() => localStorage),
+    // Persist only raw data collections and visual settings, skipping connection objects and helper functions
+    partialize: (state) => ({
+      user: state.user,
+      token: state.token,
+      users: state.users,
+      tasks: state.tasks,
+      notifications: state.notifications,
+      campaigns: state.campaigns,
+      binTasks: state.binTasks,
+      binCampaigns: state.binCampaigns,
+      binOrders: state.binOrders,
+      products: state.products,
+      activities: state.activities,
+      orders: state.orders,
+      sales: state.sales,
+      expenses: state.expenses,
+      purchases: state.purchases,
+      inventoryItems: state.inventoryItems,
+      quotations: state.quotations,
+      attendanceLogs: state.attendanceLogs,
+      salaries: state.salaries,
+      theme: state.theme,
+      focusMode: state.focusMode,
+      quickNotes: state.quickNotes,
+      activeStaffProfile: state.activeStaffProfile,
+    }),
+  }
+)
+);

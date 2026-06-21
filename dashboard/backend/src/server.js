@@ -22,6 +22,10 @@ import { logActivity } from "./services/activityLogger.js";
 import { runSeeds } from "./services/seedService.js";
 import { buildStatementWorkbook } from "./services/exportService.js";
 import { errorHandler } from "./middleware/errorHandler.js";
+import { initCache, cacheGet, cacheSet, cacheDeletePattern } from "./services/cacheService.js";
+
+// Initialize cache connection
+initCache().catch((err) => console.error("Failed to initialize cache service:", err.message));
 
 // Models
 import User from "./models/User.js";
@@ -127,6 +131,23 @@ app.use(
 );
 app.use(express.json({ limit: "15mb" }));
 app.use(express.urlencoded({ limit: "15mb", extended: true }));
+
+// Middleware to invalidate cache on database mutations
+app.use((req, res, next) => {
+  const writeMethods = ["POST", "PUT", "PATCH", "DELETE"];
+  if (writeMethods.includes(req.method) && req.originalUrl.startsWith("/api/")) {
+    const originalJson = res.json;
+    res.json = function (body) {
+      if (res.statusCode >= 200 && res.statusCode < 300) {
+        cacheDeletePattern("bootstrap:*").catch((err) => {
+          console.error("Cache invalidation failed in middleware:", err.message);
+        });
+      }
+      return originalJson.call(this, body);
+    };
+  }
+  next();
+});
 
 // Connection to MongoDB
 const PORT = process.env.PORT || 5001;
@@ -316,7 +337,14 @@ app.get("/api/bootstrap", protect, async (req, res) => {
   try {
     const userRole = req.user.role;
     const userEmail = req.user.email;
-    const userId = req.user._id;
+    const userId = req.user._id.toString();
+    const cacheKey = `bootstrap:${userId}`;
+
+    // Try to retrieve data from cache
+    const cachedData = await cacheGet(cacheKey);
+    if (cachedData) {
+      return res.json(cachedData);
+    }
 
     // ─── PRE-FETCH: Single staff user query, reused for tasks + notifications ───
     let staffUserIds = null;
@@ -425,6 +453,9 @@ app.get("/api/bootstrap", protect, async (req, res) => {
     keys.forEach((key, index) => {
       payload[key] = results[index];
     });
+
+    // Store result in cache (TTL = 1 hour / 3600 seconds)
+    await cacheSet(cacheKey, payload, 3600);
 
     res.json(payload);
   } catch (error) {

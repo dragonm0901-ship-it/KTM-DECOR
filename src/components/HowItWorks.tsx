@@ -49,42 +49,40 @@ export default function HowItWorks() {
     if (typeof window === "undefined") return;
 
     if (window.innerWidth < 1024) {
-      // Mobile: Buttery, premium slide-up and fade-in
+      // Mobile: Snappy, smooth scroll-triggered slide-up
       const stepCards = gsap.utils.toArray<HTMLElement>(".step-card");
       stepCards.forEach((card) => {
         gsap.fromTo(card,
           { 
-            y: 20, 
-            opacity: 0,
-            scale: 0.99
+            y: 25, 
+            opacity: 0
           },
           {
             y: 0,
             opacity: 1,
-            scale: 1,
-            ease: "power4.out",
-            duration: 1.2,
+            ease: "power3.out",
+            duration: 0.5,
             scrollTrigger: {
               trigger: card,
-              start: "top 95%",
+              start: "top 92%",
               toggleActions: "play none none reverse"
             }
           }
         );
       });
     } else {
-      // Desktop: Staggered sequential slide up
+      // Desktop: Snappy staggered sequential slide up
       gsap.fromTo(".step-card",
-        { y: 50, opacity: 0 },
+        { y: 40, opacity: 0 },
         {
           y: 0,
           opacity: 1,
-          duration: 0.8,
-          stagger: 0.15,
-          ease: "power2.out",
+          duration: 0.5,
+          stagger: 0.08,
+          ease: "power3.out",
           scrollTrigger: {
             trigger: ".step-card-grid",
-            start: "top 80%",
+            start: "top 85%",
             toggleActions: "play none none reverse"
           }
         }
@@ -141,7 +139,7 @@ export default function HowItWorks() {
             return (
               <div
                 key={i}
-                className={`step-card group relative p-8 md:p-10 rounded-[4px] bg-neutral-50/70 dark:bg-neutral-900/40 border border-neutral-200/50 dark:border-white/5 shadow-sm hover:border-accent/40 hover:shadow-xl hover:-translate-y-2 transition-all duration-500 backdrop-blur-sm min-h-[380px] flex flex-col justify-between overflow-hidden lg:col-span-2 ${i === 3 ? "lg:col-start-2" : ""}`}
+                className={`step-card group relative p-8 md:p-10 rounded-[4px] bg-neutral-50/70 dark:bg-neutral-900/40 border border-neutral-200/50 dark:border-white/5 shadow-sm hover:border-accent/40 hover:shadow-xl hover:-translate-y-2 transition-[border-color,box-shadow,background-color,transform] duration-300 ease-out will-change-transform backdrop-blur-sm min-h-[380px] flex flex-col justify-between overflow-hidden lg:col-span-2 ${i === 3 ? "lg:col-start-2" : ""}`}
               >
                 {/* Background decorative neon glow aura */}
                 <div className="step-card-aura absolute -bottom-10 -right-10 w-36 h-36 bg-accent/5 rounded-full blur-2xl group-hover:bg-accent/12 transition-all duration-500 pointer-events-none" />
