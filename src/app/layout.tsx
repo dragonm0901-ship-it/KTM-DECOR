@@ -59,9 +59,9 @@ const pacifico = Pacifico({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://ktmdecor.com"),
-  title: "KTM DECOR | Custom LED Neon Signs & 3D Light Boards in Nepal",
+  title: "KTM DECOR | Premium Custom Neon Signs & Signcrafting in Nepal",
   description:
-    "Looking for the best custom LED neon signs, 3D acrylic letters, and premium light boards in Nepal? KTM Decor crafts high-quality, affordable business signage and home decor.",
+    "Elevate your space and brand with Nepal's leading custom signcrafting workshop. Meticulously handcrafted LED neon signs, 3D backlit signage, elegant nameplates, and bespoke architectural decor.",
   keywords: [
     "custom neon signs price in nepal",
     "led light board makers in kathmandu",
@@ -69,25 +69,32 @@ export const metadata: Metadata = {
     "buy neon signs online ktm",
     "office wall branding decor nepal"
   ],
+  icons: {
+    icon: "/logo/favicon.svg",
+    shortcut: "/logo/favicon.svg",
+    apple: "/logo/favicon.svg",
+  },
   openGraph: {
-    title: "KTM DECOR | Custom LED Neon Signs & 3D Light Boards in Kathmandu",
+    title: "KTM DECOR | Premium Custom Neon Signs & Signcrafting in Nepal",
     description:
-      "Looking for the best custom LED neon signs, 3D acrylic letters, and premium light boards in Kathmandu, Nepal? KTM Decor crafts high-quality, affordable business signage and home decor.",
+      "Elevate your space and brand with Nepal's leading custom signcrafting workshop. Meticulously handcrafted LED neon signs, 3D backlit signage, elegant nameplates, and bespoke architectural decor.",
     type: "website",
+    url: "https://ktmdecor.com",
+    siteName: "KTM DECOR",
     images: [
       {
         url: "/images/ktm-decor-og.png",
         width: 1200,
         height: 1200,
-        alt: "KTM DECOR | Custom LED Neon Signs & 3D Light Boards in Nepal",
+        alt: "KTM DECOR | Premium Custom Neon Signs & Signcrafting in Nepal",
       }
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "KTM DECOR | Custom LED Neon Signs & 3D Light Boards in Nepal",
+    title: "KTM DECOR | Premium Custom Neon Signs & Signcrafting in Nepal",
     description:
-      "Looking for the best custom LED neon signs, 3D acrylic letters, and premium light boards in Nepal? KTM Decor crafts high-quality, affordable business signage and home decor.",
+      "Elevate your space and brand with Nepal's leading custom signcrafting workshop. Meticulously handcrafted LED neon signs, 3D backlit signage, elegant nameplates, and bespoke architectural decor.",
     images: ["/images/ktm-decor-og.png"],
   },
 };
