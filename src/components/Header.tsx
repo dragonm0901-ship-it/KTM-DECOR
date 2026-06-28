@@ -314,13 +314,22 @@ export default function Header() {
               <span className="text-[10px] uppercase tracking-[0.25em] opacity-40 mb-1">
                 Appearance
               </span>
-              <div className="flex items-center gap-4">
-                <span className="text-sm font-medium">Switch Theme</span>
+              <div className="flex items-center gap-4 group/theme">
+                <span
+                  onClick={() => {
+                    const button = document.getElementById("nav-theme-toggle-btn");
+                    if (button) button.click();
+                  }}
+                  className="text-sm font-medium cursor-pointer select-none group-hover/theme:text-accent transition-colors duration-300"
+                >
+                  Switch Theme
+                </span>
                 {mounted && (
                   <AnimatedThemeToggler
+                    id="nav-theme-toggle-btn"
                     variant="hexagon"
                     duration={600}
-                    className="w-12 h-12 flex items-center justify-center rounded-[4px] bg-foreground/5 hover:bg-foreground/10 transition-colors duration-300"
+                    className="w-12 h-12 flex items-center justify-center rounded-[4px] bg-foreground/5 hover:bg-foreground/10 group-hover/theme:bg-foreground/10 transition-colors duration-300"
                     aria-label="Toggle theme"
                   />
                 )}

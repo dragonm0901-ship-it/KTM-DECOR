@@ -2,64 +2,59 @@
 
 import { useRef } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { PRODUCTS } from "@/data/shop-data";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const expertise = [
-  {
-    title: "Acrylic Backlit Signage",
-    description: "Transform your business front or reception desk with our premium backlit signage. Handcrafted from heavy cast acrylic and fitted with high-intensity uniform LED panels to offer a glowing architectural silhouette that commands attention.",
-    image: "/images/light-boards-nivati.webp"
-  },
-  {
-    title: "Neon Sign",
-    description: "Bring vibrant color and modern aesthetic energy to any room or commercial bar with our hand-bent glowing neon signs. Mounted on contoured clear acrylic backings, these low-voltage LED tubes run perfectly cold and completely silent.",
-    image: "/images/neon-momo.webp"
-  },
-  {
-    title: "3D Signage",
-    description: "Add physical depth and structural branding authority with our heavy-duty fabricated 3D lettering signs. Combining stainless steel and block acrylic elements, these signs cast beautiful drop-shadows on corporate reception backdrops.",
-    image: "/images/3d-letters-salt.webp"
-  },
-  {
-    title: "2D Board",
-    description: "Clean, highly visible, and built to withstand the elements, our flat e-commerce 2D boards are ideal for retail pricing menus, company directional indexes, and regulatory safety displays. Features crisp beveled edges.",
-    image: "/hero-images/hero1.webp"
-  },
-  {
-    title: "House/Office Nameplate",
-    description: "Welcome guests or designate your workspace in premium style with our elegant custom nameplates. Blending natural wood inserts, glass frames, and polished brass plates for a timeless, executive presentation.",
-    image: "/images/name-plates.webp"
-  },
-  {
-    title: "Wooden Signage",
-    description: "Bring natural warmth and artisanal character to your brand with our CNC-carved solid timber signs. Sanded to a smooth furniture finish and treated with weatherproofing oils, these pieces showcase gorgeous, unique wood grains.",
-    image: "/images/laser-cnc.webp"
-  },
-  {
-    title: "2.5D Signage",
-    description: "A stunning cross between fine sculpture and modern signage, our 2.5D layered signs utilize overlapping panels and relief textures to create a spectacular physical depth layout that changes with ambient light angles.",
-    image: "/images/dimensional-ktm.webp"
-  },
-  {
-    title: "Acrylic Table Lamp",
-    description: "Light up your workspace or bedside table with our mesmerizing 3D-optical illusion acrylic lamps. Features a solid wood base with glowing warm LEDs that shine through a custom laser-etched pattern overlay.",
-    image: "/hero-images/hero2.webp"
-  },
-  {
-    title: "3D Number Plate",
-    description: "Stand out on the road or define your home address with our high-contrast 3D number plates. Fabricated with raised bold numbers on carbon fiber templates to ensure durability, high visibility, and luxury styles.",
-    image: "/hero-images/hero3.webp"
-  },
-  {
-    title: "Double Sided Round Light Board",
-    description: "Ensure maximum foot-traffic views from both street directions with our heavy-duty projecting round light boxes. Built with waterproof metal frames and double-sided glowing acrylic faces to shine brightly through night storms.",
-    image: "/images/light-boards-nivati.webp"
+const SHORT_DESCRIPTIONS: Record<string, string> = {
+  "1": "CNC-routed timber signage with premium weatherproof outdoor finishes.",
+  "2": "Premium backlit logo signs for business facades and receptionist backdrops.",
+  "3": "Multi-layered panel signs forming sculpture-like relief depths and textures.",
+  "4": "Double-sided projecting sign boxes visible from both street directions.",
+  "5": "Hand-bent custom LED neon signs to illuminate corporate walls or spaces.",
+  "6": "Durable and weather-proof flat directory, menu, and directional boards.",
+  "7": "Multi-dimensional logo letters fabricated from cast acrylic and stainless steel.",
+  "8": "Precision laser cutting and CNC engraving on wood, acrylic, and metals.",
+  "9": "Custom designer clocks handcrafted with wood, acrylic, and epoxy resin.",
+  "10": "Premium bold raised numbers mounted on heavy weatherproof templates.",
+  "11": "Bespoke executive office and home entrance signs using wood, brass, and glass.",
+  "12": "Laser-etched 3D illusion desktop lamps on warm illuminated wood bases."
+};
+
+const getCategoryGradient = (category: string) => {
+  switch (category) {
+    case "Acrylic Backlit Signage":
+      return "from-cyan-500/20 to-blue-500/30";
+    case "Neon Sign":
+      return "from-pink-500/20 to-fuchsia-500/30";
+    case "3D Signage":
+      return "from-amber-500/20 to-yellow-600/30";
+    case "2D Board":
+      return "from-slate-500/20 to-zinc-500/30";
+    case "House/Office Nameplate":
+      return "from-orange-500/20 to-amber-500/30";
+    case "Wooden Signage":
+      return "from-yellow-700/20 to-amber-800/30";
+    case "2.5D Signage":
+      return "from-teal-500/20 to-emerald-500/30";
+    case "Acrylic Table Lamp":
+      return "from-green-400/20 to-emerald-500/30";
+    case "3D Number Plate":
+      return "from-slate-700/20 to-zinc-800/30";
+    case "Double Sided Round Light Board":
+      return "from-yellow-500/20 to-orange-500/30";
+    case "Laser & CNC Products":
+      return "from-red-500/20 to-rose-600/30";
+    case "Customized Wall Clock":
+      return "from-indigo-500/20 to-violet-600/30";
+    default:
+      return "from-accent/20 to-accent/30";
   }
-];
+};
 
 export default function Expertise() {
   const containerRef = useRef<HTMLElement>(null);
@@ -67,32 +62,55 @@ export default function Expertise() {
   useGSAP(() => {
     if (typeof window === "undefined") return;
 
-    // Reveal Grid Cards staggered on scroll
-    gsap.fromTo(
-      ".expertise-card",
-      {
-        y: 60,
-        opacity: 0,
-        scale: 0.95
-      },
-      {
-        y: 0,
-        opacity: 1,
-        scale: 1,
-        duration: 0.8,
-        ease: "power3.out",
-        stagger: {
-          amount: 0.5,
-          grid: "auto",
-          ease: "power1.out"
-        },
-        scrollTrigger: {
-          trigger: ".expertise-grid-container",
-          start: "top 85%",
-          toggleActions: "play none none reverse"
-        }
+    // 1. Reveal Grid Cards: Speed & stagger dynamically adapt to scroll velocity (plays once)
+    ScrollTrigger.create({
+      trigger: ".expertise-grid-container",
+      start: "top 88%",
+      once: true,
+      onEnter: (self) => {
+        const velocity = Math.abs(self.getVelocity());
+        // Clamp duration: very fast scroll = 0.22s, slow scroll = 0.55s
+        const duration = gsap.utils.clamp(0.22, 0.55, 1200 / (velocity || 1200));
+
+        gsap.fromTo(
+          ".expertise-card",
+          {
+            y: 30,
+            opacity: 0,
+            scale: 0.98
+          },
+          {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            duration: duration,
+            ease: "power4.out",
+            stagger: {
+              amount: duration * 0.4,
+              grid: "auto",
+              ease: "power2.out"
+            }
+          }
+        );
       }
-    );
+    });
+
+    // 2. Real-time scroll speed skew/tilt effect (continuous)
+    const skewSetter = gsap.quickTo(".expertise-card", "skewY", { duration: 0.35, ease: "power3.out" });
+    const clamp = gsap.utils.clamp(-5, 5); // Limit to max 5 degrees skew for a premium look
+
+    ScrollTrigger.create({
+      trigger: ".expertise-grid-container",
+      start: "top bottom",
+      end: "bottom top",
+      onUpdate: (self) => {
+        const velocity = self.getVelocity();
+        const skew = clamp(velocity / -600);
+        skewSetter(skew);
+      },
+      onLeave: () => skewSetter(0),
+      onLeaveBack: () => skewSetter(0)
+    });
   }, { scope: containerRef });
 
   return (
@@ -120,37 +138,48 @@ export default function Expertise() {
 
       {/* Grid Container */}
       <div className="expertise-grid-container relative w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-12 z-10">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-5">
-          {expertise.map((item, index) => (
-            <div
-              key={index}
-              className="expertise-card relative flex flex-col h-[240px] sm:h-[300px] md:h-[350px] rounded-[6px] border border-border bg-card/30 backdrop-blur-md overflow-hidden"
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6 md:gap-8">
+          {PRODUCTS.map((item, index) => (
+            <Link
+              key={item.id}
+              href={`/shop/${item.id}`}
+              className="expertise-card group relative aspect-square sm:aspect-[4/5] rounded-[8px] border border-border bg-background block opacity-0 overflow-hidden cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-accent/5"
             >
-              {/* Card Image Area */}
-              <div className="relative w-full h-[55%] overflow-hidden bg-muted">
+              {/* Image BG */}
+              <div className="absolute inset-0 transition-transform duration-700 lg:group-hover:scale-105">
                 <Image
                   src={item.image}
-                  alt={item.title}
+                  alt={item.name}
                   fill
-                  sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 20vw"
-                  className="object-cover pointer-events-none"
+                  sizes="(max-width: 640px) 50vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                  className="object-cover"
                   draggable={false}
-                  priority={index < 5}
+                  priority={index < 4}
                 />
-                {/* Gradient vignette for transition to dark card bottom */}
-                <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-transparent to-transparent pointer-events-none" />
               </div>
 
-              {/* Card Text Area */}
-              <div className="p-3 sm:p-4 md:p-5 flex flex-col flex-grow justify-start">
-                <h4 className="text-sm sm:text-base md:text-lg font-bold tracking-tight text-foreground mb-1 line-clamp-1">
-                  {item.title}
+              {/* Hover color gradient glow */}
+              <div className={`absolute inset-0 bg-gradient-to-t ${getCategoryGradient(item.category)} opacity-0 lg:group-hover:opacity-100 transition-opacity duration-500 z-10`} />
+
+              {/* Dark overlay for typography contrast */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-500 z-10" />
+
+              {/* Info — always visible on mobile (compact), hover-reveal on desktop */}
+              <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 lg:p-5 lg:translate-y-6 lg:opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100 transition-all duration-500 z-20">
+                <span className="text-[8px] sm:text-[9px] font-bold tracking-[0.25em] uppercase text-white/65 block mb-0.5 sm:mb-1.5">
+                  {item.category}
+                </span>
+                <h4 className="text-[10px] sm:text-base md:text-lg lg:text-xl font-extrabold tracking-tighter text-white mb-1 sm:mb-2 leading-tight truncate">
+                  {item.name}
                 </h4>
-                <p className="text-[10px] sm:text-xs text-muted-foreground font-medium leading-relaxed line-clamp-2 sm:line-clamp-3 md:line-clamp-4">
-                  {item.description}
+                <p className="text-[9px] sm:text-xs text-white/80 font-medium leading-normal line-clamp-2 sm:line-clamp-3 mb-2 sm:mb-3">
+                  {SHORT_DESCRIPTIONS[item.id] || item.description}
                 </p>
+                <div className="text-[8px] sm:text-[9px] font-black tracking-widest uppercase text-accent flex items-center gap-1 group-hover:translate-x-1 transition-all duration-300">
+                  View Details &rarr;
+                </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

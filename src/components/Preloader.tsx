@@ -222,9 +222,9 @@ export default function Preloader() {
         naturalWidth = 134; // fallback size for mobile logo container width
       }
       
-      let scale = headerRect.height / (naturalWidth || 1);
+      let scale = headerRect.width / (naturalWidth || 1);
       if (isNaN(scale) || !isFinite(scale) || scale <= 0) {
-        scale = 0.15; // default fallback scale
+        scale = 0.8; // default fallback scale
       }
 
       // 1. Fade out percentages

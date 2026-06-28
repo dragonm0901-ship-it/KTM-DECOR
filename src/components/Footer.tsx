@@ -95,7 +95,7 @@ export default function Footer() {
                   <div className="flex flex-col gap-2 md:gap-3">
                     <span className="text-gray-500 dark:text-gray-400 text-sm md:text-base font-medium">Kathmandu, Nepal</span>
                     <a href="mailto:hello@ktmdecor.com" className="text-gray-500 dark:text-gray-400 text-sm md:text-base font-medium hover:text-orange-600 dark:hover:text-orange-500 transition-colors">hello@ktmdecor.com</a>
-                    <a href="tel:+9771234567" className="text-gray-500 dark:text-gray-400 text-sm md:text-base font-medium hover:text-orange-600 dark:hover:text-orange-500 transition-colors">+977 1 234567</a>
+                    <a href="tel:+9779706247439" className="text-gray-500 dark:text-gray-400 text-sm md:text-base font-medium hover:text-orange-600 dark:hover:text-orange-500 transition-colors">+977 9706247439</a>
                   </div>
                 </div>
               </div>

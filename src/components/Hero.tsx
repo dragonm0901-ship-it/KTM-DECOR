@@ -20,17 +20,17 @@ const features = [
 // Cards for the Desktop layout
 const rawCards = [
   // Center Card (Main Focus)
-  { src: "/hero-images/hero3.webp", left: "50%", top: "50%", width: "28vw", height: "35vw" },
+  { src: "/products/product_5_main.png", left: "50%", top: "50%", width: "28vw", height: "35vw" },
   
   // Left Cluster
-  { src: "/hero-images/hero1.webp", left: "26%", top: "45%", width: "15vw", height: "20vw" }, // Left Top of main image (moved more left and slightly down)
-  { src: "/hero-images/hero3.webp", left: "20%", top: "15%", width: "14vw", height: "18vw" },
-  { src: "/hero-images/hero2.webp", left: "15%", top: "75%", width: "15vw", height: "20vw" },
+  { src: "/products/product_1_main.png", left: "26%", top: "45%", width: "15vw", height: "20vw" }, // Left Top of main image (moved more left and slightly down)
+  { src: "/products/product_8_main.png", left: "20%", top: "15%", width: "14vw", height: "18vw" },
+  { src: "/products/product_6_main.png", left: "15%", top: "75%", width: "15vw", height: "20vw" },
   
   // Right Cluster
-  { src: "/hero-images/hero2.webp", left: "74%", top: "55%", width: "15vw", height: "18vw" }, // Right Bottom of main image (moved more right)
-  { src: "/hero-images/hero1.webp", left: "80%", top: "20%", width: "16vw", height: "20vw" },
-  { src: "/hero-images/hero3.webp", left: "85%", top: "75%", width: "18vw", height: "15vw" },
+  { src: "/products/product_4_main.png", left: "74%", top: "55%", width: "15vw", height: "18vw" }, // Right Bottom of main image (moved more right)
+  { src: "/products/product_9_main.png", left: "80%", top: "20%", width: "16vw", height: "20vw" },
+  { src: "/products/product_10_main.png", left: "85%", top: "75%", width: "18vw", height: "15vw" },
   
   // Top/Bottom Center Edges
   { src: "/hero-images/hero2.webp", left: "55%", top: "12%", width: "16vw", height: "13vw" },
@@ -230,7 +230,7 @@ export default function Hero() {
               className="w-full flex flex-col items-center justify-center opacity-0"
             >
               {/* Status Badge */}
-              <div className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full bg-accent border border-accent/10 mb-8 md:mb-10 shadow-2xl">
+              <div className="inline-flex items-center gap-2.5 px-5 py-2 rounded-[4px] bg-accent border border-accent/10 mb-8 md:mb-10 shadow-2xl">
                 <span className="text-[11px] md:text-xs font-bold tracking-widest uppercase text-white">
                   Trusted by 2000+ businesses in Nepal
                 </span>
@@ -319,7 +319,7 @@ export default function Hero() {
               {/* Main large card */}
               <div className="hero-card absolute top-0 right-[-5%] w-[63%] aspect-[3/4] rounded-[4px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.15)] border border-neutral-200/50 z-10 opacity-0">
                 <Image
-                  src="/hero-images/hero3.webp"
+                  src="/products/product_5_main.png"
                   alt="Custom neon sign installation"
                   fill
                   className="object-cover"
@@ -343,7 +343,7 @@ export default function Hero() {
               {/* Small accent card - top left */}
               <div className="hero-card absolute top-[15%] left-[-2%] w-[35%] aspect-square rounded-[4px] overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.1)] border border-neutral-200/50 z-30 opacity-0">
                 <Image
-                  src="/hero-images/hero1.webp"
+                  src="/products/product_1_main.png"
                   alt="Illuminated decor detail"
                   fill
                   className="object-cover"
