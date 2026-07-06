@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 export default function StatisticsPage() {
   return (
     <main className="min-h-screen bg-background text-foreground pt-32 pb-24 font-sans">
-      <div className="max-w-4xl mx-auto px-6 md:px-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8">
         
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-muted font-medium mb-8">

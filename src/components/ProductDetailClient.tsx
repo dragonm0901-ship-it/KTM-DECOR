@@ -421,7 +421,7 @@ export default function ProductDetailClient() {
 
   if (!product) {
     return (
-      <div className="min-h-screen pt-28 md:pt-36 lg:pt-44 pb-20 px-6 md:px-12 bg-background text-foreground flex flex-col items-center justify-center text-center">
+      <div className="min-h-screen pt-28 md:pt-36 lg:pt-44 pb-20 px-6 sm:px-8 md:px-12 bg-background text-foreground flex flex-col items-center justify-center text-center">
         <Package className="w-16 h-16 text-muted mb-4 animate-pulse" />
         <h1 className="text-2xl font-black uppercase tracking-tighter mb-2">Product Not Found</h1>
         <p className="text-muted text-sm mb-6 max-w-sm">The product you are looking for does not exist or has been removed from our catalog.</p>
@@ -489,11 +489,11 @@ Please verify availability and let me know the estimated delivery and payment sc
   };
 
   return (
-    <div className="min-h-screen pt-28 md:pt-36 lg:pt-44 pb-20 px-6 md:px-12 bg-background text-foreground">
+    <div className="min-h-screen pt-28 sm:pt-28 md:pt-36 lg:pt-44 pb-20 px-4 sm:px-8 md:px-12 bg-background text-foreground">
       <div className="max-w-[1200px] mx-auto">
         
         {/* Breadcrumb Navigation */}
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted mb-8 border-b border-border/20 pb-4">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[9px] sm:text-xs font-bold uppercase tracking-wider text-muted mb-4 md:mb-8 border-b border-border/20 pb-2 md:pb-4">
           <Link href="/shop" className="hover:text-accent transition-colors flex items-center gap-1.5 flex-shrink-0">
             <ArrowLeft className="w-3.5 h-3.5" /> Back to Shop
           </Link>
@@ -506,11 +506,11 @@ Please verify availability and let me know the estimated delivery and payment sc
         </div>
 
         {/* 2-Column Product Showcase */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-12 lg:gap-16 items-start">
           
           {/* Left Column: Image Gallery Slider */}
-          <div className="space-y-4 w-full">
-            <div className="relative aspect-[4/5] rounded-[4px] overflow-hidden bg-card border border-border/80 shadow-sm w-full group">
+          <div className="space-y-3 sm:space-y-4 w-full">
+            <div className="relative aspect-[4/3] sm:aspect-[4/5] rounded-[4px] overflow-hidden bg-card border border-border/80 shadow-sm w-full group">
               <Image 
                 src={selectedImage || product.image} 
                 alt={product.name}
@@ -522,14 +522,14 @@ Please verify availability and let me know the estimated delivery and payment sc
             </div>
             
             {galleryUrls.length > 1 && (
-              <div className="flex items-center gap-3 overflow-x-auto no-scrollbar py-1">
+              <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar py-1">
                 {galleryUrls.map((url, i) => {
                   const isActive = url === selectedImage;
                   return (
                     <button
                       key={i}
                       onClick={() => setSelectedImage(url)}
-                      className={`relative w-20 h-24 rounded-[4px] overflow-hidden bg-card border flex-shrink-0 transition-all ${
+                      className={`relative w-14 h-16 sm:w-20 sm:h-24 rounded-[4px] overflow-hidden bg-card border flex-shrink-0 transition-all ${
                         isActive
                           ? "border-accent shadow-sm scale-95"
                           : "border-border/60 hover:border-accent/40"
@@ -550,17 +550,17 @@ Please verify availability and let me know the estimated delivery and payment sc
           </div>
 
           {/* Right Column: Dynamic Parameters & Actions */}
-          <div className="space-y-8">
+          <div className="space-y-4 sm:space-y-8">
             
             {/* Header Info */}
-            <div className="space-y-3 pb-4 border-b border-border/20">
-              <span className="text-xs font-black text-accent uppercase tracking-[0.25em] block">
+            <div className="space-y-1.5 sm:space-y-3 pb-3 border-b border-border/20">
+              <span className="text-[10px] font-black text-accent uppercase tracking-[0.25em] block">
                 {product.subCategory}
               </span>
               {(() => {
                 const catDetails = getCatalogDetails(product);
                 return (
-                  <h1 className="text-3xl md:text-5xl font-display font-black tracking-tighter text-foreground leading-[1.1] uppercase">
+                  <h1 className="text-xl sm:text-3xl md:text-5xl font-display font-black tracking-tighter text-foreground leading-[1.1] uppercase">
                     {catDetails.titleWhite1}{" "}
                     <span className="text-accent">{catDetails.titleGold}</span>
                     {catDetails.titleWhite2 && ` ${catDetails.titleWhite2}`}
@@ -570,9 +570,9 @@ Please verify availability and let me know the estimated delivery and payment sc
             </div>
 
             {/* Description Text */}
-            <div className="space-y-4">
-              <h3 className="text-[10px] uppercase tracking-[0.2em] font-black text-foreground/50">Overview Description</h3>
-              <p className="text-sm sm:text-base text-muted leading-relaxed font-medium">
+            <div className="space-y-2">
+              <h3 className="text-[9px] uppercase tracking-[0.2em] font-black text-foreground/50">Overview Description</h3>
+              <p className="text-xs sm:text-base text-muted leading-relaxed font-medium">
                 {product.description}
               </p>
             </div>
@@ -583,31 +583,31 @@ Please verify availability and let me know the estimated delivery and payment sc
               const priceText = catDetails.startingPrice.replace("Rs.", "").replace("NPR", "").split("/")[0].trim();
               const suffixText = catDetails.startingPrice.split("/")[1] || "Piece";
               return (
-                <div className="bg-card/35 border border-border/40 rounded-lg p-5 space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="bg-card/35 border border-border/40 rounded-lg p-3.5 sm:p-5 space-y-3 sm:space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                     <div>
-                      <span className="text-[10px] uppercase font-black text-muted tracking-widest block mb-1.5">
+                      <span className="text-[9px] sm:text-[10px] uppercase font-black text-muted tracking-widest block mb-1">
                         STARTING PRICE
                       </span>
-                      <div className="relative inline-flex items-baseline bg-gradient-to-r from-accent to-accent-light text-black px-5 py-2.5 font-display font-black text-2xl rounded-r-lg skew-x-[-12deg] shadow-lg shadow-accent/20">
-                        <span className="skew-x-[12deg] text-base font-bold mr-1">Rs.</span>
-                        <span className="skew-x-[12deg] text-3xl tracking-tighter">
+                      <div className="relative inline-flex items-baseline bg-gradient-to-r from-accent to-accent-light text-black px-3.5 py-1.5 sm:px-5 sm:py-2.5 font-display font-black text-lg sm:text-2xl rounded-r-lg skew-x-[-12deg] shadow-lg shadow-accent/20">
+                        <span className="skew-x-[12deg] text-xs font-bold mr-1">Rs.</span>
+                        <span className="skew-x-[12deg] text-xl sm:text-3xl tracking-tighter">
                           {priceText}
                         </span>
-                        <span className="skew-x-[12deg] text-xs font-bold uppercase ml-1 opacity-75">
+                        <span className="skew-x-[12deg] text-[10px] sm:text-xs font-bold uppercase ml-1 opacity-75">
                           / {suffixText}
                         </span>
                       </div>
-                      <p className="text-[10px] text-muted-foreground mt-2 font-medium">
+                      <p className="text-[9px] sm:text-[10px] text-muted-foreground mt-1.5 sm:mt-2 font-medium">
                         {catDetails.priceNote}
                       </p>
                     </div>
                     
-                    <div className="flex items-start gap-2.5 max-w-[200px] border border-accent/20 bg-accent/5 p-2.5 rounded-lg">
-                      <div className="w-8 h-8 rounded-full bg-accent/15 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <LucideStar className="w-4 h-4 text-accent fill-accent" />
+                    <div className="flex items-start gap-2.5 max-w-[200px] border border-accent/20 bg-accent/5 p-2 sm:p-2.5 rounded-lg">
+                      <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-accent/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <LucideStar className="w-3.5 h-3.5 text-accent fill-accent" />
                       </div>
-                      <span className="text-[10px] font-bold text-accent uppercase tracking-wider leading-relaxed">
+                      <span className="text-[9px] sm:text-[10px] font-bold text-accent uppercase tracking-wider leading-relaxed">
                         {catDetails.customDesignNote}
                       </span>
                     </div>
@@ -618,24 +618,24 @@ Please verify availability and let me know the estimated delivery and payment sc
 
             {/* Sizing / Variant Selector */}
             {variantsList.length > 0 && (
-              <div className="space-y-4">
-                <h3 className="text-[10px] uppercase tracking-[0.2em] font-black text-foreground/50">Select Dimensions</h3>
-                <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2 sm:space-y-4">
+                <h3 className="text-[9px] uppercase tracking-[0.2em] font-black text-foreground/50">Select Dimensions</h3>
+                <div className="grid grid-cols-2 gap-2 sm:gap-3">
                   {variantsList.map((v) => {
                     const isSelected = selectedVariant?.option_name === v.option_name;
                     return (
                       <button
                         key={v.option_name}
                         onClick={() => setSelectedVariant(v)}
-                        className={`flex items-center justify-between px-4 py-3.5 rounded-[4px] border transition-all text-left group ${
+                        className={`flex items-center justify-between px-2.5 py-2.5 sm:px-4 sm:py-3.5 rounded-[4px] border transition-all text-left group ${
                           isSelected
                             ? "border-accent bg-accent/[0.03] text-foreground font-bold"
                             : "border-border hover:border-accent/30 text-muted-foreground hover:bg-card/30"
                         }`}
                       >
-                        <span className="text-xs uppercase tracking-wide">{v.option_name}</span>
+                        <span className="text-[10px] sm:text-xs uppercase tracking-wide">{v.option_name}</span>
                         {isSelected && (
-                          <Check className="w-4 h-4 text-accent animate-in fade-in zoom-in duration-200" />
+                          <Check className="w-3.5 h-3.5 text-accent animate-in fade-in zoom-in duration-200" />
                         )}
                       </button>
                     );
@@ -645,11 +645,11 @@ Please verify availability and let me know the estimated delivery and payment sc
             )}
 
             {/* Dynamic Price Calculation card */}
-            <div className="p-6 border border-border bg-card/40 rounded-lg space-y-4">
+            <div className="p-4 sm:p-6 border border-border bg-card/40 rounded-lg space-y-3 sm:space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-muted uppercase tracking-wider">Unit Price</span>
+                <span className="text-[10px] sm:text-xs font-bold text-muted uppercase tracking-wider">Unit Price</span>
                 {selectedVariant?.compare_at_price && (
-                  <span className="text-[10px] font-black text-red-500 uppercase tracking-widest px-2.5 py-1 bg-red-500/10 border border-red-500/15 rounded-[3px]">
+                  <span className="text-[9px] sm:text-[10px] font-black text-red-500 uppercase tracking-widest px-2 py-0.5 sm:px-2.5 sm:py-1 bg-red-500/10 border border-red-500/15 rounded-[3px]">
                     Save Rs. {(selectedVariant.compare_at_price - selectedVariant.price).toLocaleString()}
                   </span>
                 )}
@@ -657,11 +657,11 @@ Please verify availability and let me know the estimated delivery and payment sc
               
               <div className="flex items-center justify-between">
                 <div className="flex items-baseline gap-2.5">
-                  <span className="text-2xl sm:text-3xl font-black text-foreground tracking-tighter">
+                  <span className="text-xl sm:text-3xl font-black text-foreground tracking-tighter">
                     Rs. {((selectedVariant ? selectedVariant.price : product.price) * quantity).toLocaleString()}
                   </span>
                   {selectedVariant?.compare_at_price && (
-                    <span className="text-xs font-semibold text-muted line-through">
+                    <span className="text-[10px] sm:text-xs font-semibold text-muted line-through">
                       Rs. {(selectedVariant.compare_at_price * quantity).toLocaleString()}
                     </span>
                   )}
@@ -671,51 +671,51 @@ Please verify availability and let me know the estimated delivery and payment sc
                 <div className="flex items-center border border-border rounded bg-background">
                   <button 
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="px-3 py-2 text-muted hover:text-foreground text-xs transition-colors"
+                    className="px-2.5 py-1.5 sm:px-3 sm:py-2 text-muted hover:text-foreground text-[10px] sm:text-xs transition-colors"
                   >
-                    <Minus className="w-3.5 h-3.5" />
+                    <Minus className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                   </button>
-                  <span className="px-4 text-xs font-black tabular-nums text-foreground">{quantity}</span>
+                  <span className="px-3 sm:px-4 text-[10px] sm:text-xs font-black tabular-nums text-foreground">{quantity}</span>
                   <button 
                     onClick={() => setQuantity(quantity + 1)}
-                    className="px-3 py-2 text-muted hover:text-foreground text-xs transition-colors"
+                    className="px-2.5 py-1.5 sm:px-3 sm:py-2 text-muted hover:text-foreground text-[10px] sm:text-xs transition-colors"
                   >
-                    <Plus className="w-3.5 h-3.5" />
+                    <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                   </button>
                 </div>
               </div>
 
               {/* Dynamic Shipping calculator tip */}
-              <div className="flex justify-between items-center text-xs font-bold border-t border-border/30 pt-4 text-muted uppercase tracking-wider">
+              <div className="flex justify-between items-center text-[10px] sm:text-xs font-bold border-t border-border/30 pt-3 sm:pt-4 text-muted uppercase tracking-wider">
                 <span>Valley Shipping</span>
-                <span className={((selectedVariant ? selectedVariant.price : product.price) * quantity) >= 50000 ? "text-green-500 font-black tracking-widest text-[10px]" : "text-foreground font-black"}>
+                <span className={((selectedVariant ? selectedVariant.price : product.price) * quantity) >= 50000 ? "text-green-500 font-black tracking-widest text-[9px] sm:text-[10px]" : "text-foreground font-black"}>
                   {((selectedVariant ? selectedVariant.price : product.price) * quantity) >= 50000 ? "FREE Valley Delivery applied" : "Rs. 1,500"}
                 </span>
               </div>
             </div>
 
             {/* Interactive Buy and Cart CTA triggers */}
-            <div className="space-y-3 pt-4">
-              <div className="flex flex-col sm:flex-row gap-4">
+            <div className="space-y-2.5 sm:space-y-3 pt-2 sm:pt-4">
+              <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-4">
                 <button
                   onClick={handleAddToCart}
-                  className="flex-1 flex items-center justify-center gap-3 px-6 py-4 bg-accent hover:bg-accent-light text-white text-xs font-bold tracking-widest uppercase rounded-[4px] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-accent/25"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 sm:px-6 sm:py-4 bg-accent md:hover:bg-accent-light text-white text-[10px] sm:text-xs font-bold tracking-widest uppercase rounded-[4px] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-accent/25"
                 >
-                  <ShoppingBag className="w-4 h-4 flex-shrink-0" />
+                  <ShoppingBag className="w-3.5 h-3.5 flex-shrink-0" />
                   <span>Add to Shopping Cart</span>
                 </button>
 
                 <button
                   onClick={handleWhatsAppBuyNow}
-                  className="flex-1 flex items-center justify-center gap-3 px-6 py-4 bg-[#25D366] hover:bg-[#20b858] text-white text-xs font-bold tracking-widest uppercase rounded-[4px] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-[#25D366]/20"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 sm:px-6 sm:py-4 bg-[#25D366] md:hover:bg-[#20b858] text-white text-[10px] sm:text-xs font-bold tracking-widest uppercase rounded-[4px] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-[#25D366]/20"
                 >
-                  <MessageCircle className="w-4 h-4 flex-shrink-0" />
+                  <MessageCircle className="w-3.5 h-3.5 flex-shrink-0" />
                   <span>Buy Now via WhatsApp</span>
                 </button>
               </div>
 
               {/* Dual WhatsApp Contact Info */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-[10px] font-bold text-muted uppercase tracking-wider bg-card/35 border border-border/40 p-3 rounded">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-1.5 sm:gap-2 text-[9px] sm:text-[10px] font-bold text-muted uppercase tracking-wider bg-card/35 border border-border/40 p-2.5 sm:p-3 rounded">
                 <span>Primary WhatsApp: <a href="https://wa.me/9779706247439" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">+977 9706247439</a></span>
                 <span className="hidden sm:inline text-muted/30">|</span>
                 <span>Backup Line: <a href="https://wa.me/9779706247438" target="_blank" rel="noopener noreferrer" className="text-muted hover:text-foreground hover:underline">+977 9706247438</a></span>

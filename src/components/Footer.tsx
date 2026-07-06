@@ -50,7 +50,7 @@ export default function Footer() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
             viewport={{ once: true }}
-            className="max-w-7xl mx-auto bg-white/95 dark:bg-black/95 backdrop-blur-sm shadow-xl dark:shadow-2xl border border-gray-200 dark:border-white/10 rounded-[4px] overflow-hidden transition-colors duration-500"
+            className="w-full max-w-[1500px] mx-auto bg-white/95 dark:bg-black/95 backdrop-blur-sm shadow-xl dark:shadow-2xl border border-gray-200 dark:border-white/10 rounded-[4px] overflow-hidden transition-colors duration-500"
           >
             {/* Top Half */}
             <div className="p-6 md:p-12 flex flex-col gap-10 md:gap-12">
@@ -102,7 +102,7 @@ export default function Footer() {
             </div>
 
             {/* Bottom Bar */}
-            <div className="border-t border-gray-200 dark:border-white/10 bg-white dark:bg-black px-8 py-6 md:px-12 flex flex-col md:flex-row justify-between items-center gap-6 transition-colors duration-500">
+            <div className="border-t border-gray-200 dark:border-white/10 bg-white dark:bg-black px-4 sm:px-6 md:px-8 py-6 flex flex-col md:flex-row justify-between items-center gap-6 transition-colors duration-500">
               <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">
                 © {new Date().getFullYear()} KTM DECOR. All Rights Reserved.
               </span>

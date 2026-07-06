@@ -25,71 +25,30 @@ const SHORT_DESCRIPTIONS: Record<string, string> = {
   "12": "Laser-etched 3D illusion desktop lamps on warm illuminated wood bases."
 };
 
-const getCategoryGradient = (category: string) => {
-  switch (category) {
-    case "Acrylic Backlit Signage":
-      return "from-cyan-500/20 to-blue-500/30";
-    case "Neon Sign":
-      return "from-pink-500/20 to-fuchsia-500/30";
-    case "3D Signage":
-      return "from-amber-500/20 to-yellow-600/30";
-    case "2D Board":
-      return "from-slate-500/20 to-zinc-500/30";
-    case "House/Office Nameplate":
-      return "from-orange-500/20 to-amber-500/30";
-    case "Wooden Signage":
-      return "from-yellow-700/20 to-amber-800/30";
-    case "2.5D Signage":
-      return "from-teal-500/20 to-emerald-500/30";
-    case "Acrylic Table Lamp":
-      return "from-green-400/20 to-emerald-500/30";
-    case "3D Number Plate":
-      return "from-slate-700/20 to-zinc-800/30";
-    case "Double Sided Round Light Board":
-      return "from-yellow-500/20 to-orange-500/30";
-    case "Laser & CNC Products":
-      return "from-red-500/20 to-rose-600/30";
-    case "Customized Wall Clock":
-      return "from-indigo-500/20 to-violet-600/30";
-    default:
-      return "from-accent/20 to-accent/30";
-  }
-};
-
 export default function Expertise() {
   const containerRef = useRef<HTMLElement>(null);
 
   useGSAP(() => {
     if (typeof window === "undefined") return;
 
-    // 1. Reveal Grid Cards: Speed & stagger dynamically adapt to scroll velocity (plays once)
+    // 1. Reveal Grid Cards: Snappy, minimal and quick entrance animation (plays once)
     ScrollTrigger.create({
       trigger: ".expertise-grid-container",
-      start: "top 88%",
+      start: "top 95%",
       once: true,
-      onEnter: (self) => {
-        const velocity = Math.abs(self.getVelocity());
-        // Clamp duration: very fast scroll = 0.22s, slow scroll = 0.55s
-        const duration = gsap.utils.clamp(0.22, 0.55, 1200 / (velocity || 1200));
-
+      onEnter: () => {
         gsap.fromTo(
           ".expertise-card",
           {
-            y: 30,
-            opacity: 0,
-            scale: 0.98
+            y: 15,
+            opacity: 0
           },
           {
             y: 0,
             opacity: 1,
-            scale: 1,
-            duration: duration,
-            ease: "power4.out",
-            stagger: {
-              amount: duration * 0.4,
-              grid: "auto",
-              ease: "power2.out"
-            }
+            duration: 0.3,
+            ease: "power2.out",
+            stagger: 0.03
           }
         );
       }
@@ -122,7 +81,7 @@ export default function Expertise() {
       {/* Background Decorative Glow */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[120px] pointer-events-none z-0" />
 
-      <div className="relative w-full px-4 sm:px-6 md:px-12 z-10 max-w-7xl mx-auto">
+      <div className="relative w-full px-4 sm:px-6 md:px-8 z-10 max-w-[1500px] mx-auto">
         <div className="flex flex-col items-center justify-center text-center max-w-2xl mx-auto mb-12 md:mb-16">
           <span className="inline-flex items-center gap-2 px-3 py-1 text-[10px] font-black tracking-[0.25em] uppercase border border-accent/20 rounded-[4px] mb-3 text-accent bg-accent/5">
             Our Expertise
@@ -137,47 +96,57 @@ export default function Expertise() {
       </div>
 
       {/* Grid Container */}
-      <div className="expertise-grid-container relative w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-12 z-10">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6 md:gap-8">
+      <div className="expertise-grid-container relative w-full max-w-[1500px] mx-auto px-4 sm:px-6 md:px-8 z-10">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-6 gap-x-3 sm:gap-y-8 sm:gap-x-6 md:gap-x-8">
           {PRODUCTS.map((item, index) => (
             <Link
               key={item.id}
               href={`/shop/${item.id}`}
-              className="expertise-card group relative aspect-square sm:aspect-[4/5] rounded-[8px] border border-border bg-background block opacity-0 overflow-hidden cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-accent/5"
+              className="expertise-card group block opacity-0 cursor-pointer"
             >
-              {/* Image BG */}
-              <div className="absolute inset-0 transition-transform duration-700 lg:group-hover:scale-105">
-                <Image
-                  src={item.image}
-                  alt={item.name}
-                  fill
-                  sizes="(max-width: 640px) 50vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                  className="object-cover"
-                  draggable={false}
-                  priority={index < 4}
-                />
+              {/* Inner card container containing the image and hover details */}
+              <div className="relative aspect-[4/5] rounded-[8px] border border-border bg-background overflow-hidden transition-all duration-500 group-hover:scale-[1.02] group-hover:shadow-2xl group-hover:shadow-accent/5">
+                {/* Image BG */}
+                <div className="absolute inset-0 transition-transform duration-700 lg:group-hover:scale-105">
+                  <Image
+                    src={item.image}
+                    alt={item.name}
+                    fill
+                    sizes="(max-width: 640px) 50vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                    className="object-cover"
+                    draggable={false}
+                    priority={index < 4}
+                  />
+                </div>
+
+                {/* Dark overlay for typography contrast */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-500 z-10" />
+
+                {/* Info — always visible on mobile (compact), hover-reveal on desktop */}
+                <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 lg:p-5 lg:translate-y-6 lg:opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100 transition-all duration-500 z-20">
+                  <span className="text-[8px] sm:text-[9px] font-bold tracking-[0.25em] uppercase text-white/65 block mb-0.5 sm:mb-1.5">
+                    {item.category}
+                  </span>
+                  <h4 className="text-[10px] sm:text-base md:text-lg lg:text-xl font-extrabold tracking-tighter text-white mb-1 sm:mb-2 leading-tight truncate">
+                    {item.name}
+                  </h4>
+                  <p className="text-[9px] sm:text-xs text-white/80 font-medium leading-normal line-clamp-2 sm:line-clamp-3 mb-2 sm:mb-3">
+                    {SHORT_DESCRIPTIONS[item.id] || item.description}
+                  </p>
+                  <div className="text-[8px] sm:text-[9px] font-black tracking-widest uppercase text-accent flex items-center gap-1 group-hover:translate-x-1 transition-all duration-300">
+                    View Details &rarr;
+                  </div>
+                </div>
               </div>
 
-              {/* Hover color gradient glow */}
-              <div className={`absolute inset-0 bg-gradient-to-t ${getCategoryGradient(item.category)} opacity-0 lg:group-hover:opacity-100 transition-opacity duration-500 z-10`} />
-
-              {/* Dark overlay for typography contrast */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-500 z-10" />
-
-              {/* Info — always visible on mobile (compact), hover-reveal on desktop */}
-              <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 lg:p-5 lg:translate-y-6 lg:opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100 transition-all duration-500 z-20">
-                <span className="text-[8px] sm:text-[9px] font-bold tracking-[0.25em] uppercase text-white/65 block mb-0.5 sm:mb-1.5">
+              {/* Product Info below the card */}
+              <div className="mt-3 px-1 space-y-1">
+                <span className="text-[9px] sm:text-[10px] font-bold text-accent uppercase tracking-widest block">
                   {item.category}
                 </span>
-                <h4 className="text-[10px] sm:text-base md:text-lg lg:text-xl font-extrabold tracking-tighter text-white mb-1 sm:mb-2 leading-tight truncate">
+                <h4 className="text-xs sm:text-sm md:text-base font-bold tracking-tight text-foreground group-hover:text-accent transition-colors duration-300 line-clamp-2 leading-snug">
                   {item.name}
                 </h4>
-                <p className="text-[9px] sm:text-xs text-white/80 font-medium leading-normal line-clamp-2 sm:line-clamp-3 mb-2 sm:mb-3">
-                  {SHORT_DESCRIPTIONS[item.id] || item.description}
-                </p>
-                <div className="text-[8px] sm:text-[9px] font-black tracking-widest uppercase text-accent flex items-center gap-1 group-hover:translate-x-1 transition-all duration-300">
-                  View Details &rarr;
-                </div>
               </div>
             </Link>
           ))}
@@ -186,3 +155,4 @@ export default function Expertise() {
     </section>
   );
 }
+

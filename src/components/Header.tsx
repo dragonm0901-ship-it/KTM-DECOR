@@ -136,34 +136,37 @@ export default function Header() {
     <>
       <header
         ref={headerRef}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out-expo ${scrolled ? "py-3" : "py-5"
-          }`}
+        className={`fixed left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] sm:w-[calc(100%-3rem)] md:w-[calc(100%-4rem)] max-w-6xl transition-all duration-500 ease-out-expo ${
+          menuOpen
+            ? "bg-transparent border-transparent shadow-none top-6 py-2.5 md:py-[21px] px-4 md:px-10"
+            : "border border-border bg-card/85 backdrop-blur-md rounded-[8px] shadow-lg shadow-black/5 top-6 py-2.5 md:py-[21px] px-4 md:px-10"
+        }`}
       >
-        <div
-          className={`flex items-center justify-between px-4 md:px-12 transition-all duration-500 ease-out-expo w-full`}
-        >
+        <div className="flex items-center justify-between w-full">
           {/* Left: Logo */}
           <Link
             href="/"
             onClick={handleLogoClick}
-            className={`relative z-50 flex items-center h-14 md:h-24 transition-all duration-300 ${menuOpen ? "opacity-0 pointer-events-none" : "opacity-100 hover:scale-[1.02]"
-              }`}
+            className={`relative z-50 flex items-center h-10 sm:h-12 md:h-22 transition-all duration-300 ${
+              menuOpen ? "opacity-0 pointer-events-none" : "opacity-100 hover:scale-[1.02]"
+            }`}
           >
             <img
               id="header-logo"
               src="/logo/ktm%20decor.svg"
               alt="KTM DECOR"
-              className="h-full w-auto object-contain dark:invert dark:hue-rotate-180"
+              className="h-full w-auto object-contain dark:invert dark:hue-rotate-180 scale-[1.2] md:scale-[1.35] origin-left transition-transform duration-300"
             />
           </Link>
 
-          {/* Right: Actions in a Pill Navbar */}
-          <div id="header-pill-nav" className={`flex items-center gap-1 p-1 rounded-[4px] border border-border backdrop-blur-lg transition-all duration-500 ${scrolled ? "bg-card/80 shadow-lg" : "bg-card/40"
-            }`}>
-
+          {/* Right: Actions inside the header (no nested borders/backgrounds) */}
+          <div
+            id="header-pill-nav"
+            className="flex items-center gap-1.5 md:gap-2.5 transition-all duration-500"
+          >
             <Link
               href="/shop"
-              className="flex items-center px-4 md:px-6 py-2.5 bg-accent text-white text-[10px] font-bold tracking-widest uppercase rounded-[4px] hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 shrink-0 font-display"
+              className={`flex items-center px-4 py-2 sm:px-6 md:py-3.5 bg-accent text-white text-[10px] sm:text-xs font-bold tracking-widest uppercase rounded-[4px] hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 shrink-0 font-display ${menuOpen ? "hidden pointer-events-none" : ""}`}
             >
               Shop
             </Link>
@@ -171,12 +174,11 @@ export default function Header() {
             {/* Cart Icon Button */}
             <button
               onClick={openCart}
-              className={`relative flex items-center justify-center w-10 h-10 rounded-[4px] transition-all duration-500 shrink-0 group ${useWhite ? "bg-white/10 hover:bg-white/20 text-white" : "bg-foreground/5 hover:bg-foreground/10 text-foreground"
-                }`}
+              className={`relative flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-[4px] bg-foreground/5 hover:bg-foreground/10 text-foreground transition-all duration-500 shrink-0 group ${menuOpen ? "hidden pointer-events-none" : ""}`}
               aria-label="Open Cart"
               title="Open Shopping Cart"
             >
-              <ShoppingBag className="w-4 h-4 transition-transform group-hover:rotate-12" />
+              <ShoppingBag className="w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5 md:h-5 transition-transform group-hover:rotate-12" />
               {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 rounded-full bg-red-600 border border-white dark:border-zinc-950 text-[8px] font-black flex items-center justify-center text-white shadow shadow-black/35">
                   {cartCount}
@@ -184,29 +186,25 @@ export default function Header() {
               )}
             </button>
 
-            {/* Menu Toggle inside the pill */}
+            {/* Menu Toggle */}
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className={`flex items-center gap-2.5 px-3 md:px-4 h-10 rounded-[4px] transition-all duration-500 relative z-50 shrink-0 ${useWhite ? "bg-white/10 hover:bg-white/20" : "bg-foreground/5 hover:bg-foreground/10"
-                }`}
+              className="flex items-center gap-2.5 px-3 sm:px-4 md:px-5 h-9 sm:h-11 md:h-12 rounded-[4px] bg-foreground/5 hover:bg-foreground/10 transition-all duration-500 relative z-50 shrink-0 text-foreground"
               aria-label="Toggle menu"
             >
-              <div className="relative w-4 h-3">
+              <div className="relative w-3.5 h-3 sm:w-4 sm:h-3.5">
                 <span
-                  className={`absolute left-0 w-full h-[1.2px] transition-all duration-500 ease-out-expo ${useWhite ? "bg-white" : "bg-foreground"
-                    } ${menuOpen ? "top-1/2 -translate-y-1/2 rotate-45" : "top-0"
-                    }`}
+                  className={`absolute left-0 w-full h-[1.2px] transition-all duration-500 ease-out-expo bg-foreground ${
+                    menuOpen ? "top-1/2 -translate-y-1/2 rotate-45" : "top-0"
+                  }`}
                 />
                 <span
-                  className={`absolute left-0 w-full h-[1.2px] transition-all duration-500 ease-out-expo ${useWhite ? "bg-white" : "bg-foreground"
-                    } ${menuOpen
-                      ? "top-1/2 -translate-y-1/2 -rotate-45"
-                      : "bottom-0"
-                    }`}
+                  className={`absolute left-0 w-full h-[1.2px] transition-all duration-500 ease-out-expo bg-foreground ${
+                    menuOpen ? "top-1/2 -translate-y-1/2 -rotate-45" : "bottom-0"
+                  }`}
                 />
               </div>
-              <span className={`text-[10px] font-bold tracking-widest uppercase hidden sm:block transition-colors duration-500 font-display ${useWhite ? "text-white" : "text-foreground"
-                }`}>
+              <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase hidden sm:block transition-colors duration-500 font-display text-foreground">
                 {menuOpen ? "Close" : "Menu"}
               </span>
             </button>

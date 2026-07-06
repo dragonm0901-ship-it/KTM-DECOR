@@ -8,7 +8,7 @@ export default function TermsOfService() {
   return (
     <div className="min-h-screen">
       <header className="px-6 py-4 border-b border-border">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+        <div className="w-full flex items-center justify-between">
           <Link
             href="/"
             className="text-sm font-bold tracking-tight hover:opacity-60 transition-opacity uppercase text-accent"

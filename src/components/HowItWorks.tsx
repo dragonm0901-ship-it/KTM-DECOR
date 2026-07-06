@@ -91,7 +91,7 @@ export default function HowItWorks() {
   }, { scope: containerRef });
 
   return (
-    <section ref={containerRef} id="process" className="py-24 md:py-32 px-6 md:px-12 bg-background text-foreground relative overflow-hidden">
+    <section ref={containerRef} id="process" className="py-24 md:py-32 bg-background text-foreground relative overflow-hidden">
       {/* Premium Laser-Process Background Image at 50% Opacity (Extended top and bottom to eliminate high-DPI subpixel rounding gaps) */}
       <div className="absolute top-[-8px] bottom-[-8px] left-0 right-0 z-0 opacity-50 pointer-events-none select-none">
         <Image
@@ -107,7 +107,7 @@ export default function HowItWorks() {
         <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background transition-colors duration-500" />
       </div>
 
-      <div className="max-w-7xl mx-auto relative z-10">
+      <div className="max-w-[1500px] mx-auto px-4 sm:px-6 md:px-8 relative z-10">
         {/* Centered Header */}
         <div className="flex flex-col items-center justify-center text-center max-w-3xl mx-auto mb-16 md:mb-20">
           {/* Label */}

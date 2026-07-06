@@ -151,8 +151,8 @@ export default function ShopPage() {
   };
 
   return (
-    <div className="min-h-screen pt-28 md:pt-36 lg:pt-44 pb-20 px-6 md:px-12 bg-background text-foreground">
-      <div className="max-w-7xl mx-auto w-full">
+    <div className="min-h-screen pt-28 md:pt-36 lg:pt-44 pb-20 px-4 sm:px-6 md:px-8 bg-background text-foreground">
+      <div className="w-full max-w-[1500px] mx-auto">
         
         {/* ── HEADER ROW ── */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 mb-12 border-b border-border/40 pb-8">
@@ -383,17 +383,17 @@ export default function ShopPage() {
         <div className="w-full">
           {filteredProducts.length > 0 ? (
             <>
-              <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-10 w-full">
+              <div ref={gridRef} className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-8 lg:gap-10 w-full">
                 {filteredProducts.map((product) => (
-                  <div key={product.id} className="shop-card group flex flex-col justify-between h-full bg-card/20 rounded-xl border border-border/60 hover:border-accent/40 shadow-md hover:shadow-2xl overflow-hidden transition-all duration-300">
+                  <div key={product.id} className="shop-card group flex flex-col justify-between h-full bg-card/20 rounded-xl border border-border/60 md:hover:border-accent/40 shadow-sm md:hover:shadow-2xl overflow-hidden transition-all duration-300">
                     
                     {/* Image Stage wrapper (Full-width inside Card, Square) */}
-                    <Link href={`/shop/${product.id}`} className="relative aspect-square w-full overflow-hidden block bg-card">
+                    <Link href={`/shop/${product.id}`} className="relative aspect-[4/5] w-full overflow-hidden block bg-card">
                       <Image 
                         src={product.image} 
                         alt={product.name}
                         fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                        sizes="(max-width: 640px) 50vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                         className="object-cover transition-transform duration-700 lg:group-hover:scale-105"
                       />
                       
@@ -424,28 +424,28 @@ export default function ShopPage() {
                     </Link>
 
                     {/* Technical details block */}
-                    <div className="p-4 sm:p-5 flex flex-col justify-between flex-1 space-y-3">
+                    <div className="p-3 sm:p-5 flex flex-col justify-between flex-1 space-y-2 sm:space-y-3">
                       <div className="space-y-1">
-                        <span className="text-[10px] font-bold text-accent uppercase tracking-widest block">
+                        <span className="text-[9px] sm:text-[10px] font-bold text-accent uppercase tracking-widest block">
                           {product.subCategory}
                         </span>
                         
                         <Link href={`/shop/${product.id}`} className="block">
-                          <h3 className="text-sm sm:text-base font-bold tracking-tight text-foreground hover:text-accent transition-colors leading-snug line-clamp-2 min-h-[2.5rem]">
+                          <h3 className="text-xs sm:text-base font-bold tracking-tight text-foreground md:hover:text-accent transition-colors leading-snug line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem]">
                             {product.name}
                           </h3>
                         </Link>
                       </div>
 
                       {/* Pricing Tag and Direct Add CTAs */}
-                      <div className="flex items-center justify-between pt-3 border-t border-border/20 mt-2">
-                        <span className="text-sm sm:text-base font-extrabold text-foreground">
+                      <div className="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-border/20 mt-1 sm:mt-2">
+                        <span className="text-xs sm:text-base font-extrabold text-foreground">
                           Rs. {product.price.toLocaleString()}
                         </span>
                         
                         <button
                           onClick={() => addToCart(product, 1)}
-                          className="px-4 py-2 bg-accent hover:bg-accent-dark text-white rounded text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all shadow-md shadow-accent/10 active:scale-95"
+                          className="px-2.5 py-1.5 sm:px-4 sm:py-2 bg-accent md:hover:bg-accent-dark text-white rounded text-[9px] sm:text-xs font-bold uppercase tracking-wider transition-all shadow-md shadow-accent/10 active:scale-95"
                         >
                           Add to Cart
                         </button>

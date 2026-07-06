@@ -6,8 +6,8 @@ import Image from "next/image";
 
 export default function LocationMap() {
   return (
-    <section className="relative w-full bg-background pb-24 md:pb-32 px-6 md:px-12 z-20">
-      <div className="max-w-[1320px] mx-auto">
+    <section className="relative w-full bg-background pb-24 md:pb-32 px-4 sm:px-6 md:px-8 z-20">
+      <div className="w-full max-w-[1500px] mx-auto">
         <div className="flex flex-col items-center text-center mb-12 md:mb-16">
           <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-accent/10 border border-accent/25 rounded-[4px] text-accent text-[9px] font-black tracking-[0.25em] uppercase mb-4">
             Find Us

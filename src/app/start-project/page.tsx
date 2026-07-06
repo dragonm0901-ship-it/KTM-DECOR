@@ -409,7 +409,7 @@ Thank you so much!`;
     <div className="min-h-screen bg-background text-foreground pt-24 md:pt-36 lg:pt-44 pb-16 flex flex-col items-center">
       
       {/* ── Header Title Row ── */}
-      <div className="w-full max-w-[1400px] px-6 md:px-12 mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="w-full max-w-[1500px] px-4 sm:px-6 md:px-8 mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <Link 
             href="/" 
@@ -446,7 +446,7 @@ Thank you so much!`;
       </div>
 
       {/* ── Main Split View Sandbox Layout ── */}
-      <div className="w-full max-w-[1400px] px-6 md:px-12 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="w-full max-w-[1500px] px-4 sm:px-6 md:px-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
         {/* ── LEFT COLUMN: Interactive Sticky Live Preview Sandbox ── */}
         <div className="lg:col-span-7 xl:col-span-8 lg:sticky lg:top-28">

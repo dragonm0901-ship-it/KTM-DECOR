@@ -51,7 +51,7 @@ export default function CtaFaq() {
   };
 
   return (
-    <div className="max-w-[1320px] w-full mx-auto px-5 bg-background dark:bg-transparent text-foreground py-20 max-[900px]:py-[60px] mb-24 lg:mb-32 rounded-[4px] font-sans transition-colors duration-500">
+    <div className="max-w-[1500px] mx-auto w-full px-4 sm:px-6 md:px-8 bg-background dark:bg-transparent text-foreground py-20 max-[900px]:py-[60px] mb-24 lg:mb-32 rounded-[4px] font-sans transition-colors duration-500">
       <div className="grid grid-cols-[1.6fr_1fr] gap-8 md:gap-12 items-start max-[900px]:grid-cols-1">
         {/* Left column — Animated Gradient CTA card */}
         <div 

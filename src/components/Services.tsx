@@ -103,7 +103,7 @@ export default function Services() {
     <div ref={containerRef} className="relative w-full lg:h-[500vh] h-auto">
       <section 
         id="services" 
-        className="relative lg:sticky lg:top-0 h-auto lg:h-[125vh] w-full flex flex-col items-center justify-start lg:justify-center py-20 lg:py-6 px-6 md:px-12 overflow-hidden bg-background text-foreground"
+        className="relative lg:sticky lg:top-0 h-auto lg:h-[125vh] w-full flex flex-col items-center justify-start lg:justify-center py-20 lg:py-6 px-4 sm:px-6 md:px-8 overflow-hidden bg-background text-foreground"
       >
         {/* Premium Workshop Background Image */}
         <div className="absolute -inset-[5%] z-0 opacity-55 dark:opacity-20 pointer-events-none select-none overflow-hidden transition-opacity duration-500">
@@ -135,7 +135,7 @@ export default function Services() {
         {/* Stacking Cards Track (Larger, wider, and 15% taller cards offset from absolute header) */}
         <div 
           ref={cardsRef}
-          className="relative w-full max-w-[1120px] lg:h-[75vh] flex flex-col lg:block gap-4 sm:gap-8 mt-6 lg:mt-28 lg:max-h-[900px] shrink-0"
+          className="relative w-full max-w-[1320px] mx-auto lg:h-[75vh] flex flex-col lg:block gap-4 sm:gap-8 mt-6 lg:mt-28 lg:max-h-[900px] shrink-0"
         >
           {servicesData.map((service, i) => (
             <div

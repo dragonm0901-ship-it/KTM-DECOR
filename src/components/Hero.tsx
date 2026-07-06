@@ -284,7 +284,7 @@ export default function Hero() {
         id="hero"
         className="lg:hidden relative min-h-screen flex items-center bg-background overflow-hidden pt-28 pb-16 md:pt-36 md:pb-24"
       >
-        <div className="relative z-10 w-full max-w-[1400px] mx-auto px-6 md:px-12">
+        <div className="relative z-10 w-full px-4 sm:px-6 md:px-8">
           <div className="grid grid-cols-1 gap-6 items-center">
 
             {/* ── Top Content: Badge + Headline ── */}
