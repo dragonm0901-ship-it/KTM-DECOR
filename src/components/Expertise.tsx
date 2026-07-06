@@ -105,7 +105,7 @@ export default function Expertise() {
               className="expertise-card group block opacity-0 cursor-pointer"
             >
               {/* Inner card container containing the image and hover details */}
-              <div className="relative aspect-[4/5] rounded-[8px] border border-border bg-background overflow-hidden transition-all duration-500 group-hover:scale-[1.02] group-hover:shadow-2xl group-hover:shadow-accent/5">
+              <div className="relative aspect-[4/5] rounded-[4px] border border-border bg-background overflow-hidden transition-all duration-500 group-hover:scale-[1.02] group-hover:shadow-2xl group-hover:shadow-accent/5">
                 {/* Image BG */}
                 <div className="absolute inset-0 transition-transform duration-700 lg:group-hover:scale-105">
                   <Image
@@ -120,10 +120,10 @@ export default function Expertise() {
                 </div>
 
                 {/* Dark overlay for typography contrast */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-500 z-10" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent hidden lg:block lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-500 z-10" />
 
-                {/* Info — always visible on mobile (compact), hover-reveal on desktop */}
-                <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 lg:p-5 lg:translate-y-6 lg:opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100 transition-all duration-500 z-20">
+                {/* Info — hover-reveal on desktop only (hidden on mobile for cleaner UI) */}
+                <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 lg:p-5 hidden lg:block lg:translate-y-6 lg:opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100 transition-all duration-500 z-20">
                   <span className="text-[8px] sm:text-[9px] font-bold tracking-[0.25em] uppercase text-white/65 block mb-0.5 sm:mb-1.5">
                     {item.category}
                   </span>
@@ -141,7 +141,7 @@ export default function Expertise() {
 
               {/* Product Info below the card */}
               <div className="mt-3 px-1 space-y-1">
-                <span className="text-[9px] sm:text-[10px] font-bold text-accent uppercase tracking-widest block">
+                <span className="text-[9px] sm:text-[10px] font-bold text-accent uppercase tracking-widest hidden sm:block">
                   {item.category}
                 </span>
                 <h4 className="text-xs sm:text-sm md:text-base font-bold tracking-tight text-foreground group-hover:text-accent transition-colors duration-300 line-clamp-2 leading-snug">

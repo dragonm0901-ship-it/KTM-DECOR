@@ -288,13 +288,13 @@ export default function Hero() {
           <div className="grid grid-cols-1 gap-6 items-center">
 
             {/* ── Top Content: Badge + Headline ── */}
-            <div className="order-1">
+            <div className="order-1 flex flex-col items-center text-center">
               {/* Status Badge */}
               <div
                 ref={mobileBadgeRef}
-                className="inline-flex items-center gap-2.5 px-4 py-2 rounded-[4px] bg-accent border border-accent/15 mb-8 md:mb-10 opacity-0"
+                className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-[4px] bg-accent border border-accent/15 mb-4 opacity-0"
               >
-                <span className="text-[11px] font-bold tracking-wide text-white">
+                <span className="text-[8px] font-bold tracking-wide text-white">
                   Trusted by 2000+ businesses in Nepal
                 </span>
               </div>
@@ -302,7 +302,7 @@ export default function Hero() {
               {/* Main Headline */}
               <h1
                 ref={mobileTitleRef}
-                className="text-[clamp(3rem,8vw,7rem)] font-extrabold leading-[0.92] tracking-[-0.04em] mb-8 md:mb-10 text-foreground drop-shadow-[0_2px_8px_rgba(0,0,0,0.08)] dark:drop-shadow-[0_4px_16px_rgba(0,0,0,0.75)]"
+                className="text-[clamp(1.75rem,5.5vw,3rem)] font-extrabold leading-[0.95] tracking-[-0.03em] mb-4 text-foreground drop-shadow-[0_2px_8px_rgba(0,0,0,0.08)] dark:drop-shadow-[0_4px_16px_rgba(0,0,0,0.75)] w-full"
               >
                 <span className="block">Your space,</span>
                 <span className="block mt-2">
@@ -368,16 +368,16 @@ export default function Hero() {
             </div>
 
             {/* ── Mobile-only: CTAs + Features (below images) ── */}
-            <div className="order-3">
+            <div className="order-3 flex flex-col items-center text-center">
               {/* Subtext */}
-              <p className="hero-subtext-mobile text-base md:text-lg leading-relaxed mb-8 text-muted opacity-0">
+              <p className="hero-subtext-mobile text-base md:text-lg leading-relaxed mb-8 text-muted opacity-0 max-w-xl">
                 Premium neon signs and illuminated decor crafted with precision
                 to bring your brand&apos;s story to life.
               </p>
-              <div className="flex flex-col sm:flex-row items-start gap-4 mb-10">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10 w-full">
                 <Link
                   href="/shop"
-                  className="group relative overflow-hidden flex items-center gap-3 px-9 py-4 bg-accent text-white rounded-[4px] text-[11px] font-bold tracking-widest uppercase hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 shadow-lg shadow-accent/25"
+                  className="group relative overflow-hidden flex items-center justify-center gap-3 px-9 py-4 bg-accent text-white rounded-[4px] text-[11px] font-bold tracking-widest uppercase hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 shadow-lg shadow-accent/25 w-full sm:w-auto"
                 >
                   <span className="animate-laser-sheen absolute inset-0 w-[50%] h-full bg-gradient-to-r from-transparent via-white/25 to-transparent pointer-events-none" />
                   <span>Explore Collection</span>
@@ -385,13 +385,13 @@ export default function Hero() {
                 </Link>
                 <a
                   href="/start-project"
-                  className="px-9 py-4 bg-black text-white dark:bg-white dark:text-black hover:bg-neutral-900 dark:hover:bg-neutral-100 text-[11px] font-bold tracking-widest uppercase rounded-[4px] transition-all duration-300"
+                  className="flex items-center justify-center px-9 py-4 bg-black text-white dark:bg-white dark:text-black hover:bg-neutral-900 dark:hover:bg-neutral-100 text-[11px] font-bold tracking-widest uppercase rounded-[4px] transition-all duration-300 w-full sm:w-auto"
                 >
                   Create a Design
                 </a>
               </div>
 
-              <ul ref={mobileFeaturesRef} className="space-y-3">
+              <ul ref={mobileFeaturesRef} className="space-y-3 w-fit mx-auto text-left">
                 {features.map((feat, i) => (
                   <li
                     key={i}

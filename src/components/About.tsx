@@ -66,10 +66,10 @@ export default function About() {
             alt="Patan Durbar Square Background"
             fill
             sizes="100vw"
-            className={`object-cover object-center transition-all duration-1000 ${
+            className={`object-cover object-center transition-all duration-1000 grayscale opacity-30 contrast-[1.1] ${
               hoveredPart === 'content'
-                ? 'grayscale opacity-30 contrast-[1.1]' 
-                : 'grayscale opacity-45'
+                ? 'lg:grayscale lg:opacity-30 lg:contrast-[1.1]' 
+                : 'lg:grayscale lg:opacity-45 lg:contrast-100'
             }`}
           />
           {/* Soft uniform overlay to ensure optimal contrast and premium integration */}
@@ -80,16 +80,18 @@ export default function About() {
  
         {/* Content Card container */}
         <div 
-          className={`relative z-10 max-w-[1500px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-16 lg:gap-24 items-center rounded-[4px] shadow-2xl border p-5 sm:p-8 md:p-16 lg:p-20 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          className={`relative z-10 max-w-[1500px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-16 lg:gap-24 items-center rounded-[4px] shadow-2xl border p-5 sm:p-8 md:p-16 lg:p-20 bg-white dark:bg-black border-accent/25 shadow-[0_30px_70px_-15px_rgba(254,145,76,0.15)] scale-[1.015] lg:transition-all lg:duration-700 lg:ease-[cubic-bezier(0.16,1,0.3,1)] ${
             hoveredPart === 'content'
-              ? 'bg-white dark:bg-black border-accent/25 shadow-[0_30px_70px_-15px_rgba(254,145,76,0.15)] scale-[1.015]' 
-              : 'bg-card/92 dark:bg-card/85 backdrop-blur-md border-border/60 scale-[1.0]'
+              ? 'lg:bg-white lg:dark:bg-black lg:border-accent/25 lg:shadow-[0_30px_70px_-15px_rgba(254,145,76,0.15)] lg:scale-[1.015]' 
+              : 'lg:bg-card/92 lg:dark:bg-card/85 lg:border-border/60 lg:scale-[1.0]'
           }`}
           onMouseEnter={(e) => {
+            if (typeof window !== "undefined" && window.innerWidth < 1024) return;
             e.stopPropagation();
             setHoveredPart('content');
           }}
           onMouseLeave={(e) => {
+            if (typeof window !== "undefined" && window.innerWidth < 1024) return;
             e.stopPropagation();
             setHoveredPart('none');
           }}
@@ -101,8 +103,8 @@ export default function About() {
               alt="Founder Kishor G.C." 
               fill 
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 700px"
-              className={`object-cover transition-all duration-700 ${
-                hoveredPart === 'content' ? 'scale-105' : 'scale-100'
+              className={`object-cover transition-all duration-700 scale-105 ${
+                hoveredPart === 'content' ? 'lg:scale-105' : 'lg:scale-100'
               } md:grayscale md:group-hover:grayscale-0 md:hover:grayscale-0`}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
@@ -115,19 +117,19 @@ export default function About() {
               <span className="text-accent">nightscape.</span>
             </h2>
             <div className="space-y-6 text-lg leading-relaxed">
-              <p className={`reveal-text transition-colors duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+              <p className={`reveal-text transition-colors duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] text-foreground font-bold ${
                 hoveredPart === 'content'
-                  ? 'text-foreground font-bold'
-                  : 'text-foreground/95 font-semibold'
+                  ? 'lg:text-foreground lg:font-bold'
+                  : 'lg:text-foreground/95 lg:font-semibold'
               }`}>
-                Founded by <span className={`font-bold transition-colors duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                  hoveredPart === 'content' ? 'text-accent font-black' : 'text-foreground'
+                Founded by <span className={`font-bold transition-colors duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] text-accent font-black ${
+                  hoveredPart === 'content' ? 'lg:text-accent lg:font-black' : 'lg:text-foreground lg:font-bold'
                 }`}>Kishor G.C.</span>, KTM DECOR began as a small experiment in a garage, fueled by a passion for light and design. We didn&apos;t just want to make signs; we wanted to create glowing landmarks.
               </p>
-              <p className={`reveal-text transition-colors duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+              <p className={`reveal-text transition-colors duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] text-foreground font-bold ${
                 hoveredPart === 'content'
-                  ? 'text-foreground font-bold'
-                  : 'text-foreground/95 font-semibold'
+                  ? 'lg:text-foreground lg:font-bold'
+                  : 'lg:text-foreground/95 lg:font-semibold'
               }`}>
                 Today, we are a team of dedicated artisans and engineers who believe that every brand has a story that deserves to be illuminated. From the buzzing streets of Thamel to corporate hubs, our work speaks for itself.
               </p>
@@ -137,10 +139,10 @@ export default function About() {
                   <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
                     <Quote className="w-5 h-5 text-accent" />
                   </div>
-                  <p className={`text-sm italic transition-colors duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                  <p className={`text-sm italic transition-colors duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] text-foreground font-semibold ${
                     hoveredPart === 'content'
-                      ? 'text-foreground font-semibold'
-                      : 'text-foreground/90 font-medium'
+                      ? 'lg:text-foreground lg:font-semibold'
+                      : 'lg:text-foreground/90 lg:font-medium'
                   }`}>
                     &quot;We don&apos;t sell signs. We sell the feeling of walking into a space that truly belongs to you.&quot;
                   </p>
