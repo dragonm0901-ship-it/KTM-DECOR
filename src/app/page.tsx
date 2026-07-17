@@ -23,15 +23,15 @@ export default function Home() {
         "priceRange": "$$",
         "address": {
           "@type": "PostalAddress",
-          "streetAddress": "Kathmandu Factory & Workshop",
-          "addressLocality": "Kathmandu",
-          "postalCode": "44600",
+          "streetAddress": "Balkot Factory & Workshop",
+          "addressLocality": "Bhaktapur",
+          "postalCode": "44800",
           "addressCountry": "NP"
         },
         "geo": {
           "@type": "GeoCoordinates",
-          "latitude": 27.7172,
-          "longitude": 85.324
+          "latitude": 27.6715,
+          "longitude": 85.3702
         },
         "openingHoursSpecification": [
           {

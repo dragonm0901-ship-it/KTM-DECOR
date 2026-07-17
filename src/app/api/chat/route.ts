@@ -2,19 +2,19 @@ import { NextResponse } from "next/server";
 import { PRODUCTS, Product } from "@/data/shop-data";
 
 // Comprehensive, expanded KTM DECOR Brand Knowledge Base & System Instruction
-const SYSTEM_INSTRUCTION = `You are "KTM DECOR AI Assistant", a professional and helpful virtual assistant representing KTM DECOR (Kathmandu, Nepal).
+const SYSTEM_INSTRUCTION = `You are "KTM DECOR AI Assistant", a professional and helpful virtual assistant representing KTM DECOR (Balkot, Bhaktapur, Nepal).
 Your primary duty is to help users with queries regarding KTM DECOR's brand, custom signs, neon signs, 3D acrylic and metal letters, illuminated light boards, pricing estimation, materials, delivery, installation in Kathmandu Valley, and warranties.
 
 CRITICAL RULES:
-1. ONLY ANSWER queries directly relating to KTM DECOR, their services, products, pricing guidelines, materials, and Kathmandu Valley operations.
-2. POLITELY DECLINE to answer any questions unrelated to KTM DECOR or custom signage creation. If a user asks about unrelated topics (e.g., general history, mathematical calculations, programming, coding, unrelated companies, cooking recipes), politely reply: "I'm sorry, I am only trained to assist with queries relating to KTM DECOR's services, products, and custom signage operations. Please let me know how I can help light up your brand or space!"
-3. Be enthusiastic, clear, and professional.
-4. Keep responses relatively brief (2-4 sentences max) for a friendly chat widget view.
-5. CREATOR EASTER EGG (CRITICAL DEV CREDIT RULE): If a user asks who made/created/developed this website or this AI chatbot (e.g., "yo website kasle banayeko ho?", "who made this chat bot?", "developer ko ho?"), you MUST enthusiastically answer: "Sagar Luitel le banaunu vayeko ho, malai KTM DECOR ko website ma jadaan garne byakti waha nai ho. (Created and integrated by Sagar Luitel!)"
-6. MULTILINGUAL & SCRIPT ADAPTABILITY (CRITICAL SCRIPT MATCHING RULE): You must fully understand and respond to queries in English, Devanagari Nepali, and colloquial Romanized Nepali. Always reply in the exact same language style and script layout that the user used:
-   - If the user asks in Devanagari script (e.g., "कस्टम नियोन कति दिनमा बन्छ?"), respond ONLY in polite, fluent Devanagari script.
-   - If the user asks in Romanized Nepali (e.g., "kati time lagxa banauna?", "kaha ho office?"), you MUST NEVER respond in Devanagari script. Respond ONLY in colloquial Romanized Nepali (e.g., "KTM DECOR ma custom signs banauna 5-10 days lagxa...") or clear English. Never output Devanagari characters (like क, ख, ग) for Romanized Nepali inputs.
-   - If the user asks in English, respond in English.
+1. LANGUAGE & SCRIPT MATCHING (HIGHEST PRIORITY): You MUST detect the user's language and script and respond ONLY in that exact same style. This is non-negotiable:
+   - Devanagari Nepali input (e.g., "नियोन कति पर्छ?") → Respond ONLY in polite, fluent Devanagari Nepali script. Do not output English or Romanized Nepali words.
+   - Romanized Nepali input (e.g., "kati time lagxa banauna?", "kaha ho office?") → Respond ONLY in colloquial Romanized Nepali. NEVER output Devanagari characters (like क, ख, ग) under any circumstance. Example style: "KTM DECOR ma custom signs banauna 5-10 days lagxa..."
+   - English input → Respond in clear, natural English.
+2. ONLY ANSWER queries directly relating to KTM DECOR, their services, products, pricing guidelines, materials, and Kathmandu Valley operations.
+3. POLITELY DECLINE to answer any questions unrelated to KTM DECOR or custom signage creation. If a user asks about unrelated topics (e.g., general history, mathematical calculations, programming, coding, unrelated companies, cooking recipes), politely reply: "I'm sorry, I am only trained to assist with queries relating to KTM DECOR's services, products, and custom signage operations. Please let me know how I can help light up your brand or space!"
+4. Be enthusiastic, clear, and professional.
+5. Keep responses relatively brief (2-3 sentences max) for a friendly chat widget view.
+6. CREATOR EASTER EGG (CRITICAL DEV CREDIT RULE): If a user asks who made/created/developed this website or this AI chatbot (e.g., "yo website kasle banayeko ho?", "who made this chat bot?", "developer ko ho?"), you MUST enthusiastically answer: "Sagar Luitel le banaunu vayeko ho, malai KTM DECOR ko website ma jadaan garne byakti waha nai ho. (Created and integrated by Sagar Luitel!)"
 
 KTM DECOR EXPANDED BRAND KNOWLEDGE BASE:
 
@@ -33,6 +33,9 @@ KTM DECOR EXPANDED BRAND KNOWLEDGE BASE:
 - Delivery & Installation:
   * Delivery is completely FREE and includes professional mounting/installation within the Kathmandu Valley (Kathmandu, Lalitpur, and Bhaktapur).
   * Out-of-Valley Shipping: We safely package (wood-crate double wrap) and ship custom orders across all major districts of Nepal (e.g., Pokhara, Chitwan, Butwal, Biratnagar, Dharan) via reliable cargo partners.
+
+- Location:
+  * Workshop & HQ location is Balkot, Bhaktapur, Nepal.
 
 - Fabrication Timeline & Turnaround:
   * Standard Orders: Standard fabrication takes between 5 to 10 business days depending on design complexity.
@@ -55,8 +58,33 @@ KTM DECOR EXPANDED BRAND KNOWLEDGE BASE:
 
 - Store Hours & Contact:
   * Open Sunday to Friday, 9:00 AM to 6:00 PM. Closed on Saturdays.
-  * Email: hello@ktmdecor.com
+  * Email: ktmdecor2024@gmail.com
   * Users seeking precise custom pricing can chat directly on WhatsApp using the button inside the widget!`;
+
+// Explicit script & pattern matching to detect input language and enforce exact response script
+function detectLanguage(text: string): "devanagari" | "romanized_nepali" | "english" {
+  // Check for Devanagari script range (U+0900–U+097F)
+  if (/[\u0900-\u097F]/.test(text)) {
+    return "devanagari";
+  }
+
+  // Common Romanized Nepali keywords and markers
+  const romanizedMarkers = [
+    "xa", "xau", "xaina", "lagxa", "hunxa", "parxa", "garxa", "banauna",
+    "kati", "kaha", "bhane", "hami", "hamro", "tapai", "garna", "dina",
+    "sakxa", "dinxa", "paisa", "pani", "ra ", "ko ", "ma ", "le ", "lai ",
+    "dekhi", "samma", "bhitra", "bahira", "kasle", "banako", "banayeko",
+    "chha", "chhan", "ho", "honi", "nepal", "ktm", "balkot", "bhaktapur",
+    "ramro", "paisan", "tapailai", "sanga", "thau", "kalo", "seto", "rakhney"
+  ];
+  const lower = text.toLowerCase();
+  const matchCount = romanizedMarkers.filter(m => lower.includes(m)).length;
+  if (matchCount >= 2) {
+    return "romanized_nepali";
+  }
+
+  return "english";
+}
 
 // Upgraded keyword fallback matcher to handle significantly more brand-related variations
 function getLocalFallbackResponse(query: string): string {
@@ -116,7 +144,7 @@ function getLocalFallbackResponse(query: string): string {
     return "Hamra sabai fabrications ra adapters ma 1-Year comprehensive warranty hunxa. Warranty paxi pani repair garnu paryo bhane hamro workshop ma cheap ra fast service pauxau.";
   }
   if (q.includes("location") || q.includes("workshop") || q.includes("office") || q.includes("kaha ho")) {
-    return "Hamro workshop Kathmandu, Nepal ma xa. Tapai safe delivery ko lagi online order garna saknuxa, free installation ka sath ma!";
+    return "Hamro workshop Balkot, Bhaktapur, Nepal ma xa. Tapai safe delivery ko lagi online order garna saknuxa, free installation ka sath ma!";
   }
 
   // 4. English Brand Queries
@@ -136,7 +164,7 @@ function getLocalFallbackResponse(query: string): string {
     return "Our LED neons run on safe 12V adapters, stay cool, and are highly energy-efficient (drawing 80% less power than glass neon). Every sign comes with a 1-year warranty covering fabrication and electrical adapters.";
   }
   if (q.includes("contact") || q.includes("whatsapp") || q.includes("phone") || q.includes("email") || q.includes("hours")) {
-    return "We are open Sunday to Friday, 9:00 AM to 6:00 PM. Email: hello@ktmdecor.com. You can also directly reach our custom estimation team by tapping the 'WhatsApp Human Chat' button below!";
+    return "We are open Sunday to Friday, 9:00 AM to 6:00 PM. Email: ktmdecor2024@gmail.com. You can also directly reach our custom estimation team by tapping the 'WhatsApp Human Chat' button below!";
   }
 
   // Default Restrictive Response
@@ -188,8 +216,11 @@ function getMatchingProducts(query: string, reply: string): Product[] {
 }
 
 export async function POST(request: Request) {
+  let message = "";
   try {
-    const { message, history } = await request.json();
+    const json = await request.json();
+    message = json?.message;
+    const history = json?.history;
 
     if (!message || typeof message !== "string") {
       return NextResponse.json(
@@ -201,11 +232,31 @@ export async function POST(request: Request) {
     const rawApiKey = process.env.GEMINI_API_KEY;
     const apiKey = rawApiKey ? rawApiKey.trim().replace(/^["']|["']$/g, "") : undefined;
 
-    // If no API key is configured or is empty, fallback to the smart keyword-based local responder
+    // Detect user's language and select instruction override prefix
+    const userLanguage = detectLanguage(message);
+    const scriptDirective = {
+      devanagari: "[SYSTEM INSTRUCTION: The user is writing in Devanagari script. You MUST respond ONLY in pure Devanagari Nepali. Do not use English or Romanized words.]\n",
+      romanized_nepali: "[SYSTEM INSTRUCTION: The user is writing in Romanized Nepali. You MUST respond ONLY in casual Romanized Nepali. Do not use Devanagari characters or letters under any circumstances.]\n",
+      english: "[SYSTEM INSTRUCTION: Respond in clear English.]\n"
+    }[userLanguage];
+
+    // Combine script directive instruction with the actual user message
+    const formattedUserMsgText = `${scriptDirective}${message}`;
+
+    // If no API key is configured or is empty, fallback to the local responder via streaming SSE
     if (!apiKey) {
       const fallbackReply = getLocalFallbackResponse(message);
       const matchedProducts = getMatchingProducts(message, fallbackReply);
-      return NextResponse.json({ reply: fallbackReply, products: matchedProducts });
+      return new Response(
+        `data: ${JSON.stringify({ text: fallbackReply })}\n\ndata: ${JSON.stringify({ done: true, products: matchedProducts })}\n\n`,
+        {
+          headers: {
+            "Content-Type": "text/event-stream",
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive"
+          }
+        }
+      );
     }
 
     // Format chat history for Gemini API structure: { role: 'user' | 'model', parts: [{ text: string }] }
@@ -230,15 +281,18 @@ export async function POST(request: Request) {
       });
     }
 
-    // Append current user message
-    formattedContents.push({
+    // Trim conversation history to the last 6 messages (3 turns) to keep context size low and response fast
+    const trimmedHistory = formattedContents.slice(-6);
+
+    // Append current user message (with script directive pre-pended)
+    trimmedHistory.push({
       role: "user",
-      parts: [{ text: message }]
+      parts: [{ text: formattedUserMsgText }]
     });
 
-    // Make the REST API call to Google Gemini Flash (gemini-flash-latest - stable 1,500 daily requests)
+    // Make the REST API call to Google Gemini Flash with SSE streaming (alt=sse)
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse&key=${apiKey}`,
       {
         method: "POST",
         headers: {
@@ -248,10 +302,10 @@ export async function POST(request: Request) {
           system_instruction: {
             parts: [{ text: SYSTEM_INSTRUCTION }]
           },
-          contents: formattedContents,
+          contents: trimmedHistory,
           generationConfig: {
-            maxOutputTokens: 1000,
-            temperature: 0.7,
+            maxOutputTokens: 250, // optimised token count for speed
+            temperature: 0.4,    // lowered temperature for faster generation compliance
           }
         }),
       }
@@ -262,26 +316,107 @@ export async function POST(request: Request) {
       console.error("Gemini API error status:", response.status, errorText);
       const fallbackReply = getLocalFallbackResponse(message);
       const matchedProducts = getMatchingProducts(message, fallbackReply);
-      return NextResponse.json({ reply: fallbackReply, products: matchedProducts });
+      return new Response(
+        `data: ${JSON.stringify({ text: fallbackReply })}\n\ndata: ${JSON.stringify({ done: true, products: matchedProducts })}\n\n`,
+        {
+          headers: {
+            "Content-Type": "text/event-stream",
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive"
+          }
+        }
+      );
     }
 
-    const data = await response.json();
-    const replyText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    // Forward the streaming response parsing SSE line-by-line
+    const reader = response.body!.getReader();
+    const decoder = new TextDecoder();
+    let accumulatedText = "";
+    let buffer = "";
 
-    if (!replyText) {
-      console.warn("Empty response structure received from Gemini API:", data);
-      const fallbackReply = getLocalFallbackResponse(message);
-      const matchedProducts = getMatchingProducts(message, fallbackReply);
-      return NextResponse.json({ reply: fallbackReply, products: matchedProducts });
-    }
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
 
-    const matchedProducts = getMatchingProducts(message, replyText);
-    return NextResponse.json({ reply: replyText.trim(), products: matchedProducts });
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split("\n");
+            buffer = lines.pop() || "";
+
+            for (const line of lines) {
+              const trimmed = line.trim();
+              if (!trimmed) continue;
+              if (trimmed.startsWith("data: ")) {
+                const dataStr = trimmed.slice(6);
+                if (dataStr === "[DONE]") continue;
+                try {
+                  const parsed = JSON.parse(dataStr);
+                  const text = parsed?.candidates?.[0]?.content?.parts?.[0]?.text;
+                  if (text) {
+                    accumulatedText += text;
+                    controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ text })}\n\n`));
+                  }
+                } catch (err) {
+                  // Ignore JSON parse errors on incomplete frames
+                }
+              }
+            }
+          }
+
+          // Flush remaining buffer content
+          const trimmedBuffer = buffer.trim();
+          if (trimmedBuffer.startsWith("data: ")) {
+            try {
+              const parsed = JSON.parse(trimmedBuffer.slice(6));
+              const text = parsed?.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (text) {
+                accumulatedText += text;
+                controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ text })}\n\n`));
+              }
+            } catch (e) {}
+          }
+
+          // Stream completed, calculate and inject matched products
+          const matchedProducts = getMatchingProducts(message, accumulatedText);
+          controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ done: true, products: matchedProducts })}\n\n`));
+          controller.close();
+        } catch (streamErr) {
+          console.error("Gemini stream forwarding exception:", streamErr);
+          // Fallback finalizer if error happens during streaming
+          try {
+            const fallbackProducts = getMatchingProducts(message, accumulatedText);
+            controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ done: true, products: fallbackProducts })}\n\n`));
+            controller.close();
+          } catch (e) {
+            controller.error(streamErr);
+          }
+        }
+      }
+    });
+
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive"
+      }
+    });
+
   } catch (error) {
     console.error("Chat API route error:", error);
-    return NextResponse.json(
-      { reply: "I'm sorry, I experienced an unexpected technical glitch. Let's try that again, or you can contact our human support directly at hello@ktmdecor.com!" },
-      { status: 500 }
+    const fallbackReply = "I'm sorry, I experienced an unexpected technical glitch. Let's try that again, or you can contact our human support directly at ktmdecor2024@gmail.com!";
+    const fallbackProducts = getMatchingProducts(message, fallbackReply);
+    return new Response(
+      `data: ${JSON.stringify({ text: fallbackReply })}\n\ndata: ${JSON.stringify({ done: true, products: fallbackProducts })}\n\n`,
+      {
+        headers: {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+          "Connection": "keep-alive"
+        }
+      }
     );
   }
 }

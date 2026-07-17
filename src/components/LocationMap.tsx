@@ -16,7 +16,7 @@ export default function LocationMap() {
             The Workshop
           </h2>
           <p className="text-muted text-base md:text-lg leading-relaxed max-w-2xl">
-            Drop by our Kathmandu factory to see our precision CNC machines and master craftspeople bringing neon designs to life in real-time.
+            Drop by our Balkot workshop to see our precision CNC machines and master craftspeople bringing neon designs to life in real-time.
           </p>
         </div>
 
@@ -37,7 +37,7 @@ export default function LocationMap() {
             <div className="absolute inset-0 bg-black" /> {/* Dark backdrop to prevent white flashes while loading */}
             
             <iframe 
-              src="https://maps.google.com/maps?q=KTM+Decor+Pvt+Ltd.,+Kathmandu,+Nepal&t=&z=15&ie=UTF8&iwloc=&output=embed" 
+              src="https://maps.google.com/maps?q=KTM+Decor+Pvt+Ltd.,+Balkot,+Bhaktapur,+Nepal&t=&z=15&ie=UTF8&iwloc=&output=embed" 
               width="100%" 
               height="100%" 
               style={{ 
@@ -72,7 +72,7 @@ export default function LocationMap() {
                   <h3 className="text-white font-bold tracking-widest uppercase text-xs">KTM Decor HQ</h3>
                 </div>
                 <p className="text-white/70 text-sm font-medium leading-relaxed">
-                  Kathmandu, Nepal <br/>
+                  Balkot, Bhaktapur, Nepal <br/>
                   Open: Sun - Fri, 9am - 6pm
                 </p>
                 <a 

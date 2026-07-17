@@ -133,6 +133,18 @@ export default function Preloader() {
   useEffect(() => {
     if (!isDone) return;
 
+    if (!lineTopRef.current || !lineBotRef.current || !logoWrapperRef.current || !percentageRef.current) {
+      console.warn("[Preloader] Exit animation skipped because refs are null");
+      document.documentElement.classList.remove("is-loading");
+      setIsHidden(true);
+      preloaderHasRun = true;
+      if (typeof window !== "undefined") {
+        (window as any).__PRELOADER_ACTIVE__ = false;
+        window.dispatchEvent(new CustomEvent("preloaderComplete"));
+      }
+      return;
+    }
+
     const isMobileViewport = typeof window !== "undefined" && window.innerWidth < 1024;
 
     // Speed up flight animations so the user can interact with the site faster

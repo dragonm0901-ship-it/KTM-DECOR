@@ -21,12 +21,11 @@ const cases: CaseData[] = [
     afterImage: "/images/couple-portrait-after.jpg",
   },
   {
-    category: "Storefront Signage",
-    title: "CRAFT Coffee Roasters",
-    description:
-      "From a cozy hand-drawn vintage logo sketch to an elegant, high-profile physical storefront sign. Engineered with water-resistant warm amber and soft white LED neon to withstand exterior outdoor conditions while delivering a cozy, inviting street glow.",
-    beforeImage: "/images/workshop.webp",
-    afterImage: "/images/light-boards-nivati.webp",
+    category: "Acrylic Light",
+    title: "Acrylic Table Lamp",
+    description: "",
+    beforeImage: "/images/acrylic-lamp-before.jpg",
+    afterImage: "/images/acrylic-lamp-after.jpg",
   },
 ];
 

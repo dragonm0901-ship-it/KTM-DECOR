@@ -93,8 +93,8 @@ export default function Footer() {
                 <div className="flex flex-col gap-3 md:gap-4 col-span-2 md:col-span-1">
                   <h4 className="uppercase tracking-widest text-[10px] md:text-sm font-bold text-gray-900 dark:text-white">Contact</h4>
                   <div className="flex flex-col gap-2 md:gap-3">
-                    <span className="text-gray-500 dark:text-gray-400 text-sm md:text-base font-medium">Kathmandu, Nepal</span>
-                    <a href="mailto:hello@ktmdecor.com" className="text-gray-500 dark:text-gray-400 text-sm md:text-base font-medium hover:text-orange-600 dark:hover:text-orange-500 transition-colors">hello@ktmdecor.com</a>
+                    <span className="text-gray-500 dark:text-gray-400 text-sm md:text-base font-medium">Balkot, Bhaktapur, Nepal</span>
+                    <a href="mailto:ktmdecor2024@gmail.com" className="text-gray-500 dark:text-gray-400 text-sm md:text-base font-medium hover:text-orange-600 dark:hover:text-orange-500 transition-colors">ktmdecor2024@gmail.com</a>
                     <a href="tel:+9779706247439" className="text-gray-500 dark:text-gray-400 text-sm md:text-base font-medium hover:text-orange-600 dark:hover:text-orange-500 transition-colors">+977 9706247439</a>
                   </div>
                 </div>

@@ -101,7 +101,7 @@ export default function CookiePolicy() {
               </h2>
               <p>
                 If you have any questions about our Cookie Policy, please
-                contact us at hello@ktmdecor.com.
+                contact us at ktmdecor2024@gmail.com.
               </p>
             </section>
           </div>

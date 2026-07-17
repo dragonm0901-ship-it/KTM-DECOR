@@ -12,92 +12,15 @@ interface Message {
   products?: Product[];
 }
 
-// ── Custom SVG Robot Logo (Precision vector conversion of your provided image) ──
-function RobotLogo({ className = "w-6 h-6", showCircle = true }: { className?: string; showCircle?: boolean }) {
-  return (
-    <svg
-      viewBox="0 0 100 100"
-      className={className}
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      {/* 1. Brand Orange Circle (only when requested) */}
-      {showCircle && (
-        <circle cx="50" cy="50" r="44" fill="#FE914C" />
-      )}
-
-      {/* 2. Robot Side Headphones/Ears */}
-      <rect
-        x="22"
-        y="38"
-        width="5"
-        height="24"
-        rx="2.5"
-        fill={showCircle ? "white" : "#FE914C"}
-      />
-      <rect
-        x="73"
-        y="38"
-        width="5"
-        height="24"
-        rx="2.5"
-        fill={showCircle ? "white" : "#FE914C"}
-      />
-
-      {/* 3. Antenna */}
-      <rect
-        x="48.5"
-        y="17"
-        width="3"
-        height="13"
-        rx="1.5"
-        fill={showCircle ? "white" : "#FE914C"}
-      />
-      <circle
-        cx="50"
-        cy="15"
-        r="5.5"
-        fill={showCircle ? "white" : "#FE914C"}
-      />
-
-      {/* 4. Head + Speech Bubble Tail combined path */}
-      <path
-        d="M50 26 C63.25 26 74 36.75 74 50 C74 63.25 63.25 74 50 74 C46.5 74 43 73 40 71 L30 78 L34 67 C29.5 62.5 26 56.5 26 50 C26 36.75 36.75 26 50 26 Z"
-        fill={showCircle ? "white" : "#FE914C"}
-      />
-
-      {/* 5. Visor (Orange Block) */}
-      <rect
-        x="36"
-        y="42"
-        width="28"
-        height="13"
-        rx="3.5"
-        fill={showCircle ? "#FE914C" : "white"}
-      />
-
-      {/* 6. Eyes (White Circles inside Visor) */}
-      <circle
-        cx="43"
-        cy="48.5"
-        r="3"
-        fill={showCircle ? "white" : "#FE914C"}
-      />
-      <circle
-        cx="57"
-        cy="48.5"
-        r="3"
-        fill={showCircle ? "white" : "#FE914C"}
-      />
-
-      {/* 7. Smiling Mouth (Orange Curve) */}
-      <path
-        d="M43 60 C43 65 57 65 57 60 Z"
-        fill={showCircle ? "#FE914C" : "white"}
-      />
-    </svg>
-  );
-}
+const LOADING_PHASES = [
+  "Thinking...",
+  "Consulting KTM DECOR catalog...",
+  "Reviewing pricing details...",
+  "Matching custom product specs...",
+  "Formulating Kathmandu Valley delivery info...",
+  "Generating product recommendations...",
+  "Almost there..."
+];
 
 export default function ChatbotWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -111,8 +34,17 @@ export default function ChatbotWidget() {
   ]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingPhaseIndex, setLoadingPhaseIndex] = useState(0);
 
   const chatLogsRef = useRef<HTMLDivElement>(null);
+
+  // Track component mount and unmount
+  useEffect(() => {
+    console.log("[ChatBot] Component Mounted");
+    return () => {
+      console.log("[ChatBot] Component Unmounted");
+    };
+  }, []);
 
   // Observe the documentElement class to hide during preloader active state
   useEffect(() => {
@@ -141,6 +73,22 @@ export default function ChatbotWidget() {
     return () => observer.disconnect();
   }, []);
 
+  // Cycle loading messages when isLoading is true
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isLoading) {
+      setLoadingPhaseIndex(0);
+      interval = setInterval(() => {
+        setLoadingPhaseIndex((prev) => (prev + 1) % LOADING_PHASES.length);
+      }, 2500);
+    } else {
+      setLoadingPhaseIndex(0);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isLoading]);
+
   // Auto-scroll to bottom on new messages
   useEffect(() => {
     if (chatLogsRef.current) {
@@ -149,7 +97,7 @@ export default function ChatbotWidget() {
         behavior: "smooth"
       });
     }
-  }, [messages, isLoading]);
+  }, [messages, isLoading, loadingPhaseIndex]);
 
   const handleSend = async (text: string) => {
     if (!text.trim()) return;
@@ -165,10 +113,13 @@ export default function ChatbotWidget() {
     setIsLoading(true);
 
     try {
-      const history = messages.map((m) => ({
+      // Map history to simple role/text format, sending only the last 6 messages for token efficiency and performance
+      const history = messages.slice(-6).map((m) => ({
         role: m.role,
         text: m.text,
       }));
+
+      console.log("[ChatBot] Sending message to API:", text, "with history:", history);
 
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -181,30 +132,107 @@ export default function ChatbotWidget() {
         }),
       });
 
+      console.log("[ChatBot] API response status:", res.status);
+
+      let localMessages: Message[] = [...messages, userMessage];
+
       if (!res.ok) {
-        throw new Error("API call failed");
+        throw new Error(`API call failed with status ${res.status}`);
       }
 
-      const data = await res.json();
+      if (!res.body) {
+        throw new Error("No response body received from API");
+      }
 
-      const botMessage: Message = {
-        role: "model",
-        text: data.reply || "I'm sorry, I encountered a communication issue. Please try again!",
-        timestamp: new Date(),
-        products: data.products || [],
-      };
+      // Stream handling setup
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let botMessageAdded = false;
 
-      setMessages((prev) => [...prev, botMessage]);
+      console.log("[ChatBot] Starting stream read loop");
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+          console.log("[ChatBot] Stream reader done");
+          break;
+        }
+
+        const chunk = decoder.decode(value, { stream: true });
+        console.log("[ChatBot] Raw chunk length:", chunk.length);
+        buffer += chunk;
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed) continue;
+          console.log("[ChatBot] Processing line:", trimmed);
+          if (trimmed.startsWith("data: ")) {
+            const dataStr = trimmed.slice(6);
+            try {
+              const parsed = JSON.parse(dataStr);
+              console.log("[ChatBot] Parsed JSON chunk:", parsed);
+              if (parsed.text) {
+                const chunkText = parsed.text;
+                // Double check to clear loading indicator as tokens stream in
+                setIsLoading(false);
+
+                if (!botMessageAdded) {
+                  botMessageAdded = true;
+                  localMessages = [...localMessages, {
+                    role: "model",
+                    text: chunkText,
+                    timestamp: new Date(),
+                    products: []
+                  }];
+                } else {
+                  const lastIndex = localMessages.length - 1;
+                  if (lastIndex >= 0 && localMessages[lastIndex].role === "model") {
+                    localMessages[lastIndex] = {
+                      ...localMessages[lastIndex],
+                      text: localMessages[lastIndex].text + chunkText
+                    };
+                  }
+                }
+                console.log("[ChatBot] Setting messages to:", localMessages);
+                setMessages([...localMessages]);
+              } else if (parsed.done) {
+                console.log("[ChatBot] Parsed done flag. Products:", parsed.products);
+                if (parsed.products) {
+                  const lastIndex = localMessages.length - 1;
+                  if (lastIndex >= 0 && localMessages[lastIndex].role === "model") {
+                    localMessages[lastIndex] = {
+                      ...localMessages[lastIndex],
+                      products: parsed.products
+                    };
+                  }
+                  console.log("[ChatBot] Setting messages with products to:", localMessages);
+                  setMessages([...localMessages]);
+                }
+              }
+            } catch (err) {
+              console.warn("[ChatBot] Failed to parse line:", trimmed, err);
+            }
+          }
+        }
+      }
+
     } catch (err) {
+      setIsLoading(false);
       console.error("Chatbot transmission error:", err);
-      setMessages((prev) => [
-        ...prev,
+      
+      const fallbackMessages: Message[] = [
+        ...messages,
+        userMessage,
         {
           role: "model",
-          text: "I'm sorry, I am currently experiencing connection difficulties. Please feel free to email our team directly at hello@ktmdecor.com or chat with us on WhatsApp!",
+          text: "I'm sorry, I am currently experiencing connection difficulties. Please feel free to email our team directly at ktmdecor2024@gmail.com or chat with us on WhatsApp!",
           timestamp: new Date(),
-        },
-      ]);
+        }
+      ];
+      setMessages(fallbackMessages);
     } finally {
       setIsLoading(false);
     }
@@ -372,18 +400,21 @@ export default function ChatbotWidget() {
               </div>
             ))}
 
-            {/* Typing Loader */}
+            {/* Multi-Phase Loading Status */}
             {isLoading && (
-              <div className="flex flex-col items-start">
-                <div className="bg-white/10 border border-white/10 px-3.5 py-2.5 rounded-[4px] flex items-center gap-1">
-                  <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-white animate-bounce [animation-delay:-0.3s]" />
-                  <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-white animate-bounce [animation-delay:-0.15s]" />
-                  <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-white animate-bounce" />
+              <div className="flex flex-col items-start animate-in fade-in duration-300">
+                <div className="bg-white/10 border border-white/10 px-3.5 py-2.5 rounded-[4px] flex flex-col gap-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-accent animate-bounce [animation-delay:-0.3s]" />
+                    <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-accent animate-bounce [animation-delay:-0.15s]" />
+                    <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-accent animate-bounce" />
+                    <span className="text-[9px] sm:text-[10px] font-bold text-white/75 ml-1 select-none animate-pulse">
+                      {LOADING_PHASES[loadingPhaseIndex]}
+                    </span>
+                  </div>
                 </div>
               </div>
             )}
-
-
           </div>
 
           {/* Branded Suggestions (Lenis prevented scroll container) */}
