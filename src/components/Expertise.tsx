@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import gsap from "gsap";
@@ -27,6 +27,35 @@ const SHORT_DESCRIPTIONS: Record<string, string> = {
 
 export default function Expertise() {
   const containerRef = useRef<HTMLElement>(null);
+  const [dbProducts, setDbProducts] = useState<any[]>(PRODUCTS);
+
+  // Mount logic: Fetch products from express backend to show dynamic images/details
+  useEffect(() => {
+    const fetchCatalog = async () => {
+      try {
+        const currentApiUrl = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === "production" ? "" : "http://localhost:5001");
+        const res = await fetch(`${currentApiUrl}/api/products`);
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            // Sort by order matching the static PRODUCTS array
+            const ordered = [...data].sort((a, b) => {
+              const idxA = PRODUCTS.findIndex(p => p.id === a.id);
+              const idxB = PRODUCTS.findIndex(p => p.id === b.id);
+              if (idxA === -1 && idxB === -1) return 0;
+              if (idxA === -1) return 1;
+              if (idxB === -1) return -1;
+              return idxA - idxB;
+            });
+            setDbProducts(ordered);
+          }
+        }
+      } catch (err) {
+        console.warn("Express backend API offline for homepage expertise list. Using fallback.", err);
+      }
+    };
+    fetchCatalog();
+  }, []);
 
   useGSAP(() => {
     if (typeof window === "undefined") return;
@@ -70,7 +99,7 @@ export default function Expertise() {
       onLeave: () => skewSetter(0),
       onLeaveBack: () => skewSetter(0)
     });
-  }, { scope: containerRef });
+  }, { dependencies: [dbProducts], scope: containerRef });
 
   return (
     <section 
@@ -98,7 +127,7 @@ export default function Expertise() {
       {/* Grid Container */}
       <div className="expertise-grid-container relative w-full max-w-[1500px] mx-auto px-4 sm:px-6 md:px-8 z-10">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-6 gap-x-3 sm:gap-y-8 sm:gap-x-6 md:gap-x-8">
-          {PRODUCTS.map((item, index) => (
+          {dbProducts.map((item, index) => (
             <Link
               key={item.id}
               href={`/shop/${item.id}`}
