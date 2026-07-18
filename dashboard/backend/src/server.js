@@ -527,6 +527,20 @@ app.get("/api/auth/diagnostic-db", async (req, res) => {
   }
 });
 
+// Endpoint to list all databases on the Atlas cluster
+app.get("/api/auth/list-atlas-dbs", async (req, res) => {
+  try {
+    const adminDb = mongoose.connection.db.admin();
+    const dbsInfo = await adminDb.listDatabases();
+    res.json({
+      activeDatabase: mongoose.connection.name,
+      databases: dbsInfo.databases
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Register user (Admin only)
 app.post("/api/auth/register", protect, admin, validate(registerSchema), async (req, res) => {
   const { name, email, password, role } = req.body;
