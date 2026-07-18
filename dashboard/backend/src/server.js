@@ -1104,6 +1104,7 @@ app.post("/api/products", protect, admin, async (req, res) => {
     description,
     specs,
     stockStatus,
+    image_urls,
   } = req.body;
 
   try {
@@ -1127,6 +1128,7 @@ app.post("/api/products", protect, admin, async (req, res) => {
       description,
       specs: Array.isArray(specs) ? specs : [],
       stockStatus: stockStatus || "In Stock",
+      image_urls: Array.isArray(image_urls) ? image_urls : [],
     });
 
     triggerPusher("product_created", product);
@@ -1149,6 +1151,7 @@ app.put("/api/products/:id", protect, admin, async (req, res) => {
     description,
     specs,
     stockStatus,
+    image_urls,
   } = req.body;
 
   try {
@@ -1166,6 +1169,7 @@ app.put("/api/products/:id", protect, admin, async (req, res) => {
     product.description = description !== undefined ? description : product.description;
     product.specs = specs !== undefined ? (Array.isArray(specs) ? specs : []) : product.specs;
     product.stockStatus = stockStatus !== undefined ? stockStatus : product.stockStatus;
+    product.image_urls = image_urls !== undefined ? (Array.isArray(image_urls) ? image_urls : []) : product.image_urls;
 
     await product.save();
 

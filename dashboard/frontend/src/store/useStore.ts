@@ -128,6 +128,7 @@ export interface Product {
   stockStatus: "In Stock" | "Low Stock" | "Custom Order Only";
   rating?: number;
   reviewsCount?: number;
+  image_urls?: string[];
   createdAt?: string;
   updatedAt?: string;
 }

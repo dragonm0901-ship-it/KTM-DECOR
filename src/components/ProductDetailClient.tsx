@@ -104,11 +104,16 @@ const GALLERY_MAPPING: Record<string, string[]> = {
 };
 
 const getGalleryUrls = (product: Product): string[] => {
+  const gallery = [product.image];
   if (product.image_urls && product.image_urls.length > 0) {
-    return product.image_urls;
+    product.image_urls.forEach((img) => {
+      if (img && img !== product.image && !gallery.includes(img)) {
+        gallery.push(img);
+      }
+    });
+    return gallery;
   }
   const categoryImages = GALLERY_MAPPING[product.category] || [];
-  const gallery = [product.image];
   categoryImages.forEach((img) => {
     if (img !== product.image && !gallery.includes(img)) {
       gallery.push(img);

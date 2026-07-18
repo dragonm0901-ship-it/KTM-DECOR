@@ -57,9 +57,9 @@ export const ProductManagement: React.FC = () => {
   const [description, setDescription] = useState("");
   const [badge, setBadge] = useState("");
   const [stockStatus, setStockStatus] = useState<Product["stockStatus"]>("In Stock");
-  const [imageInputMode, setImageInputMode] = useState<"file" | "url">("file");
-  const [imageUrl, setImageUrl] = useState("");
-  const [imageBase64, setImageBase64] = useState("");
+  const [productImages, setProductImages] = useState<string[]>(["", "", "", "", ""]);
+  const [imageInputModes, setImageInputModes] = useState<("file" | "url")[]>(["file", "file", "file", "file", "file"]);
+  const [imageUrls, setImageUrls] = useState<string[]>(["", "", "", "", ""]);
   const [specsText, setSpecsText] = useState("");
 
   const [formError, setFormError] = useState("");
@@ -89,8 +89,8 @@ export const ProductManagement: React.FC = () => {
     }
   };
 
-  // Convert File to Base64
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Convert File to Base64 for a specific slot
+  const handleSlotFileChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -101,9 +101,51 @@ export const ProductManagement: React.FC = () => {
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setImageBase64(reader.result as string);
+      const base64 = reader.result as string;
+      setProductImages((prev) => {
+        const next = [...prev];
+        next[index] = base64;
+        return next;
+      });
     };
     reader.readAsDataURL(file);
+  };
+
+  // Handle URL change for a specific slot
+  const handleSlotUrlChange = (index: number, val: string) => {
+    setImageUrls((prev) => {
+      const next = [...prev];
+      next[index] = val;
+      return next;
+    });
+    setProductImages((prev) => {
+      const next = [...prev];
+      next[index] = val;
+      return next;
+    });
+  };
+
+  // Clear a specific slot
+  const clearSlot = (index: number) => {
+    setProductImages((prev) => {
+      const next = [...prev];
+      next[index] = "";
+      return next;
+    });
+    setImageUrls((prev) => {
+      const next = [...prev];
+      next[index] = "";
+      return next;
+    });
+  };
+
+  // Toggle input mode for a slot
+  const toggleSlotInputMode = (index: number, mode: "file" | "url") => {
+    setImageInputModes((prev) => {
+      const next = [...prev];
+      next[index] = mode;
+      return next;
+    });
   };
 
   // Open Create Modal
@@ -116,9 +158,9 @@ export const ProductManagement: React.FC = () => {
     setDescription("");
     setBadge("");
     setStockStatus("In Stock");
-    setImageInputMode("file");
-    setImageUrl("");
-    setImageBase64("");
+    setProductImages(["", "", "", "", ""]);
+    setImageInputModes(["file", "file", "file", "file", "file"]);
+    setImageUrls(["", "", "", "", ""]);
     setSpecsText("");
     setFormError("");
     setModalOpen(true);
@@ -137,15 +179,34 @@ export const ProductManagement: React.FC = () => {
     setSpecsText(prod.specs.join("\n"));
     setFormError("");
 
-    if (prod.image.startsWith("data:image")) {
-      setImageInputMode("file");
-      setImageBase64(prod.image);
-      setImageUrl("");
-    } else {
-      setImageInputMode("url");
-      setImageUrl(prod.image);
-      setImageBase64("");
+    // Populate the 5 image slots
+    const imgs = [prod.image || ""];
+    if (prod.image_urls && Array.isArray(prod.image_urls)) {
+      prod.image_urls.forEach((url) => {
+        if (url && imgs.length < 5) {
+          imgs.push(url);
+        }
+      });
     }
+    while (imgs.length < 5) {
+      imgs.push("");
+    }
+    setProductImages(imgs);
+
+    // Determine input modes and temp URLs
+    const modes: ("file" | "url")[] = [];
+    const tempUrls: string[] = [];
+    imgs.forEach((img) => {
+      if (img.startsWith("data:image")) {
+        modes.push("file");
+        tempUrls.push("");
+      } else {
+        modes.push("url");
+        tempUrls.push(img);
+      }
+    });
+    setImageInputModes(modes);
+    setImageUrls(tempUrls);
 
     setModalOpen(true);
   };
@@ -160,9 +221,10 @@ export const ProductManagement: React.FC = () => {
       return;
     }
 
-    const img = imageInputMode === "file" ? imageBase64 : imageUrl;
-    if (!img) {
-      setFormError("Please upload an image or provide an image URL.");
+    // Main image (slot 0) is required
+    const mainImage = productImages[0];
+    if (!mainImage) {
+      setFormError("Product Main Image (Slot 1) is required.");
       return;
     }
 
@@ -177,12 +239,16 @@ export const ProductManagement: React.FC = () => {
       .map((s) => s.trim())
       .filter((s) => s.length > 0);
 
+    // Additional images are slots 1, 2, 3, 4
+    const additionalImages = productImages.slice(1).filter((img) => img !== "");
+
     const productData = {
       name: name.trim(),
       category,
       subCategory,
       price: priceNum,
-      image: img,
+      image: mainImage,
+      image_urls: additionalImages,
       badge: badge.trim() || undefined,
       description: description.trim(),
       specs,
@@ -643,85 +709,96 @@ export const ProductManagement: React.FC = () => {
               </div>
 
               {/* IMAGE LOADER WIDGET */}
-              <div className="border border-border rounded-lg p-4 bg-muted/10 space-y-3">
-                <div className="flex items-center justify-between border-b border-border pb-2">
-                  <span className="font-bold">Product Image Uploader</span>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setImageInputMode("file")}
-                      className={`px-3 py-1 rounded text-[10px] uppercase font-bold border transition-colors ${
-                        imageInputMode === "file"
-                          ? "bg-accent border-accent text-white"
-                          : "border-border text-muted hover:text-foreground"
-                      }`}
-                    >
-                      File Upload
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setImageInputMode("url")}
-                      className={`px-3 py-1 rounded text-[10px] uppercase font-bold border transition-colors ${
-                        imageInputMode === "url"
-                          ? "bg-accent border-accent text-white"
-                          : "border-border text-muted hover:text-foreground"
-                      }`}
-                    >
-                      Image URL
-                    </button>
-                  </div>
-                </div>
+              <div className="border border-border rounded-lg p-4 bg-muted/10 space-y-4">
+                <span className="font-bold text-sm block border-b border-border pb-2">Product Images (Up to 5 Images)</span>
+                <div className="space-y-4 divide-y divide-border/40">
+                  {[0, 1, 2, 3, 4].map((index) => {
+                    const isMain = index === 0;
+                    const mode = imageInputModes[index];
+                    const img = productImages[index];
+                    const urlVal = imageUrls[index];
 
-                {imageInputMode === "file" ? (
-                  <div className="flex flex-col sm:flex-row items-center gap-4">
-                    <label className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-border/80 hover:border-accent hover:bg-accent/5 rounded-lg p-6 cursor-pointer transition-colors w-full">
-                      <ImageIcon size={24} className="text-muted group-hover:text-accent mb-2" />
-                      <span className="text-xs text-muted font-bold uppercase tracking-wider text-center">
-                        Select Product File
-                      </span>
-                      <span className="text-[10px] text-muted normal-case font-medium mt-1">
-                        JPEG, PNG, WEBP (Max 8MB)
-                      </span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileChange}
-                        className="hidden"
-                      />
-                    </label>
-                    {imageBase64 && (
-                      <div className="h-24 w-20 border border-border bg-muted rounded overflow-hidden relative flex-shrink-0">
-                        <img src={imageBase64} alt="Upload preview" className="h-full w-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => setImageBase64("")}
-                          className="absolute right-1 top-1 p-0.5 bg-black/60 hover:bg-black text-white rounded-full"
-                          title="Remove file"
-                        >
-                          <X size={10} />
-                        </button>
+                    return (
+                      <div key={index} className={`pt-4 ${index === 0 ? "pt-0 border-t-0" : "border-t"}`}>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground">
+                            Slot {index + 1} {isMain ? "(Main Image - Required)" : "(Additional Image)"}
+                          </span>
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => toggleSlotInputMode(index, "file")}
+                              className={`px-2 py-0.5 rounded text-[9px] uppercase font-bold border transition-colors ${
+                                mode === "file"
+                                  ? "bg-accent border-accent text-white"
+                                  : "border-border text-muted hover:text-foreground"
+                              }`}
+                            >
+                              File
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => toggleSlotInputMode(index, "url")}
+                              className={`px-2 py-0.5 rounded text-[9px] uppercase font-bold border transition-colors ${
+                                mode === "url"
+                                  ? "bg-accent border-accent text-white"
+                                  : "border-border text-muted hover:text-foreground"
+                              }`}
+                            >
+                              URL
+                            </button>
+                            {img && (
+                              <button
+                                type="button"
+                                onClick={() => clearSlot(index)}
+                                className="px-2 py-0.5 rounded text-[9px] uppercase font-bold border border-red-500/35 hover:bg-red-500/10 text-red-500 transition-colors"
+                              >
+                                Clear
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        {mode === "file" ? (
+                          <div className="flex items-center gap-4">
+                            <label className="flex-1 flex flex-col items-center justify-center border border-dashed border-border/85 hover:border-accent hover:bg-accent/5 rounded-lg p-4 cursor-pointer transition-colors w-full">
+                              <ImageIcon size={18} className="text-muted group-hover:text-accent mb-1" />
+                              <span className="text-[9px] text-muted font-black uppercase tracking-wider text-center">
+                                Upload image {index + 1}
+                              </span>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => handleSlotFileChange(index, e)}
+                                className="hidden"
+                              />
+                            </label>
+                            {img && (
+                              <div className="h-16 w-14 border border-border bg-muted rounded overflow-hidden relative flex-shrink-0">
+                                <img src={img} alt={`Preview ${index + 1}`} className="h-full w-full object-cover" />
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-4">
+                            <input
+                              type="text"
+                              value={urlVal}
+                              onChange={(e) => handleSlotUrlChange(index, e.target.value)}
+                              placeholder={`https://example.com/image-${index + 1}.jpg`}
+                              className="flex-1 w-full px-3 py-1.5 border border-border rounded bg-background text-foreground text-xs focus:outline-none focus:ring-1 focus:ring-accent normal-case font-medium"
+                            />
+                            {img && (
+                              <div className="h-10 w-10 border border-border bg-muted rounded overflow-hidden flex-shrink-0">
+                                <img src={img} alt={`Preview ${index + 1}`} className="h-full w-full object-cover" />
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="flex flex-col sm:flex-row items-end gap-4">
-                    <div className="flex-1 w-full">
-                      <label className="block mb-1.5">Paste Direct Image URL</label>
-                      <input
-                        type="text"
-                        value={imageUrl}
-                        onChange={(e) => setImageUrl(e.target.value)}
-                        placeholder="https://example.com/images/product.jpg"
-                        className="w-full px-3 py-2 border border-border rounded bg-background text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-accent normal-case font-medium"
-                      />
-                    </div>
-                    {imageUrl && (
-                      <div className="h-10 w-10 border border-border bg-muted rounded overflow-hidden flex-shrink-0">
-                        <img src={imageUrl} alt="URL preview" className="h-full w-full object-cover" />
-                      </div>
-                    )}
-                  </div>
-                )}
+                    );
+                  })}
+                </div>
               </div>
 
               {/* SAVE / CANCEL BUTTONS */}
