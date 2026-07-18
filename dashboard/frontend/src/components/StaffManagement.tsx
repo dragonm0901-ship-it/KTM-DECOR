@@ -1241,7 +1241,6 @@ export const StaffManagement: React.FC = () => {
                           <tr key={s._id} className="hover:bg-border/20 transition-colors">
                             <td className="py-3.5 px-4">
                               <p className="font-bold text-sm text-foreground">{s.name}</p>
-                              <p className="text-[10px] text-muted">{s.email}</p>
                             </td>
                             <td className="py-3.5 px-4 font-bold text-foreground">
                               Rs. {(salaryRecord ? salaryRecord.baseSalary : baseSalary).toLocaleString()}
@@ -1397,7 +1396,6 @@ export const StaffManagement: React.FC = () => {
                         <div className="flex justify-between items-start">
                           <div>
                             <h4 className="font-bold text-sm text-foreground">{s.name}</h4>
-                            <p className="text-[10px] text-muted">{s.email}</p>
                           </div>
                           <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider border ${badgeColor}`}>
                             {statusBadge}
@@ -1648,7 +1646,6 @@ export const StaffManagement: React.FC = () => {
                       >
                         <div>
                           <p className="font-bold leading-none">{s.name}</p>
-                          <p className="text-[9px] font-medium opacity-70 mt-1">{s.email}</p>
                         </div>
                         <ChevronRight size={14} />
                       </button>
@@ -1790,7 +1787,6 @@ export const StaffManagement: React.FC = () => {
                       <div key={staff._id} className="grid grid-cols-12 gap-3 items-center pt-3">
                         <div className="col-span-4">
                           <p className="text-sm font-bold">{staff.name}</p>
-                          <p className="text-[10px] text-muted">{staff.email}</p>
                         </div>
                         
                         <div className="col-span-4 flex justify-center">

@@ -536,7 +536,7 @@ app.get("/api/auth/me", protect, async (req, res) => {
 // Get all staff members (for task assignees selection)
 app.get("/api/auth/users", protect, async (req, res) => {
   try {
-    const users = await User.find({}).select("name email role");
+    const users = await User.find({}).select("name email role baseSalary");
     res.json(users);
   } catch (error) {
     res.status(500).json({ message: error.message });
