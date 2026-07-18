@@ -48,6 +48,11 @@ export const cacheGet = async (key) => {
     }
   }
 
+  // Skip in-memory fallback in production serverless to prevent instance sync issues
+  if (process.env.VERCEL || process.env.NODE_ENV === "production") {
+    return null;
+  }
+
   // Fallback to In-Memory Cache
   const cachedItem = memoryCache.get(key);
   if (cachedItem) {
@@ -75,6 +80,11 @@ export const cacheSet = async (key, value, ttlSeconds = 3600) => {
     } catch (err) {
       console.error(`Redis set error for key "${key}":`, err.message);
     }
+  }
+
+  // Skip in-memory fallback in production serverless to prevent instance sync issues
+  if (process.env.VERCEL || process.env.NODE_ENV === "production") {
+    return;
   }
 
   // Fallback to In-Memory Cache
