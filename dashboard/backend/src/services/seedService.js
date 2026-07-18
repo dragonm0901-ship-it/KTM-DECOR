@@ -79,17 +79,18 @@ export const seedUsers = async () => {
       await syncPasswordIfNeeded(sharedStaffExists, process.env.SEED_STAFF_PASSWORD);
     }
 
-    // Seed 9 Staff Members
+    // Seed 10 Staff Members
     const staffMembers = [
-      { name: "Ramesh Thapa", email: "ramesh@ktmdecor.com", baseSalary: 30000 },
-      { name: "Sita Sharma", email: "sita@ktmdecor.com", baseSalary: 32000 },
-      { name: "Gopal BK", email: "gopal@ktmdecor.com", baseSalary: 28000 },
-      { name: "Gita Adhikari", email: "gita@ktmdecor.com", baseSalary: 35000 },
-      { name: "Hari Karki", email: "hari@ktmdecor.com", baseSalary: 29000 },
-      { name: "Maya Tamang", email: "maya@ktmdecor.com", baseSalary: 31000 },
-      { name: "Sunil Shrestha", email: "sunil@ktmdecor.com", baseSalary: 33000 },
-      { name: "Pooja Chaudhary", email: "pooja@ktmdecor.com", baseSalary: 30000 },
-      { name: "Anil Gurung", email: "anil@ktmdecor.com", baseSalary: 34000 }
+      { name: "Rajesh Shah", email: "rajesh@ktmdecor.com", baseSalary: 28000 },
+      { name: "Som Gharti", email: "som@ktmdecor.com", baseSalary: 25000 },
+      { name: "Bishnu Adhikari", email: "bishnu@ktmdecor.com", baseSalary: 16000 },
+      { name: "Sobilal Chaudhary", email: "sobilal@ktmdecor.com", baseSalary: 18000 },
+      { name: "Pradip Magar", email: "pradip@ktmdecor.com", baseSalary: 15500 },
+      { name: "Tilaram Magar", email: "tilaram@ktmdecor.com", baseSalary: 15500 },
+      { name: "Bishal Pandey", email: "bishal@ktmdecor.com", baseSalary: 12000 },
+      { name: "Sugam GC", email: "sugam@ktmdecor.com", baseSalary: 12000 },
+      { name: "Sandesh GC", email: "sandesh@ktmdecor.com", baseSalary: 30000 },
+      { name: "Kishor GC", email: "kishor@ktmdecor.com", baseSalary: 50000 }
     ];
 
     const allowedEmails = [
@@ -97,8 +98,19 @@ export const seedUsers = async () => {
       ...staffMembers.map(s => s.email)
     ];
 
-    // Clean up any legacy staff users not in our seeded 9 staff list or shared staff login
-    await User.deleteMany({ role: "staff", email: { $nin: allowedEmails } });
+    // Clean up any legacy staff users not in our seeded 10 staff list or shared staff login
+    const legacyStaff = await User.find({ role: "staff", email: { $nin: allowedEmails } });
+    if (legacyStaff.length > 0) {
+      const legacyIds = legacyStaff.map(u => u._id);
+      const db = mongoose.connection.db;
+      await db.collection("attendances").deleteMany({ user: { $in: legacyIds } });
+      await db.collection("salaries").deleteMany({ user: { $in: legacyIds } });
+      await db.collection("tasks").deleteMany({ assignee: { $in: legacyIds } });
+      await db.collection("notifications").deleteMany({ user: { $in: legacyIds } });
+      await db.collection("quicknotes").deleteMany({ user: { $in: legacyIds } });
+      await User.deleteMany({ _id: { $in: legacyIds } });
+      console.log(`  ↳ Cleaned up ${legacyStaff.length} legacy staff members and their associated logs.`);
+    }
 
     for (const staff of staffMembers) {
       const exists = await User.findOne({ email: staff.email });

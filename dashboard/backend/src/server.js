@@ -105,7 +105,10 @@ const allowedOrigins = [
   "https://ktmdecor.com",
   "https://www.ktmdecor.com",
   "https://admin.ktmdecor.com",
-  "https://ktmdecor.vercel.app"
+  "https://ktmdecor.vercel.app",
+  "https://decorktm.com",
+  "https://www.decorktm.com",
+  "https://admin.decorktm.com"
 ];
 
 if (process.env.ALLOWED_ORIGINS) {
@@ -118,6 +121,7 @@ app.use(
       if (!origin) return callback(null, true);
       const isAllowed = allowedOrigins.some((allowed) => allowed === origin) || 
                         (/^https:\/\/ktmdecor(-[a-zA-Z0-9-]+)?\.vercel\.app$/.test(origin)) ||
+                        (/^https:\/\/decorktm(-[a-zA-Z0-9-]+)?\.vercel\.app$/.test(origin)) ||
                         (/^https:\/\/ktm-decor-admin(-[a-zA-Z0-9-]+)?\.vercel\.app$/.test(origin)) ||
                         (/^https:\/\/ktm-decor-site(-[a-zA-Z0-9-]+)?\.vercel\.app$/.test(origin));
       if (isAllowed) {
