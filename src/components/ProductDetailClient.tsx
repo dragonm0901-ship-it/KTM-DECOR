@@ -459,12 +459,6 @@ export default function ProductDetailClient() {
     const activePrice = selectedVariant ? selectedVariant.price : product.price;
     const activeName = selectedVariant ? `${product.name} (${selectedVariant.option_name})` : product.name;
     const totalCost = activePrice * quantity;
-    const shipping = totalCost >= 50000 ? 0 : 1500;
-    const grandTotal = totalCost + shipping;
-
-    const shippingText = shipping === 0 
-      ? "Rs. 0 (FREE Shipping Applied)" 
-      : `Rs. ${shipping.toLocaleString()}`;
 
     const message = `KTM DECOR - DIRECT PRODUCT ORDER
 ------------------------------------------
@@ -477,11 +471,9 @@ PRODUCT DETAILS:
 
 FINANCIAL SUMMARY:
 - Unit Price: Rs. ${activePrice.toLocaleString()} each
-- Subtotal Cost: Rs. ${totalCost.toLocaleString()}
-- Standard Shipping: ${shippingText}
-- GRAND TOTAL COST: Rs. ${grandTotal.toLocaleString()}
+- Total Cost (Excluding Delivery): Rs. ${totalCost.toLocaleString()}
 ------------------------------------------
-Please verify availability and let me know the estimated delivery and payment schedules!`;
+Please verify availability, let me know the delivery charges, and estimate the delivery and payment schedules!`;
 
     const encodedMessage = encodeURIComponent(message);
     const whatsappNumber = "9779706247439"; 
@@ -685,12 +677,9 @@ Please verify availability and let me know the estimated delivery and payment sc
                 </div>
               </div>
 
-              {/* Dynamic Shipping calculator tip */}
-              <div className="flex justify-between items-center text-[10px] sm:text-xs font-bold border-t border-border/30 pt-3 sm:pt-4 text-muted uppercase tracking-wider">
-                <span>Valley Shipping</span>
-                <span className={((selectedVariant ? selectedVariant.price : product.price) * quantity) >= 50000 ? "text-green-500 font-black tracking-widest text-[9px] sm:text-[10px]" : "text-foreground font-black"}>
-                  {((selectedVariant ? selectedVariant.price : product.price) * quantity) >= 50000 ? "FREE Valley Delivery applied" : "Rs. 1,500"}
-                </span>
+              {/* Delivery notice */}
+              <div className="flex justify-center items-center text-[10px] sm:text-xs font-black border-t border-border/30 pt-3 sm:pt-4 text-muted-foreground uppercase tracking-wider text-center">
+                <span>Delivery charges are excluded in the price above</span>
               </div>
             </div>
 
