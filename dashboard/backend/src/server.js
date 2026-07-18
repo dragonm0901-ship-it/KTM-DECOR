@@ -19,7 +19,7 @@ const __dirname = path.dirname(__filename);
 import { connectDB } from "./config/db.js";
 import { triggerPusher } from "./config/pusher.js";
 import { logActivity } from "./services/activityLogger.js";
-import { runSeeds } from "./services/seedService.js";
+import { runSeeds, seedUsers } from "./services/seedService.js";
 import { buildStatementWorkbook } from "./services/exportService.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { initCache, cacheGet, cacheSet, cacheDeletePattern } from "./services/cacheService.js";
@@ -492,6 +492,18 @@ app.post("/api/auth/login", loginLimiter, validate(loginSchema), async (req, res
     }
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+});
+
+// Endpoint to seed staff members in production (waits for completion, safe for serverless)
+app.get("/api/auth/seed-staff", async (req, res) => {
+  try {
+    console.log("Production trigger: seeding staff users...");
+    await seedUsers();
+    res.json({ message: "Staff members successfully seeded!" });
+  } catch (error) {
+    console.error("Staff seeding failed:", error);
+    res.status(500).json({ message: "Seeding failed", error: error.message });
   }
 });
 
