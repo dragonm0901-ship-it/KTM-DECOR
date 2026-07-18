@@ -507,6 +507,26 @@ app.get("/api/auth/seed-staff", async (req, res) => {
   }
 });
 
+// Endpoint to check live database status and counts in production
+app.get("/api/auth/diagnostic-db", async (req, res) => {
+  try {
+    const db = mongoose.connection.db;
+    const collections = await db.listCollections().toArray();
+    const stats = {};
+    for (const col of collections) {
+      stats[col.name] = await db.collection(col.name).countDocuments();
+    }
+    res.json({
+      connected: mongoose.connection.readyState === 1,
+      dbName: mongoose.connection.name,
+      host: mongoose.connection.host,
+      collectionCounts: stats,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Register user (Admin only)
 app.post("/api/auth/register", protect, admin, validate(registerSchema), async (req, res) => {
   const { name, email, password, role } = req.body;
