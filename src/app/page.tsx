@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import Preloader from "@/components/Preloader";
 import Hero from "@/components/Hero";
 import Expertise from "@/components/Expertise";
@@ -9,16 +10,25 @@ import Testimonials from "@/components/Testimonials";
 import CtaFaq from "@/components/CtaFaq";
 import LocationMap from "@/components/LocationMap";
 
+export const metadata: Metadata = {
+  title: "KTM DECOR | Custom LED Neon Signs & 3D Signboards in Nepal",
+  description:
+    "Nepal's premium custom signcrafting studio. Meticulously handcrafted LED neon signs, 3D backlit storefront boards, residential nameplates, and bespoke business signage. Valley-wide delivery & professional installation.",
+  alternates: {
+    canonical: "/",
+  },
+};
+
 export default function Home() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
       {
         "@type": "LocalBusiness",
-        "@id": "https://ktmdecor.com/#localbusiness",
+        "@id": "https://www.decorktm.com/#localbusiness",
         "name": "KTM DECOR",
-        "image": "https://ktmdecor.com/images/ktm-decor-og.png",
-        "url": "https://ktmdecor.com",
+        "image": "https://www.decorktm.com/images/ktm-decor-og.png",
+        "url": "https://www.decorktm.com",
         "telephone": "+9779706247439",
         "priceRange": "$$",
         "address": {
@@ -56,7 +66,7 @@ export default function Home() {
       },
       {
         "@type": "FAQPage",
-        "@id": "https://ktmdecor.com/#faq",
+        "@id": "https://www.decorktm.com/#faq",
         "mainEntity": [
           {
             "@type": "Question",

@@ -11,18 +11,18 @@ import { PRODUCTS } from "@/data/shop-data";
 gsap.registerPlugin(ScrollTrigger);
 
 const SHORT_DESCRIPTIONS: Record<string, string> = {
-  "1": "CNC-routed timber signage with premium weatherproof outdoor finishes.",
-  "2": "Premium backlit logo signs for business facades and receptionist backdrops.",
-  "3": "Multi-layered panel signs forming sculpture-like relief depths and textures.",
-  "4": "Double-sided projecting sign boxes visible from both street directions.",
-  "5": "Hand-bent custom LED neon signs to illuminate corporate walls or spaces.",
-  "6": "Durable and weather-proof flat directory, menu, and directional boards.",
-  "7": "Multi-dimensional logo letters fabricated from cast acrylic and stainless steel.",
-  "8": "Precision laser cutting and CNC engraving on wood, acrylic, and metals.",
-  "9": "Custom designer clocks handcrafted with wood, acrylic, and epoxy resin.",
-  "10": "Premium bold raised numbers mounted on heavy weatherproof templates.",
-  "11": "Bespoke executive office and home entrance signs using wood, brass, and glass.",
-  "12": "Laser-etched 3D illusion desktop lamps on warm illuminated wood bases."
+  "1": "Premium CNC-routed timber and business boards in Nepal for shops and cafes.",
+  "2": "Backlit logo signs and light boards in Nepal for elegant office branding.",
+  "3": "Multi-layered 3D panel business boards in Nepal with sculpted depths.",
+  "4": "Double-sided projecting round light boards in Nepal for storefront visibility.",
+  "5": "Handcrafted LED neon signs and neon lights in Nepal to illuminate your space.",
+  "6": "Durable flat-panel direction boards and business boards in Nepal.",
+  "7": "Dimensional 3D acrylic letters and premium light boards in Nepal.",
+  "8": "Precision laser-cut wooden and acrylic home decor in Nepal.",
+  "9": "Custom designer wall clocks for luxury home decor in Nepal.",
+  "10": "Raised acrylic vehicle number plates and outdoor plaques in Kathmandu.",
+  "11": "Bespoke executive office nameplates and premium home decor in Nepal.",
+  "12": "Laser-etched 3D table lamps for modern ambient home decor in Nepal."
 };
 
 export default function Expertise() {

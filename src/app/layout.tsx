@@ -58,7 +58,10 @@ const pacifico = Pacifico({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://decorktm.com"),
+  metadataBase: new URL("https://www.decorktm.com"),
+  alternates: {
+    canonical: "./",
+  },
   title: "KTM DECOR | Premium Custom Neon Signs & Signcrafting in Nepal",
   description:
     "Elevate your space and brand with Nepal's leading custom signcrafting workshop. Meticulously handcrafted LED neon signs, 3D backlit signage, elegant nameplates, and bespoke architectural decor.",
@@ -79,7 +82,7 @@ export const metadata: Metadata = {
     description:
       "Elevate your space and brand with Nepal's leading custom signcrafting workshop. Meticulously handcrafted LED neon signs, 3D backlit signage, elegant nameplates, and bespoke architectural decor.",
     type: "website",
-    url: "https://decorktm.com",
+    url: "https://www.decorktm.com",
     siteName: "KTM DECOR",
     images: [
       {

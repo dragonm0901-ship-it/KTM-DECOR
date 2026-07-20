@@ -17,24 +17,24 @@ interface ServiceData {
 
 const servicesData: ServiceData[] = [
   {
-    title: "Neon Signs",
-    description: "Custom LED neon signs that bring your brand or space to life with vibrant, energy-efficient illumination. Perfect for storefronts, high-traffic commercial venues, and bespoke modern home interiors.",
-    tag: "Illuminated",
+    title: "Neon Signs in Nepal",
+    description: "Handcrafted custom LED neon lights in Nepal that bring your brand or space to life. Energy-efficient, silent, and safe. Perfect for commercial storefronts, cafes, and modern home decor in Nepal.",
+    tag: "Custom LED Neon Lights",
   },
   {
-    title: "Light Boards",
-    description: "Precision-crafted illuminated display boards with cutting-edge edge-lit LED tech. Ideal for sleek directories, luxury restaurant menu boards, and sophisticated architectural light features.",
-    tag: "Precision",
+    title: "Light Boards in Nepal",
+    description: "Premium light boards in Nepal fabricated with cutting-edge LED technology. Ideal for high-visibility storefronts, double-sided projecting round signs, and restaurant menu boards.",
+    tag: "LED Light Boards",
   },
   {
-    title: "3D Letters & Signs",
-    description: "Multi-dimensional structural lettering and brand logos fabricated from premium-grade acrylic, metal, and hand-finished hardwoods, featuring custom halo LED backlighting.",
-    tag: "Dimensional",
+    title: "Business Boards & 3D Letters",
+    description: "Buy premium business boards in Nepal including dimensional acrylic letters, backlit metal facade signs, and professional office lobby branding crafted to elevate your business presence.",
+    tag: "3D Business Boards",
   },
   {
-    title: "Custom Decorations",
-    description: "Bespoke artistic installations for corporate events, luxury venues, and commercial showrooms. From wedding photobooth backdrops to signature corporate feature walls.",
-    tag: "Bespoke Decor",
+    title: "Home Decor & Custom Signs",
+    description: "Elevate your interiors with modern home decor in Nepal. From personalized nameplates and customized wall clocks to artistic LED wooden panels handcrafted by local artisans.",
+    tag: "Premium Home Decor",
   }
 ];
 

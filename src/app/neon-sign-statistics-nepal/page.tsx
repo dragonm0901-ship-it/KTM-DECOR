@@ -3,15 +3,38 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Neon Sign & Business Decor Statistics Nepal (2026) | KTM Decor",
+  title: "Neon Sign & Business Decor Statistics Nepal (2026) | KTM DECOR",
   description: "Read the latest 2026 statistics on how custom LED neon signs and 3D acrylic branding impact retail foot traffic and social media visibility in Kathmandu, Nepal.",
+  alternates: {
+    canonical: "/neon-sign-statistics-nepal",
+  },
   keywords: [
     "neon sign statistics nepal",
     "impact of business signage kathmandu",
     "retail foot traffic data nepal",
     "social media decor trends 2026",
     "custom neon signs price in nepal"
-  ]
+  ],
+  openGraph: {
+    title: "Neon Sign & Business Decor Statistics Nepal (2026) | KTM DECOR",
+    description: "Read the latest 2026 statistics on how custom LED neon signs and 3D acrylic branding impact retail foot traffic and social media visibility in Kathmandu, Nepal.",
+    url: "https://www.decorktm.com/neon-sign-statistics-nepal",
+    type: "article",
+    images: [
+      {
+        url: "/images/ktm-decor-og.png",
+        width: 1200,
+        height: 1200,
+        alt: "Neon Sign & Business Decor Statistics Nepal (2026)",
+      }
+    ]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Neon Sign & Business Decor Statistics Nepal (2026) | KTM DECOR",
+    description: "Read the latest 2026 statistics on how custom LED neon signs and 3D acrylic branding impact retail foot traffic and social media visibility in Kathmandu, Nepal.",
+    images: ["/images/ktm-decor-og.png"]
+  }
 };
 
 export default function StatisticsPage() {
@@ -106,7 +129,7 @@ export default function StatisticsPage() {
           <section className="pt-8 border-t border-border">
             <h3 className="text-xl font-bold tracking-tight mb-4">Methodology</h3>
             <p className="text-sm text-muted leading-relaxed">
-              Data was collected between January and April 2026 by surveying 150 local businesses (retail, hospitality, and corporate) across the Kathmandu Valley. Social media impact was measured by tracking location tags and branded hashtag usage for 30 days before and after the installation of new illuminated signage. For citation purposes, please link back to this page as the original source: <em>https://ktmdecor.com/neon-sign-statistics-nepal</em>.
+              Data was collected between January and April 2026 by surveying 150 local businesses (retail, hospitality, and corporate) across the Kathmandu Valley. Social media impact was measured by tracking location tags and branded hashtag usage for 30 days before and after the installation of new illuminated signage. For citation purposes, please link back to this page as the original source: <em>https://www.decorktm.com/neon-sign-statistics-nepal</em>.
             </p>
           </section>
 
