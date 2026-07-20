@@ -73,9 +73,17 @@ export const metadata: Metadata = {
     "office wall branding decor nepal"
   ],
   icons: {
-    icon: "/logo/favicon.svg",
-    shortcut: "/logo/favicon.svg",
-    apple: "/logo/favicon.svg",
+    icon: [
+      { url: "/logo/favicon-48x48.png", sizes: "48x48", type: "image/png" },
+      { url: "/logo/favicon-96x96.png", sizes: "96x96", type: "image/png" },
+      { url: "/logo/favicon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/logo/favicon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/logo/favicon-96x96.png",
+    apple: [
+      { url: "/logo/favicon-144x144.png", sizes: "144x144", type: "image/png" },
+      { url: "/logo/favicon-192x192.png", sizes: "192x192", type: "image/png" },
+    ],
   },
   openGraph: {
     title: "KTM DECOR | Premium Custom Neon Signs & Signcrafting in Nepal",
