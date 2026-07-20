@@ -351,21 +351,72 @@ export default function ProductDetailClient() {
   const params = useParams();
   const id = params?.id as string;
 
-  const [product, setProduct] = useState<Product | null>(null);
+  const [product, setProduct] = useState<Product | null>(() => {
+    if (!id) return null;
+    return PRODUCTS.find(p => p.id === id) || null;
+  });
   const [quantity, setQuantity] = useState(1);
   const [addedPopup, setAddedPopup] = useState(false);
   const [allProducts, setAllProducts] = useState<Product[]>(PRODUCTS);
+  const [loading, setLoading] = useState<boolean>(() => {
+    if (!id) return true;
+    return !PRODUCTS.some(p => p.id === id);
+  });
 
   // CUSTOM STATE HOOKS FOR GALLERIES, VARIANTS AND TABS
-  const [selectedImage, setSelectedImage] = useState<string>("");
-  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string>(() => {
+    if (!id) return "";
+    const p = PRODUCTS.find(x => x.id === id);
+    if (!p) return "";
+    return p.image;
+  });
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(() => {
+    if (!id) return null;
+    const p = PRODUCTS.find(x => x.id === id);
+    if (!p) return null;
+    const vars = p.variants && p.variants.length > 0 
+      ? p.variants 
+      : getCategoryVariants(p.category, p.price);
+    return vars[0] || null;
+  });
   const [activeTab, setActiveTab] = useState<"details" | "reviews">("details");
-  const [variantsList, setVariantsList] = useState<ProductVariant[]>([]);
-  const [galleryUrls, setGalleryUrls] = useState<string[]>([]);
+  const [variantsList, setVariantsList] = useState<ProductVariant[]>(() => {
+    if (!id) return [];
+    const p = PRODUCTS.find(x => x.id === id);
+    if (!p) return [];
+    return p.variants && p.variants.length > 0 
+      ? p.variants 
+      : getCategoryVariants(p.category, p.price);
+  });
+  const [galleryUrls, setGalleryUrls] = useState<string[]>(() => {
+    if (!id) return [];
+    const p = PRODUCTS.find(x => x.id === id);
+    if (!p) return [];
+    return getGalleryUrls(p);
+  });
 
   // Fetch product detail on ID change
   useEffect(() => {
     if (!id) return;
+
+    // Synchronously set to local static product if available to show it instantly
+    const foundProduct = PRODUCTS.find(p => p.id === id);
+    if (foundProduct) {
+      setProduct(foundProduct);
+      const urls = getGalleryUrls(foundProduct);
+      setGalleryUrls(urls);
+      setSelectedImage(urls[0] || foundProduct.image);
+      const vars = foundProduct.variants && foundProduct.variants.length > 0 
+        ? foundProduct.variants 
+        : getCategoryVariants(foundProduct.category, foundProduct.price);
+      setVariantsList(vars);
+      setSelectedVariant(vars[0] || null);
+      setLoading(false);
+    } else {
+      setProduct(null);
+      setLoading(true);
+    }
+
     const fetchDetail = async () => {
       try {
         const currentApiUrl = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === "production" ? "" : "http://localhost:5001");
@@ -374,7 +425,7 @@ export default function ProductDetailClient() {
           const data = await res.json();
           if (data && data.id) {
             setProduct(data);
-            window.scrollTo(0, 0);
+            setLoading(false);
             return;
           }
         }
@@ -382,13 +433,14 @@ export default function ProductDetailClient() {
         console.warn("Express backend API details fetch offline. Using local static fallback.", err);
       }
       
-      const foundProduct = PRODUCTS.find(p => p.id === id);
-      if (foundProduct) {
-        setProduct(foundProduct);
-        window.scrollTo(0, 0);
+      // Fallback if not found in db and not previously loaded
+      if (!foundProduct) {
+        setProduct(null);
+        setLoading(false);
       }
     };
     fetchDetail();
+    window.scrollTo(0, 0);
   }, [id]);
 
   // Handle dynamic population when product resolves
@@ -425,6 +477,16 @@ export default function ProductDetailClient() {
   }, []);
 
   if (!product) {
+    if (loading) {
+      return (
+        <div className="min-h-screen pt-28 md:pt-36 lg:pt-44 pb-20 px-6 sm:px-8 md:px-12 bg-background text-foreground flex flex-col items-center justify-center text-center">
+          <Package className="w-16 h-16 text-accent mb-4 animate-spin" />
+          <h1 className="text-xl font-bold uppercase tracking-tighter mb-2">Loading product details...</h1>
+          <p className="text-muted text-xs max-w-sm font-medium">Please wait while we fetch the latest specifications from the workshop catalog.</p>
+        </div>
+      );
+    }
+
     return (
       <div className="min-h-screen pt-28 md:pt-36 lg:pt-44 pb-20 px-6 sm:px-8 md:px-12 bg-background text-foreground flex flex-col items-center justify-center text-center">
         <Package className="w-16 h-16 text-muted mb-4 animate-pulse" />
