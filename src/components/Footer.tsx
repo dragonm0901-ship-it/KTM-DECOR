@@ -61,6 +61,8 @@ export default function Footer() {
                   <img
                     src="/logo/ktm%20decor.svg"
                     alt="KTM DECOR"
+                    width={90}
+                    height={90}
                     className="h-full w-auto object-contain transform-gpu dark:invert dark:hue-rotate-180 transition-all duration-500"
                   />
                 </Link>

@@ -155,6 +155,8 @@ export default function Header() {
               id="header-logo"
               src="/logo/ktm%20decor.svg"
               alt="KTM DECOR"
+              width={88}
+              height={88}
               className="h-full w-auto object-contain dark:invert dark:hue-rotate-180 scale-[1.2] md:scale-[1.35] origin-left transition-transform duration-300"
             />
           </Link>
@@ -228,7 +230,6 @@ export default function Header() {
             className={`object-cover object-center grayscale opacity-30 transition-transform duration-[2000ms] ease-out ${
               menuOpen ? "scale-100" : "scale-105"
             }`}
-            priority
           />
         </div>
 

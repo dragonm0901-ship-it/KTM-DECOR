@@ -1072,7 +1072,7 @@ app.delete("/api/bin/:type/:id/force", protect, admin, async (req, res) => {
 // Get all products (Public)
 app.get("/api/products", async (req, res) => {
   try {
-    const products = await Product.find({}).sort({ createdAt: -1 });
+    const products = await Product.find({}).select("-image_urls").sort({ createdAt: -1 });
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: error.message });
