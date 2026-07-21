@@ -132,20 +132,8 @@ export default function Hero() {
         );
       });
 
-      // ── MOBILE ANIMATION TRIGGER (max-width: 1023px) ──
-      mm.add("(max-width: 1023px)", () => {
-        const tl = gsap.timeline();
-
-        // Instantly show mobile ambient glows
-        gsap.set(".neon-glow-accent", { opacity: 0.35 });
-
-        // Quick reveal animations matching committed mobile layout
-        tl.fromTo(mobileBadgeRef.current, { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" })
-          .fromTo(".hero-subtext-mobile", { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, "-=0.35")
-          // DO NOT animate .hero-main-card — it must be visible from first paint for LCP
-          // Other background cards and details stagger-reveal
-          .fromTo(".hero-card-sub", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, stagger: 0.08, ease: "power2.out" }, "-=0.3");
-      });
+      // ── MOBILE: No animations. Everything is static and visible from first HTML paint
+      // to ensure instant LCP and Speed Index. ──
     };
 
     if (typeof window !== "undefined" && (window as any).__PRELOADER_ACTIVE__) {
@@ -293,10 +281,10 @@ export default function Hero() {
 
             {/* ── Top Content: Badge + Headline ── */}
             <div className="order-1 flex flex-col items-center text-center">
-              {/* Status Badge */}
+              {/* Status Badge — static, no animation */}
               <div
                 ref={mobileBadgeRef}
-                className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-[4px] bg-accent border border-accent/15 mb-4 opacity-0"
+                className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-[4px] bg-accent border border-accent/15 mb-4"
               >
                 <span className="text-[8px] font-bold tracking-wide text-white">
                   Trusted by 2000+ businesses in Nepal
@@ -327,14 +315,15 @@ export default function Hero() {
                   alt="Custom neon sign installation"
                   fill
                   className="object-cover"
-                  sizes="60vw"
+                  sizes="(max-width: 768px) 40vw, 60vw"
                   priority
+                  fetchPriority="high"
                   quality={60}
                 />
               </div>
 
               {/* Secondary floating card - left */}
-              <div className="hero-card-sub absolute bottom-4 left-[8%] w-[50%] aspect-[4/3] rounded-[4px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-neutral-200/50 z-20">
+              <div className="absolute bottom-4 left-[8%] w-[50%] aspect-[4/3] rounded-[4px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-neutral-200/50 z-20">
                 <Image
                   src="/hero-images/hero2.webp"
                   alt="LED signage craftsmanship"
@@ -346,7 +335,7 @@ export default function Hero() {
               </div>
 
               {/* Small accent card - top left */}
-              <div className="hero-card-sub absolute top-[15%] left-[-2%] w-[35%] aspect-square rounded-[4px] overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.1)] border border-neutral-200/50 z-30">
+              <div className="absolute top-[15%] left-[-2%] w-[35%] aspect-square rounded-[4px] overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.1)] border border-neutral-200/50 z-30">
                 <Image
                   src="/products/product_1_main.png"
                   alt="Illuminated decor detail"
@@ -358,13 +347,13 @@ export default function Hero() {
               </div>
 
               {/* Floating data badge */}
-              <div className="hero-card-sub absolute top-[8%] left-[20%] z-40 bg-card rounded-[2px] shadow-[0_6px_15px_rgba(0,0,0,0.15)] border border-border px-3 py-2 opacity-0 text-foreground scale-95">
+              <div className="absolute top-[8%] left-[20%] z-40 bg-card rounded-[2px] shadow-[0_6px_15px_rgba(0,0,0,0.15)] border border-border px-3 py-2 text-foreground">
                 <p className="text-[7px] font-bold text-muted uppercase tracking-wider mb-0">Projects Delivered</p>
                 <p className="text-sm font-black tracking-tight text-foreground">500+</p>
               </div>
 
               {/* Floating rating badge */}
-              <div className="hero-card-sub absolute bottom-[20%] left-[62%] z-40 bg-card rounded-[2px] shadow-[0_6px_15px_rgba(0,0,0,0.15)] border border-border px-3 py-2 opacity-0 text-foreground scale-95">
+              <div className="absolute bottom-[20%] left-[62%] z-40 bg-card rounded-[2px] shadow-[0_6px_15px_rgba(0,0,0,0.15)] border border-border px-3 py-2 text-foreground">
                 <p className="text-[7px] font-bold text-muted uppercase tracking-wider mb-0">Client Rating</p>
                 <div className="flex items-center gap-1">
                   <span className="text-sm font-black tracking-tight text-foreground">4.9</span>
@@ -376,7 +365,7 @@ export default function Hero() {
             {/* ── Mobile-only: CTAs + Features (below images) ── */}
             <div className="order-3 flex flex-col items-center text-center">
               {/* Subtext */}
-              <p className="hero-subtext-mobile text-base md:text-lg leading-relaxed mb-8 text-muted opacity-0 max-w-xl">
+              <p className="text-base md:text-lg leading-relaxed mb-8 text-muted max-w-xl">
                 Premium neon signs and illuminated decor crafted with precision
                 to bring your brand&apos;s story to life.
               </p>
