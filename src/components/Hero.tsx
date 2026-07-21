@@ -314,7 +314,7 @@ export default function Hero() {
               className="order-2 relative min-h-[320px] md:min-h-[500px]"
             >
               {/* Main large card */}
-              <div className="absolute top-0 right-[-5%] w-[63%] aspect-[3/4] rounded-[4px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.15)] border border-neutral-200/50 z-10">
+              <div className="hero-mobile-secondary absolute top-0 right-[-5%] w-[63%] aspect-[3/4] rounded-[4px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.15)] border border-neutral-200/50 z-10 opacity-0">
                 <Image
                   src="/products/product_5_main.png"
                   alt="Custom neon sign installation"

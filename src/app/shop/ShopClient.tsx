@@ -76,6 +76,7 @@ export default function ShopClient() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const gridRef = useRef<HTMLDivElement>(null);
+  const isFirstRender = useRef(true);
 
   // --- GLOBAL CART DISPATCH TRIGGER ---
   const addToCart = (product: Product, qty: number = 1) => {
@@ -118,7 +119,10 @@ export default function ShopClient() {
     }
 
     // F. Sorting Logic
-    if (sortBy === "price-low") {
+    if (sortBy === "featured") {
+      // Keep a stable deterministic order matching the static PRODUCTS catalog (sorted by ID)
+      result = [...result].sort((a, b) => (parseInt(a.id) || 0) - (parseInt(b.id) || 0));
+    } else if (sortBy === "price-low") {
       result = [...result].sort((a, b) => a.price - b.price);
     } else if (sortBy === "price-high") {
       result = [...result].sort((a, b) => b.price - a.price);
@@ -131,6 +135,10 @@ export default function ShopClient() {
 
   // Stagger GSAP Entrance animations on Filter Card Changes
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     if (!gridRef.current) return;
     const cards = gridRef.current.querySelectorAll(".shop-card");
     
