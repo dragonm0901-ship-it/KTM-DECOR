@@ -1,5 +1,6 @@
 import { MetadataRoute } from "next";
 import { PRODUCTS } from "@/data/shop-data";
+import { GUIDES } from "@/data/guides-data";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://decorktm.com";
@@ -8,6 +9,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes = [
     "",
     "/shop",
+    "/decor-guides",
     "/start-project",
     "/cookie-policy",
     "/privacy-policy",
@@ -17,7 +19,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
     changeFrequency: "weekly" as const,
-    priority: route === "" ? 1.0 : 0.8,
+    priority: route === "" ? 1.0 : route === "/decor-guides" ? 0.9 : 0.8,
   }));
 
   // Generate dynamic product detail page routes
@@ -28,5 +30,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  return [...staticRoutes, ...productRoutes];
+  // Generate dynamic decor & signage guide routes
+  const guideRoutes = GUIDES.map((guide) => ({
+    url: `${baseUrl}/decor-guides/${guide.slug}`,
+    lastModified: new Date(guide.updatedDate),
+    changeFrequency: "weekly" as const,
+    priority: 0.8,
+  }));
+
+  return [...staticRoutes, ...productRoutes, ...guideRoutes];
 }
+

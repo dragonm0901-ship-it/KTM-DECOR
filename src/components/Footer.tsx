@@ -69,7 +69,7 @@ export default function Footer() {
               </div>
 
               {/* Links Area */}
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-16 w-full pt-8 border-t border-gray-200 dark:border-white/10">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 w-full pt-8 border-t border-gray-200 dark:border-white/10">
                 <div className="flex flex-col gap-3 md:gap-4">
                   <h4 className="uppercase tracking-widest text-[10px] md:text-sm font-bold text-gray-900 dark:text-white">Navigation</h4>
                   <div className="flex flex-col gap-2 md:gap-3">
@@ -89,6 +89,27 @@ export default function Footer() {
                         {cat}
                       </Link>
                     ))}
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-3 md:gap-4">
+                  <h4 className="uppercase tracking-widest text-[10px] md:text-sm font-bold text-gray-900 dark:text-white">Popular Guides</h4>
+                  <div className="flex flex-col gap-2 md:gap-3 text-xs md:text-sm font-medium">
+                    <Link href="/decor-guides/neon-lights-price-nepal" className="text-gray-500 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-500 transition-colors line-clamp-1">
+                      Neon Light Price Nepal
+                    </Link>
+                    <Link href="/decor-guides/led-light-board-price-nepal" className="text-gray-500 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-500 transition-colors line-clamp-1">
+                      Light Board Price Nepal
+                    </Link>
+                    <Link href="/decor-guides/business-signboard-design-nepal" className="text-gray-500 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-500 transition-colors line-clamp-1">
+                      3D Business Board Design
+                    </Link>
+                    <Link href="/decor-guides/name-plate-design-price-nepal" className="text-gray-500 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-500 transition-colors line-clamp-1">
+                      Name Plate Design & Price
+                    </Link>
+                    <Link href="/decor-guides/home-decor-kathmandu-online" className="text-gray-500 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-500 transition-colors line-clamp-1">
+                      Home Decor Kathmandu
+                    </Link>
                   </div>
                 </div>
 
