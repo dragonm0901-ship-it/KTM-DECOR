@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Outfit, Dancing_Script, Monoton, Montserrat, Playfair_Display, Pacifico } from "next/font/google";
 import "./globals.css";
-import Script from "next/script";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -125,10 +124,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Preconnect to GTM and GA for faster script initialization */}
-        <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://www.google-analytics.com" crossOrigin="anonymous" />
-        {/* Analytics loaded dynamically on interaction in ClientProviders */}
+        {/* Analytics loaded dynamically on user interaction in ClientProviders */}
         <script
           dangerouslySetInnerHTML={{
             __html: `

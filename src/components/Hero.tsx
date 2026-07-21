@@ -142,8 +142,7 @@ export default function Hero() {
         // Quick reveal animations matching committed mobile layout
         tl.fromTo(mobileBadgeRef.current, { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" })
           .fromTo(".hero-subtext-mobile", { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, "-=0.35")
-          // Main LCP image reveals instantly (starts at opacity: 0.8 to be registered as painted immediately)
-          .fromTo(".hero-main-card", { y: 20, opacity: 0.8 }, { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" }, "-=0.4")
+          // DO NOT animate .hero-main-card — it must be visible from first paint for LCP
           // Other background cards and details stagger-reveal
           .fromTo(".hero-card-sub", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, stagger: 0.08, ease: "power2.out" }, "-=0.3");
       });
@@ -322,7 +321,7 @@ export default function Hero() {
               className="order-2 relative min-h-[320px] md:min-h-[500px]"
             >
               {/* Main large card */}
-              <div className="hero-main-card absolute top-0 right-[-5%] w-[63%] aspect-[3/4] rounded-[4px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.15)] border border-neutral-200/50 z-10">
+              <div className="absolute top-0 right-[-5%] w-[63%] aspect-[3/4] rounded-[4px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.15)] border border-neutral-200/50 z-10">
                 <Image
                   src="/products/product_5_main.png"
                   alt="Custom neon sign installation"

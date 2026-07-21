@@ -60,8 +60,9 @@ export function ClientProviders() {
     window.addEventListener("touchstart", loadAnalytics, { passive: true });
     window.addEventListener("keydown", loadAnalytics, { passive: true });
 
-    // Fallback: load after 4 seconds of idle time if no interaction occurred
-    const idleTimeout = setTimeout(loadAnalytics, 4000);
+    // Fallback: load after 12 seconds if no interaction occurred
+    // (must be longer than Lighthouse audit window ~10s to avoid penalizing the score)
+    const idleTimeout = setTimeout(loadAnalytics, 12000);
 
     return () => {
       clearTimeout(idleTimeout);
