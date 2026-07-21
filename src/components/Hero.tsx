@@ -132,8 +132,13 @@ export default function Hero() {
         );
       });
 
-      // ── MOBILE: No animations. Everything is static and visible from first HTML paint
-      // to ensure instant LCP and Speed Index. ──
+      // ── MOBILE: LCP is static for instant paint. Fast animation on secondary decorative elements. ──
+      mm.add("(max-width: 1023px)", () => {
+        gsap.fromTo(".hero-mobile-secondary",
+          { y: 15, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.5, stagger: 0.08, ease: "power2.out" }
+        );
+      });
     };
 
     if (typeof window !== "undefined" && (window as any).__PRELOADER_ACTIVE__) {
@@ -323,7 +328,7 @@ export default function Hero() {
               </div>
 
               {/* Secondary floating card - left */}
-              <div className="absolute bottom-4 left-[8%] w-[50%] aspect-[4/3] rounded-[4px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-neutral-200/50 z-20">
+              <div className="hero-mobile-secondary absolute bottom-4 left-[8%] w-[50%] aspect-[4/3] rounded-[4px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-neutral-200/50 z-20 opacity-0">
                 <Image
                   src="/hero-images/hero2.webp"
                   alt="LED signage craftsmanship"
@@ -335,7 +340,7 @@ export default function Hero() {
               </div>
 
               {/* Small accent card - top left */}
-              <div className="absolute top-[15%] left-[-2%] w-[35%] aspect-square rounded-[4px] overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.1)] border border-neutral-200/50 z-30">
+              <div className="hero-mobile-secondary absolute top-[15%] left-[-2%] w-[35%] aspect-square rounded-[4px] overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.1)] border border-neutral-200/50 z-30 opacity-0">
                 <Image
                   src="/products/product_1_main.png"
                   alt="Illuminated decor detail"
@@ -347,13 +352,13 @@ export default function Hero() {
               </div>
 
               {/* Floating data badge */}
-              <div className="absolute top-[8%] left-[20%] z-40 bg-card rounded-[2px] shadow-[0_6px_15px_rgba(0,0,0,0.15)] border border-border px-3 py-2 text-foreground">
+              <div className="hero-mobile-secondary absolute top-[8%] left-[20%] z-40 bg-card rounded-[2px] shadow-[0_6px_15px_rgba(0,0,0,0.15)] border border-border px-3 py-2 text-foreground opacity-0">
                 <p className="text-[7px] font-bold text-muted uppercase tracking-wider mb-0">Projects Delivered</p>
                 <p className="text-sm font-black tracking-tight text-foreground">500+</p>
               </div>
 
               {/* Floating rating badge */}
-              <div className="absolute bottom-[20%] left-[62%] z-40 bg-card rounded-[2px] shadow-[0_6px_15px_rgba(0,0,0,0.15)] border border-border px-3 py-2 text-foreground">
+              <div className="hero-mobile-secondary absolute bottom-[20%] left-[62%] z-40 bg-card rounded-[2px] shadow-[0_6px_15px_rgba(0,0,0,0.15)] border border-border px-3 py-2 text-foreground opacity-0">
                 <p className="text-[7px] font-bold text-muted uppercase tracking-wider mb-0">Client Rating</p>
                 <div className="flex items-center gap-1">
                   <span className="text-sm font-black tracking-tight text-foreground">4.9</span>
