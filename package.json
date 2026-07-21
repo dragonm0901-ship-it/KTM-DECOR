@@ -43,5 +43,13 @@
     "eslint": "^9.39.4",
     "eslint-config-next": "^16.2.6",
     "puppeteer": "^25.0.4"
-  }
+  },
+  "browserslist": [
+    "Chrome >= 92",
+    "Firefox >= 90",
+    "Safari >= 15",
+    "Edge >= 92",
+    "iOS >= 15",
+    "not dead"
+  ]
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import Lenis from "lenis";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -9,27 +8,37 @@ gsap.registerPlugin(ScrollTrigger);
 
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    // Lenis Smooth Scroll
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: "vertical",
-      gestureOrientation: "vertical",
-      smoothWheel: true,
-      wheelMultiplier: 1,
-      touchMultiplier: 2,
-    });
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 1024;
 
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
+    // Skip Lenis on mobile — native scroll is smooth enough and Lenis
+    // causes forced reflows + continuous rAF overhead that kills PageSpeed
+    let lenis: any = null;
+    let rafId: number | null = null;
+
+    if (!isMobile) {
+      // Dynamically import Lenis only on desktop to avoid loading its JS on mobile
+      import("lenis").then(({ default: Lenis }) => {
+        lenis = new Lenis({
+          duration: 1.2,
+          easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+          orientation: "vertical",
+          gestureOrientation: "vertical",
+          smoothWheel: true,
+          wheelMultiplier: 1,
+          touchMultiplier: 2,
+        });
+
+        function raf(time: number) {
+          lenis.raf(time);
+          rafId = requestAnimationFrame(raf);
+        }
+        rafId = requestAnimationFrame(raf);
+      });
     }
-
-    requestAnimationFrame(raf);
 
     // Mobile-only text reveal animations
     let ctx = gsap.context(() => {
-      if (typeof window !== "undefined" && window.innerWidth < 1024) {
+      if (isMobile) {
         // Target only main section headings and their direct description paragraphs (excluding card details and shop lists)
         const revealElements = Array.from(document.querySelectorAll(
           "main section:not(#hero) h2, main section:not(#hero) h2 + p"
@@ -57,7 +66,8 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
     });
 
     return () => {
-      lenis.destroy();
+      if (lenis) lenis.destroy();
+      if (rafId !== null) cancelAnimationFrame(rafId);
       ctx.revert();
     };
   }, []);

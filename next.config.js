@@ -5,7 +5,9 @@ const nextConfig = {
   turbopack: {
     root: process.cwd(),
   },
-  images: {},
+  images: {
+    qualities: [50, 60],
+  },
   experimental: {
     optimizePackageImports: ["@solar-icons/react", "lucide-react"],
   },
