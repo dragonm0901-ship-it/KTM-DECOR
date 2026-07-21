@@ -113,6 +113,7 @@ export default function Services() {
             fill
             sizes="100vw"
             className="object-cover object-center grayscale contrast-[1.1] transition-all duration-500 scale-[0.92]"
+            quality={50}
           />
         </div>
         {/* Subtle uniform overlay for contrast - bound to section limits */}

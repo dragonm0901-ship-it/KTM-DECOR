@@ -54,6 +54,7 @@ export default function LocationMap() {
               loading="lazy" 
               referrerPolicy="no-referrer-when-downgrade"
               className="z-10 transition-opacity duration-1000"
+              title="Google Maps location of KTM DECOR Pvt Ltd in Balkot, Bhaktapur"
             ></iframe>
 
             {/* Interactive Overlay to prevent accidental scrolling while navigating the page, 

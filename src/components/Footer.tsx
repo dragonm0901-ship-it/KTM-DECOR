@@ -23,9 +23,9 @@ const TikTok = (props: any) => (
 
 export default function Footer() {
   const socialLinks = [
-    { icon: Facebook, href: "https://www.facebook.com/people/KTM-Decor/61556839814576/#", hoverClass: "footer-social-fb" },
-    { icon: Instagram, href: "https://www.instagram.com/ktmdecor/", hoverClass: "footer-social-ig" },
-    { icon: TikTok, href: "https://www.tiktok.com/@ktm.decor", hoverClass: "footer-social-tt" },
+    { name: "Facebook", icon: Facebook, href: "https://www.facebook.com/people/KTM-Decor/61556839814576/#", hoverClass: "footer-social-fb" },
+    { name: "Instagram", icon: Instagram, href: "https://www.instagram.com/ktmdecor/", hoverClass: "footer-social-ig" },
+    { name: "TikTok", icon: TikTok, href: "https://www.tiktok.com/@ktm.decor", hoverClass: "footer-social-tt" },
   ];
 
   return (
@@ -118,6 +118,7 @@ export default function Footer() {
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`w-10 h-10 rounded-full border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 transition-all duration-300 ${social.hoverClass}`}
+                      aria-label={`Visit KTM DECOR on ${social.name}`}
                     >
                       <Icon className="w-5 h-5" />
                     </a>

@@ -8,7 +8,10 @@ import gsap from "gsap";
 let preloaderHasRun = false;
 
 if (typeof window !== "undefined" && !preloaderHasRun) {
-  (window as any).__PRELOADER_ACTIVE__ = true;
+  const isMobile = window.innerWidth < 1024;
+  if (!isMobile) {
+    (window as any).__PRELOADER_ACTIVE__ = true;
+  }
 }
 
 export default function Preloader() {
@@ -28,18 +31,20 @@ export default function Preloader() {
   const preloaderImgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
-    if (shouldSkip) {
+    const isMobileViewport = typeof window !== "undefined" && window.innerWidth < 1024;
+
+    if (shouldSkip || isMobileViewport) {
       document.documentElement.classList.remove("is-loading");
       if (typeof window !== "undefined") {
         (window as any).__PRELOADER_ACTIVE__ = false;
         window.dispatchEvent(new CustomEvent("preloaderComplete"));
       }
+      setIsHidden(true);
+      preloaderHasRun = true;
       return;
     }
 
     document.documentElement.classList.add("is-loading");
-
-    const isMobileViewport = typeof window !== "undefined" && window.innerWidth < 1024;
 
     // Start a safety timer immediately to guarantee page is unlocked after 1.8s on mobile or 6s on desktop
     const safetyDuration = isMobileViewport ? 1800 : 6000;
@@ -343,7 +348,7 @@ export default function Preloader() {
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center"
+      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center hidden lg:flex"
       style={{ pointerEvents: isDone ? "none" : "auto" }}
     >
       {/* Two half-panels — using inline style for guaranteed solid color */}

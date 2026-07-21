@@ -115,9 +115,9 @@ export default function Expertise() {
           <span className="inline-flex items-center gap-2 px-3 py-1 text-[10px] font-black tracking-[0.25em] uppercase border border-accent/20 rounded-[4px] mb-3 text-accent bg-accent/5">
             Our Expertise
           </span>
-          <h3 className="text-3xl md:text-5xl font-black tracking-tighter leading-tight text-foreground">
+          <h2 className="text-3xl md:text-5xl font-black tracking-tighter leading-tight text-foreground">
             Everything we touch <br className="hidden sm:inline" /> turns to <span className="text-accent">light.</span>
-          </h3>
+          </h2>
           <p className="mt-4 text-sm md:text-base text-muted-foreground font-medium max-w-lg">
             Discover our wide range of custom illumination and precision signcrafting products.
           </p>

@@ -42,6 +42,7 @@ const cards = rawCards.map((c, i) => {
   return {
     id: i,
     src: c.src,
+    widthVal: c.width,
     style: {
       left: c.left,
       top: c.top,
@@ -207,8 +208,9 @@ export default function Hero() {
                       alt="Gallery artwork" 
                       fill 
                       className="object-cover" 
-                      sizes="(max-width: 768px) 50vw, 30vw"
+                      sizes={`(max-width: 1024px) 30vw, ${card.widthVal}`}
                       priority={card.id === 0}
+                      quality={70}
                     />
                     <div className="absolute inset-0 bg-black/20" />
                   </div>
@@ -317,7 +319,7 @@ export default function Hero() {
               className="order-2 relative min-h-[320px] md:min-h-[500px]"
             >
               {/* Main large card */}
-              <div className="hero-card absolute top-0 right-[-5%] w-[63%] aspect-[3/4] rounded-[4px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.15)] border border-neutral-200/50 z-10 opacity-0">
+              <div className="hero-card absolute top-0 right-[-5%] w-[63%] aspect-[3/4] rounded-[4px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.15)] border border-neutral-200/50 z-10">
                 <Image
                   src="/products/product_5_main.png"
                   alt="Custom neon sign installation"
@@ -325,29 +327,31 @@ export default function Hero() {
                   className="object-cover"
                   sizes="60vw"
                   priority
+                  quality={70}
                 />
               </div>
 
               {/* Secondary floating card - left */}
-              <div className="hero-card absolute bottom-4 left-[8%] w-[50%] aspect-[4/3] rounded-[4px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-neutral-200/50 z-20 opacity-0">
+              <div className="hero-card absolute bottom-4 left-[8%] w-[50%] aspect-[4/3] rounded-[4px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-neutral-200/50 z-20">
                 <Image
                   src="/hero-images/hero2.webp"
                   alt="LED signage craftsmanship"
                   fill
                   className="object-cover"
                   sizes="50vw"
-                  priority
+                  quality={60}
                 />
               </div>
 
               {/* Small accent card - top left */}
-              <div className="hero-card absolute top-[15%] left-[-2%] w-[35%] aspect-square rounded-[4px] overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.1)] border border-neutral-200/50 z-30 opacity-0">
+              <div className="hero-card absolute top-[15%] left-[-2%] w-[35%] aspect-square rounded-[4px] overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.1)] border border-neutral-200/50 z-30">
                 <Image
                   src="/products/product_1_main.png"
                   alt="Illuminated decor detail"
                   fill
                   className="object-cover"
                   sizes="35vw"
+                  quality={60}
                 />
               </div>
 

@@ -60,7 +60,8 @@ export default function CookieConsent() {
             </h3>
             <button
               onClick={() => setShowBanner(false)}
-              className="p-1 hover:opacity-50 transition-opacity"
+              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-foreground/5 transition-colors"
+              aria-label="Close cookie settings banner"
             >
               <X className="w-4 h-4" />
             </button>
@@ -106,7 +107,8 @@ export default function CookieConsent() {
               </h3>
               <button
                 onClick={() => setShowPreferences(false)}
-                className="p-1 hover:opacity-50 transition-opacity"
+                className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-foreground/5 transition-colors"
+                aria-label="Close cookie settings preferences"
               >
                 <X className="w-4 h-4" />
               </button>

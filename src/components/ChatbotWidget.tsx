@@ -255,7 +255,7 @@ export default function ChatbotWidget() {
   if (!isLoaded) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[9999] font-sans selection:bg-accent/20 flex flex-col items-end gap-3 sm:gap-4">
+    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[9999] font-sans selection:bg-accent/20 flex flex-col items-end gap-4 sm:gap-5">
       {/* WhatsApp Button */}
       {!isOpen && (
         <div className="flex items-center gap-3 animate-in fade-in duration-500">
