@@ -623,24 +623,23 @@ app.post("/api/tasks", protect, admin, validate(createTaskSchema), async (req, r
       createdBy: req.user._id,
     });
 
-    const populatedTask = await Task.findById(task._id)
-      .populate("assignee", "name email role")
-      .populate("createdBy", "name role");
+    const [populatedTask, notif] = await Promise.all([
+      Task.findById(task._id)
+        .populate("assignee", "name email role")
+        .populate("createdBy", "name role")
+        .lean(),
+      Notification.create({
+        type: "task_assigned",
+        message: `New task assigned to you: "${title}" by ${req.user.name}`,
+        recipient: assignee,
+      })
+    ]);
 
     // Broadcast task creation via Pusher
     triggerPusher("task_created", populatedTask);
-
-    // Create Notification in DB
-    const notif = await Notification.create({
-      type: "task_assigned",
-      message: `New task assigned to you: "${title}" by ${req.user.name}`,
-      recipient: assignee,
-    });
-
-    // Broadcast notification via Pusher
     triggerPusher("receive_notification", notif);
 
-    await logActivity(req.user._id, "Task Created", `Assigned "${title}" to ${populatedTask.assignee.name}`);
+    logActivity(req.user, "Task Created", `Assigned "${title}" to ${populatedTask?.assignee?.name || "staff"}`);
 
     res.status(201).json(populatedTask);
   } catch (error) {
@@ -875,19 +874,23 @@ app.post("/api/campaigns", protect, validate(fieldNoteSchema), async (req, res) 
       createdBy: req.user._id,
     });
 
-    const populatedFieldNote = await FieldNote.findById(fieldNote._id).populate("createdBy", "name role");
+    const populatedFieldNote = {
+      ...fieldNote.toObject(),
+      createdBy: { _id: req.user._id, name: req.user.name, role: req.user.role }
+    };
 
     triggerPusher("campaign_updated", populatedFieldNote);
 
-    // Create and broadcast global notification for new field note
-    const globalFieldNoteNotif = await Notification.create({
+    // Create and broadcast global notification asynchronously
+    Notification.create({
       type: "new_field_note",
       message: `New field note: "${title}" by ${req.user.name} (District: ${district})`,
       recipient: null,
-    });
-    triggerPusher("receive_notification", globalFieldNoteNotif);
+    }).then((globalFieldNoteNotif) => {
+      triggerPusher("receive_notification", globalFieldNoteNotif);
+    }).catch(() => null);
 
-    await logActivity(req.user._id, "Field Note Created", `Created field note "${title}" in ${district}, ${location}`);
+    logActivity(req.user, "Field Note Created", `Created field note "${title}" in ${district}, ${location}`);
     res.status(201).json(populatedFieldNote);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -1508,9 +1511,12 @@ app.post("/api/sales", protect, admin, async (req, res) => {
     });
     await sale.save();
 
-    const populatedSale = await Sale.findById(sale._id).populate("createdBy", "name role").populate("orderId");
+    const populatedSale = {
+      ...sale.toObject(),
+      createdBy: { _id: req.user._id, name: req.user.name, role: req.user.role }
+    };
     triggerPusher("sale_created", populatedSale);
-    await logActivity(req.user._id, "Sale Logged", `Logged direct sale to "${clientName}" for "${productName}" (Rs. ${Number(amount).toLocaleString()})`);
+    logActivity(req.user, "Sale Logged", `Logged direct sale to "${clientName}" for "${productName}" (Rs. ${Number(amount).toLocaleString()})`);
 
     res.status(201).json(populatedSale);
   } catch (error) {
@@ -1524,7 +1530,7 @@ app.delete("/api/sales/:id", protect, admin, async (req, res) => {
     if (!sale) return res.status(404).json({ message: "Sale not found" });
     await Sale.findByIdAndDelete(req.params.id);
     triggerPusher("sale_deleted", req.params.id);
-    await logActivity(req.user._id, "Sale Deleted", `Deleted sale log for "${sale.productName}"`);
+    logActivity(req.user, "Sale Deleted", `Deleted sale log for "${sale.productName}"`);
     res.json({ message: "Sale deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -1556,9 +1562,12 @@ app.post("/api/expenses", protect, admin, async (req, res) => {
     });
     await expense.save();
 
-    const populatedExpense = await Expense.findById(expense._id).populate("createdBy", "name role");
+    const populatedExpense = {
+      ...expense.toObject(),
+      createdBy: { _id: req.user._id, name: req.user.name, role: req.user.role }
+    };
     triggerPusher("expense_created", populatedExpense);
-    await logActivity(req.user._id, "Expense Logged", `Logged expense "${title}" (Rs. ${Number(amount).toLocaleString()})`);
+    logActivity(req.user, "Expense Logged", `Logged expense "${title}" (Rs. ${Number(amount).toLocaleString()})`);
 
     res.status(201).json(populatedExpense);
   } catch (error) {
@@ -1580,9 +1589,12 @@ app.put("/api/expenses/:id", protect, admin, async (req, res) => {
 
     await expense.save();
 
-    const populatedExpense = await Expense.findById(expense._id).populate("createdBy", "name role");
+    const populatedExpense = {
+      ...expense.toObject(),
+      createdBy: { _id: req.user._id, name: req.user.name, role: req.user.role }
+    };
     triggerPusher("expense_updated", populatedExpense);
-    await logActivity(req.user._id, "Expense Updated", `Updated expense log "${expense.title}" (Rs. ${expense.amount.toLocaleString()})`);
+    logActivity(req.user, "Expense Updated", `Updated expense log "${expense.title}" (Rs. ${expense.amount.toLocaleString()})`);
 
     res.json(populatedExpense);
   } catch (error) {
@@ -1596,7 +1608,7 @@ app.delete("/api/expenses/:id", protect, admin, async (req, res) => {
     if (!expense) return res.status(404).json({ message: "Expense not found" });
     await Expense.findByIdAndDelete(req.params.id);
     triggerPusher("expense_deleted", req.params.id);
-    await logActivity(req.user._id, "Expense Deleted", `Deleted expense log for "${expense.title}"`);
+    logActivity(req.user, "Expense Deleted", `Deleted expense log for "${expense.title}"`);
     res.json({ message: "Expense deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -1629,9 +1641,12 @@ app.post("/api/purchases", protect, admin, async (req, res) => {
     });
     await purchase.save();
 
-    const populatedPurchase = await Purchase.findById(purchase._id).populate("createdBy", "name role");
+    const populatedPurchase = {
+      ...purchase.toObject(),
+      createdBy: { _id: req.user._id, name: req.user.name, role: req.user.role }
+    };
     triggerPusher("purchase_created", populatedPurchase);
-    await logActivity(req.user._id, "Purchase Logged", `Logged purchase from "${supplier}" (Rs. ${Number(amount).toLocaleString()})`);
+    logActivity(req.user, "Purchase Logged", `Logged purchase from "${supplier}" (Rs. ${Number(amount).toLocaleString()})`);
 
     res.status(201).json(populatedPurchase);
   } catch (error) {
@@ -1654,9 +1669,12 @@ app.put("/api/purchases/:id", protect, admin, async (req, res) => {
     
     await purchase.save();
 
-    const populatedPurchase = await Purchase.findById(purchase._id).populate("createdBy", "name role");
+    const populatedPurchase = {
+      ...purchase.toObject(),
+      createdBy: { _id: req.user._id, name: req.user.name, role: req.user.role }
+    };
     triggerPusher("purchase_updated", populatedPurchase);
-    await logActivity(req.user._id, "Purchase Updated", `Updated purchase details for "${purchase.supplier}" (Rs. ${purchase.amount.toLocaleString()})`);
+    logActivity(req.user, "Purchase Updated", `Updated purchase details for "${purchase.supplier}" (Rs. ${purchase.amount.toLocaleString()})`);
 
     res.json(populatedPurchase);
   } catch (error) {
@@ -1670,7 +1688,7 @@ app.delete("/api/purchases/:id", protect, admin, async (req, res) => {
     if (!purchase) return res.status(404).json({ message: "Purchase not found" });
     await Purchase.findByIdAndDelete(req.params.id);
     triggerPusher("purchase_deleted", req.params.id);
-    await logActivity(req.user._id, "Purchase Deleted", `Deleted purchase from "${purchase.supplier}"`);
+    logActivity(req.user, "Purchase Deleted", `Deleted purchase from "${purchase.supplier}"`);
     res.json({ message: "Purchase deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -1702,9 +1720,12 @@ app.post("/api/inventory", protect, admin, async (req, res) => {
     });
     await item.save();
 
-    const populatedItem = await InventoryItem.findById(item._id).populate("createdBy", "name role");
+    const populatedItem = {
+      ...item.toObject(),
+      createdBy: { _id: req.user._id, name: req.user.name, role: req.user.role }
+    };
     triggerPusher("inventory_created", populatedItem);
-    await logActivity(req.user._id, "Inventory Item Added", `Added inventory item "${name}" (${quantity} ${unit})`);
+    logActivity(req.user, "Inventory Item Added", `Added inventory item "${name}" (${quantity} ${unit})`);
 
     res.status(201).json(populatedItem);
   } catch (error) {

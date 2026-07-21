@@ -86,6 +86,8 @@ const SalarySchema = new mongoose.Schema(
 
 // Prevent duplicate salary logs for same user, month, and year
 SalarySchema.index({ user: 1, month: 1, year: 1 }, { unique: true });
+SalarySchema.index({ year: -1, month: -1 });
+SalarySchema.index({ user: 1, year: -1, month: -1 });
 
 const Salary = mongoose.model("Salary", SalarySchema);
 export default Salary;
