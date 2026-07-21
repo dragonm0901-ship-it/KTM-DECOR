@@ -71,6 +71,7 @@ export default function About() {
                 ? 'lg:grayscale lg:opacity-30 lg:contrast-[1.1]' 
                 : 'lg:grayscale lg:opacity-45 lg:contrast-100'
             }`}
+            quality={50}
           />
           {/* Soft uniform overlay to ensure optimal contrast and premium integration */}
           <div className="absolute inset-0 bg-background/5 dark:bg-background/10 transition-colors duration-500" />
@@ -106,6 +107,7 @@ export default function About() {
               className={`object-cover transition-all duration-700 scale-105 ${
                 hoveredPart === 'content' ? 'lg:scale-105' : 'lg:scale-100'
               } md:grayscale md:group-hover:grayscale-0 md:hover:grayscale-0`}
+              quality={60}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
           </div>

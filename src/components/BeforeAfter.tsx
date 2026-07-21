@@ -144,6 +144,7 @@ function BeforeAfterSlider({ caseData }: { caseData: CaseData }) {
           fill
           className="object-cover pointer-events-none"
           sizes="(max-width: 768px) 100vw, 50vw"
+          quality={60}
         />
 
         {/* Overlaid: Before Image (Draft Sketch) - Clipped */}
@@ -157,6 +158,7 @@ function BeforeAfterSlider({ caseData }: { caseData: CaseData }) {
             fill
             className="object-cover pointer-events-none"
             sizes="(max-width: 768px) 100vw, 50vw"
+            quality={60}
           />
         </div>
 

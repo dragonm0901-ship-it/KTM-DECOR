@@ -95,6 +95,7 @@ export default function LocationMap() {
                     fill
                     sizes="80px"
                     className="object-cover" 
+                    quality={60}
                   />
                 </div>
                 <div className="text-center">

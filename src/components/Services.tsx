@@ -161,6 +161,7 @@ export default function Services() {
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1120px"
                   className={`object-cover rounded-[4px] z-0 ${i === 1 ? "object-[center_15%]" : "object-center"}`}
+                  quality={50}
                 />
                 <div className="absolute inset-0 rounded-[4px] bg-black/55 z-0" />
               </>

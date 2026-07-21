@@ -100,6 +100,7 @@ export default function HowItWorks() {
           fill
           sizes="100vw"
           className="object-cover object-center grayscale contrast-[1.1] transition-all duration-500"
+          quality={50}
         />
         {/* Theme-adaptive blend mask tailored to the bg-background section wrapper */}
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/75 to-background/45 dark:from-background dark:via-background/85 dark:to-background/55 transition-colors duration-500" />

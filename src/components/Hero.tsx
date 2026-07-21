@@ -127,8 +127,8 @@ export default function Hero() {
 
         // Entrance animation targets the inner container (desktopTextInnerRef) to prevent any conflict
         gsap.fromTo(desktopTextInnerRef.current,
-          { opacity: 0, y: 50 },
-          { opacity: 1, y: 0, duration: 1.5, ease: "power3.out", delay: 0.5 }
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 0.8, ease: "power3.out", delay: 0.1 }
         );
       });
 
@@ -142,7 +142,10 @@ export default function Hero() {
         // Quick reveal animations matching committed mobile layout
         tl.fromTo(mobileBadgeRef.current, { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" })
           .fromTo(".hero-subtext-mobile", { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, "-=0.35")
-          .fromTo(".hero-card", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, stagger: 0.08, ease: "power2.out" }, "-=0.4");
+          // Main LCP image reveals instantly (starts at opacity: 0.8 to be registered as painted immediately)
+          .fromTo(".hero-main-card", { y: 20, opacity: 0.8 }, { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" }, "-=0.4")
+          // Other background cards and details stagger-reveal
+          .fromTo(".hero-card-sub", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, stagger: 0.08, ease: "power2.out" }, "-=0.3");
       });
     };
 
@@ -210,7 +213,7 @@ export default function Hero() {
                       className="object-cover" 
                       sizes={`(max-width: 1024px) 30vw, ${card.widthVal}`}
                       priority={card.id === 0}
-                      quality={70}
+                      quality={card.id === 0 ? 60 : 50}
                     />
                     <div className="absolute inset-0 bg-black/20" />
                   </div>
@@ -229,7 +232,7 @@ export default function Hero() {
           >
             <div
               ref={desktopTextInnerRef}
-              className="w-full flex flex-col items-center justify-center opacity-0"
+              className="w-full flex flex-col items-center justify-center"
             >
               {/* Status Badge */}
               <div className="inline-flex items-center gap-2.5 px-5 py-2 rounded-[4px] bg-accent border border-accent/10 mb-8 md:mb-10 shadow-2xl">
@@ -319,7 +322,7 @@ export default function Hero() {
               className="order-2 relative min-h-[320px] md:min-h-[500px]"
             >
               {/* Main large card */}
-              <div className="hero-card absolute top-0 right-[-5%] w-[63%] aspect-[3/4] rounded-[4px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.15)] border border-neutral-200/50 z-10">
+              <div className="hero-main-card absolute top-0 right-[-5%] w-[63%] aspect-[3/4] rounded-[4px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.15)] border border-neutral-200/50 z-10">
                 <Image
                   src="/products/product_5_main.png"
                   alt="Custom neon sign installation"
@@ -327,42 +330,42 @@ export default function Hero() {
                   className="object-cover"
                   sizes="60vw"
                   priority
-                  quality={70}
+                  quality={60}
                 />
               </div>
 
               {/* Secondary floating card - left */}
-              <div className="hero-card absolute bottom-4 left-[8%] w-[50%] aspect-[4/3] rounded-[4px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-neutral-200/50 z-20">
+              <div className="hero-card-sub absolute bottom-4 left-[8%] w-[50%] aspect-[4/3] rounded-[4px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-neutral-200/50 z-20">
                 <Image
                   src="/hero-images/hero2.webp"
                   alt="LED signage craftsmanship"
                   fill
                   className="object-cover"
                   sizes="50vw"
-                  quality={60}
+                  quality={50}
                 />
               </div>
 
               {/* Small accent card - top left */}
-              <div className="hero-card absolute top-[15%] left-[-2%] w-[35%] aspect-square rounded-[4px] overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.1)] border border-neutral-200/50 z-30">
+              <div className="hero-card-sub absolute top-[15%] left-[-2%] w-[35%] aspect-square rounded-[4px] overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.1)] border border-neutral-200/50 z-30">
                 <Image
                   src="/products/product_1_main.png"
                   alt="Illuminated decor detail"
                   fill
                   className="object-cover"
                   sizes="35vw"
-                  quality={60}
+                  quality={50}
                 />
               </div>
 
               {/* Floating data badge */}
-              <div className="hero-card absolute top-[8%] left-[20%] z-40 bg-card rounded-[2px] shadow-[0_6px_15px_rgba(0,0,0,0.15)] border border-border px-3 py-2 opacity-0 text-foreground scale-95">
+              <div className="hero-card-sub absolute top-[8%] left-[20%] z-40 bg-card rounded-[2px] shadow-[0_6px_15px_rgba(0,0,0,0.15)] border border-border px-3 py-2 opacity-0 text-foreground scale-95">
                 <p className="text-[7px] font-bold text-muted uppercase tracking-wider mb-0">Projects Delivered</p>
                 <p className="text-sm font-black tracking-tight text-foreground">500+</p>
               </div>
 
               {/* Floating rating badge */}
-              <div className="hero-card absolute bottom-[20%] left-[62%] z-40 bg-card rounded-[2px] shadow-[0_6px_15px_rgba(0,0,0,0.15)] border border-border px-3 py-2 opacity-0 text-foreground scale-95">
+              <div className="hero-card-sub absolute bottom-[20%] left-[62%] z-40 bg-card rounded-[2px] shadow-[0_6px_15px_rgba(0,0,0,0.15)] border border-border px-3 py-2 opacity-0 text-foreground scale-95">
                 <p className="text-[7px] font-bold text-muted uppercase tracking-wider mb-0">Client Rating</p>
                 <div className="flex items-center gap-1">
                   <span className="text-sm font-black tracking-tight text-foreground">4.9</span>

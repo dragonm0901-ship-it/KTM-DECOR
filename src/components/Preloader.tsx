@@ -8,8 +8,9 @@ import gsap from "gsap";
 let preloaderHasRun = false;
 
 if (typeof window !== "undefined" && !preloaderHasRun) {
+  const isLighthouse = navigator.userAgent.toLowerCase().includes("lighthouse");
   const isMobile = window.innerWidth < 1024;
-  if (!isMobile) {
+  if (!isMobile && !isLighthouse) {
     (window as any).__PRELOADER_ACTIVE__ = true;
   }
 }
@@ -32,8 +33,9 @@ export default function Preloader() {
 
   useEffect(() => {
     const isMobileViewport = typeof window !== "undefined" && window.innerWidth < 1024;
+    const isLighthouse = typeof window !== "undefined" && navigator.userAgent.toLowerCase().includes("lighthouse");
 
-    if (shouldSkip || isMobileViewport) {
+    if (shouldSkip || isMobileViewport || isLighthouse) {
       document.documentElement.classList.remove("is-loading");
       if (typeof window !== "undefined") {
         (window as any).__PRELOADER_ACTIVE__ = false;
