@@ -16,6 +16,7 @@ import {
   Eye
 } from "./ui/solar-icons";
 import { OrderDetailModal } from "./OrderDetailModal";
+import { compressImage } from "../utils/imageCompressor";
 
 export const OrdersTab: React.FC = () => {
   const { orders, createOrder, updateOrder, deleteOrder, user, users } = useStore();
@@ -108,22 +109,22 @@ export const OrdersTab: React.FC = () => {
     setShowModal(true);
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, type: "product" | "location") => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>, type: "product" | "location") => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        setFormError("Image size should be less than 2MB.");
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => {
+      try {
+        const compressedDataUrl = await compressImage(file);
         if (type === "product") {
-          setProductImageUrl(reader.result as string);
+          setProductImageUrl(compressedDataUrl);
         } else {
-          setLocationImageUrl(reader.result as string);
+          setLocationImageUrl(compressedDataUrl);
         }
-      };
-      reader.readAsDataURL(file);
+        setFormError("");
+      } catch (err: any) {
+        setFormError(err.message || "Failed to process selected image.");
+      } finally {
+        e.target.value = "";
+      }
     }
   };
 
@@ -778,14 +779,24 @@ export const OrdersTab: React.FC = () => {
                       </label>
                       <div className="flex flex-col gap-2">
                         {productImageUrl && (
-                          <div className="h-16 w-full border border-border rounded overflow-hidden bg-background">
+                          <div className="h-20 w-full border border-border rounded overflow-hidden bg-background relative group">
                             <img src={productImageUrl} alt="Product preview" className="h-full w-full object-cover" />
+                            <button
+                              type="button"
+                              onClick={() => setProductImageUrl("")}
+                              className="absolute top-1 right-1 p-1 bg-black/70 hover:bg-red-600 text-white rounded-full transition-colors"
+                              title="Remove Product Photo"
+                            >
+                              <X size={12} />
+                            </button>
                           </div>
                         )}
                         {user?.role === "admin" && (
                           <label className="flex flex-col items-center justify-center border border-dashed border-border rounded p-2.5 hover:bg-border/20 cursor-pointer transition-colors text-center text-muted">
                             <Upload size={14} className="text-accent mb-0.5" />
-                            <span className="text-[8px] font-bold uppercase tracking-wider">Upload Product</span>
+                            <span className="text-[8px] font-bold uppercase tracking-wider">
+                              {productImageUrl ? "Change Product Photo" : "Upload Product Photo"}
+                            </span>
                             <input
                               type="file"
                               accept="image/*"
@@ -803,14 +814,24 @@ export const OrdersTab: React.FC = () => {
                       </label>
                       <div className="flex flex-col gap-2">
                         {locationImageUrl && (
-                          <div className="h-16 w-full border border-border rounded overflow-hidden bg-background">
+                          <div className="h-20 w-full border border-border rounded overflow-hidden bg-background relative group">
                             <img src={locationImageUrl} alt="Location preview" className="h-full w-full object-cover" />
+                            <button
+                              type="button"
+                              onClick={() => setLocationImageUrl("")}
+                              className="absolute top-1 right-1 p-1 bg-black/70 hover:bg-red-600 text-white rounded-full transition-colors"
+                              title="Remove Location Photo"
+                            >
+                              <X size={12} />
+                            </button>
                           </div>
                         )}
                         {user?.role === "admin" && (
                           <label className="flex flex-col items-center justify-center border border-dashed border-border rounded p-2.5 hover:bg-border/20 cursor-pointer transition-colors text-center text-muted">
                             <Upload size={14} className="text-accent mb-0.5" />
-                            <span className="text-[8px] font-bold uppercase tracking-wider">Upload Location</span>
+                            <span className="text-[8px] font-bold uppercase tracking-wider">
+                              {locationImageUrl ? "Change Location Photo" : "Upload Location Photo"}
+                            </span>
                             <input
                               type="file"
                               accept="image/*"

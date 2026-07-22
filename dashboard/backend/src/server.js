@@ -133,8 +133,8 @@ app.use(
     credentials: true,
   })
 );
-app.use(express.json({ limit: "15mb" }));
-app.use(express.urlencoded({ limit: "15mb", extended: true }));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 // Middleware to invalidate cache on database mutations
 app.use((req, res, next) => {
@@ -1075,7 +1075,7 @@ app.delete("/api/bin/:type/:id/force", protect, admin, async (req, res) => {
 // Get all products (Public)
 app.get("/api/products", async (req, res) => {
   try {
-    const products = await Product.find({}).select("-image_urls").sort({ createdAt: -1 });
+    const products = await Product.find({}).sort({ createdAt: -1 });
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: error.message });

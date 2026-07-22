@@ -12,6 +12,7 @@ import {
   Search,
   Mail
 } from "./ui/solar-icons";
+import { compressImage } from "../utils/imageCompressor";
 
 // List of all 77 Districts of Nepal
 const NEPAL_DISTRICTS = [
@@ -86,18 +87,18 @@ export const FieldNotes: React.FC<FieldNotesProps> = ({
     setShowModal(true);
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 3 * 1024 * 1024) {
-        setFormError("Fitting spot image size should be less than 3MB.");
-        return;
+      try {
+        const compressedDataUrl = await compressImage(file);
+        setFittingSpotImageUrl(compressedDataUrl);
+        setFormError("");
+      } catch (err: any) {
+        setFormError(err.message || "Failed to process fitting spot image.");
+      } finally {
+        e.target.value = "";
       }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFittingSpotImageUrl(reader.result as string);
-      };
-      reader.readAsDataURL(file);
     }
   };
 

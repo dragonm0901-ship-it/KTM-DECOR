@@ -9,6 +9,7 @@ import {
   X,
   Info
 } from "./ui/solar-icons";
+import { compressImage } from "../utils/imageCompressor";
 
 // Allowed Categories and Subcategories matching the main website
 const CATEGORIES = [
@@ -89,26 +90,23 @@ export const ProductManagement: React.FC = () => {
     }
   };
 
-  // Convert File to Base64 for a specific slot
-  const handleSlotFileChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+  // Convert File to Compressed Base64 for a specific slot
+  const handleSlotFileChange = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 8 * 1024 * 1024) {
-      alert("File size exceeds 8MB limit. Please upload a smaller image.");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64 = reader.result as string;
+    try {
+      const compressedBase64 = await compressImage(file);
       setProductImages((prev) => {
         const next = [...prev];
-        next[index] = base64;
+        next[index] = compressedBase64;
         return next;
       });
-    };
-    reader.readAsDataURL(file);
+    } catch (err: any) {
+      alert(err.message || "Failed to process image file.");
+    } finally {
+      e.target.value = "";
+    }
   };
 
   // Handle URL change for a specific slot
