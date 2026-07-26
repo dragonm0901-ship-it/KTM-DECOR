@@ -125,18 +125,23 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
       });
     });
 
-    // 2. Orders
+    // 2. Orders (Placed on the date they were entered)
     orders.forEach((order) => {
-      const date = order.deliveryDate ? new Date(order.deliveryDate) : new Date(order.createdAt);
-      let displayHour = date.getHours();
+      const entryDate = order.createdAt ? new Date(order.createdAt) : (order.date ? new Date(order.date) : new Date());
+      let displayHour = entryDate.getHours();
       if (displayHour < START_HOUR || displayHour > END_HOUR) {
         displayHour = 15; // 3:00 PM default
       }
+      
+      const deadlineText = order.deliveryDate 
+        ? new Date(order.deliveryDate).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })
+        : "Not specified";
+
       events.push({
         id: order._id,
         title: `Order: ${order.customerName} (${order.productName})`,
-        description: `Product Size: ${order.size} | Color Spec: ${order.color} | Total Price: Rs. ${order.totalPrice.toLocaleString()} | Due: Rs. ${order.duePayment.toLocaleString()} | Source: ${order.orderFrom.toUpperCase()} | Stage: ${order.stage.toUpperCase()}`,
-        date,
+        description: `📅 Order Deadline: ${deadlineText}\n👤 Customer: ${order.customerName} (${order.customerContact || "No contact"})\n📦 Product: ${order.productName} (${order.size || "Standard"}, ${order.color || "Default color"})\n💰 Financials: Total Rs. ${order.totalPrice ? order.totalPrice.toLocaleString() : 0} | Due Rs. ${order.duePayment ? order.duePayment.toLocaleString() : 0}\n📌 Stage: ${order.stage ? order.stage.toUpperCase() : "PENDING"} | Source: ${order.orderFrom ? order.orderFrom.toUpperCase() : "WEBSITE"}`,
+        date: entryDate,
         displayHour,
         type: "order",
         colorClass: "bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/15",
