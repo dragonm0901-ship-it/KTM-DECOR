@@ -136,10 +136,16 @@ app.use(
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
-// Middleware to invalidate cache on database mutations
+// Middleware to invalidate cache on domain database mutations
 app.use((req, res, next) => {
   const writeMethods = ["POST", "PUT", "PATCH", "DELETE"];
-  if (writeMethods.includes(req.method) && req.originalUrl.startsWith("/api/")) {
+  const isDataMutation = writeMethods.includes(req.method) && 
+    req.originalUrl.startsWith("/api/") &&
+    !req.originalUrl.startsWith("/api/auth/") &&
+    !req.originalUrl.startsWith("/api/chat") &&
+    !req.originalUrl.startsWith("/api/activity/log");
+
+  if (isDataMutation) {
     const originalJson = res.json;
     res.json = function (body) {
       if (res.statusCode >= 200 && res.statusCode < 300) {
@@ -423,7 +429,7 @@ app.get("/api/bootstrap", protect, async (req, res) => {
 
     // 4. Inject admin-only data (with limits)
     if (userRole === "admin") {
-      promises.sales = Sale.find({}).populate("createdBy", "name role").populate("orderId").sort({ date: -1 }).limit(500).lean();
+      promises.sales = Sale.find({}).populate("createdBy", "name role").populate("orderId", "customerName totalAmount status").sort({ date: -1 }).limit(500).lean();
       promises.expenses = Expense.find({}).populate("createdBy", "name role").sort({ date: -1 }).limit(500).lean();
       promises.purchases = Purchase.find({}).populate("createdBy", "name role").sort({ date: -1 }).limit(300).lean();
       promises.quotations = Quotation.find({}).populate("createdBy", "name role").sort({ date: -1 }).limit(200).lean();
