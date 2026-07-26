@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/solar-icons";
 import { PRODUCTS, Product } from "@/data/shop-data";
 import { CATALOG_DETAILS } from "@/data/catalog-details";
+import { DirectWhatsAppModal } from "@/components/DirectWhatsAppModal";
 import {
   Leaf,
   Sun,
@@ -380,6 +381,7 @@ export default function ProductDetailClient() {
     return vars[0] || null;
   });
   const [activeTab, setActiveTab] = useState<"details" | "reviews">("details");
+  const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
   const [variantsList, setVariantsList] = useState<ProductVariant[]>(() => {
     if (!id) return [];
     const p = PRODUCTS.find(x => x.id === id);
@@ -523,28 +525,7 @@ export default function ProductDetailClient() {
 
   // --- DIRECT SINGLE ITEM WHATSAPP BUY NOW ---
   const handleWhatsAppBuyNow = () => {
-    const activePrice = selectedVariant ? selectedVariant.price : product.price;
-    const activeName = selectedVariant ? `${product.name} (${selectedVariant.option_name})` : product.name;
-    const totalCost = activePrice * quantity;
-
-    const message = `KTM DECOR - DIRECT PRODUCT ORDER
-------------------------------------------
-Hi KTM DECOR! I would like to buy this product directly from your catalog.
-
-PRODUCT DETAILS:
-- Product Name: ${activeName}
-- Category: ${product.category} [${product.subCategory}]
-- Quantity Ordered: ${quantity}
-
-FINANCIAL SUMMARY:
-- Unit Price: Rs. ${activePrice.toLocaleString()} each
-- Total Cost (Excluding Delivery): Rs. ${totalCost.toLocaleString()}
-------------------------------------------
-Please verify availability, let me know the delivery charges, and estimate the delivery and payment schedules!`;
-
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappNumber = "9779706247439"; 
-    window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, "_blank");
+    setIsWhatsAppModalOpen(true);
   };
 
   return (
@@ -1048,6 +1029,17 @@ Please verify availability, let me know the delivery charges, and estimate the d
             {product.name} added to cart
           </span>
         </div>
+      )}
+
+      {/* Direct WhatsApp Buy Intake Modal */}
+      {product && (
+        <DirectWhatsAppModal
+          isOpen={isWhatsAppModalOpen}
+          onClose={() => setIsWhatsAppModalOpen(false)}
+          product={product}
+          selectedVariant={selectedVariant}
+          quantity={quantity}
+        />
       )}
 
     </div>

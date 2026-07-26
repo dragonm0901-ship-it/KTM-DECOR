@@ -110,6 +110,7 @@ export default function GlobalCart() {
   // Form states
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
   const [customerAddress, setCustomerAddress] = useState("");
   const [deliveryRegion, setDeliveryRegion] = useState("kathmandu");
   const [deliveryNotes, setDeliveryNotes] = useState("");
@@ -122,6 +123,20 @@ export default function GlobalCart() {
         setCart(JSON.parse(savedCart));
       } catch (e) {
         console.error("Failed to parse cart storage: ", e);
+      }
+    }
+    const savedInfo = localStorage.getItem("ktm_decor_customer_info");
+    if (savedInfo) {
+      try {
+        const parsed = JSON.parse(savedInfo);
+        if (parsed.customerName) setCustomerName(parsed.customerName);
+        if (parsed.customerPhone) setCustomerPhone(parsed.customerPhone);
+        if (parsed.customerEmail) setCustomerEmail(parsed.customerEmail);
+        if (parsed.deliveryRegion) setDeliveryRegion(parsed.deliveryRegion);
+        if (parsed.customerAddress) setCustomerAddress(parsed.customerAddress);
+        if (parsed.deliveryNotes) setDeliveryNotes(parsed.deliveryNotes);
+      } catch (e) {
+        console.error("Failed to parse customer info storage: ", e);
       }
     }
   }, []);
@@ -243,6 +258,21 @@ export default function GlobalCart() {
       ? "\n⚠️ *Note:* Cart contains custom configurations. Total price excludes custom signs (Quote Pending)." 
       : "";
 
+    // Save user info to localStorage
+    try {
+      const customerData = {
+        customerName: customerName.trim(),
+        customerPhone: customerPhone.trim(),
+        customerEmail: customerEmail.trim(),
+        deliveryRegion,
+        customerAddress: customerAddress.trim(),
+        deliveryNotes: deliveryNotes.trim(),
+      };
+      localStorage.setItem("ktm_decor_customer_info", JSON.stringify(customerData));
+    } catch (err) {
+      console.error("Failed to save customer info", err);
+    }
+
     const message = `*KTM DECOR - E-COMMERCE SHOP CHECKOUT* 🛍️
 ------------------------------------------
 👋 Hi KTM DECOR team! I would like to place an order for the following items in my shopping cart.
@@ -250,6 +280,7 @@ export default function GlobalCart() {
 *👤 CUSTOMER & SHIPPING INFO:*
 • *Name:* ${customerName}
 • *Phone Contact:* ${customerPhone}
+• *Email Address:* ${customerEmail || "Not provided (Optional)"}
 • *Delivery Region:* ${regionNames[deliveryRegion]}
 • *Exact Address:* ${customerAddress}
 • *Delivery Notes/Instructions:* ${deliveryNotes || "No specific instructions"}
@@ -431,6 +462,20 @@ ${itemsText}
                           value={customerPhone}
                           onChange={(e) => setCustomerPhone(e.target.value)}
                           placeholder="e.g. 9706247439"
+                          className="w-full px-3 py-2.5 bg-white dark:bg-zinc-900 border border-border rounded-[4px] text-foreground focus:outline-none focus:border-accent"
+                        />
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="font-bold text-[10px] tracking-wider uppercase text-muted-foreground/80 block">Email Address</label>
+                          <span className="text-[9px] font-bold uppercase tracking-wider text-accent bg-accent/10 px-1.5 py-0.5 rounded">Optional</span>
+                        </div>
+                        <input 
+                          type="email" 
+                          value={customerEmail}
+                          onChange={(e) => setCustomerEmail(e.target.value)}
+                          placeholder="e.g. name@domain.com"
                           className="w-full px-3 py-2.5 bg-white dark:bg-zinc-900 border border-border rounded-[4px] text-foreground focus:outline-none focus:border-accent"
                         />
                       </div>
