@@ -4,7 +4,6 @@ import { Redis } from "@upstash/redis";
 let redisClient = null;
 let upstashRedis = null;
 const memoryCache = new Map();
-const trackedKeys = new Set(); // Registry to track keys without using disabled Redis KEYS command
 
 /**
  * Initialize cache connection (Upstash Redis, standard Redis, or fallback to In-Memory).
@@ -57,17 +56,15 @@ export const initCache = async () => {
 };
 
 /**
- * Retrieve data from cache (Memory first -> Redis second -> null).
+ * Retrieve data from cache.
+ * Uses a 5-second local memory cache TTL to allow fast burst reads while ensuring 
+ * Upstash/Redis invalidation takes effect immediately across all instances.
  */
 export const cacheGet = async (key) => {
-  // 1. Check ultra-fast local Memory Cache first (0ms latency)
+  // 1. Check ultra-fast local Memory Cache (5-second burst window)
   const cachedItem = memoryCache.get(key);
-  if (cachedItem) {
-    if (Date.now() <= cachedItem.expiry) {
-      return cachedItem.value;
-    }
-    memoryCache.delete(key);
-    trackedKeys.delete(key);
+  if (cachedItem && Date.now() <= cachedItem.expiry) {
+    return cachedItem.value;
   }
 
   // 2. Try Upstash Redis next
@@ -76,14 +73,16 @@ export const cacheGet = async (key) => {
       const val = await upstashRedis.get(key);
       if (val !== null && val !== undefined) {
         const parsed = typeof val === "string" ? JSON.parse(val) : val;
-        // Populate local memory cache for instant subsequent reads
+        // Store in short-lived local memory cache (5 seconds)
         memoryCache.set(key, {
           value: parsed,
-          expiry: Date.now() + 300 * 1000, // 5 mins local TTL
+          expiry: Date.now() + 5000,
         });
-        trackedKeys.add(key);
         return parsed;
       }
+      // If Upstash returned null (cache miss / invalidated), clear memory cache as well
+      memoryCache.delete(key);
+      return null;
     } catch (err) {
       console.error(`Upstash get error for key "${key}":`, err.message);
     }
@@ -97,11 +96,12 @@ export const cacheGet = async (key) => {
         const parsed = JSON.parse(val);
         memoryCache.set(key, {
           value: parsed,
-          expiry: Date.now() + 300 * 1000,
+          expiry: Date.now() + 5000,
         });
-        trackedKeys.add(key);
         return parsed;
       }
+      memoryCache.delete(key);
+      return null;
     } catch (err) {
       console.error(`Redis get error for key "${key}":`, err.message);
     }
@@ -111,36 +111,32 @@ export const cacheGet = async (key) => {
 };
 
 /**
- * Store data in cache with TTL.
+ * Store data in cache with TTL (default 1 hour).
  */
 export const cacheSet = async (key, value, ttlSeconds = 3600) => {
-  // 1. Always update local memory cache
+  // Always update local memory cache
   memoryCache.set(key, {
     value,
-    expiry: Date.now() + ttlSeconds * 1000,
+    expiry: Date.now() + 5000,
   });
-  trackedKeys.add(key);
 
-  // 2. Store in Upstash Redis if available
+  // Store in Upstash Redis
   if (upstashRedis) {
     try {
       await upstashRedis.set(key, JSON.stringify(value), {
         ex: ttlSeconds,
       });
-      // Store in Upstash registry set for pattern invalidation without KEYS command
-      await upstashRedis.sadd("ktm_cache_keys_registry", key).catch(() => null);
     } catch (err) {
       console.error(`Upstash set error for key "${key}":`, err.message);
     }
   }
 
-  // 3. Store in Standard TCP Redis if available
+  // Store in Standard TCP Redis
   if (redisClient && redisClient.isOpen) {
     try {
       await redisClient.set(key, JSON.stringify(value), {
         EX: ttlSeconds,
       });
-      await redisClient.sAdd("ktm_cache_keys_registry", key).catch(() => null);
     } catch (err) {
       console.error(`Redis set error for key "${key}":`, err.message);
     }
@@ -152,12 +148,10 @@ export const cacheSet = async (key, value, ttlSeconds = 3600) => {
  */
 export const cacheDelete = async (key) => {
   memoryCache.delete(key);
-  trackedKeys.delete(key);
 
   if (upstashRedis) {
     try {
       await upstashRedis.del(key);
-      await upstashRedis.srem("ktm_cache_keys_registry", key).catch(() => null);
     } catch (err) {
       console.error(`Upstash delete error for key "${key}":`, err.message);
     }
@@ -166,7 +160,6 @@ export const cacheDelete = async (key) => {
   if (redisClient && redisClient.isOpen) {
     try {
       await redisClient.del(key);
-      await redisClient.sRem("ktm_cache_keys_registry", key).catch(() => null);
     } catch (err) {
       console.error(`Redis delete error for key "${key}":`, err.message);
     }
@@ -175,56 +168,60 @@ export const cacheDelete = async (key) => {
 
 /**
  * Delete keys matching a wildcard pattern (e.g. "bootstrap:*").
- * Uses tracked keys registry to prevent "KEYS command disabled" errors in Upstash.
+ * Uses SCAN to reliably delete keys from Upstash Redis, TCP Redis, and Memory Cache.
  */
 export const cacheDeletePattern = async (pattern) => {
-  const regex = new RegExp("^" + pattern.replace(/\*/g, ".*") + "$");
-
   // 1. Clear local memory cache matching pattern
-  const matchedKeys = new Set();
-  for (const key of trackedKeys) {
-    if (regex.test(key)) {
-      matchedKeys.add(key);
-    }
-  }
+  const prefix = pattern.replace(/\*/g, "");
   for (const key of memoryCache.keys()) {
-    if (regex.test(key)) {
-      matchedKeys.add(key);
+    if (key.startsWith(prefix) || key.includes(prefix)) {
+      memoryCache.delete(key);
     }
   }
 
-  matchedKeys.forEach((key) => {
-    memoryCache.delete(key);
-    trackedKeys.delete(key);
-  });
-
-  // 2. Clear Upstash Redis matching pattern via tracked registry
+  // 2. Clear Upstash Redis using SCAN iterator (100% supported by Upstash REST API)
   if (upstashRedis) {
     try {
-      const registeredKeys = await upstashRedis.smembers("ktm_cache_keys_registry").catch(() => []);
-      const keysToDelete = (registeredKeys || []).filter((k) => regex.test(k));
-      if (keysToDelete.length > 0) {
-        await upstashRedis.del(...keysToDelete);
-        await upstashRedis.srem("ktm_cache_keys_registry", ...keysToDelete);
-        console.log(`⚡ Cleared ${keysToDelete.length} cached keys matching pattern "${pattern}" from Upstash Redis.`);
+      let cursor = 0;
+      let deletedCount = 0;
+      do {
+        const res = await upstashRedis.scan(cursor, { match: pattern, count: 100 }).catch(() => null);
+        if (!res) break;
+
+        const nextCursor = Array.isArray(res) ? res[0] : res.cursor;
+        const keys = Array.isArray(res) ? res[1] : res.keys;
+
+        cursor = Number(nextCursor) || 0;
+
+        if (Array.isArray(keys) && keys.length > 0) {
+          await upstashRedis.del(...keys).catch(() => null);
+          deletedCount += keys.length;
+        }
+      } while (cursor !== 0);
+
+      if (deletedCount > 0) {
+        console.log(`⚡ Cleared ${deletedCount} cached keys matching pattern "${pattern}" from Upstash Redis.`);
       }
     } catch (err) {
-      console.error(`Upstash delete pattern error for "${pattern}":`, err.message);
+      console.error(`Upstash scan delete error for "${pattern}":`, err.message);
     }
   }
 
-  // 3. Clear Standard TCP Redis matching pattern via tracked registry
+  // 3. Clear Standard TCP Redis using scanIterator
   if (redisClient && redisClient.isOpen) {
     try {
-      const registeredKeys = await redisClient.sMembers("ktm_cache_keys_registry").catch(() => []);
-      const keysToDelete = (registeredKeys || []).filter((k) => regex.test(k));
+      let deletedCount = 0;
+      const keysToDelete = [];
+      for await (const key of redisClient.scanIterator({ MATCH: pattern, COUNT: 100 })) {
+        keysToDelete.push(key);
+      }
       if (keysToDelete.length > 0) {
         await redisClient.del(keysToDelete);
-        await redisClient.sRem("ktm_cache_keys_registry", keysToDelete);
-        console.log(`⚡ Cleared ${keysToDelete.length} cached keys matching pattern "${pattern}" from TCP Redis.`);
+        deletedCount = keysToDelete.length;
+        console.log(`⚡ Cleared ${deletedCount} cached keys matching pattern "${pattern}" from TCP Redis.`);
       }
     } catch (err) {
-      console.error(`Redis delete pattern error for "${pattern}":`, err.message);
+      console.error(`Redis scan delete error for "${pattern}":`, err.message);
     }
   }
 };
