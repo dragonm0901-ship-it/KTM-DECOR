@@ -127,7 +127,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
 
     // 2. Orders (Placed on the date they were entered)
     orders.forEach((order) => {
-      const entryDate = order.createdAt ? new Date(order.createdAt) : (order.date ? new Date(order.date) : new Date());
+      const entryDate = order.createdAt ? new Date(order.createdAt) : new Date();
       let displayHour = entryDate.getHours();
       if (displayHour < START_HOUR || displayHour > END_HOUR) {
         displayHour = 15; // 3:00 PM default
