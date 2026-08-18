@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, CheckCircle2, HelpCircle, ShoppingBag, Sparkles, Tag } from "lucide-react";
 import { GUIDES } from "@/data/guides-data";
 import { PRODUCTS } from "@/data/shop-data";
+import VideoEmbed from "@/components/VideoEmbed";
+import CostCalculatorWidget from "@/components/CostCalculatorWidget";
 
 export async function generateStaticParams() {
   return GUIDES.map((guide) => ({
@@ -211,6 +213,18 @@ export default async function GuideDetailPage({
               </section>
             ))}
           </article>
+
+          {/* Video SEO Demonstration */}
+          <VideoEmbed
+            title={`Workshop Crafting & Quality Guide: ${guide.title}`}
+            description={`Watch how KTM DECOR crafts custom LED neon signs and illuminated 3D signboards at our Balkot workshop in Kathmandu, Nepal.`}
+            thumbnailUrl="/products/product_5_main.png"
+            uploadDate={guide.updatedDate || "2026-07-20"}
+            caption="Verified KTM DECOR Balkot Workshop Fabrication"
+          />
+
+          {/* Interactive Cost Estimator Widget */}
+          <CostCalculatorWidget />
 
           {/* Keywords Tag Cloud Section (SEO indexing signal) */}
           <div className="mt-12 p-6 bg-card border border-border rounded-[4px]">

@@ -350,7 +350,7 @@ export default function Preloader() {
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center hidden lg:flex"
+      className="fixed inset-0 z-[9999] hidden lg:flex flex-col items-center justify-center"
       style={{ pointerEvents: isDone ? "none" : "auto" }}
     >
       {/* Two half-panels — using inline style for guaranteed solid color */}

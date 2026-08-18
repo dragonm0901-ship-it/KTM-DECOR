@@ -72,6 +72,7 @@ export interface MarketingCampaign {
 export type FieldNote = MarketingCampaign;
 
 export interface Order {
+  date: any;
   _id: string;
   productName: string;
   size: string;

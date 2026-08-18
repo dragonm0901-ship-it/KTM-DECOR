@@ -1,6 +1,8 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import CitationWidget from "@/components/CitationWidget";
+import PartnerBadge from "@/components/PartnerBadge";
 
 export const metadata: Metadata = {
   title: "Neon Sign & Business Decor Statistics Nepal (2026) | KTM DECOR",
@@ -132,6 +134,10 @@ export default function StatisticsPage() {
               Data was collected between January and April 2026 by surveying 150 local businesses (retail, hospitality, and corporate) across the Kathmandu Valley. Social media impact was measured by tracking location tags and branded hashtag usage for 30 days before and after the installation of new illuminated signage. For citation purposes, please link back to this page as the original source: <em>https://www.decorktm.com/neon-sign-statistics-nepal</em>.
             </p>
           </section>
+
+          {/* Academic / Media Citation and Partner Embed Widgets */}
+          <CitationWidget />
+          <PartnerBadge />
 
         </div>
 

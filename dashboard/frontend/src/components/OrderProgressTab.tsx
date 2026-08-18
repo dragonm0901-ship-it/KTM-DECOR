@@ -316,7 +316,7 @@ export const OrderProgressTab: React.FC = () => {
                           <span className={`px-1.5 py-0.5 border text-[8px] font-bold rounded uppercase ${getSourceBadge(order.orderFrom)}`}>
                             {order.orderFrom}
                           </span>
-                          <span className="font-bold text-foreground text-[11px] flex items-center text-accent">
+                          <span className="font-bold text-accent text-[11px] flex items-center">
                             <DollarSign size={10} />
                             {order.totalPrice.toLocaleString()}
                           </span>

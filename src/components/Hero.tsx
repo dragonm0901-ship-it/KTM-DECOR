@@ -20,20 +20,20 @@ const features = [
 // Cards for the Desktop layout
 const rawCards = [
   // Center Card (Main Focus)
-  { src: "/products/product_5_main.png", left: "50%", top: "50%", width: "28vw", height: "35vw" },
+  { src: "/products/product_5_main.png", alt: "Custom LED neon sign fabricated in Kathmandu Nepal", left: "50%", top: "50%", width: "28vw", height: "35vw" },
   
   // Left Cluster
-  { src: "/products/product_1_main.png", left: "26%", top: "45%", width: "15vw", height: "20vw" }, // Left Top of main image (moved more left and slightly down)
-  { src: "/products/product_8_main.png", left: "20%", top: "15%", width: "14vw", height: "18vw" },
-  { src: "/products/product_6_main.png", left: "15%", top: "75%", width: "15vw", height: "20vw" },
+  { src: "/products/product_1_main.png", alt: "3D acrylic backlit signage lettering Nepal", left: "26%", top: "45%", width: "15vw", height: "20vw" },
+  { src: "/products/product_8_main.png", alt: "Bespoke cafe neon light board Kathmandu", left: "20%", top: "15%", width: "14vw", height: "18vw" },
+  { src: "/products/product_6_main.png", alt: "Commercial 2D double-sided outdoor light board Nepal", left: "15%", top: "75%", width: "15vw", height: "20vw" },
   
   // Right Cluster
-  { src: "/products/product_4_main.png", left: "74%", top: "55%", width: "15vw", height: "18vw" }, // Right Bottom of main image (moved more right)
-  { src: "/products/product_9_main.png", left: "80%", top: "20%", width: "16vw", height: "20vw" },
-  { src: "/products/product_10_main.png", left: "85%", top: "75%", width: "18vw", height: "15vw" },
+  { src: "/products/product_4_main.png", alt: "Architectural illuminated logo and storefront sign Nepal", left: "74%", top: "55%", width: "15vw", height: "18vw" },
+  { src: "/products/product_9_main.png", alt: "Handcrafted resin and acrylic modern wall clock decor", left: "80%", top: "20%", width: "16vw", height: "20vw" },
+  { src: "/products/product_10_main.png", alt: "Custom executive wooden nameplate for office entrance", left: "85%", top: "75%", width: "18vw", height: "15vw" },
   
   // Top/Bottom Center Edges
-  { src: "/hero-images/hero2.webp", left: "55%", top: "12%", width: "16vw", height: "13vw" },
+  { src: "/hero-images/hero2.webp", alt: "KTM DECOR artisan crafting custom neon signs in Balkot workshop", left: "55%", top: "12%", width: "16vw", height: "13vw" },
 ];
 
 const cards = rawCards.map((c, i) => {
@@ -42,6 +42,7 @@ const cards = rawCards.map((c, i) => {
   return {
     id: i,
     src: c.src,
+    alt: c.alt,
     widthVal: c.width,
     style: {
       left: c.left,
@@ -200,7 +201,7 @@ export default function Hero() {
                   <div className="relative w-full h-full rounded-[4px] overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.5)] bg-card/50 backdrop-blur-sm border border-white/5">
                     <Image 
                       src={card.src} 
-                      alt="Gallery artwork" 
+                      alt={card.alt || "Custom neon sign and 3D signage in Nepal"} 
                       fill 
                       className="object-cover" 
                       sizes={`(max-width: 1024px) 30vw, ${card.widthVal}`}
@@ -233,8 +234,9 @@ export default function Hero() {
                 </span>
               </div>
 
-              {/* Main Headline */}
+              {/* Main Headline with semantic crawlability */}
               <h1 className="text-[clamp(3.5rem,10vw,8.5rem)] font-extrabold leading-[0.9] tracking-[-0.04em] mb-6 md:mb-8 text-white drop-shadow-[0_4px_16px_rgba(0,0,0,0.45)]">
+                <span className="sr-only">KTM DECOR - Nepal&apos;s Leading Custom LED Neon Signs & 3D Signboards in Kathmandu</span>
                 <span className="block">Your space,</span>
                 <span className="block mt-2">
                   custom <span className="text-accent relative inline-block drop-shadow-[0_2px_12px_rgba(254,145,76,0.5)]">
@@ -246,8 +248,7 @@ export default function Hero() {
 
               {/* Subtext */}
               <p className="text-lg md:text-xl max-w-2xl leading-relaxed mb-10 text-white/80 font-medium">
-                Premium neon signs and illuminated decor crafted with precision
-                to bring your brand&apos;s story to life.
+                Nepal&apos;s premier custom LED neon signs, 3D backlit signboards, and architectural decor crafted in Kathmandu with valley-wide installation.
               </p>
 
               {/* CTAs */}
@@ -301,6 +302,7 @@ export default function Hero() {
                 ref={mobileTitleRef}
                 className="text-[clamp(1.75rem,5.5vw,3rem)] font-extrabold leading-[0.95] tracking-[-0.03em] mb-4 text-foreground drop-shadow-[0_2px_8px_rgba(0,0,0,0.08)] dark:drop-shadow-[0_4px_16px_rgba(0,0,0,0.75)] w-full"
               >
+                <span className="sr-only">KTM DECOR | Custom LED Neon Signs & 3D Signboards in Nepal</span>
                 <span className="block">Your space,</span>
                 <span className="block mt-2">
                   custom <span className="text-accent drop-shadow-[0_2px_10px_rgba(254,145,76,0.45)]">illuminated.</span>
@@ -317,7 +319,7 @@ export default function Hero() {
               <div className="hero-mobile-secondary absolute top-0 right-[-5%] w-[63%] aspect-[3/4] rounded-[4px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.15)] border border-neutral-200/50 z-10 opacity-0">
                 <Image
                   src="/products/product_5_main.png"
-                  alt="Custom neon sign installation"
+                  alt="Custom LED neon sign installation in Kathmandu cafe"
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 40vw, 60vw"
@@ -331,7 +333,7 @@ export default function Hero() {
               <div className="hero-mobile-secondary absolute bottom-4 left-[8%] w-[50%] aspect-[4/3] rounded-[4px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-neutral-200/50 z-20 opacity-0">
                 <Image
                   src="/hero-images/hero2.webp"
-                  alt="LED signage craftsmanship"
+                  alt="Crafting 3D acrylic LED light board in Nepal"
                   fill
                   className="object-cover"
                   sizes="50vw"
@@ -343,7 +345,7 @@ export default function Hero() {
               <div className="hero-mobile-secondary absolute top-[15%] left-[-2%] w-[35%] aspect-square rounded-[4px] overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.1)] border border-neutral-200/50 z-30 opacity-0">
                 <Image
                   src="/products/product_1_main.png"
-                  alt="Illuminated decor detail"
+                  alt="Illuminated custom architectural decor Nepal"
                   fill
                   className="object-cover"
                   sizes="35vw"

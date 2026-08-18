@@ -307,7 +307,7 @@ export const SalesTab: React.FC = () => {
 
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <div className="bg-card border border-border/80 shadow-sm p-5 rounded-2xl flex items-center gap-4 bg-green-600/[0.02] border-green-500/20">
+        <div className="border shadow-sm p-5 rounded-2xl flex items-center gap-4 bg-green-600/[0.02] border-green-500/20">
           <div className="h-12 w-12 rounded-lg bg-green-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
             <TrendingUp size={22} />
           </div>
@@ -318,7 +318,7 @@ export const SalesTab: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-card border border-border/80 shadow-sm p-5 rounded-2xl flex items-center gap-4 bg-red-600/[0.02] border-red-500/20">
+        <div className="border shadow-sm p-5 rounded-2xl flex items-center gap-4 bg-red-600/[0.02] border-red-500/20">
           <div className="h-12 w-12 rounded-lg bg-red-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
             <DollarSign size={22} className="text-white" />
           </div>
@@ -494,7 +494,7 @@ export const SalesTab: React.FC = () => {
 
       {/* Completed Sign Orders Awaiting Approval */}
       {pendingApprovalOrders.length > 0 && (
-        <div className="bg-card border border-border/80 p-5 rounded-2xl shadow-sm border-amber-500/20 bg-amber-500/[0.02] space-y-4">
+        <div className="p-5 rounded-2xl shadow-sm border border-amber-500/20 bg-amber-500/[0.02] space-y-4">
           <div className="flex items-center justify-between border-b border-border/60 pb-2.5">
             <h3 className="font-bold text-sm font-display text-amber-500 flex items-center gap-2">
               <Package size={16} />

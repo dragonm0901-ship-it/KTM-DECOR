@@ -81,7 +81,7 @@ export default function About() {
  
         {/* Content Card container */}
         <div 
-          className={`relative z-10 max-w-[1500px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-16 lg:gap-24 items-center rounded-[4px] shadow-2xl border p-5 sm:p-8 md:p-16 lg:p-20 bg-white dark:bg-black border-accent/25 shadow-[0_30px_70px_-15px_rgba(254,145,76,0.15)] scale-[1.015] lg:transition-all lg:duration-700 lg:ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          className={`relative z-10 max-w-[1500px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-16 lg:gap-24 items-center rounded-[4px] border p-5 sm:p-8 md:p-16 lg:p-20 bg-white dark:bg-black border-accent/25 shadow-[0_30px_70px_-15px_rgba(254,145,76,0.15)] scale-[1.015] lg:transition-all lg:duration-700 lg:ease-[cubic-bezier(0.16,1,0.3,1)] ${
             hoveredPart === 'content'
               ? 'lg:bg-white lg:dark:bg-black lg:border-accent/25 lg:shadow-[0_30px_70px_-15px_rgba(254,145,76,0.15)] lg:scale-[1.015]' 
               : 'lg:bg-card/92 lg:dark:bg-card/85 lg:border-border/60 lg:scale-[1.0]'
@@ -124,7 +124,7 @@ export default function About() {
                   ? 'lg:text-foreground lg:font-bold'
                   : 'lg:text-foreground/95 lg:font-semibold'
               }`}>
-                Founded by <span className={`font-bold transition-colors duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] text-accent font-black ${
+                Founded by <span className={`transition-colors duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] text-accent font-black ${
                   hoveredPart === 'content' ? 'lg:text-accent lg:font-black' : 'lg:text-foreground lg:font-bold'
                 }`}>Kishor G.C.</span>, KTM DECOR began as a small experiment in a garage, fueled by a passion for light and design. We didn&apos;t just want to make signs; we wanted to create glowing landmarks.
               </p>

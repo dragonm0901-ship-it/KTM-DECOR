@@ -69,7 +69,7 @@ export default function Footer() {
               </div>
 
               {/* Links Area */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 w-full pt-8 border-t border-gray-200 dark:border-white/10">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-5 gap-8 md:gap-8 w-full pt-8 border-t border-gray-200 dark:border-white/10">
                 <div className="flex flex-col gap-3 md:gap-4">
                   <h4 className="uppercase tracking-widest text-[10px] md:text-sm font-bold text-gray-900 dark:text-white">Navigation</h4>
                   <div className="flex flex-col gap-2 md:gap-3">
@@ -113,12 +113,30 @@ export default function Footer() {
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-3 md:gap-4 col-span-2 md:col-span-1">
+                <div className="flex flex-col gap-3 md:gap-4">
+                  <h4 className="uppercase tracking-widest text-[10px] md:text-sm font-bold text-gray-900 dark:text-white">Resources & PR</h4>
+                  <div className="flex flex-col gap-2 md:gap-3 text-xs md:text-sm font-medium">
+                    <Link href="/neon-sign-statistics-nepal" className="text-gray-500 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-500 transition-colors line-clamp-1">
+                      2026 Signage Statistics
+                    </Link>
+                    <Link href="/press" className="text-gray-500 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-500 transition-colors line-clamp-1">
+                      Press & Media Kit
+                    </Link>
+                    <Link href="/decor-guides" className="text-gray-500 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-500 transition-colors line-clamp-1">
+                      All Decor Guides
+                    </Link>
+                    <Link href="/start-project" className="text-gray-500 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-500 transition-colors line-clamp-1">
+                      Custom Design Studio
+                    </Link>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-3 md:gap-4 col-span-2 sm:col-span-1">
                   <h4 className="uppercase tracking-widest text-[10px] md:text-sm font-bold text-gray-900 dark:text-white">Contact</h4>
                   <div className="flex flex-col gap-2 md:gap-3">
-                    <span className="text-gray-500 dark:text-gray-400 text-sm md:text-base font-medium">Balkot, Bhaktapur, Nepal</span>
-                    <a href="mailto:ktmdecor2024@gmail.com" className="text-gray-500 dark:text-gray-400 text-sm md:text-base font-medium hover:text-orange-600 dark:hover:text-orange-500 transition-colors">ktmdecor2024@gmail.com</a>
-                    <a href="tel:+9779706247439" className="text-gray-500 dark:text-gray-400 text-sm md:text-base font-medium hover:text-orange-600 dark:hover:text-orange-500 transition-colors">+977 9706247439</a>
+                    <span className="text-gray-500 dark:text-gray-400 text-xs md:text-sm font-medium">Balkot Factory, Bhaktapur, Nepal</span>
+                    <a href="mailto:ktmdecor2024@gmail.com" className="text-gray-500 dark:text-gray-400 text-xs md:text-sm font-medium hover:text-orange-600 dark:hover:text-orange-500 transition-colors truncate">ktmdecor2024@gmail.com</a>
+                    <a href="tel:+9779706247439" className="text-gray-500 dark:text-gray-400 text-xs md:text-sm font-medium hover:text-orange-600 dark:hover:text-orange-500 transition-colors">+977 9706247439</a>
                   </div>
                 </div>
               </div>
