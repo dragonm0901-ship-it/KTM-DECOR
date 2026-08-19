@@ -98,7 +98,7 @@ export default function Testimonials() {
     let nameClass = "text-foreground";
     let roleClass = "text-muted";
     let starClass = "fill-accent text-accent";
-    let avatarBgClass = "bg-accent/20 text-accent";
+    let avatarBgClass = "bg-accent text-white";
 
     if (t.theme === "black") {
       bgClass = "bg-[#111] border-[#222] hover:border-accent/50";
@@ -106,14 +106,14 @@ export default function Testimonials() {
       nameClass = "text-white";
       roleClass = "text-white/50";
       starClass = "fill-accent text-accent";
-      avatarBgClass = "bg-accent/20 text-accent";
+      avatarBgClass = "bg-white text-black";
     } else if (t.theme === "orange") {
       bgClass = "bg-accent border-accent hover:border-black/20";
       textClass = "text-black/80";
       nameClass = "text-black";
       roleClass = "text-black/60";
       starClass = "fill-black text-black";
-      avatarBgClass = "bg-black/10 text-black";
+      avatarBgClass = "bg-black text-accent";
     }
 
     return (

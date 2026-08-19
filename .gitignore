@@ -37,3 +37,6 @@ next-env.d.ts
 
 # Dashboard Built Outputs
 /public/admin/
+
+# Local text files
+page list.txt
