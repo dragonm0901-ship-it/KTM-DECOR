@@ -59,6 +59,9 @@ const pacifico = Pacifico({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.decorktm.com"),
+  verification: {
+    google: "b98ok2OA0IqJbQ05BA7_R1S2W2RYHlz9273MWXF5whM",
+  },
   alternates: {
     canonical: "./",
   },
@@ -124,6 +127,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <meta name="google-site-verification" content="b98ok2OA0IqJbQ05BA7_R1S2W2RYHlz9273MWXF5whM" />
         {/* Analytics loaded dynamically on user interaction in ClientProviders */}
         <script
           dangerouslySetInnerHTML={{
