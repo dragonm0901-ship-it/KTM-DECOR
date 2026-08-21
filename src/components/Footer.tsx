@@ -147,6 +147,13 @@ export default function Footer() {
               <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">
                 © {new Date().getFullYear()} KTM DECOR. All Rights Reserved.
               </span>
+              <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 dark:text-gray-400 font-medium">
+                <Link href="/privacy-policy" className="hover:text-orange-600 dark:hover:text-orange-500 transition-colors">Privacy Policy</Link>
+                <span>•</span>
+                <Link href="/terms-of-service" className="hover:text-orange-600 dark:hover:text-orange-500 transition-colors">Terms of Service</Link>
+                <span>•</span>
+                <Link href="/return-policy" className="hover:text-orange-600 dark:hover:text-orange-500 transition-colors">Return & Refund Policy</Link>
+              </div>
               <div className="flex items-center gap-4">
                 {socialLinks.map((social, i) => {
                   const Icon = social.icon;
