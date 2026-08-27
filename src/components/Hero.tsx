@@ -243,7 +243,7 @@ export default function Hero() {
 
               {/* Subtext */}
               <p className="text-lg md:text-xl max-w-2xl leading-relaxed mb-10 text-black dark:text-white/90 font-medium">
-                Nepal&apos;s premier custom LED neon signs, 3D backlit signboards, and architectural decor crafted in Kathmandu with valley-wide installation.
+                Nepal&apos;s premium custom LED neon signs, 3D backlit signboards, and architectural decor crafted in Kathmandu with valley-wide installation.
               </p>
 
               {/* CTAs */}
