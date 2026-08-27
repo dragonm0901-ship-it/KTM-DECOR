@@ -14,6 +14,9 @@ import {
   Eye
 } from "./ui/solar-icons";
 import { OrderDetailModal } from "./OrderDetailModal";
+import { formatNepaliShort } from "../utils/nepaliDate";
+import { OrderPhotoStack } from "./ui/OrderPhotoStack";
+import { OrderPhotoGalleryModal } from "./ui/OrderPhotoGalleryModal";
 
 export const OrderProgressTab: React.FC = () => {
   const { orders, updateOrderProgress, approveOrder, user, users } = useStore();
@@ -21,35 +24,46 @@ export const OrderProgressTab: React.FC = () => {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [selectedViewOrder, setSelectedViewOrder] = useState<Order | null>(null);
 
+  // Gallery Modal State
+  const [galleryOrder, setGalleryOrder] = useState<Order | null>(null);
+  const [galleryType, setGalleryType] = useState<"product" | "location">("product");
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+
+  const handleOpenGallery = (order: Order, type: "product" | "location") => {
+    setGalleryOrder(order);
+    setGalleryType(type);
+    setIsGalleryOpen(true);
+  };
+
   const stages: { id: Order["stage"]; label: string; color: string; desc: string }[] = [
     {
       id: "design",
       label: "Design Process",
-      color: "border-orange-500/20 bg-orange-500/5 text-orange-500",
+      color: "bg-amber-600 text-white font-extrabold shadow-xs",
       desc: "Client review & vector mockups"
     },
     {
       id: "manufacturing",
       label: "Manufacturing",
-      color: "border-red-500/20 bg-red-500/5 text-red-500",
+      color: "bg-red-600 text-white font-extrabold shadow-xs",
       desc: "Acrylic cutting, neon bending & assembly"
     },
     {
       id: "completed",
       label: "Completed",
-      color: "border-purple-500/20 bg-purple-500/5 text-purple-500",
+      color: "bg-purple-600 text-white font-extrabold shadow-xs",
       desc: "Ready for delivery & installation"
     },
     {
       id: "delivered",
       label: "Delivered",
-      color: "border-blue-500/20 bg-blue-500/5 text-blue-500",
+      color: "bg-blue-600 text-white font-extrabold shadow-xs",
       desc: "Received by client & payment verified"
     },
     {
       id: "paid",
       label: "Paid",
-      color: "border-green-500/20 bg-green-500/5 text-green-500",
+      color: "bg-emerald-600 text-white font-extrabold shadow-xs",
       desc: "Delivered and balance fully settled"
     }
   ];
@@ -97,22 +111,22 @@ export const OrderProgressTab: React.FC = () => {
   const getSourceBadge = (source: Order["orderFrom"]) => {
     switch (source) {
       case "tiktok":
-        return "bg-black text-white dark:bg-zinc-800 border-zinc-700";
+        return "bg-black text-white shadow-xs font-bold";
       case "instagram":
-        return "bg-pink-100 text-pink-700 dark:bg-pink-900/20 dark:text-pink-300 border-pink-200/50";
+        return "bg-pink-600 text-white shadow-xs font-bold";
       case "whatsapp":
-        return "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300 border-emerald-200/50";
+        return "bg-emerald-600 text-white shadow-xs font-bold";
       case "direct":
-        return "bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300 border-blue-200/50";
+        return "bg-blue-600 text-white shadow-xs font-bold";
       default:
-        return "bg-gray-100 text-gray-700 border-border";
+        return "bg-slate-700 text-white shadow-xs font-bold";
     }
   };
 
   const calculateUrgency = (dateStr: string, approved: boolean, stage?: string) => {
-    if (stage === "paid") return { label: "Paid", color: "bg-green-600 border-green-600 text-white" };
-    if (approved || stage === "delivered") return { label: "Delivered", color: "bg-blue-600 border-blue-600 text-white" };
-    if (!dateStr) return { label: "No Deadline", color: "bg-gray-150 text-gray-500 border-border" };
+    if (stage === "paid") return { label: "Paid", subLabel: "", color: "bg-emerald-600 text-white font-extrabold shadow-xs" };
+    if (approved || stage === "delivered") return { label: "Delivered", subLabel: "", color: "bg-blue-600 text-white font-extrabold shadow-xs" };
+    if (!dateStr) return { label: "No Deadline", subLabel: "", color: "bg-slate-600 text-white font-bold shadow-xs" };
 
     const now = new Date();
     now.setHours(0, 0, 0, 0);
@@ -123,15 +137,15 @@ export const OrderProgressTab: React.FC = () => {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays < 0) {
-      return { label: `Overdue (${Math.abs(diffDays)}d ago)`, color: "bg-red-600 border-red-600 text-white animate-pulse-dots" };
+      return { label: "Overdue", subLabel: `(${Math.abs(diffDays)}d ago)`, color: "bg-red-600 text-white font-extrabold shadow-xs animate-pulse-dots" };
     } else if (diffDays === 0) {
-      return { label: "Urgent (Today)", color: "bg-red-600 border-red-600 text-white font-bold" };
+      return { label: "Urgent", subLabel: "(Today)", color: "bg-red-600 text-white font-extrabold shadow-xs" };
     } else if (diffDays <= 2) {
-      return { label: `High (${diffDays === 1 ? "Tomorrow" : "2d left"})`, color: "bg-amber-600 border-amber-600 text-white font-bold" };
+      return { label: "High", subLabel: `(${diffDays === 1 ? "Tomorrow" : `${diffDays}d left`})`, color: "bg-amber-600 text-white font-extrabold shadow-xs" };
     } else if (diffDays <= 4) {
-      return { label: `Medium (${diffDays}d left)`, color: "bg-yellow-600 border-yellow-600 text-white" };
+      return { label: "Medium", subLabel: `(${diffDays}d left)`, color: "bg-yellow-600 text-white font-extrabold shadow-xs" };
     } else {
-      return { label: `Normal (${diffDays}d left)`, color: "bg-blue-600 border-blue-600 text-white" };
+      return { label: "Normal", subLabel: `(${diffDays}d left)`, color: "bg-blue-600 text-white font-extrabold shadow-xs" };
     }
   };
 
@@ -197,45 +211,33 @@ export const OrderProgressTab: React.FC = () => {
                       >
                         {/* Urgency Badge & Deadline */}
                         <div className="flex items-center justify-between gap-1.5">
-                          <span className={`px-1.5 py-0.5 border text-[8px] font-extrabold uppercase rounded tracking-wide ${urgency.color}`}>
-                            {urgency.label}
-                          </span>
+                          <div className={`px-2 py-0.5 rounded text-center leading-tight shadow-xs ${urgency.color}`}>
+                            <span className="block text-[8px] uppercase font-black tracking-wider">{urgency.label}</span>
+                            {urgency.subLabel && (
+                              <span className="block text-[7px] font-bold opacity-95 leading-none mt-0.5">{urgency.subLabel}</span>
+                            )}
+                          </div>
                           <span className="text-[9px] text-muted flex items-center gap-1 font-semibold">
                             <Clock size={9} />
-                            {order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString([], { month: "short", day: "numeric" }) : "TBD"}
+                            {order.deliveryDate ? formatNepaliShort(order.deliveryDate) : "TBD"}
                           </span>
                         </div>
 
-                        {/* Mockup Preview Images */}
-                        {(order.productImageUrl || order.locationImageUrl) && (
-                          <div className="grid grid-cols-2 gap-1.5">
-                            {order.productImageUrl ? (
-                              <div className="h-16 rounded border border-border overflow-hidden bg-background relative group">
-                                <img src={order.productImageUrl} alt="Product Mock" className="w-full h-full object-cover" />
-                                <span className="absolute bottom-0 left-0 right-0 bg-black/60 text-[6px] text-white text-center py-0.5 leading-none font-bold uppercase tracking-wider">
-                                  Sign
-                                </span>
-                              </div>
-                            ) : (
-                              <div className="h-16 rounded border border-dashed border-border/50 bg-background flex items-center justify-center text-muted text-[8px] font-bold uppercase">
-                                No Sign
-                              </div>
-                            )}
-
-                            {order.locationImageUrl ? (
-                              <div className="h-16 rounded border border-border overflow-hidden bg-background relative group">
-                                <img src={order.locationImageUrl} alt="Location Site" className="w-full h-full object-cover" />
-                                <span className="absolute bottom-0 left-0 right-0 bg-black/60 text-[6px] text-white text-center py-0.5 leading-none font-bold uppercase tracking-wider">
-                                  Site
-                                </span>
-                              </div>
-                            ) : (
-                              <div className="h-16 rounded border border-dashed border-border/50 bg-background flex items-center justify-center text-muted text-[8px] font-bold uppercase">
-                                No Site
-                              </div>
-                            )}
-                          </div>
-                        )}
+                        {/* Stacked Preview Images */}
+                        <div className="flex items-center gap-3 pt-0.5">
+                          <OrderPhotoStack
+                            images={order.productImages && order.productImages.length > 0 ? order.productImages : (order.productImageUrl ? [order.productImageUrl] : [])}
+                            type="product"
+                            size="md"
+                            onClick={() => handleOpenGallery(order, "product")}
+                          />
+                          <OrderPhotoStack
+                            images={order.locationImages && order.locationImages.length > 0 ? order.locationImages : (order.locationImageUrl ? [order.locationImageUrl] : [])}
+                            type="location"
+                            size="md"
+                            onClick={() => handleOpenGallery(order, "location")}
+                          />
+                        </div>
 
                         {/* Title & Specs */}
                         <div>
@@ -400,6 +402,14 @@ export const OrderProgressTab: React.FC = () => {
       <OrderDetailModal
         order={selectedViewOrder}
         onClose={() => setSelectedViewOrder(null)}
+      />
+
+      {/* Lightbox Photo Gallery Modal */}
+      <OrderPhotoGalleryModal
+        order={galleryOrder}
+        isOpen={isGalleryOpen}
+        initialType={galleryType}
+        onClose={() => setIsGalleryOpen(false)}
       />
 
     </div>

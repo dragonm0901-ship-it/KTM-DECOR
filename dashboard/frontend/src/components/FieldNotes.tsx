@@ -13,6 +13,7 @@ import {
   Mail
 } from "./ui/solar-icons";
 import { compressImage } from "../utils/imageCompressor";
+import { formatNepali } from "../utils/nepaliDate";
 
 // List of all 77 Districts of Nepal
 const NEPAL_DISTRICTS = [
@@ -278,7 +279,7 @@ export const FieldNotes: React.FC<FieldNotesProps> = ({
                       </span>
                       <span className="flex items-center gap-1">
                         <Clock size={10} />
-                        {new Date(note.createdAt).toLocaleDateString()}
+                        {formatNepali(note.createdAt)}
                       </span>
                     </div>
                   </div>

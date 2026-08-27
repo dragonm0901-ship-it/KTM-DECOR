@@ -8,8 +8,11 @@ import {
   Mail,
   MapPin,
   Clock,
-  Download
+  Download,
+  Eye
 } from "./ui/solar-icons";
+import { formatNepali } from "../utils/nepaliDate";
+import { OrderPhotoGalleryModal } from "./ui/OrderPhotoGalleryModal";
 
 interface OrderDetailModalProps {
   order: Order | null;
@@ -17,9 +20,25 @@ interface OrderDetailModalProps {
 }
 
 export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, onClose }) => {
-  const [activeImageUrl, setActiveImageUrl] = useState<string | null>(null);
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [galleryType, setGalleryType] = useState<"product" | "location">("product");
+  const [galleryIndex, setGalleryIndex] = useState(0);
 
   if (!order) return null;
+
+  const productImages = Array.isArray(order.productImages) && order.productImages.length > 0
+    ? order.productImages
+    : (order.productImageUrl ? [order.productImageUrl] : []);
+
+  const locationImages = Array.isArray(order.locationImages) && order.locationImages.length > 0
+    ? order.locationImages
+    : (order.locationImageUrl ? [order.locationImageUrl] : []);
+
+  const handleOpenGallery = (type: "product" | "location", index: number = 0) => {
+    setGalleryType(type);
+    setGalleryIndex(index);
+    setGalleryOpen(true);
+  };
 
   return (
     <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4 overflow-y-auto">
@@ -126,11 +145,40 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, onClo
         id="order-detail-print" 
         className="bg-card w-full max-w-2xl rounded-lg border border-border p-4 sm:p-6 shadow-2xl animate-scale-up my-4 max-h-[calc(100dvh-32px)] sm:max-h-[90vh] overflow-y-auto text-left"
       >
-        <div className="flex items-center justify-between mb-6 border-b border-border pb-3">
-          <h2 className="text-lg font-bold font-display flex items-center gap-2">
-            <Package className="text-accent" />
-            Order Detail Overview
-          </h2>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 border-b border-border pb-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-bold font-display flex items-center gap-2 text-foreground">
+                <Package className="text-accent" />
+                Order Detail Overview
+              </h2>
+              <span className={`px-2.5 py-0.5 text-[9px] font-extrabold uppercase rounded-md tracking-wider text-white shadow-xs ${
+                order.stage === "paid"
+                  ? "bg-emerald-600"
+                  : order.stage === "delivered" || order.approved
+                  ? "bg-blue-600"
+                  : order.stage === "completed"
+                  ? "bg-purple-600"
+                  : order.stage === "manufacturing"
+                  ? "bg-red-600"
+                  : "bg-amber-600"
+              }`}>
+                {order.stage}
+              </span>
+            </div>
+            {/* Header Dates Bar (Always visible in UI and print PDF) */}
+            <div className="flex flex-wrap items-center gap-3 mt-1.5 text-xs text-muted">
+              <div className="flex items-center gap-1 font-medium">
+                <span className="text-muted-foreground uppercase text-[10px] font-bold">Order Date (अर्डर मिति):</span>
+                <strong className="text-foreground">{formatNepali(order.orderDate || order.createdAt)}</strong>
+              </div>
+              <span>•</span>
+              <div className="flex items-center gap-1 font-medium">
+                <span className="text-muted-foreground uppercase text-[10px] font-bold">Delivery Target (डेलिभरी):</span>
+                <strong className="text-foreground">{formatNepali(order.deliveryDate)}</strong>
+              </div>
+            </div>
+          </div>
           <div className="flex items-center gap-2 screen-only">
             <button
               type="button"
@@ -175,37 +223,84 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, onClo
               </div>
             </div>
 
-            {/* Dual Photos View */}
-            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            {/* Multi-Photos Showcase */}
+            <div className="space-y-3">
+              {/* Product Design Photos (Max 6) */}
               <div className="space-y-1.5">
-                <div className="text-[10px] text-muted-foreground uppercase font-semibold">Design Image</div>
-                <div className="h-20 sm:h-24 rounded border border-border overflow-hidden bg-background relative flex items-center justify-center">
-                  {order.productImageUrl ? (
-                    <img 
-                      src={order.productImageUrl} 
-                      alt="Product Design" 
-                      className="object-contain w-full h-full cursor-pointer hover:scale-105 transition-transform duration-300 bg-border/20 print-img"
-                      onClick={() => setActiveImageUrl(order.productImageUrl || null)}
-                    />
-                  ) : (
-                    <span className="text-[10px] text-muted uppercase font-bold">No Image</span>
+                <div className="flex justify-between items-center text-[10px] text-muted-foreground uppercase font-semibold">
+                  <span className="flex items-center gap-1">
+                    <Package size={12} className="text-accent" />
+                    <span>Product Sign Photos ({productImages.length}/6)</span>
+                  </span>
+                  {productImages.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => handleOpenGallery("product", 0)}
+                      className="text-accent font-bold hover:underline lowercase text-[10px] flex items-center gap-0.5"
+                    >
+                      <Eye size={10} /> view all ({productImages.length})
+                    </button>
                   )}
                 </div>
+                {productImages.length === 0 ? (
+                  <div className="h-16 rounded-xl border border-dashed border-border bg-background/50 flex items-center justify-center text-muted text-[10px] font-bold uppercase">
+                    No Sign Photos Attached
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                    {productImages.map((img, idx) => (
+                      <div
+                        key={`modal-prod-${idx}`}
+                        onClick={() => handleOpenGallery("product", idx)}
+                        className="relative h-16 rounded-xl border border-border overflow-hidden bg-background group cursor-pointer hover:border-accent hover:shadow-md transition-all"
+                      >
+                        <img src={img} alt={`Product ${idx + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                        <span className="absolute bottom-0 right-0 bg-black/75 text-[7px] font-black text-white px-1 rounded-tl">
+                          #{idx + 1}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-              <div className="space-y-1.5">
-                <div className="text-[10px] text-muted-foreground uppercase font-semibold">Location / Site Image</div>
-                <div className="h-20 sm:h-24 rounded border border-border overflow-hidden bg-background relative flex items-center justify-center">
-                  {order.locationImageUrl ? (
-                    <img 
-                      src={order.locationImageUrl} 
-                      alt="Installation Site" 
-                      className="object-contain w-full h-full cursor-pointer hover:scale-105 transition-transform duration-300 bg-border/20 print-img"
-                      onClick={() => setActiveImageUrl(order.locationImageUrl || null)}
-                    />
-                  ) : (
-                    <span className="text-[10px] text-muted uppercase font-bold">No Image</span>
+
+              {/* Location Site Photos (Max 4) */}
+              <div className="space-y-1.5 pt-1">
+                <div className="flex justify-between items-center text-[10px] text-muted-foreground uppercase font-semibold">
+                  <span className="flex items-center gap-1">
+                    <MapPin size={12} className="text-accent" />
+                    <span>Installation / Site Photos ({locationImages.length}/4)</span>
+                  </span>
+                  {locationImages.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => handleOpenGallery("location", 0)}
+                      className="text-accent font-bold hover:underline lowercase text-[10px] flex items-center gap-0.5"
+                    >
+                      <Eye size={10} /> view all ({locationImages.length})
+                    </button>
                   )}
                 </div>
+                {locationImages.length === 0 ? (
+                  <div className="h-16 rounded-xl border border-dashed border-border bg-background/50 flex items-center justify-center text-muted text-[10px] font-bold uppercase">
+                    No Site Photos Attached
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {locationImages.map((img, idx) => (
+                      <div
+                        key={`modal-loc-${idx}`}
+                        onClick={() => handleOpenGallery("location", idx)}
+                        className="relative h-16 rounded-xl border border-border overflow-hidden bg-background group cursor-pointer hover:border-accent hover:shadow-md transition-all"
+                      >
+                        <img src={img} alt={`Site ${idx + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                        <span className="absolute bottom-0 right-0 bg-black/75 text-[7px] font-black text-white px-1 rounded-tl">
+                          #{idx + 1}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -274,35 +369,62 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, onClo
               </div>
             </div>
 
-            {/* Platform, Payment & Deadline */}
-            <div className="grid grid-cols-2 gap-4 text-xs">
+            {/* Platform, Payment & Timeline Overview */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs bg-border/10 p-3 rounded-lg border border-border">
               <div className="space-y-1">
-                <span className="text-muted-foreground block text-[10px] uppercase font-semibold">Sales Platform</span>
-                <span className="inline-block px-2 py-0.5 border text-[9px] font-bold rounded uppercase tracking-wider bg-border/20 text-foreground text-center">
-                  {order.orderFrom}
-                </span>
+                <span className="text-muted-foreground block text-[10px] uppercase font-semibold">Order Date (अर्डर)</span>
+                <div className="font-bold text-foreground">
+                  {formatNepali(order.orderDate || order.createdAt)}
+                </div>
               </div>
               <div className="space-y-1">
-                <span className="text-muted-foreground block text-[10px] uppercase font-semibold">Payment Method</span>
-                <span className="inline-block px-2 py-0.5 border text-[9px] font-bold rounded uppercase tracking-wider bg-border/20 text-foreground text-center">
-                  {order.paymentMethod.replace("_", " ")}
-                </span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 text-xs border-t border-border/40 pt-3">
-              <div className="space-y-1">
-                <span className="text-muted-foreground block text-[10px] uppercase font-semibold">Delivery Target</span>
+                <span className="text-muted-foreground block text-[10px] uppercase font-semibold">Delivery Target (डेलिभरी)</span>
                 <div className="font-bold text-foreground flex items-center gap-1">
                   <Clock size={11} className="text-accent" />
-                  {new Date(order.deliveryDate).toLocaleDateString()}
+                  {formatNepali(order.deliveryDate)}
                 </div>
               </div>
               <div className="space-y-1">
                 <span className="text-muted-foreground block text-[10px] uppercase font-semibold">Project Lead</span>
                 <div className="font-bold text-foreground">
-                  {order.assignee?.name || "No lead assigned"}
+                  {order.assignee?.name || "Unassigned"}
                 </div>
+              </div>
+              <div className="space-y-1 pt-2 border-t border-border/40">
+                <span className="text-muted-foreground block text-[10px] uppercase font-semibold">Sales Platform</span>
+                <span className={`inline-block px-2 py-0.5 text-[9px] font-bold rounded uppercase tracking-wider text-white shadow-xs ${
+                  order.orderFrom === "tiktok"
+                    ? "bg-black"
+                    : order.orderFrom === "instagram"
+                    ? "bg-pink-600"
+                    : order.orderFrom === "whatsapp"
+                    ? "bg-emerald-600"
+                    : "bg-blue-600"
+                }`}>
+                  {order.orderFrom}
+                </span>
+              </div>
+              <div className="space-y-1 pt-2 border-t border-border/40">
+                <span className="text-muted-foreground block text-[10px] uppercase font-semibold">Payment Method</span>
+                <span className={`inline-block px-2 py-0.5 text-[9px] font-bold rounded uppercase tracking-wider text-white shadow-xs ${
+                  order.paymentMethod === "esewa"
+                    ? "bg-teal-600"
+                    : order.paymentMethod === "online_banking"
+                    ? "bg-indigo-600"
+                    : order.paymentMethod === "cheque"
+                    ? "bg-amber-600"
+                    : "bg-emerald-700"
+                }`}>
+                  {order.paymentMethod.replace("_", " ")}
+                </span>
+              </div>
+              <div className="space-y-1 pt-2 border-t border-border/40">
+                <span className="text-muted-foreground block text-[10px] uppercase font-semibold">Approval Status</span>
+                <span className={`inline-block px-2 py-0.5 text-[9px] font-bold rounded text-white shadow-xs ${
+                  order.approved ? "bg-emerald-600" : "bg-slate-600"
+                }`}>
+                  {order.approved ? "Verified & Approved ✓" : "Pending Verification"}
+                </span>
               </div>
             </div>
 
@@ -321,32 +443,14 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, onClo
         </div>
       </div>
 
-      {/* Lightbox for Zoomed Image */}
-      {activeImageUrl && (
-        <div 
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-sm p-4 transition-all duration-300 cursor-pointer select-none"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              setActiveImageUrl(null);
-            }
-          }}
-        >
-          <div className="relative max-w-[85vw] max-h-[70vh] sm:max-w-[90vw] sm:max-h-[85vh] flex items-center justify-center">
-            <button
-              className="absolute -top-12 right-0 text-white hover:text-gray-300 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors screen-only flex items-center justify-center"
-              onClick={() => setActiveImageUrl(null)}
-            >
-              <X size={20} />
-            </button>
-            <img 
-              src={activeImageUrl} 
-              alt="Full Preview" 
-              className="max-w-full max-h-[70vh] sm:max-h-[85vh] object-contain rounded-lg shadow-2xl cursor-default animate-scale-up"
-              onClick={(e) => e.stopPropagation()}
-            />
-          </div>
-        </div>
-      )}
+      {/* Fullscreen Photo Gallery Lightbox */}
+      <OrderPhotoGalleryModal
+        order={order}
+        isOpen={galleryOpen}
+        initialType={galleryType}
+        initialIndex={galleryIndex}
+        onClose={() => setGalleryOpen(false)}
+      />
     </div>
   );
 };

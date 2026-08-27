@@ -13,6 +13,13 @@ import {
   Clock
 } from "./ui/solar-icons";
 import { OrderDetailModal } from "./OrderDetailModal";
+import {
+  NEPALI_MONTHS,
+  NEPALI_YEARS,
+  getCurrentNepaliDate,
+  formatNepali,
+  formatNepaliShort
+} from "../utils/nepaliDate";
 
 export const SalesTab: React.FC = () => {
   const {
@@ -35,9 +42,11 @@ export const SalesTab: React.FC = () => {
     }
   }, [user, fetchStatementArchives]);
 
-  // Statement Export States
-  const [exportMonth, setExportMonth] = useState((new Date().getMonth() + 1).toString());
-  const [exportYear, setExportYear] = useState(new Date().getFullYear().toString());
+  const currentBs = getCurrentNepaliDate();
+
+  // Statement Export States (Nepali BS)
+  const [exportMonth, setExportMonth] = useState(currentBs.month.toString());
+  const [exportYear, setExportYear] = useState(currentBs.year.toString());
   const [exporting, setExporting] = useState(false);
 
   const handleExportClick = async () => {
@@ -111,10 +120,7 @@ export const SalesTab: React.FC = () => {
     let cumulative = 0;
     chronologicalSales.forEach((s) => {
       cumulative += s.amount;
-      const dateStr = new Date(s.date).toLocaleDateString([], {
-        month: "short",
-        day: "numeric"
-      });
+      const dateStr = formatNepaliShort(s.date);
       points.push({ label: dateStr, value: cumulative });
     });
 
@@ -249,27 +255,22 @@ export const SalesTab: React.FC = () => {
             className="bg-card border border-border text-foreground text-[11px] rounded-xl px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent font-semibold cursor-pointer"
           >
             <option value="all">All Time</option>
-            <option value="1">Jan</option>
-            <option value="2">Feb</option>
-            <option value="3">Mar</option>
-            <option value="4">Apr</option>
-            <option value="5">May</option>
-            <option value="6">Jun</option>
-            <option value="7">Jul</option>
-            <option value="8">Aug</option>
-            <option value="9">Sep</option>
-            <option value="10">Oct</option>
-            <option value="11">Nov</option>
-            <option value="12">Dec</option>
+            {NEPALI_MONTHS.map((m) => (
+              <option key={m.value} value={m.value.toString()}>
+                {m.name} ({m.nepaliName})
+              </option>
+            ))}
           </select>
           <select
             value={exportYear}
             onChange={(e) => setExportYear(e.target.value)}
             className="bg-card border border-border text-foreground text-[11px] rounded-xl px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent font-semibold cursor-pointer"
           >
-            <option value="2025">2025</option>
-            <option value="2026">2026</option>
-            <option value="2027">2027</option>
+            {NEPALI_YEARS.map((y) => (
+              <option key={y} value={y.toString()}>
+                {y} BS
+              </option>
+            ))}
           </select>
           <button
             onClick={handleExportClick}
@@ -637,10 +638,10 @@ export const SalesTab: React.FC = () => {
               ) : (
                 filteredSales.map((item) => (
                   <tr key={item.type + item.id} className="hover:bg-border/20 transition-colors">
-                    <td className="p-4 font-semibold text-foreground">
+                    <td className="p-4 font-semibold text-foreground text-xs">
                       <div className="flex items-center gap-1.5">
                         <Calendar size={12} className="text-muted" />
-                        {new Date(item.date).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })}
+                        {formatNepali(item.date)}
                       </div>
                     </td>
                     <td className="p-4">

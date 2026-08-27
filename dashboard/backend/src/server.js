@@ -11,6 +11,7 @@ import ExcelJS from "exceljs";
 import helmet from "helmet";
 import mongoSanitize from "express-mongo-sanitize";
 import { rateLimit } from "express-rate-limit";
+import NepaliDate from "nepali-date-converter";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -99,9 +100,15 @@ app.use(globalLimiter);
 // Configure CORS (support local dev + vercel subdomains and previews)
 const allowedOrigins = [
   "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:5175",
   "http://localhost:3000",
+  "http://localhost:3001",
+  "http://localhost:3002",
   "http://127.0.0.1:5173",
+  "http://127.0.0.1:5174",
   "http://127.0.0.1:3000",
+  "http://127.0.0.1:3001",
   "https://ktmdecor.com",
   "https://www.ktmdecor.com",
   "https://admin.ktmdecor.com",
@@ -115,18 +122,24 @@ if (process.env.ALLOWED_ORIGINS) {
   allowedOrigins.push(...process.env.ALLOWED_ORIGINS.split(",").map(o => o.trim()));
 }
 
+// Regex to allow any local dev host (localhost, 127.0.0.1, 0.0.0.0, LAN IPs) on any port
+const localDevRegex = /^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\]|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+)(:\d+)?$/;
+const vercelRegex = /^https:\/\/([a-zA-Z0-9_-]+\.)?vercel\.app$/;
+
 app.use(
   cors({
     origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, curl, server-to-server)
       if (!origin) return callback(null, true);
-      const isAllowed = allowedOrigins.some((allowed) => allowed === origin) || 
-                        (/^https:\/\/ktmdecor(-[a-zA-Z0-9-]+)?\.vercel\.app$/.test(origin)) ||
-                        (/^https:\/\/decorktm(-[a-zA-Z0-9-]+)?\.vercel\.app$/.test(origin)) ||
-                        (/^https:\/\/ktm-decor-admin(-[a-zA-Z0-9-]+)?\.vercel\.app$/.test(origin)) ||
-                        (/^https:\/\/ktm-decor-site(-[a-zA-Z0-9-]+)?\.vercel\.app$/.test(origin));
-      if (isAllowed) {
+
+      const isExplicitlyAllowed = allowedOrigins.includes(origin);
+      const isLocalDev = localDevRegex.test(origin);
+      const isVercel = vercelRegex.test(origin);
+
+      if (isExplicitlyAllowed || isLocalDev || isVercel) {
         callback(null, true);
       } else {
+        console.warn(`[CORS Blocked] Origin "${origin}" is not in the allowed origins list.`);
         callback(new Error("Not allowed by CORS"));
       }
     },
@@ -163,51 +176,83 @@ app.use((req, res, next) => {
 const PORT = process.env.PORT || 5001;
 const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI || "mongodb://localhost:27017/ktm_decor_dashboard";
 
-// Sync manual registry order to Sales ledger
+// Sync manual registry order to Sales ledger immediately upon creation or update
 async function syncOrderSale(order, userId) {
   try {
-    if (order.approved) {
+    if (!order.deleted) {
       // Check if sale already exists
       const existingSale = await Sale.findOne({ orderId: order._id });
+      const orderTotal = (order.totalPrice !== undefined && order.totalPrice !== null)
+        ? Number(order.totalPrice)
+        : (Number(order.price) || 0) + (Number(order.deliveryPrice) || 0) + (Number(order.installationPrice) || 0);
+
       if (!existingSale) {
         const sale = new Sale({
           clientName: order.customerName,
           productName: order.productName,
-          amount: order.totalPrice,
-          date: order.approvedAt || new Date(),
+          amount: orderTotal,
+          date: order.createdAt || new Date(),
           paymentMethod: order.paymentMethod || "cash",
-          notes: order.manufacturingNotes || `Automatic sale from approved order: ${order.productName}`,
+          notes: order.manufacturingNotes || `Automatic sale from order: ${order.productName}`,
           createdBy: userId || order.createdBy,
           orderId: order._id
         });
         await sale.save();
         
-        const populatedSale = await Sale.findById(sale._id).populate("createdBy", "name role");
+        const populatedSale = await Sale.findById(sale._id).populate("createdBy", "name role").populate("orderId");
         triggerPusher("sale_created", populatedSale);
-        await logActivity(userId || order.createdBy, "Sale Logged", `Logged sale from approved order for "${order.productName}" (Rs. ${order.totalPrice.toLocaleString()})`);
+        await logActivity(userId || order.createdBy, "Sale Logged", `Logged sale from order for "${order.productName}" (Rs. ${orderTotal.toLocaleString()})`);
       } else {
         existingSale.clientName = order.customerName;
         existingSale.productName = order.productName;
-        existingSale.amount = order.totalPrice;
+        existingSale.amount = orderTotal;
         existingSale.paymentMethod = order.paymentMethod || "cash";
-        existingSale.notes = order.manufacturingNotes || `Automatic sale from approved order: ${order.productName}`;
+        existingSale.notes = order.manufacturingNotes || `Automatic sale from order: ${order.productName}`;
         await existingSale.save();
         
-        const populatedSale = await Sale.findById(existingSale._id).populate("createdBy", "name role");
+        const populatedSale = await Sale.findById(existingSale._id).populate("createdBy", "name role").populate("orderId");
         triggerPusher("sale_created", populatedSale);
-        await logActivity(userId || order.createdBy, "Sale Updated", `Updated sale details from approved order for "${order.productName}" (Rs. ${order.totalPrice.toLocaleString()})`);
+        await logActivity(userId || order.createdBy, "Sale Updated", `Updated sale details from order for "${order.productName}" (Rs. ${orderTotal.toLocaleString()})`);
       }
     } else {
-      // If not approved, remove any corresponding sale
+      // If deleted, remove any corresponding sale
       const existingSale = await Sale.findOne({ orderId: order._id });
       if (existingSale) {
         await Sale.findByIdAndDelete(existingSale._id);
         triggerPusher("sale_deleted", existingSale._id.toString());
-        await logActivity(userId || order.createdBy, "Sale Deleted", `Deleted sale log for "${order.productName}" due to order revert`);
+        await logActivity(userId || order.createdBy, "Sale Deleted", `Deleted sale log for "${order.productName}" due to order deletion`);
       }
     }
   } catch (err) {
     console.error("Error syncing order to sale:", err);
+  }
+}
+
+// Backfill existing non-deleted orders into Sales on startup if not already present
+async function backfillOrderSales() {
+  try {
+    const orders = await Order.find({ deleted: { $ne: true } });
+    for (const order of orders) {
+      const existingSale = await Sale.findOne({ orderId: order._id });
+      if (!existingSale) {
+        const orderTotal = (order.totalPrice !== undefined && order.totalPrice !== null)
+          ? Number(order.totalPrice)
+          : (Number(order.price) || 0) + (Number(order.deliveryPrice) || 0) + (Number(order.installationPrice) || 0);
+
+        await Sale.create({
+          clientName: order.customerName,
+          productName: order.productName,
+          amount: orderTotal,
+          date: order.createdAt || new Date(),
+          paymentMethod: order.paymentMethod || "cash",
+          notes: order.manufacturingNotes || `Automatic sale from order: ${order.productName}`,
+          createdBy: order.createdBy,
+          orderId: order._id
+        });
+      }
+    }
+  } catch (err) {
+    console.error("Error backfilling order sales:", err);
   }
 }
 
@@ -1028,6 +1073,7 @@ app.put("/api/bin/:type/:id/restore", protect, admin, async (req, res) => {
       order.deleted = false;
       order.deletedAt = undefined;
       await order.save();
+      await syncOrderSale(order, req.user._id);
 
       const populatedOrder = await Order.findById(order._id)
         .populate("createdBy", "name role")
@@ -1065,8 +1111,10 @@ app.delete("/api/bin/:type/:id/force", protect, admin, async (req, res) => {
     } else if (type === "order") {
       const order = await Order.findById(id);
       if (!order) return res.status(404).json({ message: "Order not found" });
+      await Sale.findOneAndDelete({ orderId: id });
       await order.deleteOne();
       triggerPusher("bin_updated", {});
+      triggerPusher("sale_deleted", id);
       await logActivity(req.user._id, "Order Perm Deleted", `Permanently deleted order for "${order.productName}"`);
       return res.json({ message: "Order permanently deleted" });
     }
@@ -1234,7 +1282,9 @@ app.post("/api/orders", protect, admin, async (req, res) => {
     advancePayment,
     color,
     productImageUrl,
+    productImages,
     locationImageUrl,
+    locationImages,
     customerName,
     customerContact,
     customerEmail,
@@ -1242,11 +1292,15 @@ app.post("/api/orders", protect, admin, async (req, res) => {
     orderFrom,
     paymentMethod,
     manufacturingNotes,
+    orderDate,
     deliveryDate,
     assignee,
   } = req.body;
 
   try {
+    const pImgs = Array.isArray(productImages) ? productImages.slice(0, 6) : (productImageUrl ? [productImageUrl] : []);
+    const lImgs = Array.isArray(locationImages) ? locationImages.slice(0, 4) : (locationImageUrl ? [locationImageUrl] : []);
+
     const order = await Order.create({
       productName,
       size,
@@ -1255,8 +1309,10 @@ app.post("/api/orders", protect, admin, async (req, res) => {
       installationPrice: Number(installationPrice) || 0,
       advancePayment: Number(advancePayment) || 0,
       color,
-      productImageUrl: productImageUrl || "",
-      locationImageUrl: locationImageUrl || "",
+      productImages: pImgs,
+      productImageUrl: pImgs[0] || productImageUrl || "",
+      locationImages: lImgs,
+      locationImageUrl: lImgs[0] || locationImageUrl || "",
       customerName,
       customerContact,
       customerEmail: customerEmail || "",
@@ -1264,6 +1320,7 @@ app.post("/api/orders", protect, admin, async (req, res) => {
       orderFrom,
       paymentMethod,
       manufacturingNotes: manufacturingNotes || "",
+      orderDate: orderDate || new Date(),
       deliveryDate: deliveryDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       assignee: assignee || null,
       createdBy: req.user._id,
@@ -1272,6 +1329,8 @@ app.post("/api/orders", protect, admin, async (req, res) => {
     const populatedOrder = await Order.findById(order._id)
       .populate("createdBy", "name role")
       .populate("assignee", "name email role");
+
+    await syncOrderSale(populatedOrder, req.user._id);
 
     triggerPusher("order_created", populatedOrder);
     await logActivity(req.user._id, "Order Created", `Posted manual order for "${productName}" (Rs. ${populatedOrder.totalPrice.toLocaleString()})`);
@@ -1311,7 +1370,9 @@ app.put("/api/orders/:id", protect, admin, async (req, res) => {
     advancePayment,
     color,
     productImageUrl,
+    productImages,
     locationImageUrl,
+    locationImages,
     customerName,
     customerContact,
     customerEmail,
@@ -1319,6 +1380,7 @@ app.put("/api/orders/:id", protect, admin, async (req, res) => {
     orderFrom,
     paymentMethod,
     manufacturingNotes,
+    orderDate,
     deliveryDate,
     assignee,
   } = req.body;
@@ -1338,12 +1400,27 @@ app.put("/api/orders/:id", protect, admin, async (req, res) => {
     if (installationPrice !== undefined) order.installationPrice = Number(installationPrice) || 0;
     if (advancePayment !== undefined) order.advancePayment = Number(advancePayment) || 0;
     order.color = color || order.color;
-    if (productImageUrl !== undefined) order.productImageUrl = productImageUrl;
-    if (locationImageUrl !== undefined) order.locationImageUrl = locationImageUrl;
+
+    if (productImages !== undefined) {
+      order.productImages = Array.isArray(productImages) ? productImages.slice(0, 6) : [];
+      order.productImageUrl = order.productImages[0] || "";
+    } else if (productImageUrl !== undefined) {
+      order.productImageUrl = productImageUrl;
+      if (productImageUrl) order.productImages = [productImageUrl];
+    }
+
+    if (locationImages !== undefined) {
+      order.locationImages = Array.isArray(locationImages) ? locationImages.slice(0, 4) : [];
+      order.locationImageUrl = order.locationImages[0] || "";
+    } else if (locationImageUrl !== undefined) {
+      order.locationImageUrl = locationImageUrl;
+      if (locationImageUrl) order.locationImages = [locationImageUrl];
+    }
     order.customerName = customerName || order.customerName;
     order.customerContact = customerContact || order.customerContact;
     order.customerEmail = customerEmail !== undefined ? customerEmail : order.customerEmail;
     order.customerAddress = customerAddress || order.customerAddress;
+    if (orderDate) order.orderDate = orderDate;
     order.deliveryDate = deliveryDate || order.deliveryDate;
     if (assignee !== undefined) order.assignee = assignee || null;
     order.orderFrom = orderFrom || order.orderFrom;
@@ -2139,11 +2216,31 @@ app.get("/api/attendance", protect, async (req, res) => {
 
     // Filter by month/year if provided
     if (month && year) {
-      const parsedMonth = parseInt(month) - 1; // JS Month is 0-indexed
-      const parsedYear = parseInt(year);
-      const startDate = new Date(Date.UTC(parsedYear, parsedMonth, 1));
-      const endDate = new Date(Date.UTC(parsedYear, parsedMonth + 1, 1));
-      query.date = { $gte: startDate, $lt: endDate };
+      const parsedMonth = parseInt(month, 10);
+      const parsedYear = parseInt(year, 10);
+
+      if (parsedYear >= 2070 && parsedYear <= 2100) {
+        // Nepali Bikram Sambat (BS) month range
+        try {
+          const bsStart = new NepaliDate(parsedYear, parsedMonth - 1, 1).toJsDate();
+          bsStart.setUTCHours(0, 0, 0, 0);
+
+          const nextMonth = parsedMonth === 12 ? 1 : parsedMonth + 1;
+          const nextYear = parsedMonth === 12 ? parsedYear + 1 : parsedYear;
+          const bsEnd = new NepaliDate(nextYear, nextMonth - 1, 1).toJsDate();
+          bsEnd.setUTCHours(0, 0, 0, 0);
+
+          query.date = { $gte: bsStart, $lt: bsEnd };
+        } catch {
+          const startDate = new Date(Date.UTC(parsedYear, parsedMonth - 1, 1));
+          const endDate = new Date(Date.UTC(parsedYear, parsedMonth, 1));
+          query.date = { $gte: startDate, $lt: endDate };
+        }
+      } else {
+        const startDate = new Date(Date.UTC(parsedYear, parsedMonth - 1, 1));
+        const endDate = new Date(Date.UTC(parsedYear, parsedMonth, 1));
+        query.date = { $gte: startDate, $lt: endDate };
+      }
     }
 
     const logs = await Attendance.find(query)
@@ -2536,11 +2633,13 @@ app.delete("/api/salaries/:id", protect, admin, async (req, res) => {
 if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
   connectDB()
     .then(() => {
-      runSeeds().then(() => {
-        app.listen(PORT, () => {
-          console.log(`Local Express Server running on port ${PORT}`);
+      runSeeds()
+        .then(() => backfillOrderSales())
+        .then(() => {
+          app.listen(PORT, () => {
+            console.log(`Local Express Server running on port ${PORT}`);
+          });
         });
-      });
     })
     .catch((err) => {
       console.error("Failed to start local database/server:", err);

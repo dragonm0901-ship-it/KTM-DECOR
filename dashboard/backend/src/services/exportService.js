@@ -1,17 +1,58 @@
 import ExcelJS from "exceljs";
+import NepaliDate from "nepali-date-converter";
 import Sale from "../models/Sale.js";
 import Expense from "../models/Expense.js";
 import Purchase from "../models/Purchase.js";
 
+const formatBsDate = (d) => {
+  try {
+    if (!d) return "";
+    const nd = new NepaliDate(new Date(d));
+    return nd.format("YYYY-MM-DD");
+  } catch {
+    return new Date(d).toLocaleDateString();
+  }
+};
+
 export const buildStatementWorkbook = async (type, month, year) => {
   let dateFilter = {};
   
+  const nepaliMonthNames = [
+    "Baisakh", "Jestha", "Ashadh", "Shrawan", "Bhadra", "Ashwin",
+    "Kartik", "Mangsir", "Poush", "Magh", "Falgun", "Chaitra"
+  ];
+
+  const gregorianMonthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  const yNum = parseInt(year, 10);
+  const isNepaliYear = yNum >= 2070 && yNum <= 2100;
+
   if (month !== "all") {
     const mNum = parseInt(month, 10);
-    const yNum = parseInt(year, 10);
-    const startOfMonth = new Date(Date.UTC(yNum, mNum - 1, 1, 0, 0, 0));
-    const endOfMonth = new Date(Date.UTC(yNum, mNum, 0, 23, 59, 59, 999));
-    dateFilter = { date: { $gte: startOfMonth, $lte: endOfMonth } };
+    if (isNepaliYear) {
+      try {
+        const bsStart = new NepaliDate(yNum, mNum - 1, 1).toJsDate();
+        bsStart.setUTCHours(0, 0, 0, 0);
+
+        const nextMonth = mNum === 12 ? 1 : mNum + 1;
+        const nextYear = mNum === 12 ? yNum + 1 : yNum;
+        const bsEnd = new NepaliDate(nextYear, nextMonth - 1, 1).toJsDate();
+        bsEnd.setUTCHours(0, 0, 0, 0);
+
+        dateFilter = { date: { $gte: bsStart, $lt: bsEnd } };
+      } catch {
+        const startOfMonth = new Date(Date.UTC(yNum, mNum - 1, 1, 0, 0, 0));
+        const endOfMonth = new Date(Date.UTC(yNum, mNum, 0, 23, 59, 59, 999));
+        dateFilter = { date: { $gte: startOfMonth, $lte: endOfMonth } };
+      }
+    } else {
+      const startOfMonth = new Date(Date.UTC(yNum, mNum - 1, 1, 0, 0, 0));
+      const endOfMonth = new Date(Date.UTC(yNum, mNum, 0, 23, 59, 59, 999));
+      dateFilter = { date: { $gte: startOfMonth, $lte: endOfMonth } };
+    }
   }
 
   let sales = [];
@@ -28,12 +69,16 @@ export const buildStatementWorkbook = async (type, month, year) => {
     purchases = await Purchase.find(dateFilter).sort({ date: 1 }).lean();
   }
 
-  const monthNames = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
-  
-  const periodLabel = month === "all" ? "All_Time" : `${monthNames[parseInt(month, 10) - 1]}_${year}`;
+  let periodLabel = "All_Time";
+  if (month !== "all") {
+    const mNum = parseInt(month, 10);
+    if (isNepaliYear) {
+      periodLabel = `${nepaliMonthNames[mNum - 1]}_${year}_BS`;
+    } else {
+      periodLabel = `${gregorianMonthNames[mNum - 1]}_${year}`;
+    }
+  }
+
   const cleanPeriodLabel = periodLabel.replace(/_/g, " ");
 
   const workbook = new ExcelJS.Workbook();
@@ -43,7 +88,7 @@ export const buildStatementWorkbook = async (type, month, year) => {
     
     sheet.addRow(["KTM DECOR - COMBINED STATEMENT"]);
     sheet.addRow(["Statement Period:", cleanPeriodLabel]);
-    sheet.addRow(["Exported On:", new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString()]);
+    sheet.addRow(["Exported On:", formatBsDate(new Date())]);
     sheet.addRow([]); // Blank row
     
     sheet.addRow(["METRIC SUMMARY", "AMOUNT (Rs.)", "RECORDS COUNT"]);
@@ -60,11 +105,11 @@ export const buildStatementWorkbook = async (type, month, year) => {
     sheet.addRow([]); // Blank row
     
     sheet.addRow(["SALES LEDGER"]);
-    sheet.addRow(["S.N.", "Date", "Client Name", "Product", "Payment Method", "Amount (Rs.)", "Notes"]);
+    sheet.addRow(["S.N.", "Date (BS)", "Client Name", "Product", "Payment Method", "Amount (Rs.)", "Notes"]);
     sales.forEach((s, idx) => {
       sheet.addRow([
         idx + 1,
-        new Date(s.date).toLocaleDateString(),
+        formatBsDate(s.date),
         s.clientName,
         s.productName,
         s.paymentMethod.toUpperCase(),
@@ -76,11 +121,11 @@ export const buildStatementWorkbook = async (type, month, year) => {
     sheet.addRow([]); // Blank row
     
     sheet.addRow(["EXPENSES LOG"]);
-    sheet.addRow(["S.N.", "Date", "Expense Item", "Category", "Amount (Rs.)", "Description"]);
+    sheet.addRow(["S.N.", "Date (BS)", "Expense Item", "Category", "Amount (Rs.)", "Description"]);
     expenses.forEach((e, idx) => {
       sheet.addRow([
         idx + 1,
-        new Date(e.date).toLocaleDateString(),
+        formatBsDate(e.date),
         e.title,
         e.category.toUpperCase(),
         e.amount,
@@ -91,11 +136,11 @@ export const buildStatementWorkbook = async (type, month, year) => {
     sheet.addRow([]); // Blank row
     
     sheet.addRow(["PURCHASES LEDGER"]);
-    sheet.addRow(["S.N.", "Date", "Supplier", "Purchase Details", "Status", "Amount (Rs.)"]);
+    sheet.addRow(["S.N.", "Date (BS)", "Supplier", "Purchase Details", "Status", "Amount (Rs.)"]);
     purchases.forEach((p, idx) => {
       sheet.addRow([
         idx + 1,
-        new Date(p.date).toLocaleDateString(),
+        formatBsDate(p.date),
         p.supplier,
         p.itemDetails,
         p.status.toUpperCase(),
@@ -109,7 +154,7 @@ export const buildStatementWorkbook = async (type, month, year) => {
     const salesSheet = workbook.addWorksheet("Sales Ledger");
     salesSheet.columns = [
       { header: "S.N.", key: "sn" },
-      { header: "Date", key: "date" },
+      { header: "Date (BS)", key: "date" },
       { header: "Client Name", key: "clientName" },
       { header: "Product", key: "productName" },
       { header: "Payment Method", key: "paymentMethod" },
@@ -120,7 +165,7 @@ export const buildStatementWorkbook = async (type, month, year) => {
     sales.forEach((s, idx) => {
       salesSheet.addRow({
         sn: idx + 1,
-        date: new Date(s.date).toLocaleDateString(),
+        date: formatBsDate(s.date),
         clientName: s.clientName,
         productName: s.productName,
         paymentMethod: s.paymentMethod.toUpperCase(),
@@ -145,7 +190,7 @@ export const buildStatementWorkbook = async (type, month, year) => {
     const expensesSheet = workbook.addWorksheet("Expenses Log");
     expensesSheet.columns = [
       { header: "S.N.", key: "sn" },
-      { header: "Date", key: "date" },
+      { header: "Date (BS)", key: "date" },
       { header: "Expense Item", key: "title" },
       { header: "Category", key: "category" },
       { header: "Amount (Rs.)", key: "amount" },
@@ -155,7 +200,7 @@ export const buildStatementWorkbook = async (type, month, year) => {
     expenses.forEach((e, idx) => {
       expensesSheet.addRow({
         sn: idx + 1,
-        date: new Date(e.date).toLocaleDateString(),
+        date: formatBsDate(e.date),
         title: e.title,
         category: e.category.toUpperCase(),
         amount: e.amount,
@@ -178,7 +223,7 @@ export const buildStatementWorkbook = async (type, month, year) => {
     const purchasesSheet = workbook.addWorksheet("Purchases Ledger");
     purchasesSheet.columns = [
       { header: "S.N.", key: "sn" },
-      { header: "Date", key: "date" },
+      { header: "Date (BS)", key: "date" },
       { header: "Supplier", key: "supplier" },
       { header: "Purchase Details", key: "details" },
       { header: "Status", key: "status" },
@@ -188,7 +233,7 @@ export const buildStatementWorkbook = async (type, month, year) => {
     purchases.forEach((p, idx) => {
       purchasesSheet.addRow({
         sn: idx + 1,
-        date: new Date(p.date).toLocaleDateString(),
+        date: formatBsDate(p.date),
         supplier: p.supplier,
         details: p.itemDetails,
         status: p.status.toUpperCase(),

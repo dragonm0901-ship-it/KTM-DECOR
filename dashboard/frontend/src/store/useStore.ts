@@ -84,7 +84,9 @@ export interface Order {
   duePayment: number;
   color: string;
   productImageUrl?: string;
+  productImages?: string[];
   locationImageUrl?: string;
+  locationImages?: string[];
   customerName: string;
   customerContact: string;
   customerEmail?: string;
@@ -95,6 +97,7 @@ export interface Order {
   stage: "design" | "manufacturing" | "completed" | "delivered" | "paid";
   approved: boolean;
   approvedAt?: string;
+  orderDate?: string;
   deliveryDate: string;
   assignee?: User;
   createdBy: {
@@ -637,15 +640,18 @@ export const useStore = create<DashboardState>()(
       });
 
       channel.bind("order_updated", (updatedOrder: Order) => {
-        set((state) => {
-          const filtered = state.orders.filter((o) => o._id !== updatedOrder._id);
-          return { orders: [updatedOrder, ...filtered] };
-        });
+        set((state) => ({
+          orders: state.orders.map((o) => (o._id === updatedOrder._id ? updatedOrder : o)),
+        }));
       });
 
       channel.bind("order_deleted", (deletedOrderId: string) => {
         set((state) => ({
           orders: state.orders.filter((o) => o._id !== deletedOrderId),
+          sales: state.sales.filter((s) => {
+            const ordId = s.orderId ? (typeof s.orderId === "object" ? (s.orderId as any)._id : s.orderId) : null;
+            return ordId !== deletedOrderId;
+          }),
         }));
       });
 
@@ -1292,10 +1298,9 @@ export const useStore = create<DashboardState>()(
       });
       if (!res.ok) throw new Error("Order update failed");
       const updatedOrder = await res.json();
-      set((state) => {
-        const filtered = state.orders.filter((o) => o._id !== orderId);
-        return { orders: [updatedOrder, ...filtered] };
-      });
+      set((state) => ({
+        orders: state.orders.map((o) => (o._id === orderId ? updatedOrder : o)),
+      }));
       await get().fetchSales();
     } catch (err) {
       console.error("Update order failed:", err);
@@ -1316,10 +1321,9 @@ export const useStore = create<DashboardState>()(
         throw new Error(data.message || "Order progress update failed");
       }
       const updatedOrder = await res.json();
-      set((state) => {
-        const filtered = state.orders.filter((o) => o._id !== orderId);
-        return { orders: [updatedOrder, ...filtered] };
-      });
+      set((state) => ({
+        orders: state.orders.map((o) => (o._id === orderId ? updatedOrder : o)),
+      }));
       await get().fetchSales();
     } catch (err) {
       console.error("Update order progress failed:", err);
@@ -1336,10 +1340,9 @@ export const useStore = create<DashboardState>()(
       });
       if (!res.ok) throw new Error("Order approval failed");
       const updatedOrder = await res.json();
-      set((state) => {
-        const filtered = state.orders.filter((o) => o._id !== orderId);
-        return { orders: [updatedOrder, ...filtered] };
-      });
+      set((state) => ({
+        orders: state.orders.map((o) => (o._id === orderId ? updatedOrder : o)),
+      }));
       await get().fetchSales();
     } catch (err) {
       console.error("Approve order failed:", err);

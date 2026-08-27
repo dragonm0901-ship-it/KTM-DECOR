@@ -11,6 +11,13 @@ import {
   Edit2,
   Eye
 } from "./ui/solar-icons";
+import { NepaliDatePicker } from "./ui/NepaliDatePicker";
+import {
+  NEPALI_MONTHS,
+  NEPALI_YEARS,
+  getCurrentNepaliDate,
+  formatNepali,
+} from "../utils/nepaliDate";
 
 interface FormPurchaseItem {
   name: string;
@@ -39,9 +46,11 @@ export const PurchaseTab: React.FC = () => {
     }
   }, [user, fetchStatementArchives]);
 
-  // Statement Export States
-  const [exportMonth, setExportMonth] = useState((new Date().getMonth() + 1).toString());
-  const [exportYear, setExportYear] = useState(new Date().getFullYear().toString());
+  const currentBs = getCurrentNepaliDate();
+
+  // Statement Export States (Nepali BS)
+  const [exportMonth, setExportMonth] = useState(currentBs.month.toString());
+  const [exportYear, setExportYear] = useState(currentBs.year.toString());
   const [exporting, setExporting] = useState(false);
 
   const handleExportClick = async () => {
@@ -236,30 +245,25 @@ export const PurchaseTab: React.FC = () => {
             <select
               value={exportMonth}
               onChange={(e) => setExportMonth(e.target.value)}
-              className="bg-card border border-border text-foreground text-[11px] rounded px-2 py-1.5 focus:outline-none focus:border-accent font-semibold"
+              className="bg-card border border-border text-foreground text-[11px] rounded px-2 py-1.5 focus:outline-none focus:border-accent font-semibold cursor-pointer"
             >
               <option value="all">All Time</option>
-              <option value="1">Jan</option>
-              <option value="2">Feb</option>
-              <option value="3">Mar</option>
-              <option value="4">Apr</option>
-              <option value="5">May</option>
-              <option value="6">Jun</option>
-              <option value="7">Jul</option>
-              <option value="8">Aug</option>
-              <option value="9">Sep</option>
-              <option value="10">Oct</option>
-              <option value="11">Nov</option>
-              <option value="12">Dec</option>
+              {NEPALI_MONTHS.map((m) => (
+                <option key={m.value} value={m.value.toString()}>
+                  {m.name} ({m.nepaliName})
+                </option>
+              ))}
             </select>
             <select
               value={exportYear}
               onChange={(e) => setExportYear(e.target.value)}
-              className="bg-card border border-border text-foreground text-[11px] rounded px-2 py-1.5 focus:outline-none focus:border-accent font-semibold"
+              className="bg-card border border-border text-foreground text-[11px] rounded px-2 py-1.5 focus:outline-none focus:border-accent font-semibold cursor-pointer"
             >
-              <option value="2025">2025</option>
-              <option value="2026">2026</option>
-              <option value="2027">2027</option>
+              {NEPALI_YEARS.map((y) => (
+                <option key={y} value={y.toString()}>
+                  {y} BS
+                </option>
+              ))}
             </select>
             <button
               onClick={handleExportClick}
@@ -383,10 +387,10 @@ export const PurchaseTab: React.FC = () => {
                 filteredPurchases.map((purchase) => (
                   <React.Fragment key={purchase._id}>
                     <tr className="hover:bg-border/20 transition-colors">
-                      <td className="p-4 font-semibold text-foreground">
+                      <td className="p-4 font-semibold text-foreground text-xs">
                         <div className="flex items-center gap-1.5">
                           <Calendar size={12} className="text-muted" />
-                          {new Date(purchase.date).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })}
+                          {formatNepali(purchase.date)}
                         </div>
                       </td>
                       <td className="p-4 font-bold text-foreground">
@@ -541,13 +545,11 @@ export const PurchaseTab: React.FC = () => {
                 </div>
                 <div>
                   <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1">
-                    Invoice Date *
+                    Invoice Date (BS) *
                   </label>
-                  <input
-                    type="date"
+                  <NepaliDatePicker
                     value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm font-semibold"
+                    onChange={(iso) => setDate(iso)}
                     required
                   />
                 </div>
@@ -699,9 +701,9 @@ export const PurchaseTab: React.FC = () => {
                 </div>
                 <div>
                   <span className="text-[10px] text-muted uppercase font-bold tracking-wider block mb-0.5">Invoice Date</span>
-                  <span className="text-sm font-semibold text-foreground">
-                    {new Date(viewingPurchase.date).toLocaleDateString([], { month: "long", day: "numeric", year: "numeric" })}
-                  </span>
+                  <p className="text-xs font-semibold text-foreground">
+                    {formatNepali(viewingPurchase.date)}
+                  </p>
                 </div>
               </div>
 

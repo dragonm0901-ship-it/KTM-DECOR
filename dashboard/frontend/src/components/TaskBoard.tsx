@@ -13,6 +13,8 @@ import {
   ArrowLeft,
   X
 } from "./ui/solar-icons";
+import { NepaliDatePicker } from "./ui/NepaliDatePicker";
+import { formatNepali } from "../utils/nepaliDate";
 
 interface TaskBoardProps {
   showModal: boolean;
@@ -303,7 +305,7 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
                           </span>
                           <span className="flex items-center gap-1">
                             <Calendar size={12} />
-                            {new Date(task.dueDate).toLocaleDateString()}
+                            {formatNepali(task.dueDate)}
                           </span>
                         </div>
 
@@ -443,7 +445,7 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
                         {task.assignee?.name || "Deleted User"}
                       </td>
                       <td className="p-4 text-xs text-muted font-medium">
-                        {new Date(task.dueDate).toLocaleDateString()}
+                        {formatNepali(task.dueDate)}
                       </td>
                       <td className="p-4">
                         <span
@@ -576,13 +578,11 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
 
                 <div>
                   <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1">
-                    Due Date
+                    Due Date (BS)
                   </label>
-                  <input
-                    type="date"
+                  <NepaliDatePicker
                     value={dueDate}
-                    onChange={(e) => setDueDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm"
+                    onChange={(iso) => setDueDate(iso)}
                     required
                   />
                 </div>

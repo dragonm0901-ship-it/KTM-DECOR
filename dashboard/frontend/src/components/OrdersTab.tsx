@@ -17,6 +17,10 @@ import {
 } from "./ui/solar-icons";
 import { OrderDetailModal } from "./OrderDetailModal";
 import { compressImage } from "../utils/imageCompressor";
+import { NepaliDatePicker } from "./ui/NepaliDatePicker";
+import { formatNepali } from "../utils/nepaliDate";
+import { OrderPhotoStack } from "./ui/OrderPhotoStack";
+import { OrderPhotoGalleryModal } from "./ui/OrderPhotoGalleryModal";
 
 export const OrdersTab: React.FC = () => {
   const { orders, createOrder, updateOrder, deleteOrder, user, users } = useStore();
@@ -33,8 +37,8 @@ export const OrdersTab: React.FC = () => {
   const [installationPrice, setInstallationPrice] = useState("0");
   const [advancePayment, setAdvancePayment] = useState("0");
   const [color, setColor] = useState("");
-  const [productImageUrl, setProductImageUrl] = useState("");
-  const [locationImageUrl, setLocationImageUrl] = useState("");
+  const [productImages, setProductImages] = useState<string[]>([]);
+  const [locationImages, setLocationImages] = useState<string[]>([]);
   const [customerName, setCustomerName] = useState("");
   const [customerContact, setCustomerContact] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
@@ -42,6 +46,7 @@ export const OrdersTab: React.FC = () => {
   const [orderFrom, setOrderFrom] = useState<Order["orderFrom"]>("direct");
   const [paymentMethod, setPaymentMethod] = useState<Order["paymentMethod"]>("cash");
   const [manufacturingNotes, setManufacturingNotes] = useState("");
+  const [orderDate, setOrderDate] = useState(() => new Date().toISOString().split("T")[0]);
   const [deliveryDate, setDeliveryDate] = useState(() => {
     const d = new Date();
     d.setDate(d.getDate() + 7);
@@ -52,10 +57,29 @@ export const OrdersTab: React.FC = () => {
   const [formError, setFormError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  // Filters
+  // Filters & Sorting
   const [searchQuery, setSearchQuery] = useState("");
   const [sourceFilter, setSourceFilter] = useState<string>("all");
   const [stageFilter, setStageFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<
+    | "createdAt_desc"
+    | "createdAt_asc"
+    | "deliveryDate_asc"
+    | "deliveryDate_desc"
+    | "totalPrice_desc"
+    | "totalPrice_asc"
+  >("createdAt_desc");
+
+  // Lightbox Photo Gallery State
+  const [galleryOrder, setGalleryOrder] = useState<Order | null>(null);
+  const [galleryType, setGalleryType] = useState<"product" | "location">("product");
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+
+  const handleOpenGallery = (order: Order, type: "product" | "location") => {
+    setGalleryOrder(order);
+    setGalleryType(type);
+    setIsGalleryOpen(true);
+  };
 
   const openCreateModal = () => {
     setEditingOrder(null);
@@ -66,8 +90,8 @@ export const OrdersTab: React.FC = () => {
     setInstallationPrice("0");
     setAdvancePayment("0");
     setColor("");
-    setProductImageUrl("");
-    setLocationImageUrl("");
+    setProductImages([]);
+    setLocationImages([]);
     setCustomerName("");
     setCustomerContact("");
     setCustomerEmail("");
@@ -75,6 +99,7 @@ export const OrdersTab: React.FC = () => {
     setOrderFrom("direct");
     setPaymentMethod("cash");
     setManufacturingNotes("");
+    setOrderDate(new Date().toISOString().split("T")[0]);
     const d = new Date();
     d.setDate(d.getDate() + 7);
     setDeliveryDate(d.toISOString().split("T")[0]);
@@ -93,8 +118,14 @@ export const OrdersTab: React.FC = () => {
     setInstallationPrice(order.installationPrice.toString());
     setAdvancePayment((order.advancePayment || 0).toString());
     setColor(order.color);
-    setProductImageUrl(order.productImageUrl || "");
-    setLocationImageUrl(order.locationImageUrl || "");
+    const pImgs = Array.isArray(order.productImages) && order.productImages.length > 0
+      ? order.productImages
+      : (order.productImageUrl ? [order.productImageUrl] : []);
+    const lImgs = Array.isArray(order.locationImages) && order.locationImages.length > 0
+      ? order.locationImages
+      : (order.locationImageUrl ? [order.locationImageUrl] : []);
+    setProductImages(pImgs);
+    setLocationImages(lImgs);
     setCustomerName(order.customerName);
     setCustomerContact(order.customerContact);
     setCustomerEmail(order.customerEmail || "");
@@ -102,6 +133,7 @@ export const OrdersTab: React.FC = () => {
     setOrderFrom(order.orderFrom);
     setPaymentMethod(order.paymentMethod);
     setManufacturingNotes(order.manufacturingNotes || "");
+    setOrderDate(order.orderDate ? order.orderDate.split("T")[0] : (order.createdAt ? order.createdAt.split("T")[0] : new Date().toISOString().split("T")[0]));
     setDeliveryDate(order.deliveryDate ? order.deliveryDate.split("T")[0] : "");
     setAssigneeId(order.assignee?._id || "");
     setStage(order.stage);
@@ -109,22 +141,48 @@ export const OrdersTab: React.FC = () => {
     setShowModal(true);
   };
 
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>, type: "product" | "location") => {
-    const file = e.target.files?.[0];
-    if (file) {
-      try {
-        const compressedDataUrl = await compressImage(file);
-        if (type === "product") {
-          setProductImageUrl(compressedDataUrl);
-        } else {
-          setLocationImageUrl(compressedDataUrl);
-        }
-        setFormError("");
-      } catch (err: any) {
-        setFormError(err.message || "Failed to process selected image.");
-      } finally {
-        e.target.value = "";
+  const handleMultiImageAdd = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: "product" | "location"
+  ) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const maxAllowed = type === "product" ? 6 : 4;
+    const currentList = type === "product" ? productImages : locationImages;
+    const remainingSlots = maxAllowed - currentList.length;
+
+    if (remainingSlots <= 0) {
+      alert(`Maximum of ${maxAllowed} ${type === "product" ? "product" : "location/site"} photos reached.`);
+      e.target.value = "";
+      return;
+    }
+
+    const filesToProcess = Array.from(files).slice(0, remainingSlots);
+
+    try {
+      const compressedList = await Promise.all(
+        filesToProcess.map((file) => compressImage(file))
+      );
+
+      if (type === "product") {
+        setProductImages((prev) => [...prev, ...compressedList].slice(0, 6));
+      } else {
+        setLocationImages((prev) => [...prev, ...compressedList].slice(0, 4));
       }
+      setFormError("");
+    } catch (err: any) {
+      setFormError(err.message || "Failed to process selected image(s).");
+    } finally {
+      e.target.value = "";
+    }
+  };
+
+  const handleRemoveImage = (index: number, type: "product" | "location") => {
+    if (type === "product") {
+      setProductImages((prev) => prev.filter((_, idx) => idx !== index));
+    } else {
+      setLocationImages((prev) => prev.filter((_, idx) => idx !== index));
     }
   };
 
@@ -155,8 +213,10 @@ export const OrdersTab: React.FC = () => {
       installationPrice: Number(installationPrice) || 0,
       advancePayment: Number(advancePayment) || 0,
       color,
-      productImageUrl,
-      locationImageUrl,
+      productImages: productImages.slice(0, 6),
+      productImageUrl: productImages[0] || "",
+      locationImages: locationImages.slice(0, 4),
+      locationImageUrl: locationImages[0] || "",
       customerName,
       customerContact,
       customerEmail,
@@ -164,6 +224,7 @@ export const OrdersTab: React.FC = () => {
       orderFrom,
       paymentMethod,
       manufacturingNotes,
+      orderDate: orderDate || new Date().toISOString().split("T")[0],
       deliveryDate,
       assignee: assigneeId || null,
     };
@@ -202,55 +263,88 @@ export const OrdersTab: React.FC = () => {
     }
   };
 
-  // Filter orders
-  const filteredOrders = orders.filter((o) => {
-    const query = searchQuery.toLowerCase();
-    const matchesSearch =
-      o.productName.toLowerCase().includes(query) ||
-      o.customerName.toLowerCase().includes(query) ||
-      o.customerContact.includes(query) ||
-      o.customerAddress.toLowerCase().includes(query) ||
-      (o.assignee && o.assignee.name.toLowerCase().includes(query)) ||
-      (o.customerEmail && o.customerEmail.toLowerCase().includes(query));
+  // Filter & Sort orders strictly by date
+  const filteredOrders = React.useMemo(() => {
+    return orders
+      .filter((o) => {
+        const query = searchQuery.toLowerCase();
+        const matchesSearch =
+          o.productName.toLowerCase().includes(query) ||
+          o.customerName.toLowerCase().includes(query) ||
+          o.customerContact.includes(query) ||
+          o.customerAddress.toLowerCase().includes(query) ||
+          (o.assignee && o.assignee.name.toLowerCase().includes(query)) ||
+          (o.customerEmail && o.customerEmail.toLowerCase().includes(query));
 
-    const matchesSource = sourceFilter === "all" || o.orderFrom === sourceFilter;
-    const matchesStage = stageFilter === "all" || o.stage === stageFilter;
+        const matchesSource = sourceFilter === "all" || o.orderFrom === sourceFilter;
+        const matchesStage = stageFilter === "all" || o.stage === stageFilter;
 
-    return matchesSearch && matchesSource && matchesStage;
-  });
+        return matchesSearch && matchesSource && matchesStage;
+      })
+      .sort((a, b) => {
+        if (sortBy === "createdAt_desc") {
+          const timeA = new Date(a.createdAt || 0).getTime();
+          const timeB = new Date(b.createdAt || 0).getTime();
+          return timeB - timeA;
+        }
+        if (sortBy === "createdAt_asc") {
+          const timeA = new Date(a.createdAt || 0).getTime();
+          const timeB = new Date(b.createdAt || 0).getTime();
+          return timeA - timeB;
+        }
+        if (sortBy === "deliveryDate_asc") {
+          const timeA = new Date(a.deliveryDate || 0).getTime();
+          const timeB = new Date(b.deliveryDate || 0).getTime();
+          return timeA - timeB;
+        }
+        if (sortBy === "deliveryDate_desc") {
+          const timeA = new Date(a.deliveryDate || 0).getTime();
+          const timeB = new Date(b.deliveryDate || 0).getTime();
+          return timeB - timeA;
+        }
+        if (sortBy === "totalPrice_desc") {
+          return (b.totalPrice || 0) - (a.totalPrice || 0);
+        }
+        if (sortBy === "totalPrice_asc") {
+          return (a.totalPrice || 0) - (b.totalPrice || 0);
+        }
+        return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+      });
+  }, [orders, searchQuery, sourceFilter, stageFilter, sortBy]);
 
   const getSourceBadge = (source: Order["orderFrom"]) => {
     switch (source) {
       case "tiktok":
-        return "bg-black text-white dark:bg-zinc-800 border-zinc-700";
+        return "bg-black text-white shadow-xs font-bold";
       case "instagram":
-        return "bg-pink-100 text-pink-700 dark:bg-pink-900/20 dark:text-pink-300 border-pink-200/50";
+        return "bg-pink-600 text-white shadow-xs font-bold";
       case "whatsapp":
-        return "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300 border-emerald-200/50";
+        return "bg-emerald-600 text-white shadow-xs font-bold";
       case "direct":
-        return "bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300 border-blue-200/50";
+        return "bg-blue-600 text-white shadow-xs font-bold";
       default:
-        return "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border-border";
+        return "bg-slate-700 text-white shadow-xs font-bold";
     }
   };
 
   const getPaymentBadge = (method: Order["paymentMethod"]) => {
     switch (method) {
       case "esewa":
-        return "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-300 border-green-200/50";
+        return "bg-teal-600 text-white shadow-xs font-bold";
       case "online_banking":
-        return "bg-purple-100 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300 border-purple-200/50";
+        return "bg-indigo-600 text-white shadow-xs font-bold";
       case "cheque":
-        return "bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300 border-amber-200/50";
+        return "bg-amber-600 text-white shadow-xs font-bold";
+      case "cash":
       default:
-        return "bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300 border-blue-200/50";
+        return "bg-emerald-700 text-white shadow-xs font-bold";
     }
   };
 
   const calculateUrgency = (dateStr: string, approved: boolean, stage?: string) => {
-    if (stage === "paid") return { label: "Paid", color: "bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400 font-bold" };
-    if (approved || stage === "delivered") return { label: "Delivered", color: "bg-blue-500/10 border-blue-500/20 text-blue-600 dark:text-blue-400 font-bold" };
-    if (!dateStr) return { label: "No Deadline", color: "bg-gray-150 text-gray-500 border-border" };
+    if (stage === "paid") return { label: "Paid", subLabel: "", color: "bg-emerald-600 text-white font-extrabold shadow-xs" };
+    if (approved || stage === "delivered") return { label: "Delivered", subLabel: "", color: "bg-blue-600 text-white font-extrabold shadow-xs" };
+    if (!dateStr) return { label: "No Deadline", subLabel: "", color: "bg-slate-600 text-white font-bold shadow-xs" };
     
     const now = new Date();
     now.setHours(0, 0, 0, 0);
@@ -261,15 +355,15 @@ export const OrdersTab: React.FC = () => {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays < 0) {
-      return { label: `Overdue (${Math.abs(diffDays)}d ago)`, color: "bg-red-500/15 border-red-500/30 text-red-500 animate-pulse-dots" };
+      return { label: "Overdue", subLabel: `(${Math.abs(diffDays)}d ago)`, color: "bg-red-600 text-white font-extrabold shadow-xs animate-pulse-dots" };
     } else if (diffDays === 0) {
-      return { label: "Urgent (Today)", color: "bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400 font-bold" };
+      return { label: "Urgent", subLabel: "(Today)", color: "bg-red-600 text-white font-extrabold shadow-xs" };
     } else if (diffDays <= 2) {
-      return { label: `High (${diffDays === 1 ? "Tomorrow" : "2d left"})`, color: "bg-amber-500/10 border-amber-500/25 text-amber-600 dark:text-amber-400 font-bold" };
+      return { label: "High", subLabel: `(${diffDays === 1 ? "Tomorrow" : `${diffDays}d left`})`, color: "bg-amber-600 text-white font-extrabold shadow-xs" };
     } else if (diffDays <= 4) {
-      return { label: `Medium (${diffDays}d left)`, color: "bg-yellow-500/10 border-yellow-500/25 text-yellow-600 dark:text-yellow-400" };
+      return { label: "Medium", subLabel: `(${diffDays}d left)`, color: "bg-yellow-600 text-white font-extrabold shadow-xs" };
     } else {
-      return { label: `Normal (${diffDays}d left)`, color: "bg-blue-500/10 border-blue-500/20 text-blue-500" };
+      return { label: "Normal", subLabel: `(${diffDays}d left)`, color: "bg-blue-600 text-white font-extrabold shadow-xs" };
     }
   };
 
@@ -344,59 +438,69 @@ export const OrdersTab: React.FC = () => {
               <option value="paid">Paid</option>
             </select>
           </div>
+
+          {/* Sort By Filter */}
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-muted font-medium">Sort By:</span>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
+              className="px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer transition-all duration-200"
+            >
+              <option value="createdAt_desc">Entry Date (Newest First)</option>
+              <option value="createdAt_asc">Entry Date (Oldest First)</option>
+              <option value="deliveryDate_asc">Delivery Date (Earliest First)</option>
+              <option value="deliveryDate_desc">Delivery Date (Latest First)</option>
+              <option value="totalPrice_desc">Total Amount (Highest First)</option>
+              <option value="totalPrice_asc">Total Amount (Lowest First)</option>
+            </select>
+          </div>
         </div>
       </div>
 
       {/* Table List */}
       <div className="bg-card border border-border/80 rounded-2xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse min-w-[900px]">
+          <table className="w-full text-left text-xs border-collapse min-w-[980px]">
             <thead>
               <tr className="bg-card text-muted border-b border-border uppercase font-semibold tracking-wider text-[10px]">
-                <th className="p-4">Product Info & Images</th>
-                <th className="p-4">Customer Details</th>
-                <th className="p-4">Delivery & Assignee</th>
-                <th className="p-4">Source & Pay</th>
-                <th className="p-4">Pricing Details</th>
-                <th className="p-4 text-center">Progress Status</th>
-                <th className="p-4 text-right">Actions</th>
+                <th className="p-4 min-w-[240px]">Product Info & Images</th>
+                <th className="p-4 min-w-[190px]">Customer & Channel</th>
+                <th className="p-4 min-w-[220px]">Delivery & Assignee</th>
+                <th className="p-4 min-w-[160px]">Pricing Details</th>
+                <th className="p-4 min-w-[145px] text-center">Progress Status</th>
+                <th className="p-3 w-14 min-w-[56px] text-center sticky right-0 bg-card z-10 shadow-[-4px_0_8px_rgba(0,0,0,0.06)] border-l border-border/80">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/80">
               {filteredOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-muted">
+                  <td colSpan={6} className="p-8 text-center text-muted">
                     No orders matching selected criteria
                   </td>
                 </tr>
               ) : (
                 filteredOrders.map((order) => (
-                  <tr key={order._id} className="hover:bg-border/20 transition-colors animate-fade-in">
+                  <tr key={order._id} className="hover:bg-border/20 transition-colors animate-fade-in group">
                     <td className="p-4 text-left">
                       <div className="flex items-center gap-3">
-                        <div className="flex gap-1.5">
-                          {/* Product Image */}
-                          <div className="h-10 w-10 rounded border border-border bg-card flex flex-col items-center justify-center overflow-hidden flex-shrink-0 relative group">
-                            {order.productImageUrl ? (
-                              <img src={order.productImageUrl} alt="Product" className="object-cover h-full w-full" />
-                            ) : (
-                              <Package className="text-muted/60" size={16} />
-                            )}
-                            <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-[7px] text-white text-center py-0.5 leading-none opacity-0 group-hover:opacity-100 transition-opacity">
-                              Sign
-                            </div>
-                          </div>
-                          {/* Location Image */}
-                          <div className="h-10 w-10 rounded border border-border bg-card flex flex-col items-center justify-center overflow-hidden flex-shrink-0 relative group">
-                            {order.locationImageUrl ? (
-                              <img src={order.locationImageUrl} alt="Location" className="object-cover h-full w-full" />
-                            ) : (
-                              <MapPin className="text-muted/60" size={14} />
-                            )}
-                            <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-[7px] text-white text-center py-0.5 leading-none opacity-0 group-hover:opacity-100 transition-opacity">
-                              Site
-                            </div>
-                          </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {/* Stacked Product Image */}
+                          <OrderPhotoStack
+                            images={order.productImages && order.productImages.length > 0 ? order.productImages : (order.productImageUrl ? [order.productImageUrl] : [])}
+                            type="product"
+                            size="md"
+                            onClick={() => handleOpenGallery(order, "product")}
+                          />
+                          {/* Stacked Location Image */}
+                          <OrderPhotoStack
+                            images={order.locationImages && order.locationImages.length > 0 ? order.locationImages : (order.locationImageUrl ? [order.locationImageUrl] : [])}
+                            type="location"
+                            size="md"
+                            onClick={() => handleOpenGallery(order, "location")}
+                          />
                         </div>
                         <div>
                           <h4 className="font-semibold text-foreground">{order.productName}</h4>
@@ -434,30 +538,45 @@ export const OrdersTab: React.FC = () => {
                           <MapPin size={10} className="text-accent" />
                           {order.customerAddress}
                         </div>
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="space-y-1.5">
-                        <div className="flex items-center gap-1.5 text-[11px] font-bold text-foreground">
-                          <Clock size={11} className="text-accent" />
-                          {new Date(order.deliveryDate).toLocaleDateString()}
-                        </div>
-                        <span className={`inline-block px-1.5 py-0.5 border text-[9px] font-extrabold uppercase rounded tracking-wide ${calculateUrgency(order.deliveryDate, order.approved, order.stage).color}`}>
-                          {calculateUrgency(order.deliveryDate, order.approved, order.stage).label}
-                        </span>
-                        <div className="text-[10px] text-muted font-medium mt-1">
-                          Assignee: <strong className="text-foreground">{order.assignee?.name || "Unassigned"}</strong>
+                        {/* Channel & Payment Method Badges */}
+                        <div className="flex items-center gap-1.5 pt-1 mt-1 border-t border-border/40">
+                          <span className={`px-1.5 py-0.2 border text-[8px] font-bold rounded uppercase tracking-wider ${getSourceBadge(order.orderFrom)}`}>
+                            {order.orderFrom}
+                          </span>
+                          <span className={`px-1.5 py-0.2 border text-[8px] font-bold rounded uppercase tracking-wider ${getPaymentBadge(order.paymentMethod)}`}>
+                            {order.paymentMethod.replace("_", " ")}
+                          </span>
                         </div>
                       </div>
                     </td>
-                    <td className="p-4">
-                      <div className="flex flex-col gap-1.5">
-                        <span className={`px-2 py-0.5 border text-[9px] font-bold rounded uppercase w-max tracking-wide ${getSourceBadge(order.orderFrom)}`}>
-                          {order.orderFrom}
-                        </span>
-                        <span className={`px-2 py-0.5 border text-[9px] font-bold rounded uppercase w-max tracking-wide ${getPaymentBadge(order.paymentMethod)}`}>
-                          {order.paymentMethod.replace("_", " ")}
-                        </span>
+                    <td className="p-4 min-w-[220px]">
+                      <div className="space-y-1.5 bg-border/10 p-2.5 rounded-xl border border-border/60">
+                        <div className="text-[10px] text-muted flex items-center justify-between">
+                          <span className="font-semibold text-muted uppercase text-[9px] tracking-wider">Order:</span>
+                          <span className="font-bold text-foreground bg-background px-2 py-0.5 rounded border border-border/50">{formatNepali(order.orderDate || order.createdAt)}</span>
+                        </div>
+                        <div className="text-[11px] text-foreground flex items-center justify-between pt-1 border-t border-border/40">
+                          <span className="flex items-center gap-1 font-bold text-accent text-[9px] uppercase tracking-wider">
+                            <Clock size={11} /> Target:
+                          </span>
+                          <span className="font-extrabold text-foreground">{formatNepali(order.deliveryDate)}</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-2 pt-1 border-t border-border/40">
+                          {(() => {
+                            const urgency = calculateUrgency(order.deliveryDate, order.approved, order.stage);
+                            return (
+                              <div className={`px-2 py-0.5 rounded text-center leading-tight shadow-xs ${urgency.color}`}>
+                                <span className="block text-[9px] uppercase font-black tracking-wider">{urgency.label}</span>
+                                {urgency.subLabel && (
+                                  <span className="block text-[7.5px] font-bold opacity-95 leading-none mt-0.5">{urgency.subLabel}</span>
+                                )}
+                              </div>
+                            );
+                          })()}
+                          <div className="text-[10px] text-muted font-medium truncate max-w-[110px] text-right" title={order.assignee?.name || "Unassigned"}>
+                            Lead: <strong className="text-foreground">{order.assignee?.name || "Unassigned"}</strong>
+                          </div>
+                        </div>
                       </div>
                     </td>
                     <td className="p-4">
@@ -492,16 +611,16 @@ export const OrdersTab: React.FC = () => {
                             }
                           }
                         }}
-                        className={`px-2.5 py-1.5 text-[10px] font-extrabold uppercase rounded border cursor-pointer focus:outline-none ${
+                        className={`px-2.5 py-1.5 text-[10px] font-extrabold uppercase rounded-lg border-0 cursor-pointer focus:outline-none shadow-sm text-white transition-colors ${
                           order.stage === "paid"
-                            ? "bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400"
+                            ? "bg-emerald-600 hover:bg-emerald-700"
                             : order.stage === "delivered" || order.approved
-                            ? "bg-blue-500/10 border-blue-500/20 text-blue-600 dark:text-blue-400"
+                            ? "bg-blue-600 hover:bg-blue-700"
                             : order.stage === "completed"
-                            ? "bg-purple-500/10 border-purple-500/20 text-purple-600 dark:text-purple-400"
+                            ? "bg-purple-600 hover:bg-purple-700"
                             : order.stage === "manufacturing"
-                            ? "bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400"
-                            : "bg-orange-500/10 border-orange-500/20 text-orange-600 dark:text-orange-400"
+                            ? "bg-red-600 hover:bg-red-700"
+                            : "bg-amber-600 hover:bg-amber-700"
                         }`}
                       >
                         <option value="design" className="bg-card text-foreground font-bold">Design Process</option>
@@ -516,31 +635,32 @@ export const OrdersTab: React.FC = () => {
                         </div>
                       )}
                     </td>
-                    <td className="p-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                    {/* Sticky Vertically Stacked Actions Column */}
+                    <td className="p-3 w-14 min-w-[56px] text-center sticky right-0 bg-card z-10 shadow-[-4px_0_8px_rgba(0,0,0,0.06)] border-l border-border/80 group-hover:bg-border/10 transition-colors">
+                      <div className="flex flex-col items-center justify-center gap-1.5 mx-auto">
                         <button
                           onClick={() => setSelectedViewOrder(order)}
-                          className="p-1.5 bg-blue-600 rounded text-white hover:bg-blue-700 transition-colors shadow-sm"
-                          title="View Details"
+                          className="p-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all shadow-sm"
+                          title="View Full Details"
                         >
-                          <Eye size={14} />
+                          <Eye size={13} />
                         </button>
                         {user?.role === "admin" && (
                           <button
                             onClick={() => openEditModal(order)}
-                            className="p-1.5 bg-accent rounded text-white hover:bg-accent-dark transition-colors shadow-sm"
+                            className="p-1.5 bg-accent hover:bg-accent-dark text-white rounded-lg transition-all shadow-sm"
                             title="Edit Order"
                           >
-                            <Edit2 size={14} />
+                            <Edit2 size={13} />
                           </button>
                         )}
                         {user?.role === "admin" && (
                           <button
                             onClick={() => handleDelete(order._id)}
-                            className="p-1.5 bg-red-600 rounded text-white hover:bg-red-700 transition-colors shadow-sm"
+                            className="p-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all shadow-sm"
                             title="Delete Order"
                           >
-                            <Trash2 size={14} />
+                            <Trash2 size={13} />
                           </button>
                         )}
                       </div>
@@ -714,19 +834,28 @@ export const OrdersTab: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Delivery date & Assignee Selection */}
-                  <div className="grid grid-cols-2 gap-4">
+                  {/* Order Date, Delivery Date & Assignee Selection */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
                       <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1.5">
-                        Delivery Deadline *
+                        Order Date (अर्डर मिति) *
                       </label>
-                      <input
-                        type="date"
-                        value={deliveryDate}
-                        onChange={(e) => setDeliveryDate(e.target.value)}
-                        className="w-full px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm font-semibold disabled:opacity-75 disabled:bg-border/10"
-                        required
+                      <NepaliDatePicker
+                        value={orderDate}
+                        onChange={(iso) => setOrderDate(iso)}
                         disabled={user?.role !== "admin"}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1.5">
+                        Delivery Target (डेलिभरी) *
+                      </label>
+                      <NepaliDatePicker
+                        value={deliveryDate}
+                        onChange={(iso) => setDeliveryDate(iso)}
+                        disabled={user?.role !== "admin"}
+                        required
                       />
                     </div>
                     <div>
@@ -771,36 +900,59 @@ export const OrdersTab: React.FC = () => {
                     </div>
                   )}
 
-                  {/* Image uploads */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1.5">
-                        Product Photo *
-                      </label>
-                      <div className="flex flex-col gap-2">
-                        {productImageUrl && (
-                          <div className="h-20 w-full border border-border rounded overflow-hidden bg-background relative group">
-                            <img src={productImageUrl} alt="Product preview" className="h-full w-full object-cover" />
-                            <button
-                              type="button"
-                              onClick={() => setProductImageUrl("")}
-                              className="absolute top-1 right-1 p-1 bg-black/70 hover:bg-red-600 text-white rounded-full transition-colors"
-                              title="Remove Product Photo"
-                            >
-                              <X size={12} />
-                            </button>
+                  {/* Multi-Image Uploads System */}
+                  <div className="space-y-4 pt-1">
+                    {/* Product Photos (Max 6) */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <label className="text-[10px] font-bold text-muted uppercase tracking-wider flex items-center gap-1.5">
+                          <Package size={12} className="text-accent" />
+                          <span>Product Sign Photos</span>
+                        </label>
+                        <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
+                          productImages.length === 6 ? "bg-amber-500/15 text-amber-600" : "bg-accent/10 text-accent"
+                        }`}>
+                          {productImages.length}/6 Uploaded
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                        {productImages.map((imgUrl, idx) => (
+                          <div
+                            key={`prod-preview-${idx}`}
+                            className="relative h-16 rounded-xl border border-border overflow-hidden bg-background group shadow-xs"
+                          >
+                            <img src={imgUrl} alt={`Product ${idx + 1}`} className="h-full w-full object-cover" />
+                            <span className="absolute bottom-0 left-0 right-0 bg-black/70 text-[7px] font-bold text-white text-center py-0.5">
+                              #{idx + 1}
+                            </span>
+                            {user?.role === "admin" && (
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveImage(idx, "product")}
+                                className="absolute top-1 right-1 p-1 bg-black/80 hover:bg-red-600 text-white rounded-full transition-colors shadow-sm"
+                                title="Remove photo"
+                              >
+                                <X size={10} />
+                              </button>
+                            )}
                           </div>
-                        )}
-                        {user?.role === "admin" && (
-                          <label className="flex flex-col items-center justify-center border border-dashed border-border rounded p-2.5 hover:bg-border/20 cursor-pointer transition-colors text-center text-muted">
-                            <Upload size={14} className="text-accent mb-0.5" />
-                            <span className="text-[8px] font-bold uppercase tracking-wider">
-                              {productImageUrl ? "Change Product Photo" : "Upload Product Photo"}
+                        ))}
+
+                        {user?.role === "admin" && productImages.length < 6 && (
+                          <label className="h-16 flex flex-col items-center justify-center border-2 border-dashed border-border/80 hover:border-accent hover:bg-accent/[0.03] rounded-xl cursor-pointer transition-all text-center p-1 group">
+                            <Upload size={14} className="text-accent group-hover:scale-110 transition-transform mb-0.5" />
+                            <span className="text-[8px] font-bold text-muted group-hover:text-foreground leading-tight">
+                              Add Photo
+                            </span>
+                            <span className="text-[6px] text-muted/60">
+                              (Max {6 - productImages.length} left)
                             </span>
                             <input
                               type="file"
                               accept="image/*"
-                              onChange={(e) => handleImageChange(e, "product")}
+                              multiple
+                              onChange={(e) => handleMultiImageAdd(e, "product")}
                               className="hidden"
                             />
                           </label>
@@ -808,34 +960,57 @@ export const OrdersTab: React.FC = () => {
                       </div>
                     </div>
 
-                    <div>
-                      <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1.5">
-                        Location/Site Photo
-                      </label>
-                      <div className="flex flex-col gap-2">
-                        {locationImageUrl && (
-                          <div className="h-20 w-full border border-border rounded overflow-hidden bg-background relative group">
-                            <img src={locationImageUrl} alt="Location preview" className="h-full w-full object-cover" />
-                            <button
-                              type="button"
-                              onClick={() => setLocationImageUrl("")}
-                              className="absolute top-1 right-1 p-1 bg-black/70 hover:bg-red-600 text-white rounded-full transition-colors"
-                              title="Remove Location Photo"
-                            >
-                              <X size={12} />
-                            </button>
+                    {/* Location/Site Photos (Max 4) */}
+                    <div className="space-y-2 pt-1 border-t border-border/50">
+                      <div className="flex justify-between items-center">
+                        <label className="text-[10px] font-bold text-muted uppercase tracking-wider flex items-center gap-1.5">
+                          <MapPin size={12} className="text-accent" />
+                          <span>Installation / Site Photos</span>
+                        </label>
+                        <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
+                          locationImages.length === 4 ? "bg-amber-500/15 text-amber-600" : "bg-accent/10 text-accent"
+                        }`}>
+                          {locationImages.length}/4 Uploaded
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {locationImages.map((imgUrl, idx) => (
+                          <div
+                            key={`loc-preview-${idx}`}
+                            className="relative h-16 rounded-xl border border-border overflow-hidden bg-background group shadow-xs"
+                          >
+                            <img src={imgUrl} alt={`Site ${idx + 1}`} className="h-full w-full object-cover" />
+                            <span className="absolute bottom-0 left-0 right-0 bg-black/70 text-[7px] font-bold text-white text-center py-0.5">
+                              #{idx + 1}
+                            </span>
+                            {user?.role === "admin" && (
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveImage(idx, "location")}
+                                className="absolute top-1 right-1 p-1 bg-black/80 hover:bg-red-600 text-white rounded-full transition-colors shadow-sm"
+                                title="Remove photo"
+                              >
+                                <X size={10} />
+                              </button>
+                            )}
                           </div>
-                        )}
-                        {user?.role === "admin" && (
-                          <label className="flex flex-col items-center justify-center border border-dashed border-border rounded p-2.5 hover:bg-border/20 cursor-pointer transition-colors text-center text-muted">
-                            <Upload size={14} className="text-accent mb-0.5" />
-                            <span className="text-[8px] font-bold uppercase tracking-wider">
-                              {locationImageUrl ? "Change Location Photo" : "Upload Location Photo"}
+                        ))}
+
+                        {user?.role === "admin" && locationImages.length < 4 && (
+                          <label className="h-16 flex flex-col items-center justify-center border-2 border-dashed border-border/80 hover:border-accent hover:bg-accent/[0.03] rounded-xl cursor-pointer transition-all text-center p-1 group">
+                            <Upload size={14} className="text-accent group-hover:scale-110 transition-transform mb-0.5" />
+                            <span className="text-[8px] font-bold text-muted group-hover:text-foreground leading-tight">
+                              Add Site Photo
+                            </span>
+                            <span className="text-[6px] text-muted/60">
+                              (Max {4 - locationImages.length} left)
                             </span>
                             <input
                               type="file"
                               accept="image/*"
-                              onChange={(e) => handleImageChange(e, "location")}
+                              multiple
+                              onChange={(e) => handleMultiImageAdd(e, "location")}
                               className="hidden"
                             />
                           </label>
@@ -989,6 +1164,12 @@ export const OrdersTab: React.FC = () => {
       <OrderDetailModal
         order={selectedViewOrder}
         onClose={() => setSelectedViewOrder(null)}
+      />
+      <OrderPhotoGalleryModal
+        order={galleryOrder}
+        isOpen={isGalleryOpen}
+        initialType={galleryType}
+        onClose={() => setIsGalleryOpen(false)}
       />
     </div>
   );

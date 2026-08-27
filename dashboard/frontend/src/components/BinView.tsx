@@ -9,6 +9,7 @@ import {
   Package,
   MapPin
 } from "./ui/solar-icons";
+import { formatNepali } from "../utils/nepaliDate";
 
 export const BinView: React.FC = () => {
   const {
@@ -222,7 +223,7 @@ export const BinView: React.FC = () => {
                         Priority: {task.priority.toUpperCase()}
                       </span>
                       <span>Assignee: {task.assignee?.name}</span>
-                      <span>Deleted: {task.updatedAt ? new Date(task.updatedAt).toLocaleDateString() : ""}</span>
+                      <span>Deleted: {task.updatedAt ? formatNepali(task.updatedAt) : ""}</span>
                     </div>
                   </div>
 
@@ -282,7 +283,7 @@ export const BinView: React.FC = () => {
 
                     <div className="text-[10px] text-muted border-t border-border/50 pt-2 space-y-1">
                       {item.email && <div>Email: <strong className="text-foreground">{item.email}</strong></div>}
-                      <div>Deleted: {item.updatedAt ? new Date(item.updatedAt).toLocaleDateString() : ""}</div>
+                      <div>Deleted: {item.updatedAt ? formatNepali(item.updatedAt) : ""}</div>
                     </div>
                   </div>
 

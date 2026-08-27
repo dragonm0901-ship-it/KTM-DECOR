@@ -17,9 +17,18 @@ import {
   Eye,
   Phone,
   MapPin,
-  X
+  X,
+  Truck,
+  Wrench
 } from "./ui/solar-icons";
 import { OrderDetailModal } from "./OrderDetailModal";
+import {
+  formatNepali,
+  formatNepaliShort,
+  getCurrentNepaliDate,
+  NEPALI_MONTHS,
+  NEPALI_YEARS,
+} from "../utils/nepaliDate";
 
 interface OverviewProps {
   setCurrentTab: (tab: string) => void;
@@ -64,9 +73,11 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
   const [showOutstandingModal, setShowOutstandingModal] = useState(false);
   const [selectedOrderForDetails, setSelectedOrderForDetails] = useState<any>(null);
 
+  const currentBs = getCurrentNepaliDate();
+
   // Statement Export States
-  const [exportMonth, setExportMonth] = useState<string>((new Date().getMonth() + 1).toString());
-  const [exportYear, setExportYear] = useState<string>(new Date().getFullYear().toString());
+  const [exportMonth, setExportMonth] = useState<string>(currentBs.month.toString());
+  const [exportYear, setExportYear] = useState<string>(currentBs.year.toString());
   const [exportingType, setExportingType] = useState<string | null>(null);
 
   useEffect(() => {
@@ -104,10 +115,11 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
 
   // Approved manual orders
   const approvedOrders = orders
-    .filter((o) => o.approved && o.stage === "delivered")
+    .filter((o) => o.approved && (o.stage === "delivered" || o.stage === "paid"))
     .sort((a, b) => new Date(a.approvedAt || a.updatedAt || a.createdAt).getTime() - new Date(b.approvedAt || b.updatedAt || b.createdAt).getTime());
 
-  const activeOrdersCount = orders.filter((o) => o.stage !== "delivered").length;
+  // Active orders are those in design, manufacturing, or completed (not yet delivered or paid)
+  const activeOrdersCount = orders.filter((o) => !o.deleted && o.stage !== "delivered" && o.stage !== "paid").length;
 
   // Dynamic Sales: Sum of total cost of all completed tasks + sales ledger entries
   const taskSales = completedTasks.reduce((acc, t) => acc + (t.totalCost || 0), 0);
@@ -125,9 +137,10 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
 
   const totalSales = taskSales + orderSales + directSales;
 
-  // Advance and Due calculations — calculated from all orders in registry
-  const totalAdvancePaid = orders.reduce((acc, o) => acc + (o.advancePayment || 0), 0);
-  const totalDuePayment = orders.reduce((acc, o) => acc + (o.duePayment || 0), 0);
+  // Delivery and Fitting charges calculated from orders
+  const totalDeliveryCharges = orders.filter((o) => !o.deleted).reduce((acc, o) => acc + (o.deliveryPrice || 0), 0);
+  const totalFittingCharges = orders.filter((o) => !o.deleted).reduce((acc, o) => acc + (o.installationPrice || 0), 0);
+  const totalDuePayment = orders.filter((o) => !o.deleted).reduce((acc, o) => acc + (o.duePayment || 0), 0);
 
   const pendingTasks = tasks.filter((t) => t.status !== "done");
   const completedTasksCount = completedTasks.length;
@@ -165,7 +178,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
   };
 
   const staffPendingOrders = orders
-    .filter((o) => o.assignee?._id === activeId && o.deleted !== true && o.stage !== "delivered")
+    .filter((o) => o.assignee?._id === activeId && o.deleted !== true && o.stage !== "delivered" && o.stage !== "paid")
     .map((o) => ({
       _id: o._id,
       title: `Order: ${o.productName}`,
@@ -177,7 +190,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
     }));
 
   const staffCompletedOrders = orders
-    .filter((o) => o.assignee?._id === activeId && o.deleted !== true && (o.stage === "delivered" || o.approved))
+    .filter((o) => o.assignee?._id === activeId && o.deleted !== true && (o.stage === "delivered" || o.stage === "paid" || o.approved))
     .map((o) => ({
       _id: o._id,
       title: `Order: ${o.productName}`,
@@ -226,10 +239,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
     let cumulative = 0;
     revenueItems.forEach((item) => {
       cumulative += item.value;
-      const dateStr = item.date.toLocaleDateString([], {
-        month: "short",
-        day: "numeric"
-      });
+      const dateStr = formatNepaliShort(item.date);
       points.push({ label: dateStr, value: cumulative });
     });
 
@@ -562,7 +572,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                     </span>
                     <span className="text-[10px] text-muted font-medium flex items-center gap-1">
                       <Clock size={10} />
-                      Due: {new Date(task.dueDate).toLocaleDateString()}
+                      Due: {formatNepali(task.dueDate)}
                     </span>
                   </div>
                 </div>
@@ -577,96 +587,116 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Total Sales Card */}
-            <div className="bg-card border border-border/80 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all rounded-2xl p-5 flex items-center justify-between">
-              <div className="space-y-2">
-                <span className="text-xs text-muted font-bold uppercase tracking-wider block">Total Sales</span>
-                <h3 className="text-2xl sm:text-3xl font-extrabold font-display text-foreground leading-none">Rs. {totalSales.toLocaleString()}</h3>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="bg-green-500/10 text-green-600 border border-green-500/10 px-1.5 py-0.5 rounded text-[9px] font-bold">
+            <div className="bg-card border border-border/80 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all rounded-2xl p-5 flex flex-col justify-between">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <span className="text-xs text-muted font-bold uppercase tracking-wider block">Total Sales</span>
+                  <h3 className="text-2xl sm:text-3xl font-extrabold font-display text-foreground leading-none">Rs. {totalSales.toLocaleString()}</h3>
+                </div>
+                <div className="p-2 bg-emerald-600 text-white rounded-xl shadow-xs shrink-0">
+                  <DollarSign size={16} />
+                </div>
+              </div>
+              <div className="flex items-center justify-between mt-3">
+                <div className="flex items-center gap-1.5">
+                  <span className="bg-emerald-600 text-white px-1.5 py-0.5 rounded text-[9px] font-bold shadow-xs">
                     ↑ 12.4%
                   </span>
                   <span className="text-[10px] text-muted font-medium">vs last month</span>
                 </div>
-              </div>
-              <div className="flex flex-col items-end gap-2">
-                <div className="p-2 bg-green-500/10 text-green-600 rounded-xl">
-                  <DollarSign size={20} />
-                </div>
-                {renderMiniBarChart(getSparklineData("sales"), "fill-green-500/80 hover:fill-green-500 transition-colors")}
+                {renderMiniBarChart(getSparklineData("sales"), "fill-emerald-500/80 hover:fill-emerald-500 transition-colors")}
               </div>
             </div>
 
             {/* Active Orders Card */}
-            <div className="bg-card border border-border/80 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all rounded-2xl p-5 flex items-center justify-between">
-              <div className="space-y-2">
-                <span className="text-xs text-muted font-bold uppercase tracking-wider block">Active Orders</span>
-                <h3 className="text-2xl sm:text-3xl font-extrabold font-display text-foreground leading-none">{activeOrdersCount}</h3>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="bg-accent/10 text-accent border border-accent/10 px-1.5 py-0.5 rounded text-[9px] font-bold">
+            <div className="bg-card border border-border/80 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all rounded-2xl p-5 flex flex-col justify-between">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <span className="text-xs text-muted font-bold uppercase tracking-wider block">Active Orders</span>
+                  <h3 className="text-2xl sm:text-3xl font-extrabold font-display text-foreground leading-none">{activeOrdersCount}</h3>
+                </div>
+                <div className="p-2 bg-accent text-white rounded-xl shadow-xs shrink-0">
+                  <Package size={16} />
+                </div>
+              </div>
+              <div className="flex items-center justify-between mt-3">
+                <div className="flex items-center gap-1.5">
+                  <span className="bg-accent text-white px-1.5 py-0.5 rounded text-[9px] font-bold shadow-xs">
                     ↓ 4.8%
                   </span>
                   <span className="text-[10px] text-muted font-medium">vs last week</span>
-                </div>
-              </div>
-              <div className="flex flex-col items-end gap-2">
-                <div className="p-2 bg-accent/10 text-accent rounded-xl">
-                  <Package size={20} />
                 </div>
                 {renderMiniBarChart(getSparklineData("orders"), "fill-accent/80 hover:fill-accent transition-colors")}
               </div>
             </div>
 
             {/* Pending Tasks Card */}
-            <div className="bg-card border border-border/80 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all rounded-2xl p-5 flex items-center justify-between">
-              <div className="space-y-2">
-                <span className="text-xs text-muted font-bold uppercase tracking-wider block">Pending Tasks</span>
-                <h3 className="text-2xl sm:text-3xl font-extrabold font-display text-foreground leading-none">{pendingTasks.length}</h3>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="bg-amber-500/10 text-amber-600 border border-amber-500/10 px-1.5 py-0.5 rounded text-[9px] font-bold">
+            <div className="bg-card border border-border/80 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all rounded-2xl p-5 flex flex-col justify-between">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <span className="text-xs text-muted font-bold uppercase tracking-wider block">Pending Tasks</span>
+                  <h3 className="text-2xl sm:text-3xl font-extrabold font-display text-foreground leading-none">{pendingTasks.length}</h3>
+                </div>
+                <div className="p-2 bg-amber-600 text-white rounded-xl shadow-xs shrink-0">
+                  <Clock size={16} />
+                </div>
+              </div>
+              <div className="flex items-center justify-between mt-3">
+                <div className="flex items-center gap-1.5">
+                  <span className="bg-amber-600 text-white px-1.5 py-0.5 rounded text-[9px] font-bold shadow-xs">
                     ↓ 15.2%
                   </span>
                   <span className="text-[10px] text-muted font-medium">vs yesterday</span>
-                </div>
-              </div>
-              <div className="flex flex-col items-end gap-2">
-                <div className="p-2 bg-amber-500/10 text-amber-600 rounded-xl">
-                  <Clock size={20} />
                 </div>
                 {renderMiniLineChart(getSparklineData("tasks"), "#d97706", "amber-spark")}
               </div>
             </div>
 
             {/* Completed Work Card */}
-            <div className="bg-card border border-border/80 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all rounded-2xl p-5 flex items-center justify-between">
-              <div className="space-y-2">
-                <span className="text-xs text-muted font-bold uppercase tracking-wider block">Completed Work</span>
-                <h3 className="text-2xl sm:text-3xl font-extrabold font-display text-foreground leading-none">{completedTasksCount + approvedOrders.length}</h3>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="bg-blue-500/10 text-blue-600 border border-blue-500/10 px-1.5 py-0.5 rounded text-[9px] font-bold">
+            <div className="bg-card border border-border/80 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all rounded-2xl p-5 flex flex-col justify-between">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <span className="text-xs text-muted font-bold uppercase tracking-wider block">Completed Work</span>
+                  <h3 className="text-2xl sm:text-3xl font-extrabold font-display text-foreground leading-none">{completedTasksCount + approvedOrders.length}</h3>
+                </div>
+                <div className="p-2 bg-blue-600 text-white rounded-xl shadow-xs shrink-0">
+                  <CheckCircle size={16} />
+                </div>
+              </div>
+              <div className="flex items-center justify-between mt-3">
+                <div className="flex items-center gap-1.5">
+                  <span className="bg-blue-600 text-white px-1.5 py-0.5 rounded text-[9px] font-bold shadow-xs">
                     ↑ 8.3%
                   </span>
                   <span className="text-[10px] text-muted font-medium">vs last week</span>
-                </div>
-              </div>
-              <div className="flex flex-col items-end gap-2">
-                <div className="p-2 bg-blue-500/10 text-blue-600 rounded-xl">
-                  <CheckCircle size={20} />
                 </div>
                 {renderMiniLineChart(getSparklineData("completed"), "#2563eb", "blue-spark")}
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Advance Payments */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* Total Delivery Charges */}
             <div className="bg-card border border-border/80 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all p-5 rounded-2xl flex items-center justify-between">
               <div className="space-y-1">
-                <span className="text-xs text-muted font-bold uppercase tracking-wider block">Total Advance Received</span>
-                <h3 className="text-xl sm:text-2xl font-extrabold font-display text-emerald-600 dark:text-emerald-400">Rs. {totalAdvancePaid.toLocaleString()}</h3>
-                <p className="text-[10px] text-muted">Upfront client payments collected</p>
+                <span className="text-xs text-muted font-bold uppercase tracking-wider block">Total Delivery Charges</span>
+                <h3 className="text-xl sm:text-2xl font-extrabold font-display text-blue-600 dark:text-blue-400">Rs. {totalDeliveryCharges.toLocaleString()}</h3>
+                <p className="text-[10px] text-muted">Delivery fees collected from orders</p>
               </div>
-              <div className="p-3 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-2xl">
-                <CheckCircle size={22} />
+              <div className="p-3 bg-blue-600 text-white rounded-2xl shadow-xs">
+                <Truck size={22} />
+              </div>
+            </div>
+
+            {/* Total Fitting Charges */}
+            <div className="bg-card border border-border/80 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all p-5 rounded-2xl flex items-center justify-between">
+              <div className="space-y-1">
+                <span className="text-xs text-muted font-bold uppercase tracking-wider block">Total Fitting Charges</span>
+                <h3 className="text-xl sm:text-2xl font-extrabold font-display text-purple-600 dark:text-purple-400">Rs. {totalFittingCharges.toLocaleString()}</h3>
+                <p className="text-[10px] text-muted">Installation & fitting charges collected</p>
+              </div>
+              <div className="p-3 bg-purple-600 text-white rounded-2xl shadow-xs">
+                <Wrench size={22} />
               </div>
             </div>
 
@@ -680,7 +710,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                 <h3 className="text-xl sm:text-2xl font-extrabold font-display text-red-500">Rs. {totalDuePayment.toLocaleString()}</h3>
                 <p className="text-[10px] text-muted">Receivables remaining from active/completed orders (Click to view)</p>
               </div>
-              <div className="p-3 bg-red-500/10 text-red-500 rounded-2xl group-hover:scale-105 transition-transform">
+              <div className="p-3 bg-red-600 text-white rounded-2xl shadow-xs group-hover:scale-105 transition-transform">
                 <Clock size={22} />
               </div>
             </div>
@@ -694,14 +724,14 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               <span className="text-xs text-muted font-bold uppercase tracking-wider block">Your Pending Tasks</span>
               <h3 className="text-2xl sm:text-3xl font-extrabold font-display text-amber-500 leading-none">{staffPendingTasks.length}</h3>
               <div className="flex items-center gap-2 mt-1">
-                <span className="bg-amber-500/10 text-amber-600 border border-amber-500/10 px-1.5 py-0.5 rounded text-[9px] font-bold">
+                <span className="bg-amber-600 text-white px-1.5 py-0.5 rounded text-[9px] font-bold shadow-xs">
                   Active
                 </span>
                 <span className="text-[10px] text-muted font-medium">Awaiting completion</span>
               </div>
             </div>
             <div className="flex flex-col items-end gap-2">
-              <div className="p-2.5 bg-amber-500/10 text-amber-500 rounded-xl">
+              <div className="p-2.5 bg-amber-600 text-white rounded-xl shadow-xs">
                 <Clock size={20} />
               </div>
               {renderMiniLineChart(getSparklineData("tasks"), "#d97706", "staff-tasks-spark")}
@@ -713,14 +743,14 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               <span className="text-xs text-muted font-bold uppercase tracking-wider block">Your Completed Tasks</span>
               <h3 className="text-2xl sm:text-3xl font-extrabold font-display text-green-500 leading-none">{staffCompletedTasks.length}</h3>
               <div className="flex items-center gap-2 mt-1">
-                <span className="bg-green-500/10 text-green-600 border border-green-500/10 px-1.5 py-0.5 rounded text-[9px] font-bold">
+                <span className="bg-emerald-600 text-white px-1.5 py-0.5 rounded text-[9px] font-bold shadow-xs">
                   Completed
                 </span>
                 <span className="text-[10px] text-muted font-medium">Finished work items</span>
               </div>
             </div>
             <div className="flex flex-col items-end gap-2">
-              <div className="p-2.5 bg-green-500/10 text-green-500 rounded-xl">
+              <div className="p-2.5 bg-emerald-600 text-white rounded-xl shadow-xs">
                 <CheckCircle size={20} />
               </div>
               {renderMiniLineChart(getSparklineData("completed"), "#10b981", "staff-completed-spark")}
@@ -732,14 +762,14 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               <span className="text-xs text-muted font-bold uppercase tracking-wider block">Marketing Hub</span>
               <h3 className="text-2xl sm:text-3xl font-extrabold font-display text-blue-500 leading-none">{campaigns.length}</h3>
               <div className="flex items-center gap-2 mt-1">
-                <span className="bg-blue-500/10 text-blue-600 border border-blue-500/10 px-1.5 py-0.5 rounded text-[9px] font-bold">
+                <span className="bg-blue-600 text-white px-1.5 py-0.5 rounded text-[9px] font-bold shadow-xs">
                   Active
                 </span>
                 <span className="text-[10px] text-muted font-medium">Coordinated campaigns</span>
               </div>
             </div>
             <div className="flex flex-col items-end gap-2">
-              <div className="p-2.5 bg-blue-500/10 text-blue-600 rounded-xl">
+              <div className="p-2.5 bg-blue-600 text-white rounded-xl shadow-xs">
                 <FileText size={20} />
               </div>
               {renderMiniBarChart([4, 5, 3, 6, 4, campaigns.length], "fill-blue-500/80 hover:fill-blue-500 transition-colors")}
@@ -902,41 +932,36 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                 </p>
               </div>
 
-              {/* Date Filters */}
+              {/* Date Filters (Nepali BS) */}
               <div className="flex items-center gap-3">
                 <div className="flex flex-col">
-                  <span className="text-[10px] text-muted uppercase font-bold tracking-wider mb-1">Month</span>
+                  <span className="text-[10px] text-muted uppercase font-bold tracking-wider mb-1">Nepali Month</span>
                   <select
                     value={exportMonth}
                     onChange={(e) => setExportMonth(e.target.value)}
-                    className="bg-card border border-border text-foreground text-xs rounded px-3 py-1.5 focus:outline-none focus:border-accent font-semibold"
+                    className="bg-card border border-border text-foreground text-xs rounded px-3 py-1.5 focus:outline-none focus:border-accent font-semibold cursor-pointer"
                   >
-                    <option value="all">All Time</option>
-                    <option value="1">January</option>
-                    <option value="2">February</option>
-                    <option value="3">March</option>
-                    <option value="4">April</option>
-                    <option value="5">May</option>
-                    <option value="6">June</option>
-                    <option value="7">July</option>
-                    <option value="8">August</option>
-                    <option value="9">September</option>
-                    <option value="10">October</option>
-                    <option value="11">November</option>
-                    <option value="12">December</option>
+                    <option value="all">All Time (सम्पूर्ण)</option>
+                    {NEPALI_MONTHS.map((m) => (
+                      <option key={m.value} value={m.value.toString()}>
+                        {m.name} ({m.nepaliName})
+                      </option>
+                    ))}
                   </select>
                 </div>
 
                 <div className="flex flex-col">
-                  <span className="text-[10px] text-muted uppercase font-bold tracking-wider mb-1">Year</span>
+                  <span className="text-[10px] text-muted uppercase font-bold tracking-wider mb-1">Nepali Year (BS)</span>
                   <select
                     value={exportYear}
                     onChange={(e) => setExportYear(e.target.value)}
-                    className="bg-card border border-border text-foreground text-xs rounded px-3 py-1.5 focus:outline-none focus:border-accent font-semibold"
+                    className="bg-card border border-border text-foreground text-xs rounded px-3 py-1.5 focus:outline-none focus:border-accent font-semibold cursor-pointer"
                   >
-                    <option value="2025">2025</option>
-                    <option value="2026">2026</option>
-                    <option value="2027">2027</option>
+                    {NEPALI_YEARS.map((y) => (
+                      <option key={y} value={y.toString()}>
+                        {y} BS
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -946,9 +971,11 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               <button
                 onClick={() => handleExport("all")}
                 disabled={exportingType !== null}
-                className="flex flex-col items-center justify-center p-4 rounded-lg border border-accent/20 bg-accent/[0.03] hover:bg-accent/[0.06] transition-all text-center group"
+                className="flex flex-col items-center justify-center p-4 rounded-xl border border-border/80 bg-card hover:border-accent hover:shadow-md transition-all text-center group"
               >
-                <FileText className="text-accent group-hover:scale-110 transition-transform mb-2" size={24} />
+                <div className="p-2.5 bg-accent text-white rounded-xl shadow-xs mb-2 group-hover:scale-105 transition-transform">
+                  <FileText size={18} />
+                </div>
                 <span className="text-xs font-bold text-foreground">Combined Statement</span>
                 <span className="text-[9px] text-muted mt-1">All sales, expenses, and purchases</span>
                 {exportingType === "all" && <span className="text-[9px] text-accent font-bold mt-1 animate-pulse">Exporting...</span>}
@@ -957,9 +984,11 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               <button
                 onClick={() => handleExport("sales")}
                 disabled={exportingType !== null}
-                className="flex flex-col items-center justify-center p-4 rounded-lg border border-blue-500/20 bg-blue-500/[0.02] hover:bg-blue-500/[0.05] transition-all text-center group"
+                className="flex flex-col items-center justify-center p-4 rounded-xl border border-border/80 bg-card hover:border-blue-500 hover:shadow-md transition-all text-center group"
               >
-                <TrendingUp className="text-blue-500 group-hover:scale-110 transition-transform mb-2" size={24} />
+                <div className="p-2.5 bg-blue-600 text-white rounded-xl shadow-xs mb-2 group-hover:scale-105 transition-transform">
+                  <TrendingUp size={18} />
+                </div>
                 <span className="text-xs font-bold text-foreground">Sales Only</span>
                 <span className="text-[9px] text-muted mt-1">CSV file of sales ledger</span>
                 {exportingType === "sales" && <span className="text-[9px] text-blue-500 font-bold mt-1 animate-pulse">Exporting...</span>}
@@ -968,9 +997,11 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               <button
                 onClick={() => handleExport("expenses")}
                 disabled={exportingType !== null}
-                className="flex flex-col items-center justify-center p-4 rounded-lg border border-red-500/20 bg-red-500/[0.02] hover:bg-red-500/[0.05] transition-all text-center group"
+                className="flex flex-col items-center justify-center p-4 rounded-xl border border-border/80 bg-card hover:border-red-500 hover:shadow-md transition-all text-center group"
               >
-                <DollarSign className="text-red-500 group-hover:scale-110 transition-transform mb-2" size={24} />
+                <div className="p-2.5 bg-red-600 text-white rounded-xl shadow-xs mb-2 group-hover:scale-105 transition-transform">
+                  <DollarSign size={18} />
+                </div>
                 <span className="text-xs font-bold text-foreground">Expenses Only</span>
                 <span className="text-[9px] text-muted mt-1">CSV file of expenses log</span>
                 {exportingType === "expenses" && <span className="text-[9px] text-red-500 font-bold mt-1 animate-pulse">Exporting...</span>}
@@ -979,9 +1010,11 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               <button
                 onClick={() => handleExport("purchases")}
                 disabled={exportingType !== null}
-                className="flex flex-col items-center justify-center p-4 rounded-lg border border-amber-500/20 bg-amber-500/[0.02] hover:bg-amber-500/[0.05] transition-all text-center group"
+                className="flex flex-col items-center justify-center p-4 rounded-xl border border-border/80 bg-card hover:border-amber-500 hover:shadow-md transition-all text-center group"
               >
-                <Briefcase className="text-amber-500 group-hover:scale-110 transition-transform mb-2" size={24} />
+                <div className="p-2.5 bg-amber-600 text-white rounded-xl shadow-xs mb-2 group-hover:scale-105 transition-transform">
+                  <Briefcase size={18} />
+                </div>
                 <span className="text-xs font-bold text-foreground">Purchases Only</span>
                 <span className="text-[9px] text-muted mt-1">CSV file of material purchases</span>
                 {exportingType === "purchases" && <span className="text-[9px] text-amber-500 font-bold mt-1 animate-pulse">Exporting...</span>}
@@ -990,9 +1023,11 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               <button
                 onClick={() => handleExport("inventory")}
                 disabled={exportingType !== null}
-                className="flex flex-col items-center justify-center p-4 rounded-lg border border-emerald-500/20 bg-emerald-500/[0.02] hover:bg-emerald-500/[0.05] transition-all text-center group sm:col-span-2 lg:col-span-1"
+                className="flex flex-col items-center justify-center p-4 rounded-xl border border-border/80 bg-card hover:border-emerald-500 hover:shadow-md transition-all text-center group sm:col-span-2 lg:col-span-1"
               >
-                <Package className="text-emerald-500 group-hover:scale-110 transition-transform mb-2" size={24} />
+                <div className="p-2.5 bg-emerald-600 text-white rounded-xl shadow-xs mb-2 group-hover:scale-105 transition-transform">
+                  <Package size={18} />
+                </div>
                 <span className="text-xs font-bold text-foreground">Inventory Catalog</span>
                 <span className="text-[9px] text-muted mt-1">CSV file of raw materials</span>
                 {exportingType === "inventory" && <span className="text-[9px] text-emerald-500 font-bold mt-1 animate-pulse">Exporting...</span>}
@@ -1013,10 +1048,10 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                       <button
                         key={archive._id}
                         onClick={() => downloadArchive(archive._id, archive.filename)}
-                        className="flex items-center gap-3 p-3 rounded-lg border border-border bg-card hover:bg-accent/[0.04] hover:border-accent/30 transition-all text-left group"
+                        className="flex items-center gap-3 p-3 rounded-xl border border-border/80 bg-card hover:border-accent/40 hover:shadow-sm transition-all text-left group"
                       >
-                        <div className="p-2 bg-accent/10 text-accent rounded group-hover:scale-105 transition-transform">
-                          <FileText size={16} />
+                        <div className="p-2 bg-accent text-white rounded-lg shadow-xs group-hover:scale-105 transition-transform">
+                          <FileText size={14} />
                         </div>
                         <div className="min-w-0">
                           <p className="text-xs font-bold text-foreground truncate">
@@ -1102,7 +1137,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                       {task.priority}
                     </span>
                     <span className="text-[10px] text-muted font-semibold">
-                      Due: {new Date(task.dueDate).toLocaleDateString()}
+                      Due: {formatNepali(task.dueDate)}
                     </span>
                   </div>
                 </div>
@@ -1177,7 +1212,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                         Completed
                       </span>
                       <span className="text-[10px] text-muted font-semibold">
-                        Due: {new Date(task.dueDate).toLocaleDateString()}
+                        Due: {formatNepali(task.dueDate)}
                       </span>
                     </div>
                   </div>

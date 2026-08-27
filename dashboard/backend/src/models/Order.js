@@ -49,9 +49,17 @@ const OrderSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    productImages: {
+      type: [String],
+      default: [],
+    },
     locationImageUrl: {
       type: String,
       default: "",
+    },
+    locationImages: {
+      type: [String],
+      default: [],
     },
     customerName: {
       type: String,
@@ -106,6 +114,10 @@ const OrderSchema = new mongoose.Schema(
     approvedAt: {
       type: Date,
     },
+    orderDate: {
+      type: Date,
+      default: Date.now,
+    },
     deliveryDate: {
       type: Date,
       required: [true, "Delivery date is required"],
@@ -133,8 +145,22 @@ const OrderSchema = new mongoose.Schema(
   }
 );
 
-// Pre-save hook to calculate totalPrice automatically
+// Pre-save hook to calculate totalPrice and synchronize image arrays
 OrderSchema.pre("save", function (next) {
+  // Sync product images array and single image field
+  if (Array.isArray(this.productImages) && this.productImages.length > 0) {
+    this.productImageUrl = this.productImages[0];
+  } else if (this.productImageUrl) {
+    this.productImages = [this.productImageUrl];
+  }
+
+  // Sync location images array and single image field
+  if (Array.isArray(this.locationImages) && this.locationImages.length > 0) {
+    this.locationImageUrl = this.locationImages[0];
+  } else if (this.locationImageUrl) {
+    this.locationImages = [this.locationImageUrl];
+  }
+
   this.totalPrice = (this.price || 0) + (this.deliveryPrice || 0) + (this.installationPrice || 0);
   if (this.stage === "paid") {
     this.duePayment = 0;

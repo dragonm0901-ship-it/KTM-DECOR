@@ -12,6 +12,7 @@ import {
   Download,
   Edit2
 } from "./ui/solar-icons";
+import { formatNepali } from "../utils/nepaliDate";
 
 // Helper function to convert numbers to Indian/Nepalese system words (Lakhs, Thousands, Rupees)
 const numberToWords = (num: number): string => {
@@ -421,8 +422,8 @@ export const QuotationTab: React.FC = () => {
             setClientContact("");
             setProjectName("");
             setVoucherNo((quotations.length + 1).toString());
-            // Pre-fill voucher date with simple format
-            setVoucherDate(new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }));
+            // Pre-fill voucher date with Bikram Sambat date
+            setVoucherDate(formatNepali(new Date()));
             setAmountInWords("");
             setRemarks("Delivery And fitting charge is not included in this quotation.");
             setItems([{ description: "", size: "", quantity: 1, rate: 0, total: 0 }]);
@@ -533,10 +534,10 @@ export const QuotationTab: React.FC = () => {
               ) : (
                 filteredQuotations.map((quote) => (
                   <tr key={quote._id} className="hover:bg-border/20 transition-colors">
-                    <td className="p-4 font-semibold text-foreground">
+                    <td className="p-4 font-semibold text-foreground text-xs">
                       <div className="flex items-center gap-1.5">
                         <Calendar size={12} className="text-muted" />
-                        {new Date(quote.date).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })}
+                        {formatNepali(quote.date)}
                       </div>
                     </td>
                     <td className="p-4 font-bold text-foreground">

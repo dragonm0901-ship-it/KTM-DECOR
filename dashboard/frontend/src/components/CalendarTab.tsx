@@ -6,12 +6,17 @@ import {
   Search,
   X,
   Clock,
-  Package,
-  FileText,
-  CheckSquare,
-  DollarSign,
-  TrendingUp
 } from "./ui/solar-icons";
+import {
+  formatNepali,
+  formatNepaliWithTime,
+  getCurrentNepaliDate,
+  NEPALI_MONTHS,
+  NEPALI_DAYS,
+  getDaysInBsMonth,
+  getFirstDayOfBsMonth,
+  adToBs,
+} from "../utils/nepaliDate";
 
 interface CalendarTabProps {
   setCurrentTab: (tab: string) => void;
@@ -22,10 +27,14 @@ interface CalendarEvent {
   title: string;
   description: string;
   date: Date;
+  bsYear: number;
+  bsMonth: number; // 1-12
+  bsDay: number;
   displayHour: number;
   type: "task" | "order" | "field-note" | "expense" | "sale";
   colorClass: string;
   textColorClass: string;
+  badgeClass: string;
   rawObj: any;
 }
 
@@ -38,12 +47,17 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
     expenses,
     fetchSales,
     fetchExpenses,
-    user
+    user,
   } = useStore();
 
-  const [currentDate, setCurrentDate] = useState<Date>(new Date());
+  const currentBsToday = getCurrentNepaliDate();
+  const [bsYear, setBsYear] = useState<number>(currentBsToday.year);
+  const [bsMonth, setBsMonth] = useState<number>(currentBsToday.month); // 1-12
+  const [viewMode, setViewMode] = useState<"month" | "week">("month");
+  const [weekOffsetDays, setWeekOffsetDays] = useState<number>(0); // 0 = current week
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [selectedDayEvents, setSelectedDayEvents] = useState<{ day: number; events: CalendarEvent[] } | null>(null);
 
   // Current time tracker line state
   const [now, setNow] = useState<Date>(new Date());
@@ -54,7 +68,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
       fetchSales();
       fetchExpenses();
     }
-  }, [user]);
+  }, [user, fetchSales, fetchExpenses]);
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 30000);
@@ -62,111 +76,123 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
   }, []);
 
   const START_HOUR = 8; // 8 AM
-  const END_HOUR = 18;  // 6 PM
+  const END_HOUR = 18; // 6 PM
   const ROW_HEIGHT = 64; // px
 
-  // Calculate days of the current week (Monday - Sunday)
-  const getDaysOfWeek = (date: Date) => {
-    const startOfWeek = new Date(date);
-    const day = startOfWeek.getDay();
-    const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1); // Monday adjustment
-    startOfWeek.setDate(diff);
-    startOfWeek.setHours(0, 0, 0, 0);
+  const currentMonthInfo = NEPALI_MONTHS[bsMonth - 1] || NEPALI_MONTHS[0];
 
-    const days = [];
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(startOfWeek);
-      d.setDate(startOfWeek.getDate() + i);
-      days.push(d);
+  const handlePrev = () => {
+    if (viewMode === "month") {
+      if (bsMonth === 1) {
+        setBsMonth(12);
+        setBsYear((prev) => prev - 1);
+      } else {
+        setBsMonth((prev) => prev - 1);
+      }
+    } else {
+      setWeekOffsetDays((prev) => prev - 7);
     }
-    return days;
   };
 
-  const daysOfWeek = getDaysOfWeek(currentDate);
-
-  const handlePrevWeek = () => {
-    const prev = new Date(currentDate);
-    prev.setDate(currentDate.getDate() - 7);
-    setCurrentDate(prev);
-  };
-
-  const handleNextWeek = () => {
-    const next = new Date(currentDate);
-    next.setDate(currentDate.getDate() + 7);
-    setCurrentDate(next);
+  const handleNext = () => {
+    if (viewMode === "month") {
+      if (bsMonth === 12) {
+        setBsMonth(1);
+        setBsYear((prev) => prev + 1);
+      } else {
+        setBsMonth((prev) => prev + 1);
+      }
+    } else {
+      setWeekOffsetDays((prev) => prev + 7);
+    }
   };
 
   const handleGoToday = () => {
-    setCurrentDate(new Date());
+    const today = getCurrentNepaliDate();
+    setBsYear(today.year);
+    setBsMonth(today.month);
+    setWeekOffsetDays(0);
   };
 
-  // Convert all items to unified calendar events
+  // Convert all items to unified calendar events with precise BS coordinates
   const buildCalendarEvents = (): CalendarEvent[] => {
     const events: CalendarEvent[] = [];
 
     // 1. Tasks
     tasks.forEach((task) => {
       const date = task.dueDate ? new Date(task.dueDate) : new Date(task.createdAt);
+      if (isNaN(date.getTime())) return;
+      const bs = adToBs(date);
       let displayHour = date.getHours();
-      // Adjust default display time if midnight or outside normal business hours
-      if (displayHour < START_HOUR || displayHour > END_HOUR) {
-        displayHour = 16; // 4:00 PM default
-      }
+      if (displayHour < START_HOUR || displayHour > END_HOUR) displayHour = 16;
+
       events.push({
         id: task._id,
         title: `Task: ${task.title}`,
-        description: `Assignee: ${task.assignee?.name || "Unassigned"} | Priority: ${task.priority.toUpperCase()} | Status: ${task.status.toUpperCase()} | Description: ${task.description || "No description provided."}`,
+        description: `Assignee: ${task.assignee?.name || "Unassigned"} | Priority: ${task.priority.toUpperCase()} | Status: ${task.status.toUpperCase()} | Details: ${task.description || "No description."}`,
         date,
+        bsYear: bs.year,
+        bsMonth: bs.month,
+        bsDay: bs.day,
         displayHour,
         type: "task",
-        colorClass: "bg-blue-500/10 border-blue-500/20 hover:bg-blue-500/15",
+        colorClass: "bg-blue-600 text-white hover:bg-blue-700 font-bold shadow-xs",
         textColorClass: "text-blue-600 dark:text-blue-400",
-        rawObj: task
+        badgeClass: "bg-blue-600 text-white font-bold",
+        rawObj: task,
       });
     });
 
-    // 2. Orders (Placed on the date they were entered)
+    // 2. Orders (Placed / target delivery date)
     orders.forEach((order) => {
-      const entryDate = order.createdAt ? new Date(order.createdAt) : new Date();
-      let displayHour = entryDate.getHours();
-      if (displayHour < START_HOUR || displayHour > END_HOUR) {
-        displayHour = 15; // 3:00 PM default
-      }
-      
-      const deadlineText = order.deliveryDate 
-        ? new Date(order.deliveryDate).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })
-        : "Not specified";
+      if (order.deleted) return;
+      const date = order.deliveryDate ? new Date(order.deliveryDate) : new Date(order.createdAt);
+      if (isNaN(date.getTime())) return;
+      const bs = adToBs(date);
+      let displayHour = date.getHours();
+      if (displayHour < START_HOUR || displayHour > END_HOUR) displayHour = 15;
+
+      const deadlineText = formatNepali(date);
 
       events.push({
         id: order._id,
         title: `Order: ${order.customerName} (${order.productName})`,
-        description: `📅 Order Deadline: ${deadlineText}\n👤 Customer: ${order.customerName} (${order.customerContact || "No contact"})\n📦 Product: ${order.productName} (${order.size || "Standard"}, ${order.color || "Default color"})\n💰 Financials: Total Rs. ${order.totalPrice ? order.totalPrice.toLocaleString() : 0} | Due Rs. ${order.duePayment ? order.duePayment.toLocaleString() : 0}\n📌 Stage: ${order.stage ? order.stage.toUpperCase() : "PENDING"} | Source: ${order.orderFrom ? order.orderFrom.toUpperCase() : "WEBSITE"}`,
-        date: entryDate,
+        description: `📅 BS Delivery: ${deadlineText}\n👤 Customer: ${order.customerName} (${order.customerContact || "No contact"})\n📦 Item: ${order.productName} (${order.size || "Standard"}, ${order.color || "Color"})\n💰 Total: Rs. ${order.totalPrice ? order.totalPrice.toLocaleString() : 0} | Due: Rs. ${order.duePayment ? order.duePayment.toLocaleString() : 0}\n📌 Stage: ${order.stage?.toUpperCase() || "PENDING"}`,
+        date,
+        bsYear: bs.year,
+        bsMonth: bs.month,
+        bsDay: bs.day,
         displayHour,
         type: "order",
-        colorClass: "bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/15",
+        colorClass: "bg-emerald-600 text-white hover:bg-emerald-700 font-bold shadow-xs",
         textColorClass: "text-emerald-600 dark:text-emerald-400",
-        rawObj: order
+        badgeClass: "bg-emerald-600 text-white font-bold",
+        rawObj: order,
       });
     });
 
     // 3. Field Notes / Campaigns
     campaigns.forEach((camp) => {
       const date = new Date(camp.createdAt);
+      if (isNaN(date.getTime())) return;
+      const bs = adToBs(date);
       let displayHour = date.getHours();
-      if (displayHour < START_HOUR || displayHour > END_HOUR) {
-        displayHour = 14; // 2:00 PM default
-      }
+      if (displayHour < START_HOUR || displayHour > END_HOUR) displayHour = 14;
+
       events.push({
         id: camp._id,
         title: `Fit Note: ${camp.title}`,
-        description: `District: ${camp.district} | Location: ${camp.location} | Logged By: ${camp.createdBy?.name || "Staff"} | Fitting Spot Details: ${camp.description}`,
+        description: `District: ${camp.district} | Location: ${camp.location} | Logged By: ${camp.createdBy?.name || "Staff"}\nFitting Details: ${camp.description}`,
         date,
+        bsYear: bs.year,
+        bsMonth: bs.month,
+        bsDay: bs.day,
         displayHour,
         type: "field-note",
-        colorClass: "bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/15",
+        colorClass: "bg-amber-600 text-white hover:bg-amber-700 font-bold shadow-xs",
         textColorClass: "text-amber-600 dark:text-amber-400",
-        rawObj: camp
+        badgeClass: "bg-amber-600 text-white font-bold",
+        rawObj: camp,
       });
     });
 
@@ -174,32 +200,46 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
     if (user?.role === "admin") {
       expenses.forEach((expense) => {
         const date = new Date(expense.date);
+        if (isNaN(date.getTime())) return;
+        const bs = adToBs(date);
+
         events.push({
           id: expense._id,
           title: `Expense: Rs. ${expense.amount.toLocaleString()} - ${expense.title}`,
-          description: `Category: ${expense.category} | Logged: ${date.toLocaleDateString()} | Description: ${expense.description || "No description logged."}`,
+          description: `Category: ${expense.category.toUpperCase()} | Date: ${formatNepali(date)} | Details: ${expense.description || "None"}`,
           date,
-          displayHour: 11, // 11:00 AM default
+          bsYear: bs.year,
+          bsMonth: bs.month,
+          bsDay: bs.day,
+          displayHour: 11,
           type: "expense",
-          colorClass: "bg-red-500/10 border-red-500/20 hover:bg-red-500/15",
+          colorClass: "bg-red-600 text-white hover:bg-red-700 font-bold shadow-xs",
           textColorClass: "text-red-600 dark:text-red-400",
-          rawObj: expense
+          badgeClass: "bg-red-600 text-white font-bold",
+          rawObj: expense,
         });
       });
 
       // 5. Sales (Admin only)
       sales.forEach((sale) => {
         const date = new Date(sale.date);
+        if (isNaN(date.getTime())) return;
+        const bs = adToBs(date);
+
         events.push({
           id: sale._id,
           title: `Sale: Rs. ${sale.amount.toLocaleString()} - ${sale.clientName}`,
-          description: `Product: ${sale.productName} | Payment: ${sale.paymentMethod.toUpperCase()} | Notes: ${sale.notes || "No notes details."}`,
+          description: `Client: ${sale.clientName} | Product: ${sale.productName} | Payment: ${sale.paymentMethod.toUpperCase()} | Notes: ${sale.notes || "None"}`,
           date,
-          displayHour: 12, // 12:00 PM default
+          bsYear: bs.year,
+          bsMonth: bs.month,
+          bsDay: bs.day,
+          displayHour: 12,
           type: "sale",
-          colorClass: "bg-purple-500/10 border-purple-500/20 hover:bg-purple-500/15",
+          colorClass: "bg-purple-600 text-white hover:bg-purple-700 font-bold shadow-xs",
           textColorClass: "text-purple-600 dark:text-purple-400",
-          rawObj: sale
+          badgeClass: "bg-purple-600 text-white font-bold",
+          rawObj: sale,
         });
       });
     }
@@ -209,45 +249,46 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
 
   const allEvents = buildCalendarEvents();
 
-  // Filter events by search query and week range
-  const weekStartTimestamp = daysOfWeek[0].getTime();
-  const weekEndTimestamp = daysOfWeek[6].getTime() + 24 * 60 * 60 * 1000;
-
+  // Search filter
   const filteredEvents = allEvents.filter((ev) => {
-    const matchesSearch = ev.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          ev.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const evTime = ev.date.getTime();
-    const isInWeek = evTime >= weekStartTimestamp && evTime <= weekEndTimestamp;
-    return matchesSearch && isInWeek;
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return ev.title.toLowerCase().includes(q) || ev.description.toLowerCase().includes(q);
   });
 
-  // Group events by day and hour slot to compute offsets and width division
-  const slotGroups: Record<string, CalendarEvent[]> = {};
-  filteredEvents.forEach((ev) => {
-    const evHour = ev.displayHour;
-    if (evHour < START_HOUR || evHour > END_HOUR) return;
-    const dayNum = ev.date.getDay();
-    const colIdx = dayNum === 0 ? 6 : dayNum - 1;
-    const key = `${colIdx}-${evHour}`;
-    if (!slotGroups[key]) {
-      slotGroups[key] = [];
+  // Calculate days for the BS Month View
+  const daysInBsMonth = getDaysInBsMonth(bsYear, bsMonth);
+  const firstDayOfWeekBsMonth = getFirstDayOfBsMonth(bsYear, bsMonth); // 0 = Sun
+
+  // Calculate days for the BS Week View (7 days starting from Sunday)
+  const getWeekDays = () => {
+    const baseDate = new Date();
+    baseDate.setDate(baseDate.getDate() + weekOffsetDays);
+    const dayOfWeek = baseDate.getDay(); // 0 = Sunday
+    const sunday = new Date(baseDate);
+    sunday.setDate(baseDate.getDate() - dayOfWeek);
+    sunday.setHours(0, 0, 0, 0);
+
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(sunday);
+      d.setDate(sunday.getDate() + i);
+      const bs = adToBs(d);
+      days.push({
+        adDate: d,
+        bsYear: bs.year,
+        bsMonth: bs.month,
+        bsDay: bs.day,
+        monthName: bs.monthName,
+        dayOfWeek: i,
+      });
     }
-    slotGroups[key].push(ev);
-  });
+    return days;
+  };
 
-  // Render header values
-  const monthAbbr = currentDate.toLocaleDateString([], { month: "short" });
-  const dayOfMonth = currentDate.getDate();
-  const monthYearStr = currentDate.toLocaleDateString([], { month: "long", year: "numeric" });
-  
-  const weekRangeStr = `${daysOfWeek[0].toLocaleDateString([], {
-    month: "short",
-    day: "numeric"
-  })} - ${daysOfWeek[6].toLocaleDateString([], {
-    month: "short",
-    day: "numeric",
-    year: "numeric"
-  })}`;
+  const weekDays = getWeekDays();
+  const weekStartBs = weekDays[0];
+  const weekEndBs = weekDays[6];
 
   const hours = Array.from({ length: END_HOUR - START_HOUR + 1 }, (_, i) => START_HOUR + i);
 
@@ -257,36 +298,80 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
     return `${displayHour} ${suffix}`;
   };
 
-  // Determine current day red tracker position
-  const isCurrentWeek = now.getTime() >= weekStartTimestamp && now.getTime() <= weekEndTimestamp;
+  // Determine current day red tracker position in week view
+  const weekStartTs = weekDays[0].adDate.getTime();
+  const weekEndTs = weekDays[6].adDate.getTime() + 24 * 3600 * 1000;
+  const isCurrentWeek = now.getTime() >= weekStartTs && now.getTime() <= weekEndTs;
   const currentHourNow = now.getHours();
   const currentMinNow = now.getMinutes();
-  const redLineTop = ((currentHourNow - START_HOUR) + currentMinNow / 60) * ROW_HEIGHT;
+  const redLineTop = (currentHourNow - START_HOUR + currentMinNow / 60) * ROW_HEIGHT;
   const isRedLineVisible = isCurrentWeek && currentHourNow >= START_HOUR && currentHourNow < END_HOUR;
 
   return (
     <div className="space-y-6">
       {/* HEADER SECTION */}
       <div className="bg-card border border-border/80 p-5 rounded-2xl shadow-sm flex flex-col xl:flex-row items-start xl:items-center justify-between gap-5 transition-all">
-        {/* Left: Date Badge */}
-        <div className="flex items-center gap-3">
-          <div className="bg-foreground text-background dark:bg-accent dark:text-white px-3.5 py-2 rounded-xl flex flex-col items-center justify-center min-w-[64px] shadow-sm select-none">
-            <span className="text-[10px] font-extrabold uppercase tracking-widest leading-none opacity-85">{monthAbbr}</span>
-            <span className="text-2xl font-extrabold leading-none mt-1">{dayOfMonth}</span>
+        {/* Left: Nepali Date Badge & Title */}
+        <div className="flex items-center gap-3.5">
+          <div className="bg-foreground text-background dark:bg-accent dark:text-white px-4 py-2.5 rounded-xl flex flex-col items-center justify-center min-w-[70px] shadow-sm select-none">
+            <span className="text-[10px] font-extrabold uppercase tracking-widest leading-none opacity-85">
+              {currentMonthInfo.short}
+            </span>
+            <span className="text-2xl font-extrabold leading-none mt-1">
+              {currentBsToday.year === bsYear && currentBsToday.month === bsMonth
+                ? currentBsToday.day
+                : "BS"}
+            </span>
           </div>
           <div>
-            <h1 className="text-xl font-bold font-display leading-tight">{monthYearStr}</h1>
-            <p className="text-xs text-muted font-bold tracking-wider uppercase mt-0.5">{weekRangeStr}</p>
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl font-extrabold font-display leading-tight">
+                {currentMonthInfo.name} {bsYear}
+              </h1>
+              <span className="text-xs px-2 py-0.5 rounded-md bg-accent/10 text-accent font-bold">
+                {currentMonthInfo.nepaliName} {bsYear}
+              </span>
+            </div>
+            <p className="text-xs text-muted font-bold tracking-wider uppercase mt-1">
+              {viewMode === "month"
+                ? `Nepali Calendar • ${daysInBsMonth} Days`
+                : `${weekStartBs.monthName} ${weekStartBs.bsDay} – ${weekEndBs.monthName} ${weekEndBs.bsDay}, ${weekEndBs.bsYear} BS`}
+            </p>
           </div>
         </div>
 
-        {/* Center: Navigation controls */}
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex items-center gap-1.5 bg-muted/20 border border-border/80 p-1 rounded-xl">
+        {/* Center: Navigation Controls & Mode Switcher */}
+        <div className="flex flex-wrap items-center gap-3">
+          {/* View Switcher: Month / Week */}
+          <div className="flex items-center bg-muted/20 border border-border/80 p-1 rounded-xl">
             <button
-              onClick={handlePrevWeek}
+              onClick={() => setViewMode("month")}
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                viewMode === "month"
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted hover:text-foreground"
+              }`}
+            >
+              Month (मासिक)
+            </button>
+            <button
+              onClick={() => setViewMode("week")}
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                viewMode === "week"
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted hover:text-foreground"
+              }`}
+            >
+              Week (साप्ताहिक)
+            </button>
+          </div>
+
+          {/* Month / Week Nav buttons */}
+          <div className="flex items-center gap-1 bg-muted/20 border border-border/80 p-1 rounded-xl">
+            <button
+              onClick={handlePrev}
               className="p-1.5 rounded-lg hover:bg-card text-muted hover:text-foreground transition-all"
-              aria-label="Previous week"
+              aria-label="Previous"
             >
               <ChevronLeft size={16} />
             </button>
@@ -297,16 +382,16 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
               Today
             </button>
             <button
-              onClick={handleNextWeek}
+              onClick={handleNext}
               className="p-1.5 rounded-lg hover:bg-card text-muted hover:text-foreground transition-all"
-              aria-label="Next week"
+              aria-label="Next"
             >
               <ChevronRight size={16} />
             </button>
           </div>
 
           {/* Color Indicators Legend */}
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[10px] font-bold uppercase tracking-wider text-muted">
+          <div className="hidden lg:flex items-center gap-x-3 text-[10px] font-bold uppercase tracking-wider text-muted">
             <div className="flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-blue-500" />
               <span>Tasks</span>
@@ -317,7 +402,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
             </div>
             <div className="flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-amber-500" />
-              <span>Fitting Notes</span>
+              <span>Fitting</span>
             </div>
             {user?.role === "admin" && (
               <>
@@ -334,12 +419,12 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
           </div>
         </div>
 
-        {/* Right: Search filter */}
+        {/* Right: Search Filter */}
         <div className="relative w-full xl:max-w-xs">
           <Search className="absolute left-3.5 top-2.5 text-muted" size={16} />
           <input
             type="text"
-            placeholder="Search calendar events..."
+            placeholder="Search Nepali calendar events..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold"
@@ -347,186 +432,321 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
         </div>
       </div>
 
-      {/* CALENDAR WEEK GRID CONTAINER */}
-      <div className="bg-card border border-border/80 rounded-2xl shadow-sm overflow-hidden p-2 sm:p-5">
-        <div className="w-full min-w-0 md:min-w-[800px] overflow-x-auto">
-          {/* Day Grid Header */}
-          <div className="flex border-b border-border/60 pb-3">
-            <div className="w-10 sm:w-16 flex-shrink-0" /> {/* Time column blank */}
-            {daysOfWeek.map((day, idx) => {
-              const isToday = day.toDateString() === new Date().toDateString();
+      {/* VIEW 1: NEPALI MONTH VIEW (FULL 7-COLUMN BS GRID) */}
+      {viewMode === "month" && (
+        <div className="bg-card border border-border/80 rounded-2xl shadow-sm overflow-hidden">
+          {/* Weekday Headers */}
+          <div className="grid grid-cols-7 border-b border-border/70 bg-muted/10">
+            {NEPALI_DAYS.map((d, idx) => (
+              <div
+                key={d.short}
+                className={`py-3 px-2 text-center border-r last:border-r-0 border-border/40 ${
+                  idx === 6 ? "bg-amber-500/5 text-amber-600 dark:text-amber-400" : "text-muted"
+                }`}
+              >
+                <span className="text-xs font-extrabold uppercase tracking-wider block">{d.name}</span>
+                <span className="text-[10px] font-bold opacity-80 block">{d.nepaliShort}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Days Grid */}
+          <div className="grid grid-cols-7 auto-rows-fr">
+            {/* Preceding Empty Slots */}
+            {Array.from({ length: firstDayOfWeekBsMonth }).map((_, i) => (
+              <div
+                key={`empty-${i}`}
+                className="min-h-[90px] sm:min-h-[115px] border-b border-r border-border/30 bg-muted/5 opacity-30"
+              />
+            ))}
+
+            {/* Days of BS Month */}
+            {Array.from({ length: daysInBsMonth }).map((_, i) => {
+              const day = i + 1;
+              const dayOfWeek = (firstDayOfWeekBsMonth + i) % 7;
+              const isSaturday = dayOfWeek === 6;
+
+              const isToday =
+                currentBsToday.year === bsYear &&
+                currentBsToday.month === bsMonth &&
+                currentBsToday.day === day;
+
+              // Find events on this exact BS day
+              const dayEvents = filteredEvents.filter(
+                (ev) => ev.bsYear === bsYear && ev.bsMonth === bsMonth && ev.bsDay === day
+              );
+
               return (
-                <div key={idx} className="flex-1 text-center select-none">
-                  <span className="text-[8px] sm:text-[10px] font-bold text-muted uppercase tracking-widest block">
-                    {day.toLocaleDateString([], { weekday: "short" })}
+                <div
+                  key={`day-${day}`}
+                  className={`min-h-[90px] sm:min-h-[115px] p-2 border-b border-r border-border/40 flex flex-col justify-between transition-colors group relative ${
+                    isSaturday ? "bg-amber-500/[0.02]" : "bg-card"
+                  } ${isToday ? "bg-accent/5 ring-1 ring-inset ring-accent/30" : "hover:bg-muted/10"}`}
+                >
+                  {/* Day Header */}
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span
+                      className={`text-xs font-black px-1.5 py-0.5 rounded-md ${
+                        isToday
+                          ? "bg-accent text-white"
+                          : isSaturday
+                          ? "text-amber-600 dark:text-amber-400"
+                          : "text-foreground"
+                      }`}
+                    >
+                      {day}
+                    </span>
+                    {dayEvents.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedDayEvents({ day, events: dayEvents })}
+                        className="text-[10px] font-extrabold text-muted hover:text-foreground bg-muted/20 px-1.5 py-0.5 rounded-md transition-colors"
+                      >
+                        {dayEvents.length} {dayEvents.length === 1 ? "item" : "items"}
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Day Events Stack */}
+                  <div className="space-y-1 overflow-y-auto max-h-[85px] no-scrollbar">
+                    {dayEvents.slice(0, 3).map((ev) => (
+                      <div
+                        key={ev.id}
+                        onClick={() => setSelectedEvent(ev)}
+                        className={`px-1.5 py-1 rounded-lg text-[10px] font-bold border truncate cursor-pointer transition-transform hover:scale-[1.02] shadow-xs ${ev.colorClass}`}
+                        title={`${ev.title}\n${ev.description}`}
+                      >
+                        {ev.title}
+                      </div>
+                    ))}
+                    {dayEvents.length > 3 && (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedDayEvents({ day, events: dayEvents })}
+                        className="text-[9px] font-bold text-accent hover:underline block w-full text-left pt-0.5"
+                      >
+                        +{dayEvents.length - 3} more...
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* VIEW 2: NEPALI WEEK TIMETABLE VIEW */}
+      {viewMode === "week" && (
+        <div className="bg-card border border-border/80 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+          {/* Header Row: Days of Week */}
+          <div className="grid grid-cols-8 border-b border-border/70 bg-muted/10 sticky top-0 z-20">
+            {/* Time Column Header */}
+            <div className="py-3 px-2 text-center border-r border-border/40 text-muted font-bold text-xs flex items-center justify-center">
+              <Clock size={15} />
+            </div>
+
+            {weekDays.map((d) => {
+              const isSaturday = d.dayOfWeek === 6;
+              const isToday =
+                currentBsToday.year === d.bsYear &&
+                currentBsToday.month === d.bsMonth &&
+                currentBsToday.day === d.bsDay;
+
+              return (
+                <div
+                  key={d.dayOfWeek}
+                  className={`py-3 px-2 text-center border-r last:border-r-0 border-border/40 ${
+                    isSaturday ? "bg-amber-500/5 text-amber-600 dark:text-amber-400" : "text-muted"
+                  } ${isToday ? "bg-accent/5 font-black" : ""}`}
+                >
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider block">
+                    {NEPALI_DAYS[d.dayOfWeek].name}
                   </span>
-                  <span className={`mt-1 inline-flex items-center justify-center h-6 w-6 sm:h-8 sm:w-8 rounded-full text-[9px] sm:text-xs font-extrabold ${
-                    isToday
-                      ? "bg-foreground text-background dark:bg-accent dark:text-white shadow-sm"
-                      : "text-foreground"
-                  }`}>
-                    {day.getDate()}
-                  </span>
+                  <div className="flex items-center justify-center gap-1 mt-0.5">
+                    <span
+                      className={`text-xs font-black px-1.5 py-0.5 rounded-md ${
+                        isToday ? "bg-accent text-white" : "text-foreground"
+                      }`}
+                    >
+                      {d.bsDay}
+                    </span>
+                    <span className="text-[10px] text-muted font-bold">{d.monthName}</span>
+                  </div>
                 </div>
               );
             })}
           </div>
 
-          {/* Time & Event Grid body */}
-          <div className="relative mt-2" style={{ height: `${hours.length * ROW_HEIGHT}px` }}>
-            {/* Horizontal Grid Row Lines */}
-            {hours.map((hour, hourIdx) => {
-              const topVal = hourIdx * ROW_HEIGHT;
-              return (
-                <div
-                  key={hour}
-                  className="absolute left-0 right-0 flex border-b border-border/40"
-                  style={{ top: `${topVal}px`, height: `${ROW_HEIGHT}px` }}
-                >
-                  {/* Hour text label */}
-                  <div className="w-10 sm:w-16 pr-1 sm:pr-3 -mt-2 text-right text-[8px] sm:text-[10px] font-extrabold text-muted/60 uppercase select-none truncate">
-                    {formatHour(hour)}
-                  </div>
-                  {/* Read-only day slots */}
-                  {daysOfWeek.map((_, dayIdx) => (
-                    <div
-                      key={dayIdx}
-                      className="flex-1 border-l border-border/40"
-                    />
-                  ))}
+          {/* Week Hours Grid */}
+          <div className="relative overflow-y-auto max-h-[600px]">
+            {/* Red Live Tracker Line */}
+            {isRedLineVisible && (
+              <div
+                className="absolute left-[12.5%] right-0 border-t-2 border-red-500 z-30 pointer-events-none flex items-center shadow-sm"
+                style={{ top: `${redLineTop}px` }}
+              >
+                <span className="h-2.5 w-2.5 rounded-full bg-red-500 -ml-1.5 ring-2 ring-white dark:ring-zinc-900" />
+                <span className="bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-md ml-1 shadow-sm">
+                  NOW
+                </span>
+              </div>
+            )}
+
+            {hours.map((hour) => (
+              <div
+                key={hour}
+                className="grid grid-cols-8 border-b border-border/40"
+                style={{ height: `${ROW_HEIGHT}px` }}
+              >
+                {/* Hour Label */}
+                <div className="border-r border-border/40 p-2 text-right text-[11px] font-bold text-muted select-none flex items-start justify-end">
+                  {formatHour(hour)}
                 </div>
-              );
-            })}
 
-            {/* Absolute Event Cards Layer */}
-            <div className="absolute inset-0 pl-10 sm:pl-16 pointer-events-none">
-              <div className="relative w-full h-full">
-                {filteredEvents.map((ev) => {
-                  const evDate = ev.date;
-                  const evHour = ev.displayHour; // Use mapped display hour
-                  
-                  // Filter out if outside hour grid bounds
-                  if (evHour < START_HOUR || evHour > END_HOUR) return null;
-
-                  // Find column index (0 = Monday, 6 = Sunday)
-                  const dayNum = evDate.getDay();
-                  const colIdx = dayNum === 0 ? 6 : dayNum - 1;
-
-                  const key = `${colIdx}-${evHour}`;
-                  const slotEvents = slotGroups[key] || [ev];
-                  const eventIdxInSlot = slotEvents.findIndex(item => item.id === ev.id && item.type === ev.type);
-                  const slotCount = slotEvents.length;
-
-                  const cardTop = (evHour - START_HOUR) * ROW_HEIGHT;
-                  const baseWidth = 100 / 7;
-                  const finalWidth = baseWidth / slotCount;
-                  const cardLeft = ((colIdx / 7) * 100) + (eventIdxInSlot * finalWidth);
-
-                  const timeStr = evDate.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit"
-                  });
+                {/* 7 Day Slot Cells */}
+                {weekDays.map((d) => {
+                  // Find events matching this BS date and hour
+                  const slotEvents = filteredEvents.filter(
+                    (ev) =>
+                      ev.bsYear === d.bsYear &&
+                      ev.bsMonth === d.bsMonth &&
+                      ev.bsDay === d.bsDay &&
+                      ev.displayHour === hour
+                  );
 
                   return (
                     <div
-                      key={`${ev.type}-${ev.id}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedEvent(ev);
-                      }}
-                      className={`absolute pointer-events-auto cursor-pointer p-1 sm:p-2 rounded-lg sm:rounded-xl border flex flex-col justify-between transition-all duration-200 hover:scale-[1.02] hover:shadow-md hover:z-10 group select-none ${ev.colorClass}`}
-                      style={{
-                        top: `${cardTop + 4}px`,
-                        left: `calc(${cardLeft}% + 2px)`,
-                        width: `calc(${finalWidth}% - 4px)`,
-                        height: `${ROW_HEIGHT - 8}px`
-                      }}
+                      key={`${d.dayOfWeek}-${hour}`}
+                      className={`border-r last:border-r-0 border-border/30 p-1 relative group hover:bg-muted/10 transition-colors ${
+                        d.dayOfWeek === 6 ? "bg-amber-500/[0.02]" : ""
+                      }`}
                     >
-                      <div className="overflow-hidden">
-                        <span className={`text-[7px] sm:text-[9px] font-extrabold flex items-center gap-0.5 sm:gap-1 ${ev.textColorClass}`}>
-                          {ev.type === "task" && <CheckSquare size={8} className="sm:w-2.5 sm:h-2.5" />}
-                          {ev.type === "order" && <Package size={8} className="sm:w-2.5 sm:h-2.5" />}
-                          {ev.type === "field-note" && <FileText size={8} className="sm:w-2.5 sm:h-2.5" />}
-                          {ev.type === "expense" && <DollarSign size={8} className="sm:w-2.5 sm:h-2.5" />}
-                          {ev.type === "sale" && <TrendingUp size={8} className="sm:w-2.5 sm:h-2.5" />}
-                          <span className="truncate">{timeStr}</span>
-                        </span>
-                        <h4 className="text-[7px] sm:text-[10px] font-bold text-foreground leading-tight mt-0.5 truncate group-hover:text-accent transition-colors">
+                      {slotEvents.map((ev) => (
+                        <div
+                          key={ev.id}
+                          onClick={() => setSelectedEvent(ev)}
+                          className={`p-1.5 rounded-lg border text-[10px] font-bold cursor-pointer truncate shadow-xs transition-transform hover:scale-[1.02] mb-1 ${ev.colorClass}`}
+                          title={`${ev.title}\n${ev.description}`}
+                        >
                           {ev.title}
-                        </h4>
-                      </div>
-                      <span className="text-[6px] sm:text-[8px] text-muted truncate opacity-80 uppercase">
-                        {ev.type === "field-note" ? "FIT NOTE" : ev.type}
-                      </span>
+                        </div>
+                      ))}
                     </div>
                   );
                 })}
               </div>
-            </div>
-
-            {/* Red Current Time Line Indicator */}
-            {isRedLineVisible && (
-              <div
-                className="absolute left-0 right-0 flex items-center pointer-events-none z-10"
-                style={{ top: `${redLineTop}px` }}
-              >
-                <div className="w-10 sm:w-16 text-right pr-1 sm:pr-2 text-[7px] sm:text-[9px] font-extrabold text-red-500 bg-card rounded p-0.5 shadow-sm border border-red-500/10 select-none truncate">
-                  {now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                </div>
-                <div className="flex-1 border-t-2 border-dotted border-red-500 relative">
-                  <div className="absolute left-0 -top-1 h-2 w-2 rounded-full bg-red-500 shadow shadow-red-500/50" />
-                </div>
-              </div>
-            )}
+            ))}
           </div>
         </div>
-      </div>
+      )}
 
-      {/* EVENT DETAILS VIEW POPUP */}
+      {/* EVENT DETAILS MODAL */}
       {selectedEvent && (
-        <div className="modal-overlay fixed inset-0 bg-background/80 backdrop-blur-sm flex items-start sm:items-center justify-center z-50 p-4 pt-20 sm:p-4 overflow-y-auto">
-          <div className="bg-card border border-border/80 w-full max-w-md rounded-2xl shadow-xl p-6 relative">
-            <button
-              onClick={() => setSelectedEvent(null)}
-              className="absolute top-4 right-4 p-1 rounded-full hover:bg-border text-muted hover:text-foreground transition-all"
-            >
-              <X size={18} />
-            </button>
-
-            <span className={`text-[9px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-full border bg-muted/20 ${selectedEvent.textColorClass}`}>
-              {selectedEvent.type === "field-note" ? "Fitting Note" : selectedEvent.type}
-            </span>
-
-            <h3 className="font-bold text-base font-display mt-4 leading-tight">{selectedEvent.title}</h3>
-            
-            <div className="flex items-center gap-1.5 text-xs text-muted font-semibold mt-2">
-              <Clock size={14} />
-              <span>{selectedEvent.date.toLocaleString()}</span>
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-card border border-border rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-border/60 pb-3">
+              <span className={`px-2.5 py-1 rounded-lg text-xs font-black uppercase ${selectedEvent.badgeClass}`}>
+                {selectedEvent.type.replace("-", " ")}
+              </span>
+              <button
+                onClick={() => setSelectedEvent(null)}
+                className="p-1 rounded-lg hover:bg-muted/20 text-muted hover:text-foreground transition-colors"
+              >
+                <X size={18} />
+              </button>
             </div>
 
-            <div className="mt-4 p-4 rounded-xl border border-border/80 bg-muted/5 text-xs text-muted leading-relaxed whitespace-pre-wrap">
+            <div>
+              <h3 className="text-base font-extrabold text-foreground">{selectedEvent.title}</h3>
+              <p className="text-xs text-accent font-bold mt-1">
+                📅 Nepali Date: {formatNepaliWithTime(selectedEvent.date)}
+              </p>
+            </div>
+
+            <div className="p-3.5 bg-muted/15 rounded-xl border border-border/60 text-xs font-medium text-foreground whitespace-pre-line leading-relaxed">
               {selectedEvent.description}
             </div>
 
-            <div className="mt-6 flex justify-between gap-2.5">
+            <div className="flex justify-end gap-2 pt-2">
               <button
+                type="button"
                 onClick={() => {
-                  setSelectedEvent(null);
+                  if (selectedEvent.type === "order") setCurrentTab("orders");
                   if (selectedEvent.type === "task") setCurrentTab("tasks");
-                  if (selectedEvent.type === "order") setCurrentTab("order-progress");
                   if (selectedEvent.type === "field-note") setCurrentTab("field-notes");
                   if (selectedEvent.type === "expense") setCurrentTab("expenses");
                   if (selectedEvent.type === "sale") setCurrentTab("sales");
+                  setSelectedEvent(null);
                 }}
-                className="flex-1 px-4 py-2 bg-accent/10 border border-accent/20 text-accent rounded-xl font-bold text-xs hover:bg-accent/25 transition-all text-center"
+                className="px-4 py-2 bg-accent text-white font-bold rounded-xl text-xs hover:bg-accent/90 transition-all shadow-sm"
               >
-                Go to Workspace
+                Go to {selectedEvent.type.replace("-", " ")} Tab
               </button>
               <button
+                type="button"
                 onClick={() => setSelectedEvent(null)}
-                className="flex-1 px-4 py-2 border border-border rounded-xl text-xs font-bold hover:bg-muted/30 transition-all text-muted hover:text-foreground text-center"
+                className="px-4 py-2 border border-border bg-card text-foreground font-bold rounded-xl text-xs hover:bg-muted/20 transition-all"
               >
-                Close View
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DAY EVENTS LIST MODAL */}
+      {selectedDayEvents && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-card border border-border rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-border/60 pb-3">
+              <div>
+                <h3 className="text-base font-extrabold text-foreground">
+                  Events on {currentMonthInfo.name} {selectedDayEvents.day}, {bsYear} BS
+                </h3>
+                <p className="text-xs text-muted font-semibold">
+                  {currentMonthInfo.nepaliName} {selectedDayEvents.day}, {bsYear}
+                </p>
+              </div>
+              <button
+                onClick={() => setSelectedDayEvents(null)}
+                className="p-1 rounded-lg hover:bg-muted/20 text-muted hover:text-foreground transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
+              {selectedDayEvents.events.map((ev) => (
+                <div
+                  key={ev.id}
+                  onClick={() => {
+                    setSelectedDayEvents(null);
+                    setSelectedEvent(ev);
+                  }}
+                  className={`p-3 rounded-xl border text-xs cursor-pointer transition-all hover:scale-[1.01] ${ev.colorClass}`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${ev.badgeClass}`}>
+                      {ev.type}
+                    </span>
+                    <span className="text-[10px] font-bold text-muted">
+                      {formatNepaliWithTime(ev.date).split("at ")[1] || ""}
+                    </span>
+                  </div>
+                  <h4 className="font-bold text-sm text-foreground">{ev.title}</h4>
+                  <p className="text-[11px] text-muted mt-1 truncate">{ev.description}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                type="button"
+                onClick={() => setSelectedDayEvents(null)}
+                className="px-4 py-2 border border-border bg-card text-foreground font-bold rounded-xl text-xs hover:bg-muted/20 transition-all"
+              >
+                Close
               </button>
             </div>
           </div>

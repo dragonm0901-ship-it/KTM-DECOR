@@ -15,6 +15,18 @@ import {
   Edit2,
   Trash2
 } from "./ui/solar-icons";
+import { NepaliDatePicker } from "./ui/NepaliDatePicker";
+import {
+  NEPALI_MONTHS,
+  NEPALI_YEARS,
+  NEPALI_DAYS,
+  getCurrentNepaliDate,
+  getDaysInBsMonth,
+  getFirstDayOfBsMonth,
+  bsToAd,
+  adToBs,
+  formatNepali,
+} from "../utils/nepaliDate";
 
 export const StaffManagement: React.FC = () => {
   const {
@@ -48,11 +60,13 @@ export const StaffManagement: React.FC = () => {
   // Tab State (for admin)
   const [adminTab, setAdminTab] = useState<"payroll" | "calendar" | "bulk">("payroll");
 
-  // Selected Date Filter State (defaulting to current date)
-  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1); // 1-12
-  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const currentBs = getCurrentNepaliDate();
+
+  // Selected Date Filter State (defaulting to current Nepali BS date)
+  const [selectedMonth, setSelectedMonth] = useState<number>(currentBs.month); // 1-12
+  const [selectedYear, setSelectedYear] = useState<number>(currentBs.year);
   const [selectedAdminStaffId, setSelectedAdminStaffId] = useState<string>("");
-  const [selectedDayNum, setSelectedDayNum] = useState<number>(new Date().getDate());
+  const [selectedDayNum, setSelectedDayNum] = useState<number>(currentBs.day);
   const [activityDate, setActivityDate] = useState<string>(new Date().toISOString().slice(0, 10));
 
   // Modal / Form States
@@ -95,23 +109,10 @@ export const StaffManagement: React.FC = () => {
   const [bulkNotesMap, setBulkNotesMap] = useState<Record<string, string>>({});
   const [bulkSuccessMsg, setBulkSuccessMsg] = useState<string>("");
 
-  // Year list
-  const years = [2025, 2026, 2027];
-  // Month list
-  const months = [
-    { value: 1, name: "January" },
-    { value: 2, name: "February" },
-    { value: 3, name: "March" },
-    { value: 4, name: "April" },
-    { value: 5, name: "May" },
-    { value: 6, name: "June" },
-    { value: 7, name: "July" },
-    { value: 8, name: "August" },
-    { value: 9, name: "September" },
-    { value: 10, name: "October" },
-    { value: 11, name: "November" },
-    { value: 12, name: "December" }
-  ];
+  // Year list in Bikram Sambat
+  const years = NEPALI_YEARS;
+  // Month list in Bikram Sambat
+  const months = NEPALI_MONTHS;
 
   // Fetch initial data
   useEffect(() => {
@@ -128,7 +129,7 @@ export const StaffManagement: React.FC = () => {
 
   // Clamp selectedDayNum when month/year changes
   useEffect(() => {
-    const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
+    const daysInMonth = getDaysInBsMonth(selectedYear, selectedMonth);
     if (selectedDayNum > daysInMonth) {
       setSelectedDayNum(daysInMonth);
     }
@@ -136,12 +137,10 @@ export const StaffManagement: React.FC = () => {
 
   // Sync selectedMonth and selectedYear with activityDate selection
   useEffect(() => {
-    const d = new Date(activityDate);
-    const m = d.getMonth() + 1;
-    const y = d.getFullYear();
-    if (m !== selectedMonth || y !== selectedYear) {
-      setSelectedMonth(m);
-      setSelectedYear(y);
+    const bs = adToBs(activityDate);
+    if (bs.month !== selectedMonth || bs.year !== selectedYear) {
+      setSelectedMonth(bs.month);
+      setSelectedYear(bs.year);
     }
   }, [activityDate]);
 
@@ -176,14 +175,14 @@ export const StaffManagement: React.FC = () => {
 
   // Help calculate weekdays in Nepal (Sunday through Friday, Saturday off)
   const getWorkingDaysInMonth = (year: number, month: number): number => {
-    const date = new Date(year, month - 1, 1);
+    const totalDays = getDaysInBsMonth(year, month);
+    const firstDay = getFirstDayOfBsMonth(year, month);
     let count = 0;
-    while (date.getMonth() === month - 1) {
-      const day = date.getDay();
+    for (let d = 1; d <= totalDays; d++) {
+      const day = (firstDay + d - 1) % 7;
       if (day !== 6) { // 6 is Saturday (Nepal weekend)
         count++;
       }
-      date.setDate(date.getDate() + 1);
     }
     return count;
   };
@@ -191,11 +190,11 @@ export const StaffManagement: React.FC = () => {
   // Find attendance record matching a day
   const getLogForDay = (day: number): Attendance | undefined => {
     return attendanceLogs.find(log => {
-      const logDate = new Date(log.date);
+      const bs = adToBs(log.date);
       return (
-        logDate.getUTCDate() === day &&
-        logDate.getUTCMonth() + 1 === selectedMonth &&
-        logDate.getUTCFullYear() === selectedYear
+        bs.day === day &&
+        bs.month === selectedMonth &&
+        bs.year === selectedYear
       );
     });
   };
@@ -448,8 +447,8 @@ export const StaffManagement: React.FC = () => {
 
   // Render Calendar Grid helper
   const renderCalendar = () => {
-    const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
-    const firstDayOfWeek = new Date(selectedYear, selectedMonth - 1, 1).getDay(); // 0 = Sunday
+    const daysInMonth = getDaysInBsMonth(selectedYear, selectedMonth);
+    const firstDayOfWeek = getFirstDayOfBsMonth(selectedYear, selectedMonth); // 0 = Sunday
 
     const gridCells = [];
 
@@ -460,13 +459,13 @@ export const StaffManagement: React.FC = () => {
 
     // Days of the month
     for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(selectedYear, selectedMonth - 1, day);
-      const isWeekend = date.getDay() === 6; // Saturday
+      const dayOfWeek = (firstDayOfWeek + day - 1) % 7;
+      const isWeekend = dayOfWeek === 6; // Saturday in Nepal
       const log = getLogForDay(day);
       const isToday =
-        day === new Date().getDate() &&
-        selectedMonth === new Date().getMonth() + 1 &&
-        selectedYear === new Date().getFullYear();
+        day === currentBs.day &&
+        selectedMonth === currentBs.month &&
+        selectedYear === currentBs.year;
       
       const isSelected = day === selectedDayNum;
 
@@ -576,13 +575,14 @@ export const StaffManagement: React.FC = () => {
 
   // Render Selected Day Details Helper
   const renderSelectedDayDetails = (userIdToRender: string) => {
-    const selectedDate = new Date(selectedYear, selectedMonth - 1, selectedDayNum);
-    const isWeekend = selectedDate.getDay() === 6; // Saturday
+    const selectedDate = bsToAd(selectedYear, selectedMonth, selectedDayNum);
+    const dayOfWeek = (getFirstDayOfBsMonth(selectedYear, selectedMonth) + selectedDayNum - 1) % 7;
+    const isWeekend = dayOfWeek === 6; // Saturday
     const log = getLogForDay(selectedDayNum);
     const isToday =
-      selectedDayNum === new Date().getDate() &&
-      selectedMonth === new Date().getMonth() + 1 &&
-      selectedYear === new Date().getFullYear();
+      selectedDayNum === currentBs.day &&
+      selectedMonth === currentBs.month &&
+      selectedYear === currentBs.year;
 
     let statusText = "Unmarked";
     let statusColorClass = "text-muted bg-muted/10 border-muted/20";
@@ -614,7 +614,7 @@ export const StaffManagement: React.FC = () => {
               Selected Day Details
             </h4>
             <p className="text-sm font-bold text-foreground mt-0.5">
-              {selectedDate.toLocaleDateString([], { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+              {formatNepali(selectedDate)} ({NEPALI_DAYS[dayOfWeek].name})
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -1358,13 +1358,13 @@ export const StaffManagement: React.FC = () => {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <label className="text-xs font-bold text-muted uppercase tracking-widest">Select Date:</label>
-                    <input
-                      type="date"
-                      value={activityDate}
-                      onChange={(e) => setActivityDate(e.target.value)}
-                      className="px-3 py-1.5 border border-border rounded-xl bg-background/50 focus:outline-none focus:ring-1 focus:ring-accent text-xs font-bold"
-                    />
+                    <label className="text-xs font-bold text-muted uppercase tracking-widest">Select BS Date:</label>
+                    <div className="w-48">
+                      <NepaliDatePicker
+                        value={activityDate}
+                        onChange={(iso) => setActivityDate(iso)}
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -1764,13 +1764,11 @@ export const StaffManagement: React.FC = () => {
               <form onSubmit={handleBulkSubmit} className="space-y-6">
                 <div className="max-w-xs space-y-2">
                   <label className="block text-xs font-bold text-muted uppercase tracking-widest">
-                    Log Date
+                    Log Date (BS)
                   </label>
-                  <input
-                    type="date"
+                  <NepaliDatePicker
                     value={bulkDate}
-                    onChange={(e) => setBulkDate(e.target.value)}
-                    className="w-full px-3 py-2.5 border border-border rounded-xl bg-background/50 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-bold"
+                    onChange={(iso) => setBulkDate(iso)}
                     required
                   />
                 </div>
@@ -1865,11 +1863,11 @@ export const StaffManagement: React.FC = () => {
               {/* Date (Disabled representation) */}
               <div className="space-y-1">
                 <label className="block text-[10px] font-bold text-muted uppercase tracking-widest">
-                  Log Date
+                  Log Date (BS)
                 </label>
                 <input
                   type="text"
-                  value={modalDate.toLocaleDateString([], { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+                  value={formatNepali(modalDate)}
                   className="w-full px-3.5 py-2.5 border border-border rounded-xl bg-muted/20 text-xs font-bold text-muted focus:outline-none select-none"
                   disabled
                 />
@@ -2149,13 +2147,11 @@ export const StaffManagement: React.FC = () => {
               {salaryStatus === "paid" && (
                 <div className="space-y-1">
                   <label className="block text-[10px] font-bold text-muted uppercase tracking-widest">
-                    Payment Date
+                    Payment Date (BS)
                   </label>
-                  <input
-                    type="date"
+                  <NepaliDatePicker
                     value={salaryPaymentDate}
-                    onChange={(e) => setSalaryPaymentDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold"
+                    onChange={(iso) => setSalaryPaymentDate(iso)}
                     required
                   />
                 </div>
