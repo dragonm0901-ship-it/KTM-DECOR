@@ -113,7 +113,7 @@ export const PRODUCTS: Product[] = [
     category: "2.5D Signage",
     subCategory: "Corporate Office",
     price: 4000,
-    image: "/products/product_3_main.png",
+    image: "/products/product_3_layered_signage_v2.png",
     badge: "Custom",
     description: "Make a lasting impression with our 2.5D Signage - the perfect blend of depth, dimension and style. Layered design creates a rich 3D effect with a premium finish. Ideal for office interiors and showrooms.",
     specs: [
@@ -126,7 +126,7 @@ export const PRODUCTS: Product[] = [
     stockStatus: "In Stock",
     rating: 4.9,
     reviewsCount: 14,
-    image_urls: ["/products/product_3_main.png"],
+    image_urls: ["/products/product_3_layered_signage_v2.png"],
     variants: [
       { option_name: "2x1 feet (2 Sq.Ft.)", price: 4000, compare_at_price: 5200 },
       { option_name: "2x2 feet (4 Sq.Ft.)", price: 8000, compare_at_price: 10400 },

@@ -1,9 +1,22 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Star } from "@/components/ui/solar-icons";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+const StarIcon = ({ className, style }: { className?: string; style?: React.CSSProperties }) => (
+  <svg 
+    viewBox="0 0 24 24" 
+    fill="currentColor" 
+    className={className} 
+    style={style} 
+    aria-hidden="true"
+    width="1em" 
+    height="1em"
+  >
+    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+  </svg>
+);
 
 const testimonials = [
   {
@@ -94,33 +107,33 @@ export default function Testimonials() {
 
   const renderCard = (t: typeof testimonials[0], i: number) => {
     let bgClass = "bg-card border-border hover:border-accent/50";
-    let textClass = "text-foreground/80";
+    let textClass = "text-foreground/85";
     let nameClass = "text-foreground";
     let roleClass = "text-muted";
-    let starClass = "fill-accent text-accent";
-    let avatarBgClass = "bg-accent text-white";
+    let starClass = "text-accent";
+    let avatarBgClass = "bg-accent text-white font-extrabold";
 
     if (t.theme === "black") {
       bgClass = "bg-[#111] border-[#222] hover:border-accent/50";
-      textClass = "text-white/80";
+      textClass = "text-white/85";
       nameClass = "text-white";
-      roleClass = "text-white/50";
-      starClass = "fill-accent text-accent";
+      roleClass = "text-white/60";
+      starClass = "text-accent";
       avatarBgClass = "bg-white text-black";
     } else if (t.theme === "orange") {
-      bgClass = "bg-accent border-accent hover:border-black/20";
-      textClass = "text-black/80";
-      nameClass = "text-black";
-      roleClass = "text-black/60";
-      starClass = "fill-black text-black";
-      avatarBgClass = "bg-black text-accent";
+      bgClass = "bg-accent border-accent hover:border-white/20";
+      textClass = "text-white font-medium";
+      nameClass = "text-white font-black";
+      roleClass = "text-white/80 font-semibold";
+      starClass = "text-white";
+      avatarBgClass = "bg-white text-black font-extrabold";
     }
 
     return (
       <div key={i} className={`flex-shrink-0 w-[180px] md:w-[420px] ${bgClass} border p-3.5 md:p-8 rounded-[4px] transition-colors group/card`}>
         <div className="flex gap-1 mb-2.5 md:mb-6">
           {[...Array(5)].map((_, idx) => (
-            <Star 
+            <StarIcon 
               key={idx} 
               className={`w-2.5 h-2.5 md:w-4 md:h-4 ${starClass} transition-transform group-hover/card:scale-110 duration-300`} 
               style={{ transitionDelay: `${idx * 100}ms` }}
@@ -128,7 +141,7 @@ export default function Testimonials() {
           ))}
         </div>
         <p className={`${textClass} text-xs md:text-lg leading-relaxed mb-3 md:mb-8`}>
-          "{t.content}"
+          &quot;{t.content}&quot;
         </p>
         <div className="flex items-center gap-2 md:gap-4">
           <div className={`w-6 h-6 md:w-12 md:h-12 rounded-full flex items-center justify-center font-bold text-[10px] md:text-lg shrink-0 ${avatarBgClass}`}>
@@ -136,7 +149,7 @@ export default function Testimonials() {
           </div>
           <div>
             <p className={`font-bold text-[9px] md:text-sm uppercase tracking-widest ${nameClass}`}>{t.name}</p>
-            <p className={`text-[8px] md:text-xs font-medium ${roleClass}`}>{t.role}</p>
+            <p className={`text-[8px] md:text-xs ${roleClass}`}>{t.role}</p>
           </div>
         </div>
       </div>

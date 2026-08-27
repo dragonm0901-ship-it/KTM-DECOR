@@ -136,8 +136,8 @@ export default function Hero() {
       // ── MOBILE: LCP is static for instant paint. Fast animation on secondary decorative elements. ──
       mm.add("(max-width: 1023px)", () => {
         gsap.fromTo(".hero-mobile-secondary",
-          { y: 15, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.5, stagger: 0.08, ease: "power2.out" }
+          { y: 15, opacity: 0.7 },
+          { y: 0, opacity: 1, duration: 0.4, stagger: 0.05, ease: "power2.out" }
         );
       });
     };
@@ -182,7 +182,7 @@ export default function Hero() {
             <div 
               ref={desktopSceneRef} 
               className="relative w-[180vw] h-[150vh] max-w-[2500px] max-h-[1500px] [transform-style:preserve-3d] pointer-events-none"
-              style={{ transformOrigin: "center center", filter: "blur(12px)" }}
+              style={{ transformOrigin: "center center" }}
             >
               {cards.map((card) => (
                 <div 
@@ -205,9 +205,10 @@ export default function Hero() {
                       fill 
                       className="object-cover" 
                       sizes={`(max-width: 1024px) 30vw, ${card.widthVal}`}
-                      priority={card.id === 0}
-                      fetchPriority={card.id === 0 ? "high" : "low"}
-                      quality={card.id === 0 ? 60 : 50}
+                      priority={false}
+                      fetchPriority="low"
+                      loading="lazy"
+                      quality={50}
                     />
                     <div className="absolute inset-0 bg-black/20" />
                   </div>
@@ -222,7 +223,7 @@ export default function Hero() {
           {/* Hero Text Content - Overlaid directly center */}
           <div 
             ref={desktopTextRef}
-            className="relative z-30 flex flex-col items-center justify-center text-center px-6 w-full max-w-4xl mx-auto pointer-events-auto"
+            className="relative z-30 flex flex-col items-center justify-center text-center px-6 w-full max-w-4xl mx-auto pointer-events-auto opacity-100"
           >
             <div
               ref={desktopTextInnerRef}
@@ -230,7 +231,7 @@ export default function Hero() {
             >
               {/* Status Badge */}
               <div className="inline-flex items-center gap-2.5 px-5 py-2 rounded-[4px] bg-accent border border-accent/10 mb-8 md:mb-10 shadow-2xl">
-                <span className="text-[11px] md:text-xs font-bold tracking-widest uppercase text-white">
+                <span className="text-[11px] md:text-xs font-black tracking-widest uppercase text-white">
                   Trusted by 2000+ businesses in Nepal
                 </span>
               </div>
@@ -248,7 +249,7 @@ export default function Hero() {
               </h1>
 
               {/* Subtext */}
-              <p className="text-lg md:text-xl max-w-2xl leading-relaxed mb-10 text-white/80 font-medium">
+              <p className="text-lg md:text-xl max-w-2xl leading-relaxed mb-10 text-white/90 font-medium">
                 Nepal&apos;s premier custom LED neon signs, 3D backlit signboards, and architectural decor crafted in Kathmandu with valley-wide installation.
               </p>
 
@@ -256,7 +257,8 @@ export default function Hero() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
                 <Link
                   href="/shop"
-                  className="group relative overflow-hidden flex items-center gap-3 px-10 py-5 bg-accent text-white rounded-[4px] text-[12px] font-bold tracking-widest uppercase hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 shadow-[0_0_40px_rgba(254,145,76,0.4)]"
+                  prefetch={false}
+                  className="group relative overflow-hidden flex items-center gap-3 px-10 py-5 bg-accent text-white rounded-[4px] text-[12px] font-black tracking-widest uppercase hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 shadow-[0_0_40px_rgba(254,145,76,0.4)]"
                 >
                   <span className="animate-laser-sheen absolute inset-0 w-[50%] h-full bg-gradient-to-r from-transparent via-white/25 to-transparent pointer-events-none" />
                   <span>Explore Collection</span>
@@ -293,7 +295,7 @@ export default function Hero() {
                 ref={mobileBadgeRef}
                 className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-[4px] bg-accent border border-accent/15 mb-4"
               >
-                <span className="text-[8px] font-bold tracking-wide text-white">
+                <span className="text-[9px] font-black tracking-wide text-white uppercase">
                   Trusted by 2000+ businesses in Nepal
                 </span>
               </div>
@@ -318,15 +320,15 @@ export default function Hero() {
             >
               {/* Main large card (LCP Element - paints instantly on first frame) */}
               <div className="absolute top-0 right-[-5%] w-[63%] aspect-[3/4] rounded-[4px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.15)] border border-neutral-200/50 z-10 opacity-100">
-                <Image
-                  src="/products/product_5_main.png"
+                <img
+                  src="/hero-images/hero-lcp.webp"
                   alt="Custom LED neon sign installation in Kathmandu cafe"
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 63vw, 400px"
-                  priority
+                  width={280}
+                  height={373}
+                  loading="eager"
                   fetchPriority="high"
-                  quality={60}
+                  decoding="async"
+                  className="w-full h-full object-cover"
                 />
               </div>
 
@@ -339,6 +341,7 @@ export default function Hero() {
                   className="object-cover"
                   sizes="(max-width: 768px) 50vw, 300px"
                   loading="lazy"
+                  fetchPriority="low"
                   quality={50}
                 />
               </div>
@@ -352,6 +355,7 @@ export default function Hero() {
                   className="object-cover"
                   sizes="(max-width: 768px) 35vw, 200px"
                   loading="lazy"
+                  fetchPriority="low"
                   quality={50}
                 />
               </div>
@@ -375,14 +379,15 @@ export default function Hero() {
             {/* ── Mobile-only: CTAs + Features (below images) ── */}
             <div className="order-3 flex flex-col items-center text-center">
               {/* Subtext */}
-              <p className="text-base md:text-lg leading-relaxed mb-8 text-muted max-w-xl">
+              <p className="text-base md:text-lg leading-relaxed mb-8 text-muted max-w-xl font-medium">
                 Premium neon signs and illuminated decor crafted with precision
                 to bring your brand&apos;s story to life.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10 w-full">
                 <Link
                   href="/shop"
-                  className="group relative overflow-hidden flex items-center justify-center gap-3 px-9 py-4 bg-accent text-white rounded-[4px] text-[11px] font-bold tracking-widest uppercase hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 shadow-lg shadow-accent/25 w-full sm:w-auto"
+                  prefetch={false}
+                  className="group relative overflow-hidden flex items-center justify-center gap-3 px-9 py-4 bg-accent text-white rounded-[4px] text-[11px] font-black tracking-widest uppercase hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 shadow-lg shadow-accent/25 w-full sm:w-auto"
                 >
                   <span className="animate-laser-sheen absolute inset-0 w-[50%] h-full bg-gradient-to-r from-transparent via-white/25 to-transparent pointer-events-none" />
                   <span>Explore Collection</span>
@@ -400,9 +405,9 @@ export default function Hero() {
                 {features.map((feat, i) => (
                   <li
                     key={i}
-                    className="flex items-center gap-3 text-sm md:text-base text-muted"
+                    className="flex items-center gap-3 text-sm md:text-base text-muted font-medium"
                   >
-                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-accent/10 flex items-center justify-center">
+                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-accent/15 flex items-center justify-center">
                       <Check className="w-3 h-3 text-accent" />
                     </span>
                     {feat}

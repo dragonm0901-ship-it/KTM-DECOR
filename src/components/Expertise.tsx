@@ -27,34 +27,20 @@ const SHORT_DESCRIPTIONS: Record<string, string> = {
 
 export default function Expertise() {
   const containerRef = useRef<HTMLElement>(null);
-  const [dbProducts, setDbProducts] = useState<any[]>(PRODUCTS);
+  const [shouldLoadImages, setShouldLoadImages] = useState(false);
+  const dbProducts = PRODUCTS;
 
-  // Mount logic: Fetch products from express backend to show dynamic images/details
   useEffect(() => {
-    const fetchCatalog = async () => {
-      try {
-        const currentApiUrl = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === "production" ? "" : "http://localhost:5001");
-        const res = await fetch(`${currentApiUrl}/api/products`);
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data) && data.length > 0) {
-            // Sort by order matching the static PRODUCTS array
-            const ordered = [...data].sort((a, b) => {
-              const idxA = PRODUCTS.findIndex(p => p.id === a.id);
-              const idxB = PRODUCTS.findIndex(p => p.id === b.id);
-              if (idxA === -1 && idxB === -1) return 0;
-              if (idxA === -1) return 1;
-              if (idxB === -1) return -1;
-              return idxA - idxB;
-            });
-            setDbProducts(ordered);
-          }
-        }
-      } catch (err) {
-        console.warn("Express backend API offline for homepage expertise list. Using fallback.", err);
+    // Allow hero section and LCP to paint uninhibited before requesting catalog images
+    if (typeof window !== "undefined") {
+      if ("requestIdleCallback" in window) {
+        const handle = (window as any).requestIdleCallback(() => setShouldLoadImages(true), { timeout: 1200 });
+        return () => (window as any).cancelIdleCallback(handle);
+      } else {
+        const timer = setTimeout(() => setShouldLoadImages(true), 600);
+        return () => clearTimeout(timer);
       }
-    };
-    fetchCatalog();
+    }
   }, []);
 
   useGSAP(() => {
@@ -98,7 +84,7 @@ export default function Expertise() {
         onLeaveBack: () => skewSetter(0)
       });
     }
-  }, { dependencies: [dbProducts], scope: containerRef });
+  }, { scope: containerRef });
 
   return (
     <section 
@@ -117,7 +103,7 @@ export default function Expertise() {
           <h2 className="text-3xl md:text-5xl font-black tracking-tighter leading-tight text-foreground">
             Everything we touch <br className="hidden sm:inline" /> turns to <span className="text-accent">light.</span>
           </h2>
-          <p className="mt-4 text-sm md:text-base text-muted-foreground font-medium max-w-lg">
+          <p className="mt-4 text-sm md:text-base text-muted font-medium max-w-lg">
             Discover our wide range of custom illumination and precision signcrafting products.
           </p>
         </div>
@@ -130,21 +116,27 @@ export default function Expertise() {
             <Link
               key={item.id}
               href={`/shop/${item.id}`}
+              prefetch={false}
               className="expertise-card group block cursor-pointer"
             >
               {/* Inner card container containing the image and hover details */}
-              <div className="relative aspect-[4/5] rounded-[4px] border border-border bg-background overflow-hidden transition-all duration-500 group-hover:scale-[1.02] group-hover:shadow-2xl group-hover:shadow-accent/5">
+              <div className="relative aspect-[4/5] rounded-[4px] border border-border bg-card/60 overflow-hidden transition-all duration-500 group-hover:scale-[1.02] group-hover:shadow-2xl group-hover:shadow-accent/5">
                 {/* Image BG */}
                 <div className="absolute inset-0 transition-transform duration-700 lg:group-hover:scale-105">
-                  <Image
-                    src={item.image}
-                    alt={item.name}
-                    fill
-                    sizes="(max-width: 640px) 50vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                    className="object-cover"
-                    draggable={false}
-                    quality={60}
-                  />
+                  {shouldLoadImages ? (
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      fill
+                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                      className="object-cover"
+                      draggable={false}
+                      loading="lazy"
+                      quality={50}
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-foreground/5 animate-pulse" />
+                  )}
                 </div>
 
                 {/* Dark overlay for typography contrast */}
@@ -152,16 +144,16 @@ export default function Expertise() {
 
                 {/* Info — hover-reveal on desktop only (hidden on mobile for cleaner UI) */}
                 <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 lg:p-5 hidden lg:block lg:translate-y-6 lg:opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100 transition-all duration-500 z-20">
-                  <span className="text-[8px] sm:text-[9px] font-bold tracking-[0.25em] uppercase text-white/65 block mb-0.5 sm:mb-1.5">
+                  <span className="text-[8px] sm:text-[9px] font-bold tracking-[0.25em] uppercase text-white/75 block mb-0.5 sm:mb-1.5">
                     {item.category}
                   </span>
-                  <h4 className="text-[10px] sm:text-base md:text-lg lg:text-xl font-extrabold tracking-tighter text-white mb-1 sm:mb-2 leading-tight truncate">
+                  <p className="text-[10px] sm:text-base md:text-lg lg:text-xl font-extrabold tracking-tighter text-white mb-1 sm:mb-2 leading-tight truncate">
                     {item.name}
-                  </h4>
+                  </p>
                   <p className="text-[9px] sm:text-xs text-white/80 font-medium leading-normal line-clamp-2 sm:line-clamp-3 mb-2 sm:mb-3">
                     {SHORT_DESCRIPTIONS[item.id] || item.description}
                   </p>
-                  <div className="text-[8px] sm:text-[9px] font-black tracking-widest uppercase text-accent flex items-center gap-1 group-hover:translate-x-1 transition-all duration-300">
+                  <div className="text-[8px] sm:text-[9px] font-black tracking-widest uppercase text-accent-light flex items-center gap-1 group-hover:translate-x-1 transition-all duration-300">
                     View Details &rarr;
                   </div>
                 </div>
@@ -172,9 +164,9 @@ export default function Expertise() {
                 <span className="text-[9px] sm:text-[10px] font-bold text-accent uppercase tracking-widest hidden sm:block">
                   {item.category}
                 </span>
-                <h4 className="text-xs sm:text-sm md:text-base font-bold tracking-tight text-foreground group-hover:text-accent transition-colors duration-300 line-clamp-2 leading-snug">
+                <h3 className="text-xs sm:text-sm md:text-base font-bold tracking-tight text-foreground group-hover:text-accent transition-colors duration-300 line-clamp-2 leading-snug">
                   {item.name}
-                </h4>
+                </h3>
               </div>
             </Link>
           ))}

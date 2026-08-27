@@ -108,7 +108,7 @@ export default function HowItWorks() {
           <div>
             <a
               href="/start-project"
-              className="inline-flex items-center gap-3 px-8 py-4 bg-accent text-white rounded-[4px] text-[10px] font-bold tracking-widest uppercase hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 shadow-lg shadow-accent/20"
+              className="inline-flex items-center gap-3 px-8 py-4 bg-accent text-white rounded-[4px] text-[10px] font-black tracking-widest uppercase hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 shadow-lg shadow-accent/20"
             >
               Start Your Project
               <Plus className="w-4 h-4" />

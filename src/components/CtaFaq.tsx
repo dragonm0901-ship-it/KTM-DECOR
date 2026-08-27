@@ -87,7 +87,7 @@ export default function CtaFaq() {
               >
                 <div className={`flex justify-between items-center font-extrabold text-base md:text-xl tracking-tight transition-colors duration-300 ${isActive ? 'text-accent' : 'text-foreground'}`}>
                   <span>{faq.question}</span>
-                  <div className={`w-8 h-8 rounded-md flex-shrink-0 flex items-center justify-center transition-colors duration-300 ${isActive ? 'bg-accent text-white' : 'bg-foreground/5 text-foreground/50'}`}>
+                  <div className={`w-8 h-8 rounded-md flex-shrink-0 flex items-center justify-center transition-colors duration-300 ${isActive ? 'bg-accent text-white font-bold' : 'bg-foreground/5 text-foreground/70'}`}>
                     {isActive ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
                   </div>
                 </div>

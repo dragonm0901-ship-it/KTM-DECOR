@@ -53,11 +53,12 @@
   --background: #F2F2F2;
   --card: #FFFFFF;
   --foreground: #000000;
-  --muted: #666666;
+  --muted: #737373;
   --border: rgba(0, 0, 0, 0.08);
   --accent: #FE914C;
   --accent-light: #FFA46A;
   --accent-dark: #E2752D;
+  --accent-text: #FE914C;
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
   --font-display: "Outfit", system-ui, -apple-system, sans-serif;
 
@@ -88,6 +89,7 @@
   --foreground: #F2F2F2;
   --muted: #A1A1AA;
   --border: rgba(255, 255, 255, 0.1);
+  --accent-text: #FE914C;
 }
 
 /* ─── View Transition ───────────────────────────────────── */
@@ -330,6 +332,33 @@ body {
 
 html {
   view-transition-name: root;
+}
+
+/* ─── Gentle, Smooth Fade-in & Fade-out Theme Transition ─── */
+::view-transition-old(root) {
+  animation: theme-fade-out 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+::view-transition-new(root) {
+  animation: theme-fade-in 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes theme-fade-out {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes theme-fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 /* GPU-Accelerated Laser Sheen Shimmer Animation */

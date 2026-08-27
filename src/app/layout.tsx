@@ -43,13 +43,10 @@ export const metadata: Metadata = {
     icon: [
       { url: "/logo/favicon-48x48.png", sizes: "48x48", type: "image/png" },
       { url: "/logo/favicon-96x96.png", sizes: "96x96", type: "image/png" },
-      { url: "/logo/favicon-192x192.png", sizes: "192x192", type: "image/png" },
-      { url: "/logo/favicon.svg", type: "image/svg+xml" },
     ],
     shortcut: "/logo/favicon-96x96.png",
     apple: [
       { url: "/logo/favicon-144x144.png", sizes: "144x144", type: "image/png" },
-      { url: "/logo/favicon-192x192.png", sizes: "192x192", type: "image/png" },
     ],
   },
   openGraph: {
@@ -92,6 +89,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="google-site-verification" content="b98ok2OA0IqJbQ05BA7_R1S2W2RYHlz9273MWXF5whM" />
+        <link rel="preload" as="image" href="/hero-images/hero-lcp.webp" type="image/webp" media="(max-width: 1023px)" fetchPriority="high" />
         {/* Analytics loaded dynamically on user interaction in ClientProviders */}
         <script
           dangerouslySetInnerHTML={{

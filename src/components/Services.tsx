@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -41,6 +41,19 @@ const servicesData: ServiceData[] = [
 export default function Services() {
   const containerRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
+  const [shouldLoadImages, setShouldLoadImages] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      if ("requestIdleCallback" in window) {
+        const handle = (window as any).requestIdleCallback(() => setShouldLoadImages(true), { timeout: 1500 });
+        return () => (window as any).cancelIdleCallback(handle);
+      } else {
+        const timer = setTimeout(() => setShouldLoadImages(true), 800);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, []);
 
   useGSAP(() => {
     if (typeof window === "undefined") return;
@@ -107,14 +120,17 @@ export default function Services() {
       >
         {/* Premium Workshop Background Image */}
         <div className="absolute -inset-[5%] z-0 opacity-55 dark:opacity-20 pointer-events-none select-none overflow-hidden transition-opacity duration-500">
-          <Image
-            src="/images/workshop.webp"
-            alt="KTM DECOR Workshop"
-            fill
-            sizes="100vw"
-            className="object-cover object-center grayscale contrast-[1.1] transition-all duration-500 scale-[0.92]"
-            quality={50}
-          />
+          {shouldLoadImages && (
+            <Image
+              src="/images/workshop.webp"
+              alt="KTM DECOR Workshop"
+              fill
+              sizes="100vw"
+              className="object-cover object-center grayscale contrast-[1.1] transition-all duration-500 scale-[0.92]"
+              quality={50}
+              loading="lazy"
+            />
+          )}
         </div>
         {/* Subtle uniform overlay for contrast - bound to section limits */}
         <div className="absolute inset-0 z-0 bg-background/55 dark:bg-background/75 transition-colors duration-500 pointer-events-none" />
@@ -153,19 +169,22 @@ export default function Services() {
             >
               {/* Background Cover */}
               <>
-                <Image
-                  src={[
-                    "/images/neon-momo.webp",
-                    "/images/light-boards-nivati.webp",
-                    "/images/3d-letters-salt.webp",
-                    "/images/custom-decor-collage.webp"
-                  ][i]}
-                  alt={service.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1120px"
-                  className={`object-cover rounded-[4px] z-0 ${i === 1 ? "object-[center_15%]" : "object-center"}`}
-                  quality={50}
-                />
+                {shouldLoadImages && (
+                  <Image
+                    src={[
+                      "/images/neon-momo.webp",
+                      "/images/light-boards-nivati.webp",
+                      "/images/3d-letters-salt.webp",
+                      "/images/custom-decor-collage.webp"
+                    ][i]}
+                    alt={service.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1120px"
+                    className={`object-cover rounded-[4px] z-0 ${i === 1 ? "object-[center_15%]" : "object-center"}`}
+                    quality={50}
+                    loading="lazy"
+                  />
+                )}
                 <div className="absolute inset-0 rounded-[4px] bg-black/55 z-0" />
               </>
 

@@ -168,7 +168,8 @@ export default function Header() {
           >
             <Link
               href="/shop"
-              className={`flex items-center px-4 py-2 sm:px-6 md:py-3.5 bg-accent text-white text-[10px] sm:text-xs font-bold tracking-widest uppercase rounded-[4px] hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 shrink-0 font-display ${menuOpen ? "hidden pointer-events-none" : ""}`}
+              prefetch={false}
+              className={`flex items-center px-4 py-2 sm:px-6 md:py-3.5 bg-accent text-white text-[10px] sm:text-xs font-black tracking-widest uppercase rounded-[4px] hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 shrink-0 font-display ${menuOpen ? "hidden pointer-events-none" : ""}`}
             >
               Shop
             </Link>
@@ -220,19 +221,19 @@ export default function Header() {
         className="fixed inset-0 z-40 opacity-0 pointer-events-none overflow-hidden"
         style={{ backgroundColor: "var(--background)" }}
       >
-        {/* Background Image: Grayscale & 30% Opacity */}
+        {/* Background Image: Grayscale & 30% Opacity — only loaded when menu is activated */}
         <div className="absolute inset-0 z-0 select-none pointer-events-none">
-          <Image
-            src="/images/nav-bg.webp"
-            alt="Menu Background"
-            fill
-            sizes="100vw"
-            className={`object-cover object-center grayscale opacity-30 transition-transform duration-[2000ms] ease-out ${
-              menuOpen ? "scale-100" : "scale-105"
-            }`}
-            quality={50}
-            fetchPriority="low"
-          />
+          {menuOpen && (
+            <Image
+              src="/images/nav-bg.webp"
+              alt="Menu Background"
+              fill
+              sizes="100vw"
+              className="object-cover object-center grayscale opacity-30 transition-transform duration-[2000ms] ease-out scale-100"
+              quality={50}
+              loading="lazy"
+            />
+          )}
         </div>
 
         <div
@@ -262,8 +263,9 @@ export default function Header() {
             </nav>
           </div>
 
-          {/* Legal + Social */}
-          <div className="flex flex-col gap-8 md:ml-auto md:justify-center mt-12 md:mt-0">
+          {/* Legal + Social + Appearance (2-column layout on mobile, column layout on desktop) */}
+          <div className="grid grid-cols-2 md:flex md:flex-col gap-6 sm:gap-8 md:gap-8 md:ml-auto md:justify-center mt-8 md:mt-0 pt-6 md:pt-0 border-t border-border/30 md:border-t-0">
+            {/* Column 1: Legal */}
             <div className="flex flex-col gap-3">
               <span className="nav-reveal-item text-[10px] uppercase tracking-[0.25em] opacity-40 mb-1">
                 Legal
@@ -273,67 +275,69 @@ export default function Header() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setMenuOpen(false)}
-                  className="nav-reveal-item font-display text-lg font-medium tracking-tight text-foreground hover:text-accent transition-all duration-300"
+                  className="nav-reveal-item font-display text-sm sm:text-base md:text-lg font-medium tracking-tight text-foreground hover:text-accent transition-all duration-300"
                 >
                   {link.label}
                 </Link>
               ))}
             </div>
 
-            <div className="flex flex-col gap-3">
-              <span className="nav-reveal-item text-[10px] uppercase tracking-[0.25em] opacity-40 mb-1">
-                Social
-              </span>
-              <a
-                href="https://www.instagram.com/ktmdecor/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="nav-reveal-item font-display text-lg font-medium tracking-tight text-foreground hover-instagram w-fit"
-              >
-                Instagram
-              </a>
-              <a
-                href="https://www.facebook.com/people/KTM-Decor/61556839814576/#"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="nav-reveal-item font-display text-lg font-medium tracking-tight text-foreground hover-facebook w-fit"
-              >
-                Facebook
-              </a>
-              <a
-                href="https://www.tiktok.com/@ktm.decor"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="nav-reveal-item font-display text-lg font-medium tracking-tight text-foreground hover-tiktok w-fit"
-              >
-                TikTok
-              </a>
-            </div>
-
-            {/* Theme Toggle in Menu */}
-            <div className="nav-reveal-item flex flex-col gap-3 pt-6 border-t border-border mt-6">
-              <span className="text-[10px] uppercase tracking-[0.25em] opacity-40 mb-1">
-                Appearance
-              </span>
-              <div className="flex items-center gap-4 group/theme">
-                <span
-                  onClick={() => {
-                    const button = document.getElementById("nav-theme-toggle-btn");
-                    if (button) button.click();
-                  }}
-                  className="text-sm font-medium cursor-pointer select-none group-hover/theme:text-accent transition-colors duration-300"
-                >
-                  Switch Theme
+            {/* Column 2 on mobile: Social + Appearance */}
+            <div className="flex flex-col gap-6 md:gap-8">
+              <div className="flex flex-col gap-3">
+                <span className="nav-reveal-item text-[10px] uppercase tracking-[0.25em] opacity-40 mb-1">
+                  Social
                 </span>
-                {mounted && (
-                  <AnimatedThemeToggler
-                    id="nav-theme-toggle-btn"
-                    variant="hexagon"
-                    duration={600}
-                    className="w-12 h-12 flex items-center justify-center rounded-[4px] bg-foreground/5 hover:bg-foreground/10 group-hover/theme:bg-foreground/10 transition-colors duration-300"
-                    aria-label="Toggle theme"
-                  />
-                )}
+                <a
+                  href="https://www.instagram.com/ktmdecor/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="nav-reveal-item font-display text-sm sm:text-base md:text-lg font-medium tracking-tight text-foreground hover-instagram w-fit"
+                >
+                  Instagram
+                </a>
+                <a
+                  href="https://www.facebook.com/people/KTM-Decor/61556839814576/#"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="nav-reveal-item font-display text-sm sm:text-base md:text-lg font-medium tracking-tight text-foreground hover-facebook w-fit"
+                >
+                  Facebook
+                </a>
+                <a
+                  href="https://www.tiktok.com/@ktm.decor"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="nav-reveal-item font-display text-sm sm:text-base md:text-lg font-medium tracking-tight text-foreground hover-tiktok w-fit"
+                >
+                  TikTok
+                </a>
+              </div>
+
+              {/* Theme Toggle in Menu */}
+              <div className="nav-reveal-item flex flex-col gap-2 pt-4 md:pt-6 border-t border-border/40 md:border-border mt-0 md:mt-6">
+                <span className="text-[10px] uppercase tracking-[0.25em] opacity-40 mb-1">
+                  Appearance
+                </span>
+                <div className="flex items-center gap-3 sm:gap-4 group/theme">
+                  <span
+                    onClick={() => {
+                      const button = document.getElementById("nav-theme-toggle-btn");
+                      if (button) button.click();
+                    }}
+                    className="text-xs sm:text-sm font-medium cursor-pointer select-none group-hover/theme:text-accent transition-colors duration-300"
+                  >
+                    Switch Theme
+                  </span>
+                  {mounted && (
+                    <AnimatedThemeToggler
+                      id="nav-theme-toggle-btn"
+                      duration={450}
+                      className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-[4px] bg-foreground/5 hover:bg-foreground/10 group-hover/theme:bg-foreground/10 transition-colors duration-300"
+                      aria-label="Toggle theme"
+                    />
+                  )}
+                </div>
               </div>
             </div>
           </div>

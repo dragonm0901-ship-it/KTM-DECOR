@@ -69,7 +69,7 @@ export default function Footer() {
                   <h4 className="uppercase tracking-widest text-[10px] md:text-sm font-bold text-gray-900 dark:text-white">Navigation</h4>
                   <div className="flex flex-col gap-2 md:gap-3">
                     {["About", "Services", "Shop", "Process", "FAQ"].map(link => (
-                      <Link key={link} href={link === "Shop" ? "/shop" : `/#${link.toLowerCase()}`} className="text-gray-500 dark:text-gray-400 text-sm md:text-base font-medium hover:text-orange-600 dark:hover:text-orange-500 transition-colors">
+                      <Link key={link} href={link === "Shop" ? "/shop" : `/#${link.toLowerCase()}`} prefetch={false} className="text-neutral-600 dark:text-neutral-300 text-sm md:text-base font-medium hover:text-accent transition-colors">
                         {link}
                       </Link>
                     ))}
@@ -80,7 +80,7 @@ export default function Footer() {
                   <h4 className="uppercase tracking-widest text-[10px] md:text-sm font-bold text-gray-900 dark:text-white">Shop</h4>
                   <div className="flex flex-col gap-2 md:gap-3">
                     {["Neon Signage", "3D Led Signage", "Branding Signage", "Light Boards", "Custom Designs"].map(cat => (
-                      <Link key={cat} href="/shop" className="text-gray-500 dark:text-gray-400 text-sm md:text-base font-medium hover:text-orange-600 dark:hover:text-orange-500 transition-colors">
+                      <Link key={cat} href="/shop" prefetch={false} className="text-neutral-600 dark:text-neutral-300 text-sm md:text-base font-medium hover:text-accent transition-colors">
                         {cat}
                       </Link>
                     ))}
@@ -90,19 +90,19 @@ export default function Footer() {
                 <div className="flex flex-col gap-3 md:gap-4">
                   <h4 className="uppercase tracking-widest text-[10px] md:text-sm font-bold text-gray-900 dark:text-white">Popular Guides</h4>
                   <div className="flex flex-col gap-2 md:gap-3 text-xs md:text-sm font-medium">
-                    <Link href="/decor-guides/neon-lights-price-nepal" className="text-gray-500 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-500 transition-colors line-clamp-1">
+                    <Link href="/decor-guides/neon-lights-price-nepal" prefetch={false} className="text-neutral-600 dark:text-neutral-300 hover:text-accent transition-colors line-clamp-1">
                       Neon Light Price Nepal
                     </Link>
-                    <Link href="/decor-guides/led-light-board-price-nepal" className="text-gray-500 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-500 transition-colors line-clamp-1">
+                    <Link href="/decor-guides/led-light-board-price-nepal" prefetch={false} className="text-neutral-600 dark:text-neutral-300 hover:text-accent transition-colors line-clamp-1">
                       Light Board Price Nepal
                     </Link>
-                    <Link href="/decor-guides/business-signboard-design-nepal" className="text-gray-500 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-500 transition-colors line-clamp-1">
+                    <Link href="/decor-guides/business-signboard-design-nepal" prefetch={false} className="text-neutral-600 dark:text-neutral-300 hover:text-accent transition-colors line-clamp-1">
                       3D Business Board Design
                     </Link>
-                    <Link href="/decor-guides/name-plate-design-price-nepal" className="text-gray-500 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-500 transition-colors line-clamp-1">
+                    <Link href="/decor-guides/name-plate-design-price-nepal" prefetch={false} className="text-neutral-600 dark:text-neutral-300 hover:text-accent transition-colors line-clamp-1">
                       Name Plate Design & Price
                     </Link>
-                    <Link href="/decor-guides/home-decor-kathmandu-online" className="text-gray-500 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-500 transition-colors line-clamp-1">
+                    <Link href="/decor-guides/home-decor-kathmandu-online" prefetch={false} className="text-neutral-600 dark:text-neutral-300 hover:text-accent transition-colors line-clamp-1">
                       Home Decor Kathmandu
                     </Link>
                   </div>
@@ -111,16 +111,16 @@ export default function Footer() {
                 <div className="flex flex-col gap-3 md:gap-4">
                   <h4 className="uppercase tracking-widest text-[10px] md:text-sm font-bold text-gray-900 dark:text-white">Resources & PR</h4>
                   <div className="flex flex-col gap-2 md:gap-3 text-xs md:text-sm font-medium">
-                    <Link href="/neon-sign-statistics-nepal" className="text-gray-500 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-500 transition-colors line-clamp-1">
+                    <Link href="/neon-sign-statistics-nepal" prefetch={false} className="text-neutral-600 dark:text-neutral-300 hover:text-accent transition-colors line-clamp-1">
                       2026 Signage Statistics
                     </Link>
-                    <Link href="/press" className="text-gray-500 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-500 transition-colors line-clamp-1">
+                    <Link href="/press" prefetch={false} className="text-neutral-600 dark:text-neutral-300 hover:text-accent transition-colors line-clamp-1">
                       Press & Media Kit
                     </Link>
-                    <Link href="/decor-guides" className="text-gray-500 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-500 transition-colors line-clamp-1">
+                    <Link href="/decor-guides" prefetch={false} className="text-neutral-600 dark:text-neutral-300 hover:text-accent transition-colors line-clamp-1">
                       All Decor Guides
                     </Link>
-                    <Link href="/start-project" className="text-gray-500 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-500 transition-colors line-clamp-1">
+                    <Link href="/start-project" prefetch={false} className="text-neutral-600 dark:text-neutral-300 hover:text-accent transition-colors line-clamp-1">
                       Custom Design Studio
                     </Link>
                   </div>
@@ -129,9 +129,9 @@ export default function Footer() {
                 <div className="flex flex-col gap-3 md:gap-4 col-span-2 sm:col-span-1">
                   <h4 className="uppercase tracking-widest text-[10px] md:text-sm font-bold text-gray-900 dark:text-white">Contact</h4>
                   <div className="flex flex-col gap-2 md:gap-3">
-                    <span className="text-gray-500 dark:text-gray-400 text-xs md:text-sm font-medium">Balkot Factory, Bhaktapur, Nepal</span>
-                    <a href="mailto:ktmdecor2024@gmail.com" className="text-gray-500 dark:text-gray-400 text-xs md:text-sm font-medium hover:text-orange-600 dark:hover:text-orange-500 transition-colors truncate">ktmdecor2024@gmail.com</a>
-                    <a href="tel:+9779706247439" className="text-gray-500 dark:text-gray-400 text-xs md:text-sm font-medium hover:text-orange-600 dark:hover:text-orange-500 transition-colors">+977 9706247439</a>
+                    <span className="text-neutral-600 dark:text-neutral-300 text-xs md:text-sm font-medium">Balkot Factory, Bhaktapur, Nepal</span>
+                    <a href="mailto:ktmdecor2024@gmail.com" className="text-neutral-600 dark:text-neutral-300 text-xs md:text-sm font-medium hover:text-accent transition-colors truncate">ktmdecor2024@gmail.com</a>
+                    <a href="tel:+9779706247439" className="text-neutral-600 dark:text-neutral-300 text-xs md:text-sm font-medium hover:text-accent transition-colors">+977 9706247439</a>
                   </div>
                 </div>
               </div>
@@ -139,15 +139,15 @@ export default function Footer() {
 
             {/* Bottom Bar */}
             <div className="border-t border-gray-200 dark:border-white/10 bg-white dark:bg-black px-4 sm:px-6 md:px-8 py-6 flex flex-col md:flex-row justify-between items-center gap-6 transition-colors duration-500">
-              <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+              <span className="text-sm text-neutral-600 dark:text-neutral-300 font-medium">
                 © {new Date().getFullYear()} KTM DECOR. All Rights Reserved.
               </span>
-              <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 dark:text-gray-400 font-medium">
-                <Link href="/privacy-policy" className="hover:text-orange-600 dark:hover:text-orange-500 transition-colors">Privacy Policy</Link>
+              <div className="flex flex-wrap items-center gap-3 text-xs text-neutral-600 dark:text-neutral-300 font-medium">
+                <Link href="/privacy-policy" prefetch={false} className="hover:text-accent transition-colors">Privacy Policy</Link>
                 <span>•</span>
-                <Link href="/terms-of-service" className="hover:text-orange-600 dark:hover:text-orange-500 transition-colors">Terms of Service</Link>
+                <Link href="/terms-of-service" prefetch={false} className="hover:text-accent transition-colors">Terms of Service</Link>
                 <span>•</span>
-                <Link href="/return-policy" className="hover:text-orange-600 dark:hover:text-orange-500 transition-colors">Return & Refund Policy</Link>
+                <Link href="/return-policy" prefetch={false} className="hover:text-accent transition-colors">Return & Refund Policy</Link>
               </div>
               <div className="flex items-center gap-4">
                 {socialLinks.map((social, i) => {

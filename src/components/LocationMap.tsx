@@ -41,7 +41,6 @@ export default function LocationMap() {
                 width: "100%",
                 height: "100%",
                 filter: "grayscale(100%) invert(92%) contrast(83%)",
-                /* mixBlendMode removed to prevent severe WebKit renderer crashes on iOS */
               }} 
               allowFullScreen={false} 
               loading="lazy" 
@@ -50,8 +49,7 @@ export default function LocationMap() {
               title="Google Maps location of KTM DECOR Pvt Ltd in Balkot, Bhaktapur"
             ></iframe>
 
-            {/* Interactive Overlay to prevent accidental scrolling while navigating the page, 
-                clicks through when users actually want to interact. */}
+            {/* Interactive Overlay */}
             <div className="absolute inset-0 z-20 pointer-events-none" />
           </div>
 
@@ -72,7 +70,7 @@ export default function LocationMap() {
                 <a 
                   href="https://maps.app.goo.gl/MnbeQy7Y6tPmV4DB9" 
                   target="_blank" 
-                  rel="noopener noreferrer"
+                  rel="noopener noreferrer" 
                   className="inline-block mt-4 text-[10px] text-accent font-bold uppercase tracking-widest hover:text-white transition-colors"
                 >
                   Get Directions &rarr;
@@ -80,20 +78,20 @@ export default function LocationMap() {
               </div>
 
               {/* QR Code Section */}
-              <div className="flex flex-col items-center justify-center border-l border-white/10 pl-6 md:pl-8 ml-2 flex-shrink-0">
-                <div className="w-20 h-20 bg-white p-1 rounded-[4px] mb-3 relative overflow-hidden">
+              <div className="flex flex-col items-center justify-center border-l border-white/10 pl-5 sm:pl-6 md:pl-8 ml-2 flex-shrink-0">
+                <div className="w-24 h-24 sm:w-28 sm:h-28 bg-white p-1.5 rounded-[6px] mb-2.5 relative overflow-hidden shadow-lg shadow-black/40">
                   <Image 
-                    src="/qr-code.png" 
-                    alt="Scan for Google Maps Location" 
+                    src="/qr-map-ktm.png" 
+                    alt="Scan for Google Maps Location and Review - KTM DECOR" 
                     fill
-                    sizes="80px"
-                    className="object-cover" 
-                    quality={60}
+                    sizes="(max-width: 640px) 96px, 112px"
+                    className="object-contain" 
+                    quality={90}
                   />
                 </div>
                 <div className="text-center">
-                  <p className="text-white font-bold text-[10px] tracking-widest uppercase mb-1">Scan & Go</p>
-                  <p className="text-white/60 text-[9px] max-w-[100px] leading-snug">
+                  <p className="text-white font-bold text-[10px] sm:text-xs tracking-widest uppercase mb-0.5">Scan & Go</p>
+                  <p className="text-white/60 text-[9px] sm:text-[10px] max-w-[110px] leading-snug">
                     Navigate easily & leave us a review!
                   </p>
                 </div>

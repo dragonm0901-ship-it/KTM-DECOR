@@ -23,6 +23,7 @@ const config: Config = {
           DEFAULT: "var(--accent)",
           light: "var(--accent-light)",
           dark: "var(--accent-dark)",
+          text: "var(--accent-text)",
         },
       },
       animation: {

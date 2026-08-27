@@ -174,10 +174,10 @@ function BeforeAfterSlider({ caseData }: { caseData: CaseData }) {
         </div>
 
         {/* Labels Badges Overlays */}
-        <div className="absolute bottom-4 left-4 z-20 px-3 py-1 bg-black/60 backdrop-blur-md text-white/70 text-[9px] font-bold tracking-widest uppercase rounded-[4px] border border-white/5 pointer-events-none">
+        <div className="absolute bottom-4 left-4 z-20 px-3 py-1 bg-black/60 backdrop-blur-md text-white/90 text-[9px] font-bold tracking-widest uppercase rounded-[4px] border border-white/5 pointer-events-none">
           Concept
         </div>
-        <div className="absolute bottom-4 right-4 z-20 px-3 py-1 bg-accent/80 backdrop-blur-md text-white text-[9px] font-bold tracking-widest uppercase rounded-[4px] shadow-lg shadow-accent/20 border border-accent pointer-events-none">
+        <div className="absolute bottom-4 right-4 z-20 px-3 py-1 bg-accent backdrop-blur-md text-white text-[9px] font-black tracking-widest uppercase rounded-[4px] shadow-lg shadow-accent/20 border border-accent pointer-events-none">
           Final
         </div>
       </div>
@@ -191,7 +191,7 @@ function BeforeAfterSlider({ caseData }: { caseData: CaseData }) {
           {caseData.title}
         </h3>
         {caseData.description && (
-          <p className="text-muted-foreground text-sm leading-relaxed font-medium">
+          <p className="text-muted text-sm leading-relaxed font-medium">
             {caseData.description}
           </p>
         )}
