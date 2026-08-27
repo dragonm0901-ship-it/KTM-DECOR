@@ -66,7 +66,7 @@ export default function Services() {
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: containerRef.current,
-          start: "top 20%",
+          start: "top 40%",
           end: "bottom bottom",
           scrub: 1,
         }
@@ -143,7 +143,7 @@ export default function Services() {
         <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background to-transparent z-0 pointer-events-none transition-colors duration-500" />
 
         {/* Top Center Header (Absolute on desktop, relative on mobile to prevent pushing cards out of viewport) */}
-        <div className="relative left-0 translate-x-0 mb-8 w-full max-w-3xl px-6 select-text flex flex-col items-center text-center lg:absolute lg:top-28 lg:left-1/2 lg:-translate-x-1/2 lg:mb-0">
+        <div className="relative left-0 translate-x-0 mb-8 w-full max-w-3xl px-6 select-text flex flex-col items-center text-center lg:absolute lg:top-36 lg:left-1/2 lg:-translate-x-1/2 lg:mb-0">
           <span className="inline-flex items-center gap-2 px-4 py-1.5 text-[10px] font-black tracking-[0.25em] uppercase border border-accent/20 rounded-[4px] mb-3 text-neutral-950 bg-accent">
             The Craft
           </span>
@@ -155,7 +155,7 @@ export default function Services() {
         {/* Stacking Cards Track (Larger, wider, and 15% taller cards offset from absolute header) */}
         <div 
           ref={cardsRef}
-          className="relative w-full max-w-[1320px] mx-auto lg:h-[70vh] flex flex-col lg:block gap-4 sm:gap-8 mt-6 lg:mt-36 lg:max-h-[820px] shrink-0"
+          className="relative w-full max-w-[1320px] mx-auto lg:h-[68vh] flex flex-col lg:block gap-4 sm:gap-8 mt-6 lg:mt-44 lg:max-h-[780px] shrink-0"
         >
           {servicesData.map((service, i) => (
             <div
