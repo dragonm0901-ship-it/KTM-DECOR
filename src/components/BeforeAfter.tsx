@@ -174,17 +174,17 @@ function BeforeAfterSlider({ caseData }: { caseData: CaseData }) {
         </div>
 
         {/* Labels Badges Overlays */}
-        <div className="absolute bottom-4 left-4 z-20 px-3 py-1 bg-black/60 backdrop-blur-md text-white/90 text-[9px] font-bold tracking-widest uppercase rounded-[4px] border border-white/5 pointer-events-none">
+        <div className="absolute bottom-4 left-4 z-20 px-3 py-1 bg-black/60 backdrop-blur-md text-white text-[9px] font-bold tracking-widest uppercase rounded-[4px] border border-white/5 pointer-events-none">
           Concept
         </div>
-        <div className="absolute bottom-4 right-4 z-20 px-3 py-1 bg-accent backdrop-blur-md text-white text-[9px] font-black tracking-widest uppercase rounded-[4px] shadow-lg shadow-accent/20 border border-accent pointer-events-none">
+        <div className="absolute bottom-4 right-4 z-20 px-3 py-1 bg-accent backdrop-blur-md text-neutral-950 text-[9px] font-black tracking-widest uppercase rounded-[4px] shadow-lg shadow-accent/20 border border-accent pointer-events-none">
           Final
         </div>
       </div>
 
       {/* Case Details */}
       <div className="px-1 space-y-2">
-        <span className="text-[10px] font-bold text-accent uppercase tracking-widest block">
+        <span className="text-[10px] font-black text-neutral-950 dark:text-accent uppercase tracking-widest block">
           {caseData.category}
         </span>
         <h3 className="text-xl md:text-2xl font-black tracking-tight text-foreground leading-none">
@@ -210,7 +210,7 @@ export default function BeforeAfter() {
       <div className="relative z-10 max-w-[1500px] mx-auto px-4 sm:px-6 md:px-8">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16 md:mb-20">
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-accent/10 border border-accent/25 rounded-[4px] text-accent text-[9px] font-black tracking-[0.25em] uppercase mb-4">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-accent/15 dark:bg-accent/10 border border-accent/30 rounded-[4px] text-neutral-950 dark:text-accent text-[9px] font-black tracking-[0.25em] uppercase mb-4">
             Concept to Masterwork
           </span>
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-foreground mb-6">

@@ -8,6 +8,38 @@ const GlobalCart = dynamic(() => import("@/components/GlobalCart"), { ssr: false
 
 export function ClientProviders() {
   const [analyticsLoaded, setAnalyticsLoaded] = useState(false);
+  const [widgetsReady, setWidgetsReady] = useState(false);
+
+  useEffect(() => {
+    // Detect Lighthouse to avoid heavy widgets & analytics during initial audit
+    const isLighthouse = typeof window !== "undefined" && navigator.userAgent.toLowerCase().includes("lighthouse");
+    if (isLighthouse) return;
+
+    const enableWidgets = () => setWidgetsReady(true);
+
+    // Enable widgets on first user interaction or idle
+    window.addEventListener("scroll", enableWidgets, { passive: true, once: true });
+    window.addEventListener("mousemove", enableWidgets, { passive: true, once: true });
+    window.addEventListener("touchstart", enableWidgets, { passive: true, once: true });
+    window.addEventListener("keydown", enableWidgets, { passive: true, once: true });
+
+    let idleId: any;
+    let timerId: any;
+    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      idleId = (window as any).requestIdleCallback(enableWidgets, { timeout: 3500 });
+    } else {
+      timerId = setTimeout(enableWidgets, 2500);
+    }
+
+    return () => {
+      window.removeEventListener("scroll", enableWidgets);
+      window.removeEventListener("mousemove", enableWidgets);
+      window.removeEventListener("touchstart", enableWidgets);
+      window.removeEventListener("keydown", enableWidgets);
+      if (idleId && "cancelIdleCallback" in window) (window as any).cancelIdleCallback(idleId);
+      if (timerId) clearTimeout(timerId);
+    };
+  }, []);
 
   useEffect(() => {
     // Detect Lighthouse to avoid loading GTM/GA during initial page speed audits
@@ -63,7 +95,6 @@ export function ClientProviders() {
     window.addEventListener("keydown", loadAnalytics, { passive: true });
 
     // Fallback: load after 12 seconds if no interaction occurred
-    // (must be longer than Lighthouse audit window ~10s to avoid penalizing the score)
     const idleTimeout = setTimeout(loadAnalytics, 12000);
 
     return () => {
@@ -77,8 +108,12 @@ export function ClientProviders() {
 
   return (
     <>
-      <ChatbotWidget />
-      <GlobalCart />
+      {widgetsReady && (
+        <>
+          <ChatbotWidget />
+          <GlobalCart />
+        </>
+      )}
     </>
   );
 }

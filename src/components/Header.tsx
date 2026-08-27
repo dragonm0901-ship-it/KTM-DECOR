@@ -169,7 +169,7 @@ export default function Header() {
             <Link
               href="/shop"
               prefetch={false}
-              className={`flex items-center px-4 py-2 sm:px-6 md:py-3.5 bg-accent text-white text-[10px] sm:text-xs font-black tracking-widest uppercase rounded-[4px] hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 shrink-0 font-display ${menuOpen ? "hidden pointer-events-none" : ""}`}
+              className={`flex items-center px-4 py-2 sm:px-6 md:py-3.5 bg-accent text-neutral-950 text-[10px] sm:text-xs font-black tracking-widest uppercase rounded-[4px] hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 shrink-0 font-display ${menuOpen ? "hidden pointer-events-none" : ""}`}
             >
               Shop
             </Link>

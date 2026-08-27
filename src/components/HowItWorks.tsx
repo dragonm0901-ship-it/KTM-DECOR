@@ -108,7 +108,7 @@ export default function HowItWorks() {
           <div>
             <a
               href="/start-project"
-              className="inline-flex items-center gap-3 px-8 py-4 bg-accent text-white rounded-[4px] text-[10px] font-black tracking-widest uppercase hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 shadow-lg shadow-accent/20"
+              className="inline-flex items-center gap-3 px-8 py-4 bg-accent text-neutral-950 rounded-[4px] text-[10px] font-black tracking-widest uppercase hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 shadow-lg shadow-accent/20"
             >
               Start Your Project
               <Plus className="w-4 h-4" />
@@ -130,7 +130,7 @@ export default function HowItWorks() {
                 
                 {/* Top header containing Icon */}
                 <div className="mb-8">
-                  <div className="step-card-icon w-14 h-14 rounded-[4px] bg-accent/10 flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white group-hover:scale-110 transition-all duration-500">
+                  <div className="step-card-icon w-14 h-14 rounded-[4px] bg-accent/10 flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-neutral-950 group-hover:scale-110 transition-all duration-500">
                     <StepIcon className="w-6 h-6" />
                   </div>
                 </div>
@@ -143,7 +143,7 @@ export default function HowItWorks() {
                   </h3>
                   
                   {/* Step Description Paragraph (Upscaled Font Sizes) */}
-                  <p className="text-neutral-500 dark:text-neutral-400 text-base md:text-[17px] leading-relaxed font-medium">
+                  <p className="text-muted dark:text-neutral-300 text-base md:text-[17px] leading-relaxed font-medium">
                     {step.description}
                   </p>
                 </div>

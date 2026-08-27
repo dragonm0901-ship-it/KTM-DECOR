@@ -121,12 +121,12 @@ export default function Testimonials() {
       starClass = "text-accent";
       avatarBgClass = "bg-white text-black";
     } else if (t.theme === "orange") {
-      bgClass = "bg-accent border-accent hover:border-white/20";
-      textClass = "text-white font-medium";
-      nameClass = "text-white font-black";
-      roleClass = "text-white/80 font-semibold";
-      starClass = "text-white";
-      avatarBgClass = "bg-white text-black font-extrabold";
+      bgClass = "bg-accent border-accent hover:border-neutral-950/20";
+      textClass = "text-neutral-950 font-medium";
+      nameClass = "text-neutral-950 font-black";
+      roleClass = "text-neutral-900 font-semibold";
+      starClass = "text-neutral-950";
+      avatarBgClass = "bg-neutral-950 text-white font-extrabold";
     }
 
     return (

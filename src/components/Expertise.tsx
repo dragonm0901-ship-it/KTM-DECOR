@@ -97,7 +97,7 @@ export default function Expertise() {
 
       <div className="relative w-full px-4 sm:px-6 md:px-8 z-10 max-w-[1500px] mx-auto">
         <div className="flex flex-col items-center justify-center text-center max-w-2xl mx-auto mb-12 md:mb-16">
-          <span className="inline-flex items-center gap-2 px-3 py-1 text-[10px] font-black tracking-[0.25em] uppercase border border-accent/20 rounded-[4px] mb-3 text-accent bg-accent/5">
+          <span className="inline-flex items-center gap-2 px-3 py-1 text-[10px] font-black tracking-[0.25em] uppercase border border-accent/30 rounded-[4px] mb-3 text-neutral-950 dark:text-accent bg-accent/15 dark:bg-accent/5">
             Our Expertise
           </span>
           <h2 className="text-3xl md:text-5xl font-black tracking-tighter leading-tight text-foreground">

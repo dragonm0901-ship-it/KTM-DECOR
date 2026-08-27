@@ -46,31 +46,18 @@ export default function ChatbotWidget() {
     };
   }, []);
 
-  // Observe the documentElement class to hide during preloader active state
+  // Sync with preloader completion
   useEffect(() => {
     const checkLoading = () => {
-      const isPreloading = document.documentElement.classList.contains("is-loading");
+      const isPreloading = typeof document !== "undefined" && document.documentElement.classList.contains("is-loading");
       setIsLoaded(!isPreloading);
     };
 
-    // Run initial check
     checkLoading();
 
-    // Listen for attribute mutations on the HTML tag
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === "class") {
-          checkLoading();
-        }
-      });
-    });
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-
-    return () => observer.disconnect();
+    const handleDone = () => setIsLoaded(true);
+    window.addEventListener("preloaderComplete", handleDone);
+    return () => window.removeEventListener("preloaderComplete", handleDone);
   }, []);
 
   // Cycle loading messages when isLoading is true

@@ -8,7 +8,7 @@ export default function LocationMap() {
     <section className="relative w-full bg-background pb-24 md:pb-32 px-4 sm:px-6 md:px-8 z-20">
       <div className="w-full max-w-[1500px] mx-auto">
         <div className="flex flex-col items-center text-center mb-12 md:mb-16">
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-accent/10 border border-accent/25 rounded-[4px] text-accent text-[9px] font-black tracking-[0.25em] uppercase mb-4">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-accent/15 dark:bg-accent/10 border border-accent/30 rounded-[4px] text-neutral-950 dark:text-accent text-[9px] font-black tracking-[0.25em] uppercase mb-4">
             Find Us
           </span>
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-foreground mb-6">

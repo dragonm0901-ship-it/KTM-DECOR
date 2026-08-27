@@ -144,7 +144,7 @@ export default function Services() {
 
         {/* Top Center Header (Absolute on desktop, relative on mobile to prevent pushing cards out of viewport) */}
         <div className="relative left-0 translate-x-0 mb-8 w-full max-w-3xl px-6 select-text flex flex-col items-center text-center lg:absolute lg:top-8 lg:left-1/2 lg:-translate-x-1/2 lg:mb-0">
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 text-[10px] font-black tracking-[0.25em] uppercase border border-accent/20 rounded-[4px] mb-3 text-white bg-accent">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 text-[10px] font-black tracking-[0.25em] uppercase border border-accent/20 rounded-[4px] mb-3 text-neutral-950 bg-accent">
             The Craft
           </span>
           <h2 className="text-[clamp(1.75rem,4.5vw,3rem)] font-black leading-[1.1] tracking-tighter text-foreground">

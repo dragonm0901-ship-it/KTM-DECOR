@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowRight, Check } from "@/components/ui/solar-icons";
 import Image from "next/image";
 import Link from "next/link";
+import { HERO_LCP_DATA_URI } from "@/data/hero-lcp-base64";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -223,7 +224,7 @@ export default function Hero() {
             >
               {/* Status Badge */}
               <div className="inline-flex items-center gap-2.5 px-5 py-2 rounded-[4px] bg-accent border border-accent/10 mb-8 md:mb-10 shadow-2xl">
-                <span className="text-[11px] md:text-xs font-black tracking-widest uppercase text-white">
+                <span className="text-[11px] md:text-xs font-black tracking-widest uppercase text-neutral-950">
                   Trusted by 2000+ businesses in Nepal
                 </span>
               </div>
@@ -250,7 +251,7 @@ export default function Hero() {
                 <Link
                   href="/shop"
                   prefetch={false}
-                  className="group relative overflow-hidden flex items-center gap-3 px-10 py-5 bg-accent text-white rounded-[4px] text-[12px] font-black tracking-widest uppercase hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 shadow-[0_0_40px_rgba(254,145,76,0.4)]"
+                  className="group relative overflow-hidden flex items-center gap-3 px-10 py-5 bg-accent text-neutral-950 rounded-[4px] text-[12px] font-black tracking-widest uppercase hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 shadow-[0_0_40px_rgba(254,145,76,0.4)]"
                 >
                   <span className="animate-laser-sheen absolute inset-0 w-[50%] h-full bg-gradient-to-r from-transparent via-white/25 to-transparent pointer-events-none" />
                   <span>Explore Collection</span>
@@ -287,7 +288,7 @@ export default function Hero() {
                 ref={mobileBadgeRef}
                 className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-[4px] bg-accent border border-accent/15 mb-4"
               >
-                <span className="text-[9px] font-black tracking-wide text-white uppercase">
+                <span className="text-[9px] font-black tracking-wide text-neutral-950 uppercase">
                   Trusted by 2000+ businesses in Nepal
                 </span>
               </div>
@@ -316,7 +317,7 @@ export default function Hero() {
                 style={{ width: "52%", aspectRatio: "3/4" }}
               >
                 <img
-                  src="/hero-images/hero-lcp.webp"
+                  src={HERO_LCP_DATA_URI}
                   alt="Custom LED neon sign installation in Kathmandu cafe"
                   width={280}
                   height={373}
@@ -391,7 +392,7 @@ export default function Hero() {
                 <Link
                   href="/shop"
                   prefetch={false}
-                  className="group relative overflow-hidden flex items-center justify-center gap-3 px-9 py-4 bg-accent text-white rounded-[4px] text-[11px] font-black tracking-widest uppercase hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 shadow-lg shadow-accent/25 w-full sm:w-auto"
+                  className="group relative overflow-hidden flex items-center justify-center gap-3 px-9 py-4 bg-accent text-neutral-950 rounded-[4px] text-[11px] font-black tracking-widest uppercase hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 shadow-lg shadow-accent/25 w-full sm:w-auto"
                 >
                   <span className="animate-laser-sheen absolute inset-0 w-[50%] h-full bg-gradient-to-r from-transparent via-white/25 to-transparent pointer-events-none" />
                   <span>Explore Collection</span>

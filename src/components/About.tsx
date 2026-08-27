@@ -115,27 +115,27 @@ export default function About() {
           </div>
           
           <div className="space-y-8 lg:pr-8 xl:pr-16 lg:pl-8 w-full max-w-xl lg:max-w-2xl mx-auto lg:mx-0">
-            <span className="inline-block text-[10px] font-bold tracking-[0.3em] uppercase text-accent">The Vision</span>
+            <span className="inline-block text-[10px] font-black tracking-[0.3em] uppercase text-neutral-950 dark:text-accent">The Vision</span>
             <h2 className="reveal-text text-4xl md:text-6xl font-extrabold tracking-tighter leading-[1.1] text-foreground">
               Crafting Nepal&apos;s <br />
               <span className="text-accent">nightscape.</span>
             </h2>
             <div className="space-y-6 text-lg leading-relaxed">
-              <p className="reveal-text transition-colors duration-500 text-foreground/80 font-medium">
+              <p className="reveal-text transition-colors duration-500 text-foreground font-medium">
                 Founded by <span className={`transition-colors duration-500 font-bold ${
                   hoveredPart === 'content' ? 'text-accent' : 'text-foreground'
                 }`}>Kishor G.C.</span>, KTM DECOR began as a small experiment in a garage, fueled by a passion for light and design. We didn&apos;t just want to make signs; we wanted to create glowing landmarks.
               </p>
-              <p className="reveal-text transition-colors duration-500 text-foreground/80 font-medium">
+              <p className="reveal-text transition-colors duration-500 text-foreground font-medium">
                 Today, we are a team of dedicated artisans and engineers who believe that every brand has a story that deserves to be illuminated. From the buzzing streets of Thamel to corporate hubs, our work speaks for itself.
               </p>
             </div>
             <div className="pt-8 border-t border-border transition-colors duration-500">
                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
-                    <Quote className="w-5 h-5 text-accent" />
+                  <div className="w-12 h-12 rounded-full bg-accent/15 dark:bg-accent/10 flex items-center justify-center shrink-0">
+                    <Quote className="w-5 h-5 text-neutral-950 dark:text-accent" />
                   </div>
-                  <p className="text-sm italic transition-colors duration-500 text-foreground/85 font-medium">
+                  <p className="text-sm italic transition-colors duration-500 text-foreground font-medium">
                     &quot;We don&apos;t sell signs. We sell the feeling of walking into a space that truly belongs to you.&quot;
                   </p>
                </div>

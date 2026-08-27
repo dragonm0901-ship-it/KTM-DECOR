@@ -89,7 +89,6 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="google-site-verification" content="b98ok2OA0IqJbQ05BA7_R1S2W2RYHlz9273MWXF5whM" />
-        <link rel="preload" as="image" href="/hero-images/hero-lcp.webp" type="image/webp" fetchPriority="high" />
       </head>
       <body className={`${inter.variable} ${outfit.variable} font-sans`} suppressHydrationWarning>
         {/* Google Tag Manager (noscript) */}

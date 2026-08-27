@@ -1,7 +1,8 @@
 import { Metadata } from "next";
 import dynamic from "next/dynamic";
-import Preloader from "@/components/Preloader";
 import Hero from "@/components/Hero";
+
+const Preloader = dynamic(() => import("@/components/Preloader"));
 
 // Below-the-fold components: code-split to reduce initial JS bundle
 const Expertise = dynamic(() => import("@/components/Expertise"));
