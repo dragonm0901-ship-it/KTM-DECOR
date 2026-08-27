@@ -14,23 +14,25 @@ export default function About() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Text Reveal Animations
-      const revealTexts = document.querySelectorAll(".reveal-text");
-      revealTexts.forEach((text) => {
-        gsap.fromTo(text, 
-          { y: 100, opacity: 0 },
-          { 
-            y: 0, 
-            opacity: 1, 
-            duration: 1.2, 
-            ease: "power4.out",
-            scrollTrigger: {
-              trigger: text,
-              start: "top 85%",
+      // Text Reveal Animations (desktop only to prevent mobile CLS and invisible text)
+      if (window.innerWidth >= 1024) {
+        const revealTexts = document.querySelectorAll(".reveal-text");
+        revealTexts.forEach((text) => {
+          gsap.fromTo(text, 
+            { y: 60, opacity: 0 },
+            { 
+              y: 0, 
+              opacity: 1, 
+              duration: 1.0, 
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: text,
+                start: "top 88%",
+              }
             }
-          }
-        );
-      });
+          );
+        });
+      }
 
       // Stat Counters
       const stats = document.querySelectorAll(".stat-number");

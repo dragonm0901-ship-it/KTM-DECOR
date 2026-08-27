@@ -17,9 +17,71 @@ import { CalendarTab } from "./components/CalendarTab";
 import { StaffManagement } from "./components/StaffManagement";
 import { LogIn, KeyRound, Mail } from "./components/ui/solar-icons";
 
+const ALL_VALID_TABS = [
+  "overview",
+  "calendar",
+  "tasks",
+  "field-notes",
+  "staff-management",
+  "orders",
+  "order-progress",
+  "inventory",
+  "sales",
+  "expenses",
+  "purchase",
+  "quotation",
+  "products",
+  "bin"
+];
+
+const RESTRICTED_STAFF_TABS = ["sales", "expenses", "quotation", "products", "bin", "purchase"];
+
+const getInitialTab = (): string => {
+  if (typeof window !== "undefined") {
+    const hash = window.location.hash.replace(/^#\/?/, "").trim();
+    if (hash && ALL_VALID_TABS.includes(hash)) {
+      return hash;
+    }
+    const stored = localStorage.getItem("ktm_active_tab");
+    if (stored && ALL_VALID_TABS.includes(stored)) {
+      return stored;
+    }
+  }
+  return "overview";
+};
+
 export const App: React.FC = () => {
   const { user, token, init, login } = useStore();
-  const [currentTab, setCurrentTab] = useState("overview");
+  const [currentTab, setCurrentTab] = useState<string>(getInitialTab);
+
+  // Tab change handler that keeps URL hash and localStorage in sync
+  const handleSetCurrentTab = (tab: string) => {
+    if (ALL_VALID_TABS.includes(tab)) {
+      setCurrentTab(tab);
+      localStorage.setItem("ktm_active_tab", tab);
+      if (window.location.hash.replace(/^#\/?/, "") !== tab) {
+        window.location.hash = tab;
+      }
+    }
+  };
+
+  // Sync with browser back/forward and direct hash changes
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace(/^#\/?/, "").trim();
+      if (hash && ALL_VALID_TABS.includes(hash)) {
+        if (user && user.role !== "admin" && RESTRICTED_STAFF_TABS.includes(hash)) {
+          handleSetCurrentTab("overview");
+        } else {
+          setCurrentTab(hash);
+          localStorage.setItem("ktm_active_tab", hash);
+        }
+      }
+    };
+
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, [user]);
 
   // Login Form States
   const [email, setEmail] = useState("");
@@ -38,10 +100,14 @@ export const App: React.FC = () => {
   }, [token, init]);
 
   useEffect(() => {
-    if (user && user.role !== "admin") {
-      const restrictedTabs = ["sales", "expenses", "quotation", "products", "bin", "purchase"];
-      if (restrictedTabs.includes(currentTab)) {
-        setCurrentTab("overview");
+    if (user) {
+      if (user.role !== "admin" && RESTRICTED_STAFF_TABS.includes(currentTab)) {
+        handleSetCurrentTab("overview");
+      } else {
+        localStorage.setItem("ktm_active_tab", currentTab);
+        if (window.location.hash.replace(/^#\/?/, "") !== currentTab) {
+          window.location.hash = currentTab;
+        }
       }
     }
   }, [currentTab, user]);
@@ -176,10 +242,10 @@ export const App: React.FC = () => {
   }
 
   return (
-    <Layout currentTab={currentTab} setCurrentTab={setCurrentTab}>
+    <Layout currentTab={currentTab} setCurrentTab={handleSetCurrentTab}>
       {currentTab === "overview" && (
         <DashboardOverview
-          setCurrentTab={setCurrentTab}
+          setCurrentTab={handleSetCurrentTab}
           openTaskModal={() => {
             setEditingTask(null);
             setShowTaskModal(true);
@@ -199,7 +265,7 @@ export const App: React.FC = () => {
         />
       )}
       {currentTab === "calendar" && (
-        <CalendarTab setCurrentTab={setCurrentTab} />
+        <CalendarTab setCurrentTab={handleSetCurrentTab} />
       )}
       {currentTab === "field-notes" && (
         <FieldNotes

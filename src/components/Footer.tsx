@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "motion/react";
 import Link from "next/link";
 
 const Facebook = (props: any) => (
@@ -45,11 +44,7 @@ export default function Footer() {
         
         {/* Footer Card */}
         <div className="relative w-full z-30">
-          <motion.div 
-            initial={{ opacity: 0, y: -20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            viewport={{ once: true }}
+          <div 
             className="w-full max-w-[1500px] mx-auto bg-white/95 dark:bg-black/95 backdrop-blur-sm shadow-xl dark:shadow-2xl border border-gray-200 dark:border-white/10 rounded-[4px] overflow-hidden transition-colors duration-500"
           >
             {/* Top Half */}
@@ -172,7 +167,7 @@ export default function Footer() {
                 })}
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </div>

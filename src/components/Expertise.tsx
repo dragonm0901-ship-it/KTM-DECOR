@@ -60,45 +60,44 @@ export default function Expertise() {
   useGSAP(() => {
     if (typeof window === "undefined") return;
 
-    // 1. Reveal Grid Cards: Snappy, minimal and quick entrance animation (plays once)
-    ScrollTrigger.create({
-      trigger: ".expertise-grid-container",
-      start: "top 95%",
-      once: true,
-      onEnter: () => {
-        gsap.fromTo(
-          ".expertise-card",
-          {
-            y: 15,
-            opacity: 0
-          },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 0.3,
-            ease: "power2.out",
-            stagger: 0.03
-          }
-        );
-      }
-    });
+    if (window.innerWidth >= 1024) {
+      // 1. Reveal Grid Cards: Snappy, minimal entrance animation on desktop
+      ScrollTrigger.create({
+        trigger: ".expertise-grid-container",
+        start: "top 95%",
+        once: true,
+        onEnter: () => {
+          gsap.fromTo(
+            ".expertise-card",
+            { y: 15, opacity: 0.8 },
+            {
+              y: 0,
+              opacity: 1,
+              duration: 0.3,
+              ease: "power2.out",
+              stagger: 0.03
+            }
+          );
+        }
+      });
 
-    // 2. Real-time scroll speed skew/tilt effect (continuous)
-    const skewSetter = gsap.quickTo(".expertise-card", "skewY", { duration: 0.35, ease: "power3.out" });
-    const clamp = gsap.utils.clamp(-5, 5); // Limit to max 5 degrees skew for a premium look
+      // 2. Real-time scroll speed skew/tilt effect (desktop only)
+      const skewSetter = gsap.quickTo(".expertise-card", "skewY", { duration: 0.35, ease: "power3.out" });
+      const clamp = gsap.utils.clamp(-5, 5);
 
-    ScrollTrigger.create({
-      trigger: ".expertise-grid-container",
-      start: "top bottom",
-      end: "bottom top",
-      onUpdate: (self) => {
-        const velocity = self.getVelocity();
-        const skew = clamp(velocity / -600);
-        skewSetter(skew);
-      },
-      onLeave: () => skewSetter(0),
-      onLeaveBack: () => skewSetter(0)
-    });
+      ScrollTrigger.create({
+        trigger: ".expertise-grid-container",
+        start: "top bottom",
+        end: "bottom top",
+        onUpdate: (self) => {
+          const velocity = self.getVelocity();
+          const skew = clamp(velocity / -600);
+          skewSetter(skew);
+        },
+        onLeave: () => skewSetter(0),
+        onLeaveBack: () => skewSetter(0)
+      });
+    }
   }, { dependencies: [dbProducts], scope: containerRef });
 
   return (
@@ -131,7 +130,7 @@ export default function Expertise() {
             <Link
               key={item.id}
               href={`/shop/${item.id}`}
-              className="expertise-card group block opacity-0 cursor-pointer"
+              className="expertise-card group block cursor-pointer"
             >
               {/* Inner card container containing the image and hover details */}
               <div className="relative aspect-[4/5] rounded-[4px] border border-border bg-background overflow-hidden transition-all duration-500 group-hover:scale-[1.02] group-hover:shadow-2xl group-hover:shadow-accent/5">

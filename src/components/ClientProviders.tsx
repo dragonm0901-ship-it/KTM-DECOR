@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import ChatbotWidget from "@/components/ChatbotWidget";
-import GlobalCart from "@/components/GlobalCart";
+import dynamic from "next/dynamic";
+
+const ChatbotWidget = dynamic(() => import("@/components/ChatbotWidget"), { ssr: false });
+const GlobalCart = dynamic(() => import("@/components/GlobalCart"), { ssr: false });
 
 export function ClientProviders() {
   const [analyticsLoaded, setAnalyticsLoaded] = useState(false);

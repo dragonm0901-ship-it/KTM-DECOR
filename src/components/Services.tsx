@@ -118,10 +118,13 @@ export default function Services() {
         </div>
         {/* Subtle uniform overlay for contrast - bound to section limits */}
         <div className="absolute inset-0 z-0 bg-background/55 dark:bg-background/75 transition-colors duration-500 pointer-events-none" />
-        {/* Soft vertical fade transitions at the edges - bound to section limits for seamless blending */}
+        {/* Soft vertical fade transitions at the top and bottom edges - bound to section limits for seamless blending */}
         <div 
-          className="absolute inset-0 z-0 bg-[linear-gradient(to_bottom,_var(--background)_0%,_transparent_15%,_transparent_85%,_var(--card)_100%)] transition-colors duration-500 pointer-events-none" 
+          className="absolute inset-0 z-0 bg-[linear-gradient(to_bottom,_var(--background)_0%,_transparent_15%,_transparent_85%,_var(--background)_100%)] transition-colors duration-500 pointer-events-none" 
         />
+        {/* Additional top and bottom fade gradients for soft, seamless edge transition */}
+        <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-background to-transparent z-0 pointer-events-none transition-colors duration-500" />
+        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background to-transparent z-0 pointer-events-none transition-colors duration-500" />
 
         {/* Top Center Header (Absolute on desktop, relative on mobile to prevent pushing cards out of viewport) */}
         <div className="relative left-0 translate-x-0 mb-8 w-full max-w-3xl px-6 select-text flex flex-col items-center text-center lg:absolute lg:top-8 lg:left-1/2 lg:-translate-x-1/2 lg:mb-0">

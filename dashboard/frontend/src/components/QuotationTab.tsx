@@ -86,7 +86,7 @@ export const QuotationTab: React.FC = () => {
   const [voucherNo, setVoucherNo] = useState("");
   const [voucherDate, setVoucherDate] = useState("");
   const [amountInWords, setAmountInWords] = useState("");
-  const [remarks, setRemarks] = useState("Delivery And fitting charge is not included in this quotation.");
+  const [remarks, setRemarks] = useState("Delivery And fitting charges are not included in this quotation.");
   const [items, setItems] = useState<QuotationItem[]>([
     { description: "", size: "", quantity: 1, rate: 0, total: 0 }
   ]);
@@ -425,7 +425,7 @@ export const QuotationTab: React.FC = () => {
             // Pre-fill voucher date with Bikram Sambat date
             setVoucherDate(formatNepali(new Date()));
             setAmountInWords("");
-            setRemarks("Delivery And fitting charge is not included in this quotation.");
+            setRemarks("Delivery And fitting charges are not included in this quotation.");
             setItems([{ description: "", size: "", quantity: 1, rate: 0, total: 0 }]);
             setDiscount("0");
             setTax("0");
@@ -846,7 +846,7 @@ export const QuotationTab: React.FC = () => {
                       value={remarks}
                       onChange={(e) => setRemarks(e.target.value)}
                       className="w-full h-16 px-3 py-1.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs resize-none font-semibold text-muted"
-                      placeholder="e.g. Delivery and fitting charge is not included"
+                      placeholder="e.g. Delivery and fitting charges are not included"
                     />
                   </div>
                 </div>

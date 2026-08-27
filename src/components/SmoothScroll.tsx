@@ -1,10 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
 
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -36,39 +32,9 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
       });
     }
 
-    // Mobile-only text reveal animations
-    let ctx = gsap.context(() => {
-      if (isMobile) {
-        // Target only main section headings and their direct description paragraphs (excluding card details and shop lists)
-        const revealElements = Array.from(document.querySelectorAll(
-          "main section:not(#hero) h2, main section:not(#hero) h2 + p"
-        )).filter((el) => {
-          return !el.closest(".no-mobile-animate, .shop-card, .portfolio-card, .step-card, .service-card");
-        });
-
-        revealElements.forEach((el) => {
-          gsap.fromTo(el,
-            { y: 30, opacity: 0 },
-            {
-              y: 0,
-              opacity: 1,
-              duration: 0.8,
-              ease: "power2.out",
-              scrollTrigger: {
-                trigger: el,
-                start: "top 92%",
-                toggleActions: "play none none reverse",
-              }
-            }
-          );
-        });
-      }
-    });
-
     return () => {
       if (lenis) lenis.destroy();
       if (rafId !== null) cancelAnimationFrame(rafId);
-      ctx.revert();
     };
   }, []);
 

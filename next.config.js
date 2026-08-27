@@ -5,29 +5,32 @@ const nextConfig = {
   turbopack: {
     root: process.cwd(),
   },
+  compress: true,
   images: {
+    formats: ['image/avif', 'image/webp'],
     qualities: [50, 60],
+    minimumCacheTTL: 31536000,
   },
   experimental: {
-    optimizePackageImports: ["@solar-icons/react", "lucide-react"],
+    optimizePackageImports: ["@solar-icons/react", "lucide-react", "gsap", "@gsap/react", "motion"],
   },
   async headers() {
     return [
       {
-        source: "/logo/:path*",
+        source: "/(logo|images|products|hero-images)/:path*",
         headers: [
           {
             key: "Cache-Control",
-            value: "public, max-age=31536000, must-revalidate",
+            value: "public, max-age=31536000, immutable",
           },
         ],
       },
       {
-        source: "/images/:path*",
+        source: "/:path*\\.(svg|png|jpg|jpeg|webp|avif|woff2|woff)",
         headers: [
           {
             key: "Cache-Control",
-            value: "public, max-age=31536000, must-revalidate",
+            value: "public, max-age=31536000, immutable",
           },
         ],
       },

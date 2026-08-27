@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef } from "react";
-import Image from "next/image";
 import { MessageSquare, PenTool, Wrench, Truck, Plus, Settings } from "@/components/ui/solar-icons";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -92,22 +91,6 @@ export default function HowItWorks() {
 
   return (
     <section ref={containerRef} id="process" className="py-24 md:py-32 bg-background text-foreground relative overflow-hidden">
-      {/* Premium Laser-Process Background Image at 50% Opacity (Extended top and bottom to eliminate high-DPI subpixel rounding gaps) */}
-      <div className="absolute top-[-8px] bottom-[-8px] left-0 right-0 z-0 opacity-50 pointer-events-none select-none">
-        <Image
-          src="/images/laser-cnc.webp"
-          alt="KTM DECOR Laser Cutting"
-          fill
-          sizes="100vw"
-          className="object-cover object-center grayscale contrast-[1.1] transition-all duration-500"
-          quality={50}
-        />
-        {/* Theme-adaptive blend mask tailored to the bg-background section wrapper */}
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/75 to-background/45 dark:from-background dark:via-background/85 dark:to-background/55 transition-colors duration-500" />
-        {/* Top/bottom vertical fade to guarantee seamless color transition and block subpixel gaps */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background transition-colors duration-500" />
-      </div>
-
       <div className="max-w-[1500px] mx-auto px-4 sm:px-6 md:px-8 relative z-10">
         {/* Centered Header */}
         <div className="flex flex-col items-center justify-center text-center max-w-3xl mx-auto mb-16 md:mb-20">

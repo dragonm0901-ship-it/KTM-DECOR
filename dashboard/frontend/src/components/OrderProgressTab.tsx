@@ -201,7 +201,7 @@ export const OrderProgressTab: React.FC = () => {
                     return (
                       <div
                         key={order._id}
-                        className={`p-3.5 bg-card border rounded-md shadow-sm space-y-3 transition-all relative ${
+                        className={`p-3.5 bg-card border rounded-md shadow-sm space-y-3 transition-all relative min-w-0 overflow-hidden ${
                           order.stage === "paid"
                             ? "border-green-500/30 dark:border-green-500/20 bg-green-500/[0.01]"
                             : order.stage === "delivered"
@@ -284,8 +284,8 @@ export const OrderProgressTab: React.FC = () => {
                         )}
 
                         {/* Lead Assignee Selection */}
-                        <div className="flex items-center gap-2 text-[10px] bg-background border border-border/80 rounded p-1.5">
-                          <span className="text-muted font-bold uppercase text-[8px] tracking-wide">Lead:</span>
+                        <div className="flex items-center gap-1.5 bg-background border border-border/80 rounded px-2 py-1 min-w-0 w-full overflow-hidden">
+                          <span className="text-muted font-bold uppercase text-[8px] tracking-wider shrink-0">Lead:</span>
                           <select
                             value={order.assignee?._id || ""}
                             onChange={async (e) => {
@@ -300,7 +300,7 @@ export const OrderProgressTab: React.FC = () => {
                                 setUpdatingId(null);
                               }
                             }}
-                            className="px-1.5 py-0.5 border border-border rounded bg-card focus:outline-none text-[9px] font-bold flex-1 cursor-pointer"
+                            className="px-1.5 py-0.5 border border-border rounded bg-card focus:outline-none focus:ring-1 focus:ring-accent text-[8.5px] font-semibold flex-1 min-w-0 w-full truncate cursor-pointer text-foreground"
                           >
                             <option value="">Unassigned</option>
                             {users

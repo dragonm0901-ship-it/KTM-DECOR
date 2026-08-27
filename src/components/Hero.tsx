@@ -206,6 +206,7 @@ export default function Hero() {
                       className="object-cover" 
                       sizes={`(max-width: 1024px) 30vw, ${card.widthVal}`}
                       priority={card.id === 0}
+                      fetchPriority={card.id === 0 ? "high" : "low"}
                       quality={card.id === 0 ? 60 : 50}
                     />
                     <div className="absolute inset-0 bg-black/20" />
@@ -315,14 +316,14 @@ export default function Hero() {
               ref={mobileCollageRef} 
               className="order-2 relative min-h-[320px] md:min-h-[500px]"
             >
-              {/* Main large card */}
-              <div className="hero-mobile-secondary absolute top-0 right-[-5%] w-[63%] aspect-[3/4] rounded-[4px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.15)] border border-neutral-200/50 z-10 opacity-0">
+              {/* Main large card (LCP Element - paints instantly on first frame) */}
+              <div className="absolute top-0 right-[-5%] w-[63%] aspect-[3/4] rounded-[4px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.15)] border border-neutral-200/50 z-10 opacity-100">
                 <Image
                   src="/products/product_5_main.png"
                   alt="Custom LED neon sign installation in Kathmandu cafe"
                   fill
                   className="object-cover"
-                  sizes="(max-width: 768px) 40vw, 60vw"
+                  sizes="(max-width: 768px) 63vw, 400px"
                   priority
                   fetchPriority="high"
                   quality={60}
@@ -330,37 +331,39 @@ export default function Hero() {
               </div>
 
               {/* Secondary floating card - left */}
-              <div className="hero-mobile-secondary absolute bottom-4 left-[8%] w-[50%] aspect-[4/3] rounded-[4px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-neutral-200/50 z-20 opacity-0">
+              <div className="hero-mobile-secondary absolute bottom-4 left-[8%] w-[50%] aspect-[4/3] rounded-[4px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-neutral-200/50 z-20">
                 <Image
                   src="/hero-images/hero2.webp"
                   alt="Crafting 3D acrylic LED light board in Nepal"
                   fill
                   className="object-cover"
-                  sizes="50vw"
+                  sizes="(max-width: 768px) 50vw, 300px"
+                  loading="lazy"
                   quality={50}
                 />
               </div>
 
               {/* Small accent card - top left */}
-              <div className="hero-mobile-secondary absolute top-[15%] left-[-2%] w-[35%] aspect-square rounded-[4px] overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.1)] border border-neutral-200/50 z-30 opacity-0">
+              <div className="hero-mobile-secondary absolute top-[15%] left-[-2%] w-[35%] aspect-square rounded-[4px] overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.1)] border border-neutral-200/50 z-30">
                 <Image
                   src="/products/product_1_main.png"
                   alt="Illuminated custom architectural decor Nepal"
                   fill
                   className="object-cover"
-                  sizes="35vw"
+                  sizes="(max-width: 768px) 35vw, 200px"
+                  loading="lazy"
                   quality={50}
                 />
               </div>
 
               {/* Floating data badge */}
-              <div className="hero-mobile-secondary absolute top-[8%] left-[20%] z-40 bg-card rounded-[2px] shadow-[0_6px_15px_rgba(0,0,0,0.15)] border border-border px-3 py-2 text-foreground opacity-0">
+              <div className="hero-mobile-secondary absolute top-[8%] left-[20%] z-40 bg-card rounded-[2px] shadow-[0_6px_15px_rgba(0,0,0,0.15)] border border-border px-3 py-2 text-foreground">
                 <p className="text-[7px] font-bold text-muted uppercase tracking-wider mb-0">Projects Delivered</p>
                 <p className="text-sm font-black tracking-tight text-foreground">500+</p>
               </div>
 
               {/* Floating rating badge */}
-              <div className="hero-mobile-secondary absolute bottom-[20%] left-[62%] z-40 bg-card rounded-[2px] shadow-[0_6px_15px_rgba(0,0,0,0.15)] border border-border px-3 py-2 text-foreground opacity-0">
+              <div className="hero-mobile-secondary absolute bottom-[20%] left-[62%] z-40 bg-card rounded-[2px] shadow-[0_6px_15px_rgba(0,0,0,0.15)] border border-border px-3 py-2 text-foreground">
                 <p className="text-[7px] font-bold text-muted uppercase tracking-wider mb-0">Client Rating</p>
                 <div className="flex items-center gap-1">
                   <span className="text-sm font-black tracking-tight text-foreground">4.9</span>
