@@ -89,30 +89,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="google-site-verification" content="b98ok2OA0IqJbQ05BA7_R1S2W2RYHlz9273MWXF5whM" />
-        <link rel="preload" as="image" href="/hero-images/hero-lcp.webp" type="image/webp" media="(max-width: 1023px)" fetchPriority="high" />
-        {/* Analytics loaded dynamically on user interaction in ClientProviders */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                const removeAttr = () => {
-                  if (document.body && document.body.hasAttribute('data-demoway-document-id')) {
-                    document.body.removeAttribute('data-demoway-document-id');
-                  }
-                };
-                removeAttr();
-                const observer = new MutationObserver((mutations) => {
-                  for (const mutation of mutations) {
-                    if (mutation.type === 'attributes' && mutation.attributeName === 'data-demoway-document-id') {
-                      removeAttr();
-                    }
-                  }
-                });
-                observer.observe(document.documentElement, { attributes: true, subtree: true });
-              })();
-            `,
-          }}
-        />
+        <link rel="preload" as="image" href="/hero-images/hero-lcp.webp" type="image/webp" fetchPriority="high" />
       </head>
       <body className={`${inter.variable} ${outfit.variable} font-sans`} suppressHydrationWarning>
         {/* Google Tag Manager (noscript) */}

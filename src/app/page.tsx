@@ -133,14 +133,14 @@ export default function Home() {
       <Preloader />
       <main>
         <Hero />
-        <Expertise />
-        <Services />
-        <HowItWorks />
-        <BeforeAfter />
-        <About />
-        <Testimonials />
-        <CtaFaq />
-        <LocationMap />
+        <div className="defer-render"><Expertise /></div>
+        <div className="defer-render"><Services /></div>
+        <div className="defer-render"><HowItWorks /></div>
+        <div className="defer-render"><BeforeAfter /></div>
+        <div className="defer-render"><About /></div>
+        <div className="defer-render"><Testimonials /></div>
+        <div className="defer-render"><CtaFaq /></div>
+        <div className="defer-render"><LocationMap /></div>
       </main>
     </>
   );

@@ -296,6 +296,12 @@ body {
   }
 }
 
+/* ─── Defer Rendering of Below-the-fold Sections ─── */
+.defer-render {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 800px;
+}
+
 /* ─── Smooth Link Underline ─────────────────────────────── */
 .link-underline {
   position: relative;

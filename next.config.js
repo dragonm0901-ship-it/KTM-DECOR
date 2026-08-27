@@ -12,6 +12,7 @@ const nextConfig = {
     minimumCacheTTL: 31536000,
   },
   experimental: {
+    optimizeCss: true,
     optimizePackageImports: ["@solar-icons/react", "lucide-react", "gsap", "@gsap/react", "motion"],
   },
   async headers() {

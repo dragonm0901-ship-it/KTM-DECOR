@@ -132,14 +132,6 @@ export default function Hero() {
           { opacity: 1, y: 0, duration: 0.8, ease: "power3.out", delay: 0.1 }
         );
       });
-
-      // ── MOBILE: LCP is static for instant paint. Fast animation on secondary decorative elements. ──
-      mm.add("(max-width: 1023px)", () => {
-        gsap.fromTo(".hero-mobile-secondary",
-          { y: 15, opacity: 0.7 },
-          { y: 0, opacity: 1, duration: 0.4, stagger: 0.05, ease: "power2.out" }
-        );
-      });
     };
 
     if (typeof window !== "undefined" && (window as any).__PRELOADER_ACTIVE__) {
@@ -303,7 +295,7 @@ export default function Hero() {
               {/* Main Headline */}
               <h1
                 ref={mobileTitleRef}
-                className="text-[clamp(1.75rem,5.5vw,3rem)] font-extrabold leading-[0.95] tracking-[-0.03em] mb-4 text-foreground drop-shadow-[0_2px_8px_rgba(0,0,0,0.08)] dark:drop-shadow-[0_4px_16px_rgba(0,0,0,0.75)] w-full"
+                className="text-[clamp(2.2rem,6.8vw,3.5rem)] font-black leading-[1.02] tracking-[-0.03em] mb-4 text-foreground drop-shadow-[0_2px_8px_rgba(0,0,0,0.08)] dark:drop-shadow-[0_4px_16px_rgba(0,0,0,0.75)] w-full"
               >
                 <span className="sr-only">KTM DECOR | Custom LED Neon Signs & 3D Signboards in Nepal</span>
                 <span className="block">Your space,</span>
@@ -316,10 +308,13 @@ export default function Hero() {
             {/* ── Image Collage (Mobile Restored) ── */}
             <div 
               ref={mobileCollageRef} 
-              className="order-2 relative min-h-[320px] md:min-h-[500px]"
+              className="order-2 relative min-h-[300px] md:min-h-[480px]"
             >
               {/* Main large card (LCP Element - paints instantly on first frame) */}
-              <div className="absolute top-0 right-[-5%] w-[63%] aspect-[3/4] rounded-[4px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.15)] border border-neutral-200/50 z-10 opacity-100">
+              <div 
+                className="absolute top-0 right-[-2%] w-[52%] aspect-[3/4] rounded-[4px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.15)] border border-neutral-200/50 z-10 opacity-100"
+                style={{ width: "52%", aspectRatio: "3/4" }}
+              >
                 <img
                   src="/hero-images/hero-lcp.webp"
                   alt="Custom LED neon sign installation in Kathmandu cafe"
@@ -327,36 +322,45 @@ export default function Hero() {
                   height={373}
                   loading="eager"
                   fetchPriority="high"
-                  decoding="async"
+                  decoding="sync"
                   className="w-full h-full object-cover"
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
               </div>
 
               {/* Secondary floating card - left */}
-              <div className="hero-mobile-secondary absolute bottom-4 left-[8%] w-[50%] aspect-[4/3] rounded-[4px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-neutral-200/50 z-20">
-                <Image
-                  src="/hero-images/hero2.webp"
+              <div 
+                className="absolute bottom-4 left-[8%] w-[50%] aspect-[4/3] rounded-[4px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-neutral-200/50 z-20"
+                style={{ width: "50%", aspectRatio: "4/3" }}
+              >
+                <img
+                  src="/hero-images/hero-accent-2.webp"
                   alt="Crafting 3D acrylic LED light board in Nepal"
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 50vw, 300px"
+                  width={300}
+                  height={225}
                   loading="lazy"
                   fetchPriority="low"
-                  quality={50}
+                  decoding="async"
+                  className="w-full h-full object-cover"
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
               </div>
 
               {/* Small accent card - top left */}
-              <div className="hero-mobile-secondary absolute top-[15%] left-[-2%] w-[35%] aspect-square rounded-[4px] overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.1)] border border-neutral-200/50 z-30">
-                <Image
-                  src="/products/product_1_main.png"
+              <div 
+                className="absolute top-[15%] left-[-2%] w-[35%] aspect-square rounded-[4px] overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.1)] border border-neutral-200/50 z-30"
+                style={{ width: "35%", aspectRatio: "1/1" }}
+              >
+                <img
+                  src="/hero-images/hero-accent-1.webp"
                   alt="Illuminated custom architectural decor Nepal"
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 35vw, 200px"
+                  width={200}
+                  height={200}
                   loading="lazy"
                   fetchPriority="low"
-                  quality={50}
+                  decoding="async"
+                  className="w-full h-full object-cover"
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
               </div>
 
