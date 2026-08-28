@@ -57,4 +57,7 @@ const MarketingCampaignSchema = new mongoose.Schema(
   }
 );
 
+MarketingCampaignSchema.index({ deleted: 1, scheduledDate: -1 });
+MarketingCampaignSchema.index({ status: 1 });
+
 export default mongoose.model("MarketingCampaign", MarketingCampaignSchema);

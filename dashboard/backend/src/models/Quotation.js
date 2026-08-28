@@ -81,5 +81,9 @@ const QuotationSchema = new mongoose.Schema(
   }
 );
 
+QuotationSchema.index({ date: -1 });
+QuotationSchema.index({ status: 1, createdAt: -1 });
+QuotationSchema.index({ clientName: 1 });
+
 const Quotation = mongoose.model("Quotation", QuotationSchema);
 export default Quotation;

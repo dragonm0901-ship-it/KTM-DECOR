@@ -621,7 +621,7 @@ app.get("/api/auth/me", protect, async (req, res) => {
 // Get all staff members (for task assignees selection)
 app.get("/api/auth/users", protect, async (req, res) => {
   try {
-    const users = await User.find({}).select("name email role baseSalary");
+    const users = await User.find({}).select("name email role baseSalary").lean();
     res.json(users);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -637,7 +637,7 @@ app.get("/api/tasks", protect, async (req, res) => {
     if (req.user.role !== "admin") {
       if (req.user.email === SHARED_STAFF_EMAIL) {
         // Shared staff login: can view all staff-assigned tasks
-        const staffUsers = await User.find({ role: "staff" }).select("_id");
+        const staffUsers = await User.find({ role: "staff" }).select("_id").lean();
         const staffIds = staffUsers.map((u) => u._id);
         query = { assignee: { $in: [req.user._id, ...staffIds] }, deleted: { $ne: true } };
       } else {
@@ -647,7 +647,8 @@ app.get("/api/tasks", protect, async (req, res) => {
     const tasks = await Task.find(query)
       .populate("assignee", "name email role")
       .populate("createdBy", "name role")
-      .sort({ pinned: -1, createdAt: -1 });
+      .sort({ pinned: -1, createdAt: -1 })
+      .lean();
     res.json(tasks);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -826,7 +827,7 @@ app.get("/api/notifications", protect, async (req, res) => {
   try {
     let query = {};
     if (req.user.email === SHARED_STAFF_EMAIL) {
-      const staffUsers = await User.find({ role: "staff" }).select("_id");
+      const staffUsers = await User.find({ role: "staff" }).select("_id").lean();
       const staffIds = staffUsers.map((u) => u._id);
       query = {
         $or: [
@@ -840,7 +841,7 @@ app.get("/api/notifications", protect, async (req, res) => {
         $or: [{ recipient: req.user._id }, { recipient: null }]
       };
     }
-    const notifs = await Notification.find(query).sort({ createdAt: -1 });
+    const notifs = await Notification.find(query).sort({ createdAt: -1 }).lean();
     res.json(notifs);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -899,7 +900,8 @@ app.get("/api/campaigns", protect, async (req, res) => {
   try {
     const fieldNotes = await FieldNote.find({ deleted: { $ne: true } })
       .populate("createdBy", "name role")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
     res.json(fieldNotes);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -1015,14 +1017,17 @@ app.get("/api/bin", protect, admin, async (req, res) => {
   try {
     const deletedTasks = await Task.find({ deleted: true })
       .populate("assignee", "name email role")
-      .populate("createdBy", "name role");
+      .populate("createdBy", "name role")
+      .lean();
       
     const deletedCampaigns = await FieldNote.find({ deleted: true })
-      .populate("createdBy", "name role");
+      .populate("createdBy", "name role")
+      .lean();
 
     const deletedOrders = await Order.find({ deleted: true })
       .populate("assignee", "name email role")
-      .populate("createdBy", "name role");
+      .populate("createdBy", "name role")
+      .lean();
 
     res.json({
       tasks: deletedTasks,
@@ -1129,7 +1134,7 @@ app.delete("/api/bin/:type/:id/force", protect, admin, async (req, res) => {
 // Get all products (Public)
 app.get("/api/products", async (req, res) => {
   try {
-    const products = await Product.find({}).sort({ createdAt: -1 });
+    const products = await Product.find({}).sort({ createdAt: -1 }).lean();
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -1139,7 +1144,7 @@ app.get("/api/products", async (req, res) => {
 // Get a single product by ID (Public)
 app.get("/api/products/:id", async (req, res) => {
   try {
-    const product = await Product.findOne({ id: req.params.id });
+    const product = await Product.findOne({ id: req.params.id }).lean();
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
@@ -1264,7 +1269,8 @@ app.get("/api/orders", protect, async (req, res) => {
     const orders = await Order.find({ deleted: { $ne: true } })
       .populate("createdBy", "name role")
       .populate("assignee", "name email role")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
     res.json(orders);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -1573,7 +1579,7 @@ app.delete("/api/orders/:id", protect, admin, async (req, res) => {
 // ==========================================
 app.get("/api/sales", protect, admin, async (req, res) => {
   try {
-    const sales = await Sale.find({}).populate("createdBy", "name role").populate("orderId").sort({ date: -1 });
+    const sales = await Sale.find({}).populate("createdBy", "name role").populate("orderId").sort({ date: -1 }).lean();
     res.json(sales);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -1625,7 +1631,7 @@ app.delete("/api/sales/:id", protect, admin, async (req, res) => {
 // ==========================================
 app.get("/api/expenses", protect, admin, async (req, res) => {
   try {
-    const expenses = await Expense.find({}).populate("createdBy", "name role").sort({ date: -1 });
+    const expenses = await Expense.find({}).populate("createdBy", "name role").sort({ date: -1 }).lean();
     res.json(expenses);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -1703,7 +1709,7 @@ app.delete("/api/expenses/:id", protect, admin, async (req, res) => {
 // ==========================================
 app.get("/api/purchases", protect, admin, async (req, res) => {
   try {
-    const purchases = await Purchase.find({}).populate("createdBy", "name role").sort({ date: -1 });
+    const purchases = await Purchase.find({}).populate("createdBy", "name role").sort({ date: -1 }).lean();
     res.json(purchases);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -1783,7 +1789,7 @@ app.delete("/api/purchases/:id", protect, admin, async (req, res) => {
 // ==========================================
 app.get("/api/inventory", protect, async (req, res) => {
   try {
-    const items = await InventoryItem.find({}).populate("createdBy", "name role").sort({ name: 1 });
+    const items = await InventoryItem.find({}).populate("createdBy", "name role").sort({ name: 1 }).lean();
     res.json(items);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -1857,7 +1863,7 @@ app.delete("/api/inventory/:id", protect, admin, async (req, res) => {
 // ==========================================
 app.get("/api/quotations", protect, admin, async (req, res) => {
   try {
-    const quotations = await Quotation.find({}).populate("createdBy", "name role").sort({ date: -1 });
+    const quotations = await Quotation.find({}).populate("createdBy", "name role").sort({ date: -1 }).lean();
     res.json(quotations);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -1947,7 +1953,8 @@ app.get("/api/activities", protect, async (req, res) => {
     const activities = await ActivityLog.find({})
       .populate("user", "name email role")
       .sort({ createdAt: -1 })
-      .limit(30);
+      .limit(30)
+      .lean();
     res.json(activities);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -1957,7 +1964,7 @@ app.get("/api/activities", protect, async (req, res) => {
 // Quick-Notes support
 app.get("/api/notes", protect, async (req, res) => {
   try {
-    const notes = await QuickNote.find({}).populate("createdBy", "name role").sort({ createdAt: -1 });
+    const notes = await QuickNote.find({}).populate("createdBy", "name role").sort({ createdAt: -1 }).lean();
     res.json(notes);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -2245,7 +2252,8 @@ app.get("/api/attendance", protect, async (req, res) => {
 
     const logs = await Attendance.find(query)
       .populate("user", "name email role baseSalary")
-      .sort({ date: 1 });
+      .sort({ date: 1 })
+      .lean();
       
     res.json(logs);
   } catch (error) {
@@ -2402,7 +2410,8 @@ app.get("/api/salaries", protect, async (req, res) => {
     const salaries = await Salary.find(query)
       .populate("user", "name email role baseSalary")
       .populate("createdBy", "name role")
-      .sort({ year: -1, month: -1 });
+      .sort({ year: -1, month: -1 })
+      .lean();
     res.json(salaries);
   } catch (error) {
     res.status(500).json({ message: error.message });

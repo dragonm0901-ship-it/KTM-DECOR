@@ -39,6 +39,7 @@ const InventoryItemSchema = new mongoose.Schema(
 );
 
 InventoryItemSchema.index({ name: 1 });
+InventoryItemSchema.index({ category: 1 });
 
 const InventoryItem = mongoose.model("InventoryItem", InventoryItemSchema);
 export default InventoryItem;
