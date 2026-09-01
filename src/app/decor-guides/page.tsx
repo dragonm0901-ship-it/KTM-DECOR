@@ -4,16 +4,24 @@ import { ArrowRight, BookOpen, Clock, Sparkles, Tag } from "lucide-react";
 import { GUIDES } from "@/data/guides-data";
 
 export const metadata: Metadata = {
-  title: "Signage & Decor Buying Guides Nepal | KTM DECOR",
+  title: "Nepal Signage & LED Neon Buying Guides (2026 Price Lists) | KTM DECOR",
   description:
-    "Explore pricing guides, design recommendations, material comparisons, and market data for custom LED neon signs, 3D acrylic light boards, address nameplates, and home decor items in Kathmandu, Nepal.",
+    "In-depth pricing guides, design advice, and material comparisons for custom LED neon lights, 3D acrylic signage boards, and nameplates in Kathmandu, Nepal.",
+  keywords: [
+    "led neon light price in nepal",
+    "neon light price in nepal daraz",
+    "light board price in nepal",
+    "3d acrylic board price in nepal",
+    "name plate design in nepal with price",
+    "home decor kathmandu online"
+  ],
   alternates: {
     canonical: "/decor-guides",
   },
   openGraph: {
-    title: "Signage & Decor Buying Guides Nepal | KTM DECOR",
+    title: "Nepal Signage & LED Neon Buying Guides (2026 Price Lists) | KTM DECOR",
     description:
-      "Explore pricing guides, design recommendations, material comparisons, and market data for custom LED neon signs, 3D acrylic light boards, address nameplates, and home decor items in Kathmandu, Nepal.",
+      "In-depth pricing guides, design advice, and material comparisons for custom LED neon lights, 3D acrylic signage boards, and nameplates in Kathmandu, Nepal.",
     url: "https://www.decorktm.com/decor-guides",
     type: "website",
     siteName: "KTM DECOR",
@@ -22,22 +30,75 @@ export const metadata: Metadata = {
         url: "/images/ktm-decor-og.png",
         width: 1200,
         height: 1200,
-        alt: "Signage & Decor Buying Guides Nepal | KTM DECOR",
+        alt: "Nepal Signage & LED Neon Buying Guides | KTM DECOR",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Signage & Decor Buying Guides Nepal | KTM DECOR",
+    title: "Nepal Signage & LED Neon Buying Guides (2026 Price Lists) | KTM DECOR",
     description:
-      "Explore pricing guides, design recommendations, material comparisons, and market data for custom LED neon signs, 3D acrylic light boards, address nameplates, and home decor items in Kathmandu, Nepal.",
+      "In-depth pricing guides, design advice, and material comparisons for custom LED neon lights, 3D acrylic signage boards, and nameplates in Kathmandu, Nepal.",
     images: ["/images/ktm-decor-og.png"],
   },
 };
 
 export default function GuidesIndexPage() {
+  const guidesSchema = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "CollectionPage",
+        "@id": "https://www.decorktm.com/decor-guides#webpage",
+        "url": "https://www.decorktm.com/decor-guides",
+        "name": "Nepal Signage & Decor Resource Hub",
+        "description": "Comprehensive buying guides, pricing breakdowns, and material specifications for custom signage in Nepal.",
+        "isPartOf": {
+          "@type": "WebSite",
+          "@id": "https://www.decorktm.com/#website",
+          "name": "KTM DECOR",
+          "url": "https://www.decorktm.com"
+        }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": "https://www.decorktm.com/decor-guides#breadcrumb",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://www.decorktm.com"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Decor Guides",
+            "item": "https://www.decorktm.com/decor-guides"
+          }
+        ]
+      },
+      {
+        "@type": "ItemList",
+        "@id": "https://www.decorktm.com/decor-guides#itemlist",
+        "name": "Signage & Decor Buying Guides",
+        "itemListElement": GUIDES.map((guide, index) => ({
+          "@type": "ListItem",
+          "position": index + 1,
+          "url": `https://www.decorktm.com/decor-guides/${guide.slug}`,
+          "name": guide.title
+        }))
+      }
+    ]
+  };
+
   return (
-    <main className="min-h-screen bg-background text-foreground pt-32 pb-24 font-sans">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(guidesSchema) }}
+      />
+      <main className="min-h-screen bg-background text-foreground pt-32 pb-24 font-sans">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8">
         
         {/* Breadcrumb */}
@@ -130,5 +191,6 @@ export default function GuidesIndexPage() {
 
       </div>
     </main>
+    </>
   );
 }

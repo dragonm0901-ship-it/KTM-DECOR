@@ -1,7 +1,12 @@
+import { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata = {
-  title: "Cookie Policy — KTM DECOR",
+export const metadata: Metadata = {
+  title: "Cookie Policy | KTM DECOR",
+  description: "Read the cookie policy for KTM DECOR to understand how we use cookies and improve user experience.",
+  alternates: {
+    canonical: "/cookie-policy",
+  },
 };
 
 export default function CookiePolicy() {

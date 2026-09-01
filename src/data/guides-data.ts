@@ -34,7 +34,7 @@ export const GUIDES: GuideItem[] = [
     slug: "neon-lights-price-nepal",
     title: "LED Neon Light Price in Nepal (2026 Buying & Cost Guide)",
     metaTitle: "LED Neon Light Price in Nepal (2026 Price List) | KTM DECOR",
-    metaDescription: "Looking for neon light prices in Nepal or Daraz? Check complete pricing for custom LED neon signs, strip lights, room decor, and business neon logos in Kathmandu.",
+    metaDescription: "Looking for neon light prices in Nepal or Daraz? Check complete 2026 pricing for custom LED neon signs, strip lights, and business logos in Kathmandu. 1-Yr Warranty.",
     keywords: [
       "Neon light price in nepal daraz",
       "Led neon light price in nepal",
@@ -108,8 +108,8 @@ export const GUIDES: GuideItem[] = [
   {
     slug: "led-light-board-price-nepal",
     title: "Light Board & LED Display Board Price in Nepal (2026 Guide)",
-    metaTitle: "Light Board & LED Display Board Price in Nepal | KTM DECOR",
-    metaDescription: "Comprehensive guide to 2D light board prices, outdoor LED display boards, digital screens, and illuminated store signboards in Kathmandu, Nepal.",
+    metaTitle: "LED Display Board & 2D Light Board Price in Nepal (2026) | KTM DECOR",
+    metaDescription: "2026 Guide to 2D acrylic light board prices, outdoor LED display boards, digital screens, and store signboards in Kathmandu, Nepal. Direct workshop estimates.",
     keywords: [
       "Light board price",
       "Led light board",
@@ -173,8 +173,8 @@ export const GUIDES: GuideItem[] = [
   {
     slug: "home-decor-kathmandu-online",
     title: "Best Home Decor in Kathmandu: Wholesale & Online Shopping Guide",
-    metaTitle: "Home Decor Kathmandu: Wholesale & Online Shopping in Nepal",
-    metaDescription: "Looking for wholesale home decor in Kathmandu or luxury home decoration items in Nepal? Explore trendy acrylic table lamps, custom clocks, and interior decor online.",
+    metaTitle: "Home Decor Kathmandu: Online Shopping & Wholesale Nepal (2026)",
+    metaDescription: "Buy wholesale home decor & custom acrylic lamps in Kathmandu. Handcrafted wall clocks, bedside lamps & entrance nameplates with fast delivery across Nepal.",
     keywords: [
       "Wholesale home decor kathmandu",
       "Home decor kathmandu online shopping",
@@ -228,8 +228,8 @@ export const GUIDES: GuideItem[] = [
   {
     slug: "name-plate-design-price-nepal",
     title: "Name Plate Design in Nepal with Price (Wooden, Acrylic & Table)",
-    metaTitle: "Name Plate Design in Nepal with Price (Wooden & Acrylic)",
-    metaDescription: "Explore modern, simple, and luxury nameplate designs for home and office entrances in Nepal. Compare prices for wooden, brass, acrylic, and table nameplates.",
+    metaTitle: "Name Plate Design in Nepal with Price List (2026) | KTM DECOR",
+    metaDescription: "Explore modern, simple & luxury nameplate designs for home and office entrances in Nepal. Compare prices for wooden, acrylic, brass, and table nameplates in KTM.",
     keywords: [
       "Name plate design in nepal with price",
       "Simple name plate design in nepal",
@@ -276,8 +276,8 @@ export const GUIDES: GuideItem[] = [
   {
     slug: "business-signboard-design-nepal",
     title: "Business Sign Board Design & 3D Acrylic Lettering in Nepal",
-    metaTitle: "Business Sign Board Design & 3D Acrylic Price in Nepal",
-    metaDescription: "Planning a 3D acrylic signboard for your shop or business in Nepal? Check design options, cost per sq ft, 3D lettering prices, and local Kathmandu installation.",
+    metaTitle: "3D Acrylic Letter Board & Sign Board Price in Nepal (2026)",
+    metaDescription: "Design 3D acrylic signboards and halo-lit storefront letters in Nepal. Check cost per sq ft, 3D lettering prices, and local Kathmandu workshop installation.",
     keywords: [
       "Business board design nepal price",
       "Best business board design nepal",
@@ -333,8 +333,8 @@ export const GUIDES: GuideItem[] = [
   {
     slug: "engineered-wood-flooring-nepal",
     title: "Wooden Board Design & Parquet Wood Decor in Nepal",
-    metaTitle: "Engineered Wood Flooring & Parquet Wood Decor Nepal",
-    metaDescription: "Guide to modern wooden board design, wall paneling, engineered wood flooring, and parquet installations for homes and offices in Kathmandu, Nepal.",
+    metaTitle: "Engineered Wood Flooring & Wooden Board Design in Nepal (2026)",
+    metaDescription: "Comprehensive guide to engineered wood flooring, parquet wood decor, and laser-engraved wooden wall paneling for homes and offices in Kathmandu, Nepal.",
     keywords: [
       "Wooden board design in nepal online",
       "Modern wooden board design in nepal",

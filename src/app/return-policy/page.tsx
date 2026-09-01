@@ -7,13 +7,13 @@ export const metadata: Metadata = {
   description:
     "Official Return, Refund, Damage Replacement, and 1-Year Warranty Policy for custom LED neon signs, 3D acrylic signboards, and architectural decor by KTM DECOR in Kathmandu, Nepal.",
   alternates: {
-    canonical: "https://decorktm.com/return-policy",
+    canonical: "/return-policy",
   },
   openGraph: {
     title: "Return & Refund Policy — KTM DECOR Nepal",
     description:
       "Official Return, Refund, Transit Damage Guarantee, and 1-Year Warranty Policy for custom LED neon signs and illuminated business signboards.",
-    url: "https://decorktm.com/return-policy",
+    url: "https://www.decorktm.com/return-policy",
     type: "website",
     siteName: "KTM DECOR",
   },

@@ -1,7 +1,12 @@
+import { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata = {
-  title: "Privacy Policy — KTM DECOR",
+export const metadata: Metadata = {
+  title: "Privacy Policy | KTM DECOR",
+  description: "Learn how KTM DECOR collects, uses, and safeguards customer data and project inquiries in Nepal.",
+  alternates: {
+    canonical: "/privacy-policy",
+  },
 };
 
 export default function PrivacyPolicy() {

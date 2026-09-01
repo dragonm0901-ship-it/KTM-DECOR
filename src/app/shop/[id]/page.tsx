@@ -22,8 +22,8 @@ export async function generateMetadata({
     };
   }
 
-  const title = `${product.name} | Buy Custom Signage in Nepal | KTM DECOR`;
-  const description = `${product.description} Specifications: ${product.specs.slice(0, 3).join(", ")}. Handcrafted in Kathmandu, Nepal.`;
+  const title = `${product.name} Price in Nepal (2026) | Custom Signage — KTM DECOR`;
+  const description = `Buy ${product.name} in Nepal. ${product.description.slice(0, 110)}... Direct Balkot workshop price from NPR ${product.price.toLocaleString()} with 1-year warranty & fast delivery.`;
   const canonicalUrl = `https://www.decorktm.com/shop/${product.id}`;
 
   return {
@@ -32,6 +32,7 @@ export async function generateMetadata({
     keywords: [
       product.name.toLowerCase(),
       `${product.name.toLowerCase()} price in nepal`,
+      `${product.category.toLowerCase()} price nepal`,
       `${product.category.toLowerCase()} kathmandu`,
       "custom signage nepal",
       "buy neon signs online ktm"
@@ -47,7 +48,7 @@ export async function generateMetadata({
       siteName: "KTM DECOR",
       images: [
         {
-          url: product.image,
+          url: product.image.startsWith("http") ? product.image : `https://www.decorktm.com${product.image}`,
           width: 800,
           height: 800,
           alt: product.name,
@@ -58,7 +59,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: [product.image],
+      images: [product.image.startsWith("http") ? product.image : `https://www.decorktm.com${product.image}`],
     },
   };
 }
@@ -75,15 +76,15 @@ export default async function Page({
     return <ProductDetailClient />;
   }
 
+  const productImageUrl = product.image.startsWith("http")
+    ? product.image
+    : `https://www.decorktm.com${product.image}`;
+
   const productSchema = {
     "@context": "https://schema.org/",
     "@type": "Product",
     "name": product.name,
-    "image": [
-      product.image.startsWith("http")
-        ? product.image
-        : `https://www.decorktm.com${product.image}`
-    ],
+    "image": [productImageUrl],
     "description": product.description,
     "sku": `KTM-PROD-${product.id}`,
     "brand": {
@@ -100,7 +101,38 @@ export default async function Page({
       "availability": "https://schema.org/InStock",
       "seller": {
         "@type": "Organization",
-        "name": "KTM DECOR"
+        "name": "KTM DECOR",
+        "url": "https://www.decorktm.com"
+      },
+      "hasMerchantReturnPolicy": {
+        "@type": "MerchantReturnPolicy",
+        "applicableCountry": "NP",
+        "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+        "merchantReturnDays": 7,
+        "returnMethod": "https://schema.org/ReturnByMail",
+        "returnFees": "https://schema.org/ReturnFeesCustomerResponsibility",
+        "url": "https://www.decorktm.com/return-policy"
+      },
+      "shippingDetails": {
+        "@type": "OfferShippingDetails",
+        "shippingRate": {
+          "@type": "MonetaryAmount",
+          "value": "0",
+          "currency": "NPR"
+        },
+        "shippingDestination": {
+          "@type": "DefinedRegion",
+          "addressCountry": "NP"
+        },
+        "deliveryTime": {
+          "@type": "ShippingDeliveryTime",
+          "transitTime": {
+            "@type": "QuantitativeValue",
+            "minValue": 1,
+            "maxValue": 4,
+            "unitCode": "DAY"
+          }
+        }
       }
     },
     "aggregateRating": {

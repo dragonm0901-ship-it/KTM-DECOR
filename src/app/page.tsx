@@ -31,10 +31,27 @@ export default function Home() {
         "@type": "LocalBusiness",
         "@id": "https://www.decorktm.com/#localbusiness",
         "name": "KTM DECOR",
+        "description": "Nepal's leading custom signcrafting workshop specializing in handcrafted LED neon signs, 3D backlit signage, nameplates, and bespoke architectural decor.",
         "image": "https://www.decorktm.com/images/ktm-decor-og.png",
         "url": "https://www.decorktm.com",
         "telephone": "+9779706247439",
-        "priceRange": "$$",
+        "priceRange": "NPR 1,500 - NPR 50,000",
+        "currenciesAccepted": "NPR",
+        "paymentAccepted": "Cash, eSewa, Khalti, Bank Transfer, Fonepay",
+        "areaServed": [
+          { "@type": "City", "name": "Kathmandu" },
+          { "@type": "City", "name": "Lalitpur" },
+          { "@type": "City", "name": "Bhaktapur" },
+          { "@type": "City", "name": "Pokhara" },
+          { "@type": "Country", "name": "Nepal" }
+        ],
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "telephone": "+9779706247439",
+          "contactType": "customer service",
+          "areaServed": "NP",
+          "availableLanguage": ["English", "Nepali"]
+        },
         "address": {
           "@type": "PostalAddress",
           "streetAddress": "Balkot Factory & Workshop",

@@ -1,7 +1,12 @@
+import { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata = {
-  title: "Terms of Service — KTM DECOR",
+export const metadata: Metadata = {
+  title: "Terms of Service | KTM DECOR",
+  description: "Terms and conditions for custom signcrafting, manufacturing, and orders with KTM DECOR in Nepal.",
+  alternates: {
+    canonical: "/terms-of-service",
+  },
 };
 
 export default function TermsOfService() {

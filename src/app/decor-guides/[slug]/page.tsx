@@ -76,7 +76,7 @@ export default async function GuideDetailPage({
     guide.relatedProductIds.includes(p.id)
   );
 
-  // JSON-LD Schemas (Article + FAQPage)
+  // JSON-LD Schemas (Article + BreadcrumbList + FAQPage)
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -85,6 +85,8 @@ export default async function GuideDetailPage({
         "@id": `https://www.decorktm.com/decor-guides/${guide.slug}#article`,
         "headline": guide.title,
         "description": guide.metaDescription,
+        "image": ["https://www.decorktm.com/images/ktm-decor-og.png"],
+        "inLanguage": "en",
         "datePublished": guide.publishDate,
         "dateModified": guide.updatedDate,
         "author": {
@@ -101,6 +103,30 @@ export default async function GuideDetailPage({
           }
         },
         "mainEntityOfPage": `https://www.decorktm.com/decor-guides/${guide.slug}`
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": `https://www.decorktm.com/decor-guides/${guide.slug}#breadcrumb`,
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://www.decorktm.com"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Decor Guides",
+            "item": "https://www.decorktm.com/decor-guides"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": guide.title,
+            "item": `https://www.decorktm.com/decor-guides/${guide.slug}`
+          }
+        ]
       },
       ...(guide.faqs && guide.faqs.length > 0
         ? [

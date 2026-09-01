@@ -4,7 +4,7 @@ import { GUIDES } from "@/data/guides-data";
 import { PSEO_SERVICES, PSEO_LOCATIONS } from "@/data/pseo-locations-data";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://decorktm.com";
+  const baseUrl = "https://www.decorktm.com";
 
   // Define static routes
   const staticRoutes = [
