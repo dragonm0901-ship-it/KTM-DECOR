@@ -154,9 +154,9 @@ export const SalesTab: React.FC = () => {
   // Completed Sign Orders Awaiting Approval
   const pendingApprovalOrders = orders.filter((o) => o.stage === "completed" && !o.approved);
 
-  // Generate sales chart data points (using sales array chronologically)
+  // Generate sales chart data points (using unifiedSales with base prices chronologically)
   const getSalesChartData = () => {
-    const chronologicalSales = [...sales].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const chronologicalSales = [...unifiedSales].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     const points: { label: string; value: number }[] = [{ label: "Start", value: 0 }];
     
     let cumulative = 0;

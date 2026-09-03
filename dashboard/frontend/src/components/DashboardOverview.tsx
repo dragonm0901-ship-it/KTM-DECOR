@@ -243,9 +243,19 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
     });
     
     safeSales.forEach((s) => {
+      const orderIdStr = (typeof s.orderId === "object" && s.orderId !== null)
+        ? (s.orderId as any)._id?.toString()
+        : s.orderId?.toString();
+      const matchedOrder = orderIdStr ? ordersMap.get(orderIdStr) : undefined;
+      const pPrice = matchedOrder
+        ? (Number(matchedOrder.price) || 0)
+        : (s.orderId && typeof s.orderId === "object" && "price" in s.orderId)
+          ? (Number((s.orderId as any).price) || 0)
+          : (Number(s.amount) || 0);
+
       revenueItems.push({
         date: new Date(s.date),
-        value: s.amount || 0
+        value: pPrice
       });
     });
 
