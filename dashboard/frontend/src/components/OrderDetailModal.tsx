@@ -183,10 +183,13 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, onClo
             <button
               type="button"
               onClick={() => window.print()}
-              className="flex items-center gap-1 py-1.5 px-3 bg-accent hover:bg-accent-dark text-white rounded text-[10px] font-bold transition-all shadow-md shadow-accent/15"
+              style={{
+                background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
+              }}
+              className="flex items-center gap-1.5 py-1.5 px-3.5 text-black rounded-xl text-xs font-bold transition-all shadow-md shadow-orange-500/20 hover:scale-[1.02] active:scale-95 cursor-pointer"
               title="Download PDF / Print"
             >
-              <Download size={12} />
+              <Download size={13} />
               PDF / Print
             </button>
             <button

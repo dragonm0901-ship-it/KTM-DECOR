@@ -805,18 +805,10 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
             >
               <div className="relative z-10">
                 <div className="flex items-center justify-between border-b border-black/10 pb-2.5 mb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-black/85 uppercase tracking-wider block">Expenses Summary</span>
-                    <span className="text-[10px] font-bold bg-black/10 text-black border border-black/10 px-2 py-0.5 rounded-full">
-                      Outflows
-                    </span>
-                  </div>
-                  <div
-                    className="p-2 text-white rounded-xl shadow-md shrink-0"
-                    style={{ background: "linear-gradient(135deg, #F87171 0%, #EF4444 50%, #DC2626 100%)" }}
-                  >
-                    <DollarSign size={16} />
-                  </div>
+                  <span className="text-xs font-semibold text-black/85 uppercase tracking-wider block">Expenses Summary</span>
+                  <span className="text-[10px] font-bold bg-black/10 text-black border border-black/10 px-2 py-0.5 rounded-full">
+                    Outflows
+                  </span>
                 </div>
                 <div className="mb-3">
                   <h4 className="text-3xl sm:text-4xl font-semibold font-display text-black leading-none">
@@ -861,18 +853,10 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
             >
               <div className="relative z-10">
                 <div className="flex items-center justify-between border-b border-black/10 pb-2.5 mb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-black/85 uppercase tracking-wider block">Purchases Tracker</span>
-                    <span className="text-[10px] font-bold bg-black/10 text-black border border-black/10 px-2 py-0.5 rounded-full">
-                      {outstandingPurchasesVal > 0 ? "Pending Dues" : "Settled"}
-                    </span>
-                  </div>
-                  <div
-                    className="p-2 text-white rounded-xl shadow-md shrink-0"
-                    style={{ background: "linear-gradient(135deg, #60A5FA 0%, #3B82F6 50%, #1D4ED8 100%)" }}
-                  >
-                    <Briefcase size={16} />
-                  </div>
+                  <span className="text-xs font-semibold text-black/85 uppercase tracking-wider block">Purchases Tracker</span>
+                  <span className="text-[10px] font-bold bg-black/10 text-black border border-black/10 px-2 py-0.5 rounded-full">
+                    {outstandingPurchasesVal > 0 ? "Pending Dues" : "Settled"}
+                  </span>
                 </div>
                 <div className="mb-3">
                   <h4 className="text-3xl sm:text-4xl font-semibold font-display text-black leading-none">
@@ -915,18 +899,10 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
             >
               <div className="relative z-10">
                 <div className="flex items-center justify-between border-b border-black/10 pb-2.5 mb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-black/85 uppercase tracking-wider block">Material Inventory</span>
-                    <span className="text-[10px] font-bold bg-black/10 text-black border border-black/10 px-2 py-0.5 rounded-full">
-                      {(lowStockVal + outOfStockVal) > 0 ? "Alerts" : "Ok"}
-                    </span>
-                  </div>
-                  <div
-                    className="p-2 text-white rounded-xl shadow-md shrink-0"
-                    style={{ background: "linear-gradient(135deg, #34D399 0%, #10B981 50%, #059669 100%)" }}
-                  >
-                    <Package size={16} />
-                  </div>
+                  <span className="text-xs font-semibold text-black/85 uppercase tracking-wider block">Material Inventory</span>
+                  <span className="text-[10px] font-bold bg-black/10 text-black border border-black/10 px-2 py-0.5 rounded-full">
+                    {(lowStockVal + outOfStockVal) > 0 ? "Alerts" : "Ok"}
+                  </span>
                 </div>
                 <div className="mb-3 flex justify-between items-end">
                   <div>
@@ -1177,34 +1153,53 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               </div>
             </div>
 
-            {/* Archived Monthly Combined Statements */}
+            {/* Archived Monthly Combined Statements (Senior UI/UX Porcelain Card) */}
             {user?.role === "admin" && statementArchives.filter((a) => a.type === "all").length > 0 && (
-              <div className="mt-6 border-t border-border pt-4">
-                <h4 className="text-xs font-bold text-muted uppercase tracking-wider mb-3 flex items-center gap-2">
-                  <Calendar size={14} className="text-accent" />
-                  Archived Monthly Combined Statements (PDF & CSV)
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              <div className="mt-8 border-t border-border/80 pt-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
+                  <div className="flex items-center gap-2.5">
+                    <div
+                      className="p-2 rounded-xl text-black shadow-xs shrink-0"
+                      style={{ background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 100%)" }}
+                    >
+                      <Calendar size={16} />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">
+                        Archived Monthly Combined Statements
+                      </h4>
+                      <p className="text-[11px] text-muted">Permanent historical records and downloadable monthly statement archives</p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-bold px-3 py-1 rounded-full bg-border/40 text-muted self-start sm:self-auto border border-border/50">
+                    {statementArchives.filter((a) => a.type === "all").length} Records Saved
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5">
                   {statementArchives
                     .filter((a) => a.type === "all")
                     .map((archive) => (
                       <div
                         key={archive._id}
-                        className="flex items-center justify-between p-3 rounded-xl border border-border/80 bg-card hover:border-accent/40 hover:shadow-sm transition-all group"
+                        className="flex items-center justify-between p-4 rounded-2xl border border-border/80 bg-background/50 hover:bg-background hover:border-orange-400/40 hover:shadow-md transition-all group"
                       >
                         <button
                           onClick={() => handlePreviewArchive(archive._id)}
-                          className="flex items-center gap-3 min-w-0 text-left flex-1"
+                          className="flex items-center gap-3 min-w-0 text-left flex-1 cursor-pointer"
                           title="Preview / Print PDF"
                         >
-                          <div className="p-2 bg-accent text-white rounded-lg shadow-xs group-hover:scale-105 transition-transform">
-                            <FileText size={14} />
+                          <div
+                            className="p-2.5 rounded-xl text-black shadow-xs group-hover:scale-105 transition-transform shrink-0"
+                            style={{ background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 100%)" }}
+                          >
+                            <FileText size={15} />
                           </div>
                           <div className="min-w-0">
-                            <p className="text-xs font-bold text-foreground truncate">
+                            <p className="text-xs font-bold text-foreground truncate group-hover:text-accent transition-colors">
                               Combined Statement
                             </p>
-                            <p className="text-[10px] text-muted font-medium mt-0.5">
+                            <p className="text-[11px] text-muted font-medium mt-0.5">
                               {formatArchiveStatementLabel(archive)}
                             </p>
                           </div>
@@ -1212,10 +1207,10 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
 
                         <button
                           onClick={() => downloadArchive(archive._id, archive.filename)}
-                          className="p-1.5 text-muted hover:text-accent rounded-lg hover:bg-accent/10 transition-colors ml-2"
+                          className="p-2 text-muted hover:text-black hover:bg-orange-500/10 rounded-xl transition-colors ml-2 cursor-pointer shrink-0"
                           title="Download CSV file"
                         >
-                          <Download size={14} />
+                          <Download size={15} />
                         </button>
                       </div>
                     ))}
@@ -1229,52 +1224,81 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
       {/* SECONDARY ROW GRID */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* LEFT COLUMN: STAFF LIST (ADMIN) / TODAY'S SCHEDULE (STAFF) */}
-        <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-6 flex flex-col h-[400px]">
-          <h2 className="text-base font-bold font-display border-b border-border pb-3 mb-4 flex items-center gap-2">
+        <div className="bg-card border border-border/80 rounded-[28px] shadow-sm hover:shadow-md transition-all p-6 flex flex-col h-[430px]">
+          <div className="border-b border-border/60 pb-3.5 mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div
+                className="p-2 text-white rounded-xl shadow-md shrink-0"
+                style={{
+                  background: user?.role === "admin"
+                    ? "linear-gradient(135deg, #60A5FA 0%, #3B82F6 50%, #1D4ED8 100%)"
+                    : "linear-gradient(135deg, #34D399 0%, #10B981 50%, #059669 100%)",
+                }}
+              >
+                {user?.role === "admin" ? <TrendingUp size={16} /> : <CheckCircle size={16} />}
+              </div>
+              <h2 className="text-sm sm:text-base font-bold font-display text-foreground">
+                {user?.role === "admin" ? "Staff Performance & Workload" : "Your Pending Schedule"}
+              </h2>
+            </div>
             {user?.role === "admin" ? (
-              <>
-                <TrendingUp size={18} className="text-accent" />
-                Staff Performance & Workload
-              </>
+              <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-border/40 text-muted border border-border/50">
+                {staffPerformance.length} Staff
+              </span>
             ) : (
-              <>
-                <CheckCircle size={18} className="text-accent" />
-                Your Pending Schedule
-              </>
+              <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/20">
+                {staffPendingTasks.length} Pending
+              </span>
             )}
-          </h2>
+          </div>
 
           <div className="flex-1 overflow-y-auto pr-1 space-y-3">
             {user?.role === "admin" ? (
-              staffPerformance.map((staff) => (
-                <div
-                  key={staff.name}
-                  className="flex items-center justify-between p-4 rounded-xl bg-background border border-border/60 shadow-sm"
-                >
-                  <div>
-                    <h4 className="font-bold text-sm text-foreground">{staff.name}</h4>
-                    <span className="text-[10px] text-muted font-semibold">
-                      {staff.pending} tasks remaining
-                    </span>
+              staffPerformance.map((staff) => {
+                const total = staff.completed + staff.pending;
+                const completionPct = total > 0 ? Math.round((staff.completed / total) * 100) : 0;
+                return (
+                  <div
+                    key={staff.name}
+                    className="p-4 rounded-2xl bg-background/60 border border-border/70 hover:bg-background hover:border-border transition-all space-y-2.5"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <div className="h-8 w-8 rounded-xl bg-border/50 text-foreground font-bold text-xs flex items-center justify-center shrink-0 border border-border/60">
+                          {staff.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-sm text-foreground leading-tight">{staff.name}</h4>
+                          <span className="text-[11px] text-muted font-medium">
+                            {staff.pending} tasks pending
+                          </span>
+                        </div>
+                      </div>
+                      <span className="border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-emerald-500/10">
+                        {staff.completed} Done
+                      </span>
+                    </div>
+                    {/* Completion progress bar */}
+                    <div className="w-full bg-border/40 rounded-full h-1.5 overflow-hidden">
+                      <div
+                        className="bg-emerald-500 h-1.5 rounded-full transition-all duration-500"
+                        style={{ width: `${completionPct}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1 text-xs">
-                    <span className="border border-green-500/20 text-green-600 dark:text-green-400 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase bg-green-500/5">
-                      {staff.completed} Completed
-                    </span>
-                  </div>
-                </div>
-              ))
+                );
+              })
             ) : staffPendingTasks.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center text-muted">
-                <CheckCircle size={40} className="text-green-500/30 mb-2" />
-                <p className="text-sm">Great job! No pending tasks remaining today.</p>
+                <CheckCircle size={40} className="text-emerald-500/30 mb-2" />
+                <p className="text-sm font-medium">Great job! No pending tasks remaining today.</p>
               </div>
             ) : (
               staffPendingTasks.map((task) => (
                 <div
                   key={task._id}
                   onClick={() => setCurrentTab(task.isOrder ? "order-progress" : "tasks")}
-                  className="p-4 bg-background border border-border/60 rounded-xl hover:border-accent hover:shadow-md cursor-pointer transition-all duration-200"
+                  className="p-4 bg-background/60 border border-border/70 rounded-2xl hover:bg-background hover:border-accent hover:shadow-md cursor-pointer transition-all duration-200"
                 >
                   <h4 className="font-bold text-sm line-clamp-1 text-foreground">{task.title}</h4>
                   <p className="text-xs text-muted mt-1 line-clamp-1 font-medium">
@@ -1282,12 +1306,12 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                   </p>
                   <div className="flex justify-between items-center mt-3">
                     <span
-                      className={`text-[9px] px-2.5 py-1 rounded-lg font-bold uppercase border ${
+                      className={`text-[9px] px-2.5 py-1 rounded-full font-bold uppercase border ${
                         task.priority === "high"
-                          ? "border-red-500/25 text-red-600 dark:text-red-400 bg-red-500/5"
+                          ? "border-red-500/25 text-red-600 dark:text-red-400 bg-red-500/10"
                           : task.priority === "medium"
-                          ? "border-amber-500/25 text-amber-600 dark:text-amber-400 bg-amber-500/5"
-                          : "border-green-500/25 text-green-600 dark:text-green-400 bg-green-500/5"
+                          ? "border-amber-500/25 text-amber-600 dark:text-amber-400 bg-amber-500/10"
+                          : "border-green-500/25 text-green-600 dark:text-green-400 bg-green-500/10"
                       }`}
                     >
                       {task.priority}
@@ -1304,67 +1328,96 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
 
         {/* MIDDLE COLUMN: LIVE ACTIVITY LOG (ADMIN) / OR FOCUS MODE NOTIFICATION BAR */}
         {user?.role === "admin" ? (
-          <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-6 flex flex-col h-[400px]">
-            <h2 className="text-base font-bold font-display border-b border-border pb-3 mb-4 flex items-center gap-2">
-              <ActivityIcon size={18} className="text-accent" />
-              Activity Audit Log
-            </h2>
-            <div className="flex-1 overflow-y-auto pr-1 space-y-3">
+          <div className="bg-card border border-border/80 rounded-[28px] shadow-sm hover:shadow-md transition-all p-6 flex flex-col h-[430px]">
+            <div className="border-b border-border/60 pb-3.5 mb-4 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div
+                  className="p-2 text-white rounded-xl shadow-md shrink-0"
+                  style={{ background: "linear-gradient(135deg, #C084FC 0%, #9333EA 50%, #7E22CE 100%)" }}
+                >
+                  <ActivityIcon size={16} />
+                </div>
+                <h2 className="text-sm sm:text-base font-bold font-display text-foreground">
+                  Activity Audit Log
+                </h2>
+              </div>
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 text-[10px] font-bold">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span>Live Feed</span>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto pr-1 space-y-2.5">
               {activities.length === 0 ? (
-                <div className="h-full flex items-center justify-center text-muted text-sm">
+                <div className="h-full flex items-center justify-center text-muted text-sm font-medium">
                   No activity logged yet
                 </div>
               ) : (
                 activities.map((act) => (
-                  <div key={act._id} className="p-4 bg-background border border-border/60 rounded-xl text-xs space-y-1">
-                    <div className="flex justify-between items-start mb-1">
-                      <span className="font-extrabold text-accent">{act.user?.name || "Deleted User"}</span>
-                      <span className="text-[10px] text-muted font-medium">
+                  <div key={act._id} className="p-3.5 bg-background/60 border border-border/60 rounded-2xl text-xs space-y-1 hover:bg-background transition-colors">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="font-bold text-foreground text-xs flex items-center gap-1.5">
+                        <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+                        {act.user?.name || "Deleted User"}
+                      </span>
+                      <span className="text-[10px] text-muted font-mono font-medium">
                         {new Date(act.createdAt).toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit"
                         })}
                       </span>
                     </div>
-                    <span className="font-extrabold text-foreground uppercase tracking-wider block text-[9px] mb-1">
-                      {act.action}
-                    </span>
-                    <p className="text-muted leading-relaxed font-medium">{act.details}</p>
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-extrabold text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-md bg-border/40 text-muted">
+                        {act.action}
+                      </span>
+                    </div>
+                    <p className="text-muted leading-relaxed font-medium text-[11px] pt-0.5">{act.details}</p>
                   </div>
                 ))
               )}
             </div>
           </div>
         ) : (
-          <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-6 flex flex-col h-[400px]">
-            <h2 className="text-base font-bold font-display border-b border-border pb-3 mb-4 flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <CheckCircle size={18} className="text-accent" />
-                Completed Tasks
+          <div className="bg-card border border-border/80 rounded-[28px] shadow-sm hover:shadow-md transition-all p-6 flex flex-col h-[430px]">
+            <div className="border-b border-border/60 pb-3.5 mb-4 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div
+                  className="p-2 text-white rounded-xl shadow-md shrink-0"
+                  style={{ background: "linear-gradient(135deg, #34D399 0%, #10B981 50%, #059669 100%)" }}
+                >
+                  <CheckCircle size={16} />
+                </div>
+                <h2 className="text-sm sm:text-base font-bold font-display text-foreground">
+                  Completed Tasks
+                </h2>
+              </div>
+              <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                {staffCompletedTasks.length} Done
               </span>
-              <span className="text-xs bg-border px-2 py-0.5 rounded font-bold text-muted">
-                {staffCompletedTasks.length}
-              </span>
-            </h2>
+            </div>
             <div className="flex-1 overflow-y-auto pr-1 space-y-3">
               {staffCompletedTasks.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center text-muted">
                   <CheckCircle size={40} className="text-muted/30 mb-2" />
-                  <p className="text-sm">No tasks completed yet.</p>
+                  <p className="text-sm font-medium">No tasks completed yet.</p>
                 </div>
               ) : (
                 staffCompletedTasks.map((task) => (
                   <div
                     key={task._id}
                     onClick={() => setCurrentTab(task.isOrder ? "order-progress" : "tasks")}
-                    className="p-4 bg-background border border-border/60 rounded-xl hover:border-accent hover:shadow-md cursor-pointer transition-all duration-200"
+                    className="p-4 bg-background/60 border border-border/70 rounded-2xl hover:bg-background hover:border-accent hover:shadow-md cursor-pointer transition-all duration-200"
                   >
                     <h4 className="font-bold text-sm line-clamp-1 text-foreground">{task.title}</h4>
                     <p className="text-xs text-muted mt-1 line-clamp-1 font-medium">
                       {task.description || "No description."}
                     </p>
                     <div className="flex justify-between items-center mt-3">
-                      <span className="text-[9px] border border-green-500/25 text-green-600 dark:text-green-400 px-2.5 py-1 rounded-lg font-bold uppercase bg-green-500/5">
+                      <span className="text-[9px] border border-green-500/25 text-green-600 dark:text-green-400 px-2.5 py-1 rounded-full font-bold uppercase bg-green-500/10">
                         Completed
                       </span>
                       <span className="text-[10px] text-muted font-semibold">
@@ -1379,23 +1432,30 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
         )}
 
         {/* RIGHT COLUMN: QUICK NOTES STICKY REMINDERS */}
-        <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-6 flex flex-col h-[400px]">
-          <h2 className="text-base font-bold font-display border-b border-border pb-3 mb-4 flex items-center justify-between">
-            <span className="flex items-center gap-2">
-              <FileText size={18} className="text-accent" />
-              Quick-Notes Widget
-            </span>
+        <div className="bg-card border border-border/80 rounded-[28px] shadow-sm hover:shadow-md transition-all p-6 flex flex-col h-[430px]">
+          <div className="border-b border-border/60 pb-3.5 mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div
+                className="p-2 text-white rounded-xl shadow-md shrink-0"
+                style={{ background: "linear-gradient(135deg, #FBBF24 0%, #F59E0B 50%, #D97706 100%)" }}
+              >
+                <FileText size={16} />
+              </div>
+              <h2 className="text-sm sm:text-base font-bold font-display text-foreground">
+                Quick-Notes Widget
+              </h2>
+            </div>
             <button
               onClick={() => setShowNoteInput(!showNoteInput)}
               style={{
                 background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 100%)",
               }}
-              className="p-1.5 rounded-full text-black shadow-xs hover:scale-110 active:scale-95 transition-transform cursor-pointer"
+              className="p-2 rounded-xl text-black shadow-xs hover:scale-110 active:scale-95 transition-transform cursor-pointer"
               aria-label="Add Note"
             >
               <Plus size={16} />
             </button>
-          </h2>
+          </div>
 
           {showNoteInput && (
             <form onSubmit={handleAddNote} className="mb-4 animate-slide-up">
@@ -1404,7 +1464,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                   type="text"
                   value={noteText}
                   onChange={(e) => setNoteText(e.target.value)}
-                  className="flex-1 px-4 py-2 text-sm border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent"
+                  className="flex-1 px-4 py-2.5 text-xs border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent"
                   placeholder="Type note and hit enter..."
                   required
                 />
@@ -1434,21 +1494,21 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                   return (
                     <div
                       key={note._id}
-                      className={`p-4 rounded-xl border flex flex-col justify-between min-h-[105px] shadow-sm transition-all duration-200 hover:scale-[1.02] ${colorClass}`}
+                      className={`p-4 rounded-2xl border flex flex-col justify-between min-h-[115px] shadow-xs transition-all duration-200 hover:scale-[1.02] hover:shadow-sm ${colorClass}`}
                     >
                       <p className="text-xs font-bold leading-normal break-words">
                         {note.text}
                       </p>
-                      <div className="flex justify-between items-center mt-3 border-t border-black/5 dark:border-white/5 pt-2 text-[9px] opacity-80">
+                      <div className="flex justify-between items-center mt-3 border-t border-black/10 dark:border-white/10 pt-2 text-[9px] opacity-85">
                         <span className="font-extrabold">
                           By {note.createdBy?.name?.split(" ")[0] || "Staff"}
                         </span>
                         <button
                           onClick={() => deleteQuickNote(note._id)}
-                          className="p-1 rounded hover:bg-black/10 text-inherit opacity-75 hover:opacity-100 transition-all"
+                          className="p-1 rounded-md hover:bg-black/10 text-inherit opacity-75 hover:opacity-100 transition-all cursor-pointer"
                           title="Delete note"
                         >
-                          <Trash2 size={12} />
+                          <Trash2 size={13} />
                         </button>
                       </div>
                     </div>

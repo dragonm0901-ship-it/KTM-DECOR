@@ -801,7 +801,10 @@ export const PurchaseTab: React.FC = () => {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-4 py-2 bg-accent text-white rounded text-xs hover:bg-accent-dark transition-colors shadow-md shadow-accent/15 font-bold disabled:opacity-50"
+                  style={{
+                    background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
+                  }}
+                  className="px-5 py-2 text-black rounded-xl text-xs font-bold transition-all shadow-md shadow-orange-500/20 hover:scale-[1.02] active:scale-95 cursor-pointer disabled:opacity-50"
                 >
                   {submitting ? "Saving..." : editingPurchase ? "Update Invoice" : "Log Invoice"}
                 </button>
