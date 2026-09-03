@@ -277,7 +277,10 @@ export const Layout: React.FC<LayoutProps> = ({
                           setShowAnnouncementModal(true);
                           setNotifDropdownOpen(false);
                         }}
-                        className="w-full flex items-center justify-center gap-1.5 py-1.5 text-xs bg-accent text-white rounded font-medium hover:bg-accent-dark transition-colors"
+                        style={{
+                          background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
+                        }}
+                        className="w-full flex items-center justify-center gap-1.5 py-2 text-xs text-black font-bold rounded-xl shadow-md hover:opacity-95 transition-opacity"
                       >
                         <PlusCircle size={14} />
                         Publish System Announcement
@@ -350,14 +353,22 @@ export const Layout: React.FC<LayoutProps> = ({
                       <button
                         key={item.id}
                         onClick={() => setCurrentTab(item.id)}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium border transition-all group relative ${
+                        style={
                           isActive
-                            ? "bg-accent/10 border-accent/15 text-accent font-bold shadow-sm"
+                            ? {
+                                background:
+                                  "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
+                              }
+                            : undefined
+                        }
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium border transition-all group relative cursor-pointer ${
+                          isActive
+                            ? "text-black font-semibold border-transparent shadow-md shadow-orange-500/20"
                             : "text-muted border-transparent hover:bg-border/50 hover:text-foreground"
                         }`}
                       >
-                        <Icon size={20} className={isActive ? "" : "text-muted group-hover:text-foreground"} />
-                        {sidebarOpen && <span>{item.label}</span>}
+                        <Icon size={20} className={isActive ? "text-black" : "text-muted group-hover:text-foreground"} />
+                        {sidebarOpen && <span className={isActive ? "text-black font-bold" : ""}>{item.label}</span>}
                         
                         {/* Tooltip when collapsed */}
                         {!sidebarOpen && (
@@ -464,14 +475,22 @@ export const Layout: React.FC<LayoutProps> = ({
                           setCurrentTab(item.id);
                           setMobileMenuOpen(false);
                         }}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-all ${
+                        style={
                           isActive
-                            ? "bg-accent text-white shadow-md shadow-accent/15"
+                            ? {
+                                background:
+                                  "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
+                              }
+                            : undefined
+                        }
+                        className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                          isActive
+                            ? "text-black font-semibold shadow-md shadow-orange-500/20"
                             : "text-muted hover:bg-border hover:text-foreground"
                         }`}
                       >
-                        <Icon size={20} className={isActive ? "" : "text-muted"} />
-                        <span>{item.label}</span>
+                        <Icon size={20} className={isActive ? "text-black" : "text-muted"} />
+                        <span className={isActive ? "text-black font-bold" : ""}>{item.label}</span>
                       </button>
                     );
                   })}

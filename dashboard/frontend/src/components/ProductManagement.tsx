@@ -344,7 +344,10 @@ export const ProductManagement: React.FC = () => {
 
         <button
           onClick={openCreateModal}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-dark text-white rounded font-bold text-sm transition-all shadow-md shadow-accent/20"
+          style={{
+            background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
+          }}
+          className="flex items-center justify-center gap-2 px-4 py-2.5 text-black rounded-xl font-bold text-sm transition-all shadow-md shadow-orange-500/20 hover:scale-[1.02] active:scale-95 cursor-pointer"
         >
           <Plus size={16} />
           Add New Product

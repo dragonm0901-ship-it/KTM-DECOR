@@ -191,7 +191,10 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
           {user?.role === "admin" && (
             <button
               onClick={openCreateModal}
-              className="flex items-center gap-1.5 px-4 py-2 bg-accent text-white rounded font-semibold text-sm hover:bg-accent-dark transition-colors shadow-md shadow-accent/15"
+              style={{
+                background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
+              }}
+              className="flex items-center gap-1.5 px-4 py-2 text-black rounded-xl font-bold text-sm hover:scale-[1.02] active:scale-95 transition-all shadow-md shadow-orange-500/20 cursor-pointer"
             >
               <Plus size={16} />
               Create Task

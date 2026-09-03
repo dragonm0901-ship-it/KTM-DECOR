@@ -197,7 +197,10 @@ export const InventoryTab: React.FC = () => {
           {user?.role === "admin" && (
             <button
               onClick={handleOpenAddModal}
-              className="flex items-center justify-center gap-1.5 py-2 px-4 bg-accent hover:bg-accent-dark text-white rounded font-bold text-xs transition-all shadow-md shadow-accent/15 h-9"
+              style={{
+                background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
+              }}
+              className="flex items-center justify-center gap-1.5 py-2 px-4 text-black rounded-xl font-bold text-xs transition-all shadow-md shadow-orange-500/20 hover:scale-[1.02] active:scale-95 h-9 cursor-pointer"
             >
               <Plus size={16} />
               Register New Material

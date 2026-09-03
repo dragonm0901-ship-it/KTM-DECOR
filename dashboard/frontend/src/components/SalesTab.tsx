@@ -260,11 +260,14 @@ export const SalesTab: React.FC = () => {
           </select>
           <button
             onClick={handlePreviewClick}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#FE914C] text-white text-[11px] rounded-xl font-bold hover:bg-[#E2752D] transition-all shadow-xs cursor-pointer"
+            style={{
+              background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
+            }}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 text-black text-[11px] rounded-xl font-bold transition-all shadow-md shadow-orange-500/20 active:scale-95 cursor-pointer hover:opacity-95"
             title="Preview and Print PDF Sales Statement"
           >
             <Printer size={13} />
-            <span>Preview PDF</span>
+            <span>Preview / Print PDF</span>
           </button>
           <button
             onClick={handleExportClick}

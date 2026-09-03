@@ -600,7 +600,10 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                   <span className="text-xs text-muted font-bold uppercase tracking-wider block">Active Orders</span>
                   <h3 className="text-3xl sm:text-4xl font-semibold font-display text-foreground leading-none mt-2">{activeOrdersCount}</h3>
                 </div>
-                <div className="p-2.5 bg-accent text-white rounded-2xl shadow-sm shrink-0">
+                <div
+                  style={{ background: "linear-gradient(135deg, #60A5FA 0%, #3B82F6 50%, #1D4ED8 100%)" }}
+                  className="p-2.5 text-white rounded-2xl shadow-md shadow-blue-500/20 shrink-0"
+                >
                   <Package size={18} />
                 </div>
               </div>
@@ -622,7 +625,10 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                   <span className="text-xs text-muted font-bold uppercase tracking-wider block">Pending Tasks</span>
                   <h3 className="text-3xl sm:text-4xl font-semibold font-display text-foreground leading-none mt-2">{pendingTasks.length}</h3>
                 </div>
-                <div className="p-2.5 bg-amber-600 text-white rounded-2xl shadow-sm shrink-0">
+                <div
+                  style={{ background: "linear-gradient(135deg, #FBBF24 0%, #F59E0B 50%, #D97706 100%)" }}
+                  className="p-2.5 text-white rounded-2xl shadow-md shadow-amber-500/20 shrink-0"
+                >
                   <Clock size={18} />
                 </div>
               </div>
@@ -644,7 +650,10 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                   <span className="text-xs text-muted font-bold uppercase tracking-wider block">Completed Work</span>
                   <h3 className="text-3xl sm:text-4xl font-semibold font-display text-foreground leading-none mt-2">{completedTasksCount + approvedOrders.length}</h3>
                 </div>
-                <div className="p-2.5 bg-blue-600 text-white rounded-2xl shadow-sm shrink-0">
+                <div
+                  style={{ background: "linear-gradient(135deg, #34D399 0%, #10B981 50%, #059669 100%)" }}
+                  className="p-2.5 text-white rounded-2xl shadow-md shadow-emerald-500/20 shrink-0"
+                >
                   <CheckCircle size={18} />
                 </div>
               </div>
@@ -668,7 +677,10 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                 <h3 className="text-2xl sm:text-3xl font-semibold font-display text-blue-600 dark:text-blue-400">Rs. {totalDeliveryCharges.toLocaleString()}</h3>
                 <p className="text-xs text-muted">Separate delivery fees (not in Total Sales)</p>
               </div>
-              <div className="p-3 bg-blue-600 text-white rounded-2xl shadow-xs">
+              <div
+                style={{ background: "linear-gradient(135deg, #38BDF8 0%, #0284C7 50%, #0369A1 100%)" }}
+                className="p-3 text-white rounded-2xl shadow-md shadow-sky-500/20 shrink-0"
+              >
                 <Truck size={22} />
               </div>
             </div>
@@ -680,7 +692,10 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                 <h3 className="text-2xl sm:text-3xl font-semibold font-display text-purple-600 dark:text-purple-400">Rs. {totalFittingCharges.toLocaleString()}</h3>
                 <p className="text-xs text-muted">Separate installation fees (not in Total Sales)</p>
               </div>
-              <div className="p-3 bg-purple-600 text-white rounded-2xl shadow-xs">
+              <div
+                style={{ background: "linear-gradient(135deg, #C084FC 0%, #9333EA 50%, #7E22CE 100%)" }}
+                className="p-3 text-white rounded-2xl shadow-md shadow-purple-500/20 shrink-0"
+              >
                 <Wrench size={22} />
               </div>
             </div>
@@ -695,7 +710,10 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                 <h3 className="text-2xl sm:text-3xl font-semibold font-display text-red-500">Rs. {totalDuePayment.toLocaleString()}</h3>
                 <p className="text-xs text-muted">Receivables remaining from active/completed orders (Click to view)</p>
               </div>
-              <div className="p-3 bg-red-600 text-white rounded-2xl shadow-xs group-hover:scale-105 transition-transform">
+              <div
+                style={{ background: "linear-gradient(135deg, #F87171 0%, #EF4444 50%, #DC2626 100%)" }}
+                className="p-3 text-white rounded-2xl shadow-md shadow-red-500/20 group-hover:scale-105 transition-transform shrink-0"
+              >
                 <Clock size={22} />
               </div>
             </div>
@@ -740,7 +758,10 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               </div>
             </div>
             <div className="flex flex-col items-end gap-2">
-              <div className="p-2.5 bg-emerald-600 text-white rounded-2xl shadow-sm">
+              <div
+                style={{ background: "linear-gradient(135deg, #34D399 0%, #10B981 50%, #059669 100%)" }}
+                className="p-2.5 text-white rounded-2xl shadow-md shadow-emerald-500/20"
+              >
                 <CheckCircle size={20} />
               </div>
               {renderMiniLineChart(getSparklineData("completed"), "#10b981", "staff-completed-spark")}
@@ -759,7 +780,10 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               </div>
             </div>
             <div className="flex flex-col items-end gap-2">
-              <div className="p-2.5 bg-blue-600 text-white rounded-2xl shadow-sm">
+              <div
+                style={{ background: "linear-gradient(135deg, #60A5FA 0%, #3B82F6 50%, #1D4ED8 100%)" }}
+                className="p-2.5 text-white rounded-2xl shadow-md shadow-blue-500/20"
+              >
                 <FileText size={20} />
               </div>
               {renderMiniBarChart([4, 5, 3, 6, 4, campaigns.length], "fill-blue-500/80 hover:fill-blue-500 transition-colors")}
@@ -772,139 +796,171 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
       {user?.role === "admin" && (
         <div className="space-y-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Expenses Overview Card */}
-            <div className="bg-card border border-border/80 rounded-[28px] shadow-sm hover:shadow-md transition-all p-6 flex flex-col justify-between h-[250px]">
-              <div>
-                <div className="flex items-center justify-between border-b border-border/60 pb-2.5 mb-3">
-                  <h3 className="font-semibold text-sm font-display flex items-center gap-2">
-                    <DollarSign size={16} className="text-red-500" />
-                    Expenses Summary
-                  </h3>
-                  <span className="text-[10px] font-bold bg-red-500/10 text-red-600 border border-red-500/20 px-2.5 py-0.5 rounded-full">
-                    Outflows
-                  </span>
+            {/* Expenses Overview Card (Signature Sunset Gradient Style) */}
+            <div
+              className="relative rounded-[28px] p-6 shadow-xl shadow-orange-500/10 overflow-hidden flex flex-col justify-between min-h-[260px] transition-all hover:scale-[1.01] text-black"
+              style={{
+                background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
+              }}
+            >
+              <div className="relative z-10">
+                <div className="flex items-center justify-between border-b border-black/10 pb-2.5 mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-black/85 uppercase tracking-wider block">Expenses Summary</span>
+                    <span className="text-[10px] font-bold bg-black/10 text-black border border-black/10 px-2 py-0.5 rounded-full">
+                      Outflows
+                    </span>
+                  </div>
+                  <div
+                    className="p-2 text-white rounded-xl shadow-md shrink-0"
+                    style={{ background: "linear-gradient(135deg, #F87171 0%, #EF4444 50%, #DC2626 100%)" }}
+                  >
+                    <DollarSign size={16} />
+                  </div>
                 </div>
                 <div className="mb-3">
-                  <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Total Expenses</span>
-                  <h4 className="text-2xl font-semibold font-display text-foreground mt-0.5">Rs. {totalExpensesVal.toLocaleString()}</h4>
+                  <h4 className="text-3xl sm:text-4xl font-semibold font-display text-black leading-none">
+                    Rs. {totalExpensesVal.toLocaleString()}
+                  </h4>
+                  <span className="text-xs text-black/75 font-medium mt-1 block">Total operating expenditures</span>
                 </div>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[10px] text-muted font-medium">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[11px] font-medium text-black/80">
                   <div className="flex justify-between">
                     <span>Salary:</span>
-                    <span className="font-bold text-foreground">Rs. {expenseCategorySums.salary.toLocaleString()}</span>
+                    <span className="font-bold text-black">Rs. {expenseCategorySums.salary.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Rent:</span>
-                    <span className="font-bold text-foreground">Rs. {expenseCategorySums.rent.toLocaleString()}</span>
+                    <span className="font-bold text-black">Rs. {expenseCategorySums.rent.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Travel:</span>
-                    <span className="font-bold text-foreground">Rs. {expenseCategorySums.travel.toLocaleString()}</span>
+                    <span className="font-bold text-black">Rs. {expenseCategorySums.travel.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Food:</span>
-                    <span className="font-bold text-foreground">Rs. {expenseCategorySums.food.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Misc:</span>
-                    <span className="font-bold text-foreground">Rs. {expenseCategorySums.miscellaneous.toLocaleString()}</span>
+                    <span className="font-bold text-black">Rs. {expenseCategorySums.food.toLocaleString()}</span>
                   </div>
                 </div>
               </div>
               <button
                 onClick={() => setCurrentTab("expenses")}
-                className="text-left text-xs font-bold text-accent hover:text-accent-dark transition-colors mt-3"
+                className="text-left text-xs font-bold text-black hover:opacity-80 transition-opacity mt-2 relative z-10 flex items-center gap-1 cursor-pointer"
               >
-                View Expense Log &rarr;
+                <span>View Expense Log</span>
+                <span>&rarr;</span>
               </button>
             </div>
 
-            {/* Purchases Tracker Card */}
-            <div className="bg-card border border-border/80 rounded-[28px] shadow-sm hover:shadow-md transition-all p-6 flex flex-col justify-between h-[250px]">
-              <div>
-                <div className="flex items-center justify-between border-b border-border/60 pb-2.5 mb-3">
-                  <h3 className="font-semibold text-sm font-display flex items-center gap-2">
-                    <Briefcase size={16} className="text-blue-500" />
-                    Purchases Tracker
-                  </h3>
-                  <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
-                    outstandingPurchasesVal > 0 ? "bg-amber-500/10 text-amber-600 border-amber-500/20" : "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
-                  }`}>
-                    {outstandingPurchasesVal > 0 ? "Pending Dues" : "Settled"}
-                  </span>
+            {/* Purchases Tracker Card (Signature Sunset Gradient Style) */}
+            <div
+              className="relative rounded-[28px] p-6 shadow-xl shadow-orange-500/10 overflow-hidden flex flex-col justify-between min-h-[260px] transition-all hover:scale-[1.01] text-black"
+              style={{
+                background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
+              }}
+            >
+              <div className="relative z-10">
+                <div className="flex items-center justify-between border-b border-black/10 pb-2.5 mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-black/85 uppercase tracking-wider block">Purchases Tracker</span>
+                    <span className="text-[10px] font-bold bg-black/10 text-black border border-black/10 px-2 py-0.5 rounded-full">
+                      {outstandingPurchasesVal > 0 ? "Pending Dues" : "Settled"}
+                    </span>
+                  </div>
+                  <div
+                    className="p-2 text-white rounded-xl shadow-md shrink-0"
+                    style={{ background: "linear-gradient(135deg, #60A5FA 0%, #3B82F6 50%, #1D4ED8 100%)" }}
+                  >
+                    <Briefcase size={16} />
+                  </div>
                 </div>
-                <div className="mb-2">
-                  <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Total Purchases</span>
-                  <h4 className="text-2xl font-semibold font-display text-foreground mt-0.5">Rs. {totalPurchasesVal.toLocaleString()}</h4>
-                  {outstandingPurchasesVal > 0 && (
-                    <p className="text-[10px] text-red-500 font-medium mt-0.5">Rs. {outstandingPurchasesVal.toLocaleString()} outstanding dues</p>
+                <div className="mb-3">
+                  <h4 className="text-3xl sm:text-4xl font-semibold font-display text-black leading-none">
+                    Rs. {totalPurchasesVal.toLocaleString()}
+                  </h4>
+                  {outstandingPurchasesVal > 0 ? (
+                    <span className="text-xs text-black/90 font-bold mt-1 block">Rs. {outstandingPurchasesVal.toLocaleString()} pending dues</span>
+                  ) : (
+                    <span className="text-xs text-black/75 font-medium mt-1 block">All vendor bills settled</span>
                   )}
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[9px] text-muted uppercase font-bold tracking-wider block">Recent Invoices</span>
+                  <span className="text-[10px] text-black/75 uppercase font-bold tracking-wider block">Recent Invoices</span>
                   {purchases.slice(0, 2).map((p) => (
-                    <div key={p._id} className="flex justify-between items-center text-[10px] border-b border-border/40 pb-1">
-                      <span className="truncate max-w-[120px] font-medium text-foreground">{p.supplier}</span>
-                      <span className="text-muted font-semibold">Rs. {p.amount.toLocaleString()}</span>
+                    <div key={p._id} className="flex justify-between items-center text-[11px] border-b border-black/10 pb-1">
+                      <span className="truncate max-w-[130px] font-medium text-black">{p.supplier}</span>
+                      <span className="text-black font-bold">Rs. {p.amount.toLocaleString()}</span>
                     </div>
                   ))}
                   {purchases.length === 0 && (
-                    <span className="text-[10px] text-muted italic">No purchases logged</span>
+                    <span className="text-[11px] text-black/75 italic">No purchases logged</span>
                   )}
                 </div>
               </div>
               <button
                 onClick={() => setCurrentTab("purchase")}
-                className="text-left text-xs font-bold text-accent hover:text-accent-dark transition-colors mt-3"
+                className="text-left text-xs font-bold text-black hover:opacity-80 transition-opacity mt-2 relative z-10 flex items-center gap-1 cursor-pointer"
               >
-                View Purchases Tracker &rarr;
+                <span>View Purchases Tracker</span>
+                <span>&rarr;</span>
               </button>
             </div>
 
-            {/* Material Inventory Card */}
-            <div className="bg-card border border-border/80 rounded-[28px] shadow-sm hover:shadow-md transition-all p-6 flex flex-col justify-between h-[250px]">
-              <div>
-                <div className="flex items-center justify-between border-b border-border/60 pb-2.5 mb-3">
-                  <h3 className="font-semibold text-sm font-display flex items-center gap-2">
-                    <Package size={16} className="text-emerald-500" />
-                    Material Inventory
-                  </h3>
-                  <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
-                    (lowStockVal + outOfStockVal) > 0 ? "bg-red-500/10 text-red-600 border-red-500/20" : "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
-                  }`}>
-                    {(lowStockVal + outOfStockVal) > 0 ? "Alerts" : "Ok"}
-                  </span>
-                </div>
-                <div className="mb-2 flex justify-between items-center">
-                  <div>
-                    <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Low Stock / Out</span>
-                    <h4 className="text-2xl font-semibold font-display text-foreground mt-0.5">{(lowStockVal + outOfStockVal)} Items</h4>
+            {/* Material Inventory Card (Signature Sunset Gradient Style) */}
+            <div
+              className="relative rounded-[28px] p-6 shadow-xl shadow-orange-500/10 overflow-hidden flex flex-col justify-between min-h-[260px] transition-all hover:scale-[1.01] text-black"
+              style={{
+                background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
+              }}
+            >
+              <div className="relative z-10">
+                <div className="flex items-center justify-between border-b border-black/10 pb-2.5 mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-black/85 uppercase tracking-wider block">Material Inventory</span>
+                    <span className="text-[10px] font-bold bg-black/10 text-black border border-black/10 px-2 py-0.5 rounded-full">
+                      {(lowStockVal + outOfStockVal) > 0 ? "Alerts" : "Ok"}
+                    </span>
                   </div>
-                  <div className="text-right text-[10px] font-medium space-y-0.5">
-                    <div className="text-amber-500">{lowStockVal} Low Stock</div>
-                    <div className="text-red-500">{outOfStockVal} Out of Stock</div>
+                  <div
+                    className="p-2 text-white rounded-xl shadow-md shrink-0"
+                    style={{ background: "linear-gradient(135deg, #34D399 0%, #10B981 50%, #059669 100%)" }}
+                  >
+                    <Package size={16} />
+                  </div>
+                </div>
+                <div className="mb-3 flex justify-between items-end">
+                  <div>
+                    <h4 className="text-3xl sm:text-4xl font-semibold font-display text-black leading-none">
+                      {(lowStockVal + outOfStockVal)} Items
+                    </h4>
+                    <span className="text-xs text-black/75 font-medium mt-1 block">Stock alerts requiring restock</span>
+                  </div>
+                  <div className="text-right text-[10px] font-bold space-y-0.5">
+                    <div className="text-black bg-black/10 px-2 py-0.5 rounded-full">{lowStockVal} Low Stock</div>
+                    {outOfStockVal > 0 && <div className="text-black bg-black/15 px-2 py-0.5 rounded-full mt-1">{outOfStockVal} Out</div>}
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[9px] text-muted uppercase font-bold tracking-wider block">Critical Materials</span>
+                  <span className="text-[10px] text-black/75 uppercase font-bold tracking-wider block">Critical Materials</span>
                   {inventoryItems.filter((i) => i.quantity <= i.alertLevel).slice(0, 2).map((i) => (
-                    <div key={i._id} className="flex justify-between items-center text-[10px] border-b border-border/40 pb-1">
-                      <span className="truncate max-w-[120px] font-medium text-foreground">{i.name}</span>
-                      <span className={`font-bold ${i.quantity === 0 ? "text-red-500" : "text-amber-500"}`}>
+                    <div key={i._id} className="flex justify-between items-center text-[11px] border-b border-black/10 pb-1">
+                      <span className="truncate max-w-[130px] font-medium text-black">{i.name}</span>
+                      <span className="font-bold text-black">
                         {i.quantity} {i.unit}
                       </span>
                     </div>
                   ))}
                   {inventoryItems.filter((i) => i.quantity <= i.alertLevel).length === 0 && (
-                    <span className="text-[10px] text-emerald-500 font-medium italic">All materials fully stocked</span>
+                    <span className="text-[11px] text-black font-semibold italic">All materials fully stocked</span>
                   )}
                 </div>
               </div>
               <button
                 onClick={() => setCurrentTab("inventory")}
-                className="text-left text-xs font-bold text-accent hover:text-accent-dark transition-colors mt-3"
+                className="text-left text-xs font-bold text-black hover:opacity-80 transition-opacity mt-2 relative z-10 flex items-center gap-1 cursor-pointer"
               >
-                View Material Inventory &rarr;
+                <span>View Material Inventory</span>
+                <span>&rarr;</span>
               </button>
             </div>
           </div>
@@ -957,7 +1013,10 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
 
                 <button
                   onClick={() => handlePreviewStatement("all")}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#FE914C] hover:bg-[#E2752D] text-white rounded-lg text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
+                  style={{
+                    background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
+                  }}
+                  className="flex items-center gap-1.5 px-4 py-2 text-black rounded-xl text-xs font-bold transition-all shadow-md shadow-orange-500/20 active:scale-95 cursor-pointer hover:opacity-95"
                   title="Open printable statement preview modal"
                 >
                   <Printer size={14} />
@@ -984,7 +1043,10 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                 <div className="flex items-center gap-1.5 mt-3 w-full">
                   <button
                     onClick={() => handlePreviewStatement("all")}
-                    className="flex-1 py-1.5 px-2.5 rounded-xl bg-[#18181B] text-white hover:bg-black text-[11px] font-semibold transition-all flex items-center justify-center gap-1 shadow-xs"
+                    style={{
+                      background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 100%)",
+                    }}
+                    className="flex-1 py-1.5 px-2.5 rounded-xl text-black hover:opacity-95 text-[11px] font-bold transition-all flex items-center justify-center gap-1 shadow-xs"
                   >
                     <Eye size={12} />
                     <span>PDF</span>
@@ -1003,7 +1065,10 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               {/* Sales Only */}
               <div className="p-5 rounded-2xl border border-border/80 bg-card hover:border-blue-500 hover:shadow-md transition-all flex flex-col items-center justify-between text-center group">
                 <div className="flex flex-col items-center">
-                  <div className="p-2.5 bg-blue-600 text-white rounded-xl shadow-xs mb-2 group-hover:scale-105 transition-transform">
+                  <div
+                    style={{ background: "linear-gradient(135deg, #60A5FA 0%, #3B82F6 50%, #1D4ED8 100%)" }}
+                    className="p-2.5 text-white rounded-xl shadow-md shadow-blue-500/20 mb-2 group-hover:scale-105 transition-transform"
+                  >
                     <TrendingUp size={18} />
                   </div>
                   <span className="text-xs font-bold text-foreground">Sales Only</span>
@@ -1031,7 +1096,10 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               {/* Expenses Only */}
               <div className="p-5 rounded-2xl border border-border/80 bg-card hover:border-red-500 hover:shadow-md transition-all flex flex-col items-center justify-between text-center group">
                 <div className="flex flex-col items-center">
-                  <div className="p-2.5 bg-red-600 text-white rounded-xl shadow-xs mb-2 group-hover:scale-105 transition-transform">
+                  <div
+                    style={{ background: "linear-gradient(135deg, #F87171 0%, #EF4444 50%, #DC2626 100%)" }}
+                    className="p-2.5 text-white rounded-xl shadow-md shadow-red-500/20 mb-2 group-hover:scale-105 transition-transform"
+                  >
                     <DollarSign size={18} />
                   </div>
                   <span className="text-xs font-bold text-foreground">Expenses Only</span>
@@ -1059,7 +1127,10 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               {/* Purchases Only */}
               <div className="p-5 rounded-2xl border border-border/80 bg-card hover:border-amber-500 hover:shadow-md transition-all flex flex-col items-center justify-between text-center group">
                 <div className="flex flex-col items-center">
-                  <div className="p-2.5 bg-amber-600 text-white rounded-xl shadow-xs mb-2 group-hover:scale-105 transition-transform">
+                  <div
+                    style={{ background: "linear-gradient(135deg, #FBBF24 0%, #F59E0B 50%, #D97706 100%)" }}
+                    className="p-2.5 text-white rounded-xl shadow-md shadow-amber-500/20 mb-2 group-hover:scale-105 transition-transform"
+                  >
                     <Briefcase size={18} />
                   </div>
                   <span className="text-xs font-bold text-foreground">Purchases Only</span>
@@ -1087,7 +1158,10 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               {/* Inventory Catalog */}
               <div className="p-5 rounded-2xl border border-border/80 bg-card hover:border-emerald-500 hover:shadow-md transition-all flex flex-col items-center justify-between text-center group sm:col-span-2 lg:col-span-1">
                 <div className="flex flex-col items-center">
-                  <div className="p-2.5 bg-emerald-600 text-white rounded-xl shadow-xs mb-2 group-hover:scale-105 transition-transform">
+                  <div
+                    style={{ background: "linear-gradient(135deg, #34D399 0%, #10B981 50%, #059669 100%)" }}
+                    className="p-2.5 text-white rounded-xl shadow-md shadow-emerald-500/20 mb-2 group-hover:scale-105 transition-transform"
+                  >
                     <Package size={18} />
                   </div>
                   <span className="text-xs font-bold text-foreground">Inventory Catalog</span>
@@ -1313,10 +1387,13 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
             </span>
             <button
               onClick={() => setShowNoteInput(!showNoteInput)}
-              className="p-1.5 rounded-full hover:bg-border text-accent transition-colors"
+              style={{
+                background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 100%)",
+              }}
+              className="p-1.5 rounded-full text-black shadow-xs hover:scale-110 active:scale-95 transition-transform cursor-pointer"
               aria-label="Add Note"
             >
-              <Plus size={18} />
+              <Plus size={16} />
             </button>
           </h2>
 
@@ -1333,9 +1410,12 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                 />
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-accent text-white text-xs font-bold rounded-xl hover:bg-accent-dark transition-all shadow-md shadow-accent/15"
+                  style={{
+                    background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
+                  }}
+                  className="px-4 py-2 text-black text-xs font-bold rounded-xl shadow-md shadow-orange-500/20 hover:scale-[1.02] active:scale-95 transition-all cursor-pointer"
                 >
-                  Save
+                  Save Note
                 </button>
               </div>
             </form>
@@ -1472,10 +1552,13 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
           {/* Core FAB Toggle Button */}
           <button
             onClick={() => setFabOpen(!fabOpen)}
-            className="h-12 w-12 rounded-full bg-accent text-white shadow-xl flex items-center justify-center hover:bg-accent-dark transition-all hover:scale-105"
+            style={{
+              background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
+            }}
+            className="h-14 w-14 rounded-full text-black shadow-2xl shadow-orange-500/40 flex items-center justify-center transition-all hover:scale-110 active:scale-95 cursor-pointer"
             aria-label="Quick action trigger"
           >
-            <Plus size={24} className={`transition-transform duration-200 ${fabOpen ? "rotate-45" : ""}`} />
+            <Plus size={28} className={`transition-transform duration-200 text-black ${fabOpen ? "rotate-45" : ""}`} />
           </button>
         </div>
       </div>

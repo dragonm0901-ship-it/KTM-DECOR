@@ -339,16 +339,19 @@ export const ExpensesTab: React.FC = () => {
             </select>
             <button
               onClick={handlePreviewClick}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#FE914C] text-white text-[11px] rounded-xl font-bold hover:bg-[#E2752D] transition-all shadow-xs cursor-pointer"
+              style={{
+                background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
+              }}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 text-black text-[11px] rounded-xl font-bold transition-all shadow-md shadow-orange-500/20 active:scale-95 cursor-pointer hover:opacity-95"
               title="Preview and Print PDF Expenses Statement"
             >
               <Printer size={13} />
-              <span>Preview PDF</span>
+              <span>Preview / Print PDF</span>
             </button>
             <button
               onClick={handleExportClick}
               disabled={exporting}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-accent/90 text-white text-[11px] rounded-xl font-bold hover:bg-accent-dark transition-all disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-accent/90 text-white text-[11px] rounded-xl font-bold hover:bg-accent-dark transition-all disabled:opacity-50 cursor-pointer"
             >
               {exporting ? "Exporting..." : "Export CSV"}
             </button>
@@ -356,7 +359,10 @@ export const ExpensesTab: React.FC = () => {
 
           <button
             onClick={handleOpenAddModal}
-            className="flex items-center justify-center gap-1.5 py-2 px-4 bg-accent hover:bg-accent-dark text-white rounded-xl font-bold text-xs transition-all shadow-md shadow-accent/15 self-start md:self-auto h-9"
+            style={{
+              background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
+            }}
+            className="flex items-center justify-center gap-1.5 py-2 px-4 text-black rounded-xl font-bold text-xs transition-all shadow-md shadow-orange-500/20 hover:scale-[1.02] active:scale-95 self-start md:self-auto h-9 cursor-pointer"
           >
             <Plus size={16} />
             Log New Expense
