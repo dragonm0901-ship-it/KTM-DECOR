@@ -11,7 +11,8 @@ import ExcelJS from "exceljs";
 import helmet from "helmet";
 import mongoSanitize from "express-mongo-sanitize";
 import { rateLimit } from "express-rate-limit";
-import NepaliDate from "nepali-date-converter";
+import pkgNepaliDate from "nepali-date-converter";
+const NepaliDate = pkgNepaliDate.default || pkgNepaliDate;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -2138,16 +2139,34 @@ app.delete("/api/notes/:id", protect, async (req, res) => {
 });
 
 
-// Helper to get previous month and year (1-based month)
-function getPreviousMonthAndYear() {
-  const now = new Date();
-  let month = now.getMonth();
-  let year = now.getFullYear();
-  if (month === 0) {
-    month = 12;
-    year -= 1;
+// Nepali calendar month names
+const NEPALI_MONTH_NAMES = [
+  "Baisakh", "Jestha", "Ashadh", "Shrawan", "Bhadra", "Ashwin",
+  "Kartik", "Mangsir", "Poush", "Magh", "Falgun", "Chaitra"
+];
+
+// Helper to format Nepali month and year label
+function getNepaliMonthLabel(month, year) {
+  const mIdx = parseInt(month, 10) - 1;
+  const mName = NEPALI_MONTH_NAMES[mIdx] || `Month ${month}`;
+  return `${mName} ${year} BS`;
+}
+
+// Helper to get previous Nepali month and year (1-based month, BS year)
+function getPreviousNepaliMonthAndYear(offsetMonths = 1) {
+  const nd = new NepaliDate();
+  let mIdx = nd.getMonth(); // 0 to 11
+  let year = nd.getYear();
+
+  for (let i = 0; i < offsetMonths; i++) {
+    if (mIdx === 0) {
+      mIdx = 11;
+      year -= 1;
+    } else {
+      mIdx -= 1;
+    }
   }
-  return { month, year };
+  return { month: mIdx + 1, year };
 }
 
 // Helper to generate CSV text content for a statement type, month, and year using dry exportService
@@ -2157,33 +2176,40 @@ async function generateStatementCSVText(type, month, year) {
   return csvBuffer.toString("utf-8");
 }
 
-// Function to generate and save missing statements for the previous month
-async function generateMissingPreviousMonthStatements() {
-  const { month, year } = getPreviousMonthAndYear();
+// Function to generate and save missing statements for past completed Nepali months (BS)
+async function generateMissingNepaliMonthStatements(monthsBack = 4) {
   const types = ["sales", "expenses", "purchases", "all"];
-  const monthNames = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
-  const monthLabel = monthNames[month - 1];
 
-  for (const type of types) {
-    const exists = await MonthlyStatement.findOne({ month, year, type });
-    if (!exists) {
-      try {
-        const csvText = await generateStatementCSVText(type, month, year);
-        const filename = `${type}_statement_${monthLabel}_${year}.csv`;
-        
-        await MonthlyStatement.create({
-          month,
-          year,
-          type,
-          filename,
-          content: csvText
-        });
-        console.log(`Auto-generated monthly statement: ${filename}`);
-      } catch (err) {
-        console.error(`Error generating auto monthly statement for ${type} (${monthLabel} ${year}):`, err);
+  // Clean up any obsolete statements generated for Gregorian calendar periods (year < 2070)
+  try {
+    await MonthlyStatement.deleteMany({ year: { $lt: 2070 } });
+  } catch (cleanErr) {
+    console.warn("Could not clean old Gregorian statements:", cleanErr.message);
+  }
+
+  for (let offset = 1; offset <= monthsBack; offset++) {
+    const { month, year } = getPreviousNepaliMonthAndYear(offset);
+    const monthLabel = NEPALI_MONTH_NAMES[month - 1];
+
+    for (const type of types) {
+      const exists = await MonthlyStatement.findOne({ month, year, type });
+      if (!exists) {
+        try {
+          const csvText = await generateStatementCSVText(type, month, year);
+          const prefix = type === "all" ? "combined" : type;
+          const filename = `${prefix}_statement_${monthLabel}_${year}_BS.csv`;
+          
+          await MonthlyStatement.create({
+            month,
+            year,
+            type,
+            filename,
+            content: csvText
+          });
+          console.log(`Auto-generated Nepali BS monthly statement: ${filename}`);
+        } catch (err) {
+          console.error(`Error generating auto Nepali monthly statement for ${type} (${monthLabel} ${year} BS):`, err);
+        }
       }
     }
   }
@@ -2200,8 +2226,8 @@ app.get("/api/cron/generate-statements", async (req, res) => {
   }
 
   try {
-    await generateMissingPreviousMonthStatements();
-    res.json({ message: "Monthly statements checked and generated successfully" });
+    await generateMissingNepaliMonthStatements(4);
+    res.json({ message: "Nepali monthly statements checked and generated successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -2209,7 +2235,8 @@ app.get("/api/cron/generate-statements", async (req, res) => {
 
 // Export monthly or all-time statements (Admin only) - Beautifully formatted with ExcelJS
 app.get("/api/export/statement", protect, admin, async (req, res) => {
-  const { type = "all", month = "all", year = new Date().getFullYear().toString() } = req.query;
+  const currentBsYear = new NepaliDate().getYear().toString();
+  const { type = "all", month = "all", year = currentBsYear } = req.query;
 
   try {
     const { workbook, periodLabel } = await buildStatementWorkbook(type, month, year);
@@ -2233,11 +2260,11 @@ app.get("/api/export/statement", protect, admin, async (req, res) => {
 // Get all archived monthly statements (Admin only)
 app.get("/api/export/archives", protect, admin, async (req, res) => {
   try {
-    // Lazy check: trigger auto-generator for previous month if missing
-    await generateMissingPreviousMonthStatements();
+    // Lazy check: trigger auto-generator for past completed Nepali months if missing
+    await generateMissingNepaliMonthStatements(4);
     
-    // Fetch statement metadata, excluding content field
-    const archives = await MonthlyStatement.find({})
+    // Fetch statement metadata, strictly for BS years, excluding content field
+    const archives = await MonthlyStatement.find({ year: { $gte: 2070 } })
       .select("-content")
       .sort({ year: -1, month: -1, type: 1 });
       
@@ -2342,12 +2369,12 @@ app.get("/api/attendance", protect, async (req, res) => {
         // Nepali Bikram Sambat (BS) month range
         try {
           const bsStart = new NepaliDate(parsedYear, parsedMonth - 1, 1).toJsDate();
-          bsStart.setUTCHours(0, 0, 0, 0);
+          bsStart.setHours(0, 0, 0, 0);
 
           const nextMonth = parsedMonth === 12 ? 1 : parsedMonth + 1;
           const nextYear = parsedMonth === 12 ? parsedYear + 1 : parsedYear;
           const bsEnd = new NepaliDate(nextYear, nextMonth - 1, 1).toJsDate();
-          bsEnd.setUTCHours(0, 0, 0, 0);
+          bsEnd.setHours(0, 0, 0, 0);
 
           query.date = { $gte: bsStart, $lt: bsEnd };
         } catch {
@@ -2563,13 +2590,13 @@ app.post("/api/salaries", protect, admin, validate(createSalarySchema), async (r
 
     let newExpense = null;
     if (status === "paid") {
-      const monthName = new Date(year, month - 1, 1).toLocaleString("default", { month: "long" });
+      const monthLabel = getNepaliMonthLabel(month, year);
       newExpense = new Expense({
-        title: `Salary Payment - ${staffUser.name} (${monthName} ${year})`,
+        title: `Salary Payment - ${staffUser.name} (${monthLabel})`,
         category: "salary",
         amount: finalSalary,
         date: paymentDate ? new Date(paymentDate).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
-        description: `Salary payment for ${staffUser.name} (${monthName} ${year}). Present: ${presentDays} days, Absent: ${absentDays} days. Note: ${notes || "None"}`,
+        description: `Salary payment for ${staffUser.name} (${monthLabel}). Present: ${presentDays} days, Absent: ${absentDays} days. Note: ${notes || "None"}`,
         createdBy: req.user._id,
       });
       await newExpense.save();
@@ -2605,11 +2632,11 @@ app.post("/api/salaries", protect, admin, validate(createSalarySchema), async (r
     triggerPusher("salary_created", populatedSalary);
 
     // Log Activity
-    const monthName = new Date(year, month - 1, 1).toLocaleString("default", { month: "long" });
+    const monthLabel = getNepaliMonthLabel(month, year);
     await logActivity(
       req.user._id,
       "Salary Generated",
-      `Generated ${status.toUpperCase()} salary of Rs. ${finalSalary.toLocaleString()} for ${staffUser.name} for ${monthName} ${year}`
+      `Generated ${status.toUpperCase()} salary of Rs. ${finalSalary.toLocaleString()} for ${staffUser.name} for ${monthLabel}`
     );
 
     res.status(201).json(populatedSalary);
@@ -2642,7 +2669,7 @@ app.put("/api/salaries/:id", protect, admin, validate(updateSalarySchema), async
     if (status !== undefined) salary.status = status;
     if (notes !== undefined) salary.notes = notes;
 
-    const monthName = new Date(salary.year, salary.month - 1, 1).toLocaleString("default", { month: "long" });
+    const monthLabel = getNepaliMonthLabel(salary.month, salary.year);
 
     let newExpenseId = oldExpenseId;
 
@@ -2651,8 +2678,8 @@ app.put("/api/salaries/:id", protect, admin, validate(updateSalarySchema), async
       if (paymentMethod) salary.paymentMethod = paymentMethod;
 
       const expenseDate = salary.paymentDate.toISOString().split("T")[0];
-      const expenseTitle = `Salary Payment - ${staffUser.name} (${monthName} ${salary.year})`;
-      const expenseDesc = `Salary payment for ${staffUser.name} (${monthName} ${salary.year}). Present: ${salary.presentDays} days, Absent: ${salary.absentDays} days. Note: ${salary.notes || "None"}`;
+      const expenseTitle = `Salary Payment - ${staffUser.name} (${monthLabel})`;
+      const expenseDesc = `Salary payment for ${staffUser.name} (${monthLabel}). Present: ${salary.presentDays} days, Absent: ${salary.absentDays} days. Note: ${salary.notes || "None"}`;
 
       if (oldStatus === "pending") {
         // Transition from pending to paid: Create new expense
@@ -2707,7 +2734,7 @@ app.put("/api/salaries/:id", protect, admin, validate(updateSalarySchema), async
     await logActivity(
       req.user._id,
       "Salary Updated",
-      `Updated salary details for ${staffUser.name} for ${monthName} ${salary.year} (Status: ${salary.status.toUpperCase()})`
+      `Updated salary details for ${staffUser.name} for ${monthLabel} (Status: ${salary.status.toUpperCase()})`
     );
 
     res.json(populatedSalary);
@@ -2725,7 +2752,7 @@ app.delete("/api/salaries/:id", protect, admin, async (req, res) => {
     }
 
     const staffUser = await User.findById(salary.user);
-    const monthName = new Date(salary.year, salary.month - 1, 1).toLocaleString("default", { month: "long" });
+    const monthLabel = getNepaliMonthLabel(salary.month, salary.year);
 
     if (salary.linkedExpense) {
       await Expense.findByIdAndDelete(salary.linkedExpense);
@@ -2741,7 +2768,7 @@ app.delete("/api/salaries/:id", protect, admin, async (req, res) => {
     await logActivity(
       req.user._id,
       "Salary Deleted",
-      `Deleted salary record for ${staffUser?.name || "Staff"} for ${monthName} ${salary.year}`
+      `Deleted salary record for ${staffUser?.name || "Staff"} for ${monthLabel}`
     );
 
     res.json({ message: "Salary record deleted successfully" });
@@ -2771,7 +2798,7 @@ if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
 if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
   setInterval(() => {
     if (mongoose.connection?.readyState === 1) {
-      generateMissingPreviousMonthStatements().catch((err) => {
+      generateMissingNepaliMonthStatements(4).catch((err) => {
         console.error("Interval auto statement generation error:", err);
       });
     }

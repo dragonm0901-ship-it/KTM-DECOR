@@ -1,5 +1,6 @@
 import ExcelJS from "exceljs";
-import NepaliDate from "nepali-date-converter";
+import pkgNepaliDate from "nepali-date-converter";
+const NepaliDate = pkgNepaliDate.default || pkgNepaliDate;
 import Sale from "../models/Sale.js";
 import Expense from "../models/Expense.js";
 import Purchase from "../models/Purchase.js";
@@ -10,7 +11,7 @@ const formatBsDate = (d) => {
     const nd = new NepaliDate(new Date(d));
     return nd.format("YYYY-MM-DD");
   } catch {
-    return new Date(d).toLocaleDateString();
+    return new Date(d).toISOString().slice(0, 10);
   }
 };
 
@@ -22,36 +23,27 @@ export const buildStatementWorkbook = async (type, month, year) => {
     "Kartik", "Mangsir", "Poush", "Magh", "Falgun", "Chaitra"
   ];
 
-  const gregorianMonthNames = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
+  let yNum = parseInt(year, 10);
+  if (isNaN(yNum) || yNum < 2070 || yNum > 2100) {
+    // Strictly default to current Nepali BS year - no Gregorian calculations
+    yNum = new NepaliDate().getYear();
+  }
 
-  const yNum = parseInt(year, 10);
-  const isNepaliYear = yNum >= 2070 && yNum <= 2100;
+  let periodLabel = "All_Time";
 
   if (month !== "all") {
     const mNum = parseInt(month, 10);
-    if (isNepaliYear) {
-      try {
-        const bsStart = new NepaliDate(yNum, mNum - 1, 1).toJsDate();
-        bsStart.setUTCHours(0, 0, 0, 0);
+    if (mNum >= 1 && mNum <= 12) {
+      const bsStart = new NepaliDate(yNum, mNum - 1, 1).toJsDate();
+      bsStart.setHours(0, 0, 0, 0);
 
-        const nextMonth = mNum === 12 ? 1 : mNum + 1;
-        const nextYear = mNum === 12 ? yNum + 1 : yNum;
-        const bsEnd = new NepaliDate(nextYear, nextMonth - 1, 1).toJsDate();
-        bsEnd.setUTCHours(0, 0, 0, 0);
+      const nextMonth = mNum === 12 ? 1 : mNum + 1;
+      const nextYear = mNum === 12 ? yNum + 1 : yNum;
+      const bsEnd = new NepaliDate(nextYear, nextMonth - 1, 1).toJsDate();
+      bsEnd.setHours(0, 0, 0, 0);
 
-        dateFilter = { date: { $gte: bsStart, $lt: bsEnd } };
-      } catch {
-        const startOfMonth = new Date(Date.UTC(yNum, mNum - 1, 1, 0, 0, 0));
-        const endOfMonth = new Date(Date.UTC(yNum, mNum, 0, 23, 59, 59, 999));
-        dateFilter = { date: { $gte: startOfMonth, $lte: endOfMonth } };
-      }
-    } else {
-      const startOfMonth = new Date(Date.UTC(yNum, mNum - 1, 1, 0, 0, 0));
-      const endOfMonth = new Date(Date.UTC(yNum, mNum, 0, 23, 59, 59, 999));
-      dateFilter = { date: { $gte: startOfMonth, $lte: endOfMonth } };
+      dateFilter = { date: { $gte: bsStart, $lt: bsEnd } };
+      periodLabel = `${nepaliMonthNames[mNum - 1]}_${yNum}_BS`;
     }
   }
 
@@ -67,16 +59,6 @@ export const buildStatementWorkbook = async (type, month, year) => {
   }
   if (type === "all" || type === "purchases") {
     purchases = await Purchase.find(dateFilter).sort({ date: 1 }).lean();
-  }
-
-  let periodLabel = "All_Time";
-  if (month !== "all") {
-    const mNum = parseInt(month, 10);
-    if (isNepaliYear) {
-      periodLabel = `${nepaliMonthNames[mNum - 1]}_${year}_BS`;
-    } else {
-      periodLabel = `${gregorianMonthNames[mNum - 1]}_${year}`;
-    }
   }
 
   const cleanPeriodLabel = periodLabel.replace(/_/g, " ");

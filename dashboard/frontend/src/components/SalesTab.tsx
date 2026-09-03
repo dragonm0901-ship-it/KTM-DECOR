@@ -19,7 +19,8 @@ import {
   NEPALI_YEARS,
   getCurrentNepaliDate,
   formatNepali,
-  formatNepaliShort
+  formatNepaliShort,
+  formatArchiveStatementLabel,
 } from "../utils/nepaliDate";
 
 export const SalesTab: React.FC = () => {
@@ -352,7 +353,7 @@ export const SalesTab: React.FC = () => {
                   className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border bg-background hover:bg-accent/[0.04] hover:border-accent/30 text-xs font-bold transition-all"
                 >
                   <TrendingUp size={12} className="text-accent" />
-                  {archive.filename.replace("sales_statement_", "").replace(".csv", "").replace("_", " ")}
+                  {formatArchiveStatementLabel(archive)}
                 </button>
               ))}
           </div>

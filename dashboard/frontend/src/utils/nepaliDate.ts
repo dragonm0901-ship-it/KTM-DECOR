@@ -190,3 +190,39 @@ export const getFirstDayOfBsMonth = (year: number, month: number): number => {
     return 0;
   }
 };
+
+/**
+ * Formats a monthly statement archive item into a clean Nepali BS calendar label.
+ * Example: "Shrawan (साउन) 2083 BS"
+ */
+export const formatArchiveStatementLabel = (archive: {
+  filename?: string;
+  month?: number;
+  year?: number;
+}): string => {
+  if (archive.month && archive.year && archive.year >= 2070) {
+    const monthObj = NEPALI_MONTHS.find((m) => m.value === archive.month);
+    const monthStr = monthObj ? `${monthObj.name} (${monthObj.nepaliName})` : `Month ${archive.month}`;
+    return `${monthStr} ${archive.year} BS`;
+  }
+
+  if (!archive.filename) return "Statement Archive";
+
+  let label = archive.filename
+    .replace(/^(combined|sales|expenses|purchases|all)_statement_/, "")
+    .replace(/\.csv$/, "")
+    .replace(/_BS$/, " BS")
+    .replace(/_/g, " ")
+    .trim();
+
+  // Enhance with Devanagari month if matching a known Nepali month
+  for (const m of NEPALI_MONTHS) {
+    if (label.includes(m.name) && !label.includes(m.nepaliName)) {
+      label = label.replace(m.name, `${m.name} (${m.nepaliName})`);
+      break;
+    }
+  }
+
+  return label;
+};
+

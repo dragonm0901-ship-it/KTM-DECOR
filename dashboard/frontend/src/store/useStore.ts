@@ -1863,12 +1863,14 @@ export const useStore = create<DashboardState>()(
       const a = document.createElement("a");
       a.href = url;
       
-      const monthNames = [
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"
+      const nepaliMonthNames = [
+        "Baisakh", "Jestha", "Ashadh", "Shrawan", "Bhadra", "Ashwin",
+        "Kartik", "Mangsir", "Poush", "Magh", "Falgun", "Chaitra"
       ];
-      const periodLabel = month === "all" ? "All_Time" : `${monthNames[parseInt(month, 10) - 1]}_${year}`;
-      a.download = `${type}_statement_${periodLabel}.csv`;
+      const mNum = parseInt(month, 10);
+      const periodLabel = month === "all" ? `All_Time_${year}_BS` : `${nepaliMonthNames[mNum - 1]}_${year}_BS`;
+      const prefix = type === "all" ? "combined" : type;
+      a.download = `${prefix}_statement_${periodLabel}.csv`;
       
       document.body.appendChild(a);
       a.click();

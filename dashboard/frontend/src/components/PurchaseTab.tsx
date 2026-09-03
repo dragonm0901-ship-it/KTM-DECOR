@@ -17,6 +17,7 @@ import {
   NEPALI_YEARS,
   getCurrentNepaliDate,
   formatNepali,
+  formatArchiveStatementLabel,
 } from "../utils/nepaliDate";
 
 interface FormPurchaseItem {
@@ -344,7 +345,7 @@ export const PurchaseTab: React.FC = () => {
                   className="flex items-center gap-2 px-3 py-1.5 rounded border border-border bg-background hover:bg-accent/[0.04] hover:border-accent/30 text-xs font-bold transition-all"
                 >
                   <Briefcase size={12} className="text-accent" />
-                  {archive.filename.replace("purchases_statement_", "").replace(".csv", "").replace("_", " ")}
+                  {formatArchiveStatementLabel(archive)}
                 </button>
               ))}
           </div>

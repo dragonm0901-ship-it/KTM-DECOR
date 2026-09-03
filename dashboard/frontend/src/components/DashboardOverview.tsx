@@ -28,6 +28,7 @@ import {
   getCurrentNepaliDate,
   NEPALI_MONTHS,
   NEPALI_YEARS,
+  formatArchiveStatementLabel,
 } from "../utils/nepaliDate";
 
 interface OverviewProps {
@@ -1084,7 +1085,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                             Combined Statement
                           </p>
                           <p className="text-[10px] text-muted font-medium mt-0.5">
-                            {archive.filename.replace("combined_statement_", "").replace("all_statement_", "").replace(".csv", "").replace("_", " ")}
+                            {formatArchiveStatementLabel(archive)}
                           </p>
                         </div>
                       </button>
