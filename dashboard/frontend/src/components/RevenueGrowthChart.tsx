@@ -295,11 +295,12 @@ export const RevenueGrowthChart: React.FC<RevenueGrowthChartProps> = ({
           </h2>
 
           <div className="flex items-center gap-2 mt-2">
-            <span className="text-xs sm:text-sm font-medium text-black/80">
-              {growthPercentage >= 0 ? `+${growthPercentage}%` : `${growthPercentage}%`} {periodLabel}
+            <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-black/15 text-black border border-black/15">
+              {growthPercentage >= 0 ? `+${growthPercentage}%` : `${growthPercentage}%`}
             </span>
+            <span className="text-xs sm:text-sm font-medium text-black/80">{periodLabel}</span>
             {hoveredPoint && (
-              <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-black/10 text-black border border-black/10 transition-all">
+              <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-black/15 text-black border border-black/15 transition-all">
                 {hoveredPoint.label}
               </span>
             )}

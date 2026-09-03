@@ -577,7 +577,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                 <div className="space-y-1">
                   <div className="flex items-center gap-1.5">
                     <span className="text-xs font-semibold text-black/85 uppercase tracking-wider block">Total Sales</span>
-                    <span className="text-[10px] font-bold text-black bg-black/10 px-2 py-0.5 rounded-full border border-black/10">Product Only</span>
+                    <span className="text-[10px] font-bold text-black bg-black/20 px-2.5 py-0.5 rounded-full border border-black/25">Product Only</span>
                   </div>
                   <h3 className="text-3xl sm:text-4xl font-semibold font-display text-black leading-none mt-2">
                     Rs. {totalSales.toLocaleString()}
@@ -609,7 +609,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               </div>
               <div className="flex items-center justify-between mt-4">
                 <div className="flex items-center gap-1.5">
-                  <span className="bg-[#FDF3E9] dark:bg-accent/15 text-accent border border-orange-200/50 dark:border-accent/30 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                  <span className="bg-neutral-200 dark:bg-neutral-200 text-black dark:text-black border border-neutral-300 dark:border-neutral-300 px-2.5 py-0.5 rounded-full text-[10px] font-bold">
                     ↓ 4.8%
                   </span>
                   <span className="text-xs text-muted font-medium">vs last week</span>
@@ -634,7 +634,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               </div>
               <div className="flex items-center justify-between mt-4">
                 <div className="flex items-center gap-1.5">
-                  <span className="bg-amber-500/10 text-amber-600 border border-amber-500/20 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                  <span className="bg-neutral-200 dark:bg-neutral-200 text-black dark:text-black border border-neutral-300 dark:border-neutral-300 px-2.5 py-0.5 rounded-full text-[10px] font-bold">
                     ↓ 15.2%
                   </span>
                   <span className="text-xs text-muted font-medium">vs yesterday</span>
@@ -659,7 +659,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               </div>
               <div className="flex items-center justify-between mt-4">
                 <div className="flex items-center gap-1.5">
-                  <span className="bg-blue-500/10 text-blue-600 border border-blue-500/20 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                  <span className="bg-neutral-200 dark:bg-neutral-200 text-black dark:text-black border border-neutral-300 dark:border-neutral-300 px-2.5 py-0.5 rounded-full text-[10px] font-bold">
                     ↑ 8.3%
                   </span>
                   <span className="text-xs text-muted font-medium">vs last week</span>
@@ -799,9 +799,9 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
             {/* Expenses Overview Card (Porcelain White Card) */}
             <div className="bg-card border border-border/80 rounded-[28px] shadow-sm hover:shadow-md transition-all p-6 flex flex-col justify-between min-h-[260px]">
               <div>
-                <div className="flex items-center justify-between border-b border-border/60 pb-2.5 mb-3">
+                <div className="flex items-center justify-between mb-3">
                   <span className="text-xs font-bold text-muted uppercase tracking-wider block">Expenses Summary</span>
-                  <span className="text-[10px] font-bold bg-red-500/10 text-red-600 border border-red-500/20 px-2.5 py-0.5 rounded-full">
+                  <span className="text-[10px] font-bold bg-neutral-200 dark:bg-neutral-800 text-black dark:text-neutral-100 border border-neutral-300 dark:border-neutral-700 px-2.5 py-0.5 rounded-full">
                     Outflows
                   </span>
                 </div>
@@ -842,11 +842,9 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
             {/* Purchases Tracker Card (Porcelain White Card) */}
             <div className="bg-card border border-border/80 rounded-[28px] shadow-sm hover:shadow-md transition-all p-6 flex flex-col justify-between min-h-[260px]">
               <div>
-                <div className="flex items-center justify-between border-b border-border/60 pb-2.5 mb-3">
+                <div className="flex items-center justify-between mb-3">
                   <span className="text-xs font-bold text-muted uppercase tracking-wider block">Purchases Tracker</span>
-                  <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
-                    outstandingPurchasesVal > 0 ? "bg-amber-500/10 text-amber-600 border-amber-500/20" : "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
-                  }`}>
+                  <span className="text-[10px] font-bold bg-neutral-200 dark:bg-neutral-800 text-black dark:text-neutral-100 border border-neutral-300 dark:border-neutral-700 px-2.5 py-0.5 rounded-full">
                     {outstandingPurchasesVal > 0 ? "Pending Dues" : "Settled"}
                   </span>
                 </div>
@@ -863,7 +861,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                 <div className="space-y-1">
                   <span className="text-[10px] text-muted uppercase font-bold tracking-wider block">Recent Invoices</span>
                   {purchases.slice(0, 2).map((p) => (
-                    <div key={p._id} className="flex justify-between items-center text-[11px] border-b border-border/40 pb-1">
+                    <div key={p._id} className="flex justify-between items-center text-[11px] py-0.5">
                       <span className="truncate max-w-[130px] font-medium text-foreground">{p.supplier}</span>
                       <span className="text-foreground font-bold">Rs. {p.amount.toLocaleString()}</span>
                     </div>
@@ -885,30 +883,36 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
             {/* Material Inventory Card (Porcelain White Card) */}
             <div className="bg-card border border-border/80 rounded-[28px] shadow-sm hover:shadow-md transition-all p-6 flex flex-col justify-between min-h-[260px]">
               <div>
-                <div className="flex items-center justify-between border-b border-border/60 pb-2.5 mb-3">
+                <div className="flex items-center justify-between mb-3">
                   <span className="text-xs font-bold text-muted uppercase tracking-wider block">Material Inventory</span>
-                  <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
-                    (lowStockVal + outOfStockVal) > 0 ? "bg-red-500/10 text-red-600 border-red-500/20" : "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
-                  }`}>
+                  <span className="text-[10px] font-bold bg-neutral-200 dark:bg-neutral-800 text-black dark:text-neutral-100 border border-neutral-300 dark:border-neutral-700 px-2.5 py-0.5 rounded-full">
                     {(lowStockVal + outOfStockVal) > 0 ? "Alerts" : "Ok"}
                   </span>
                 </div>
-                <div className="mb-3 flex justify-between items-end">
-                  <div>
+                <div className="mb-3">
+                  <div className="flex items-center justify-between gap-2">
                     <h4 className="text-3xl sm:text-4xl font-semibold font-display text-foreground leading-none">
                       {(lowStockVal + outOfStockVal)} Items
                     </h4>
-                    <span className="text-xs text-muted font-medium mt-1 block">Stock alerts requiring restock</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-neutral-200 dark:bg-neutral-800 text-black dark:text-neutral-100 border border-neutral-300 dark:border-neutral-700 shadow-xs">
+                        <span className="h-2 w-2 rounded-full bg-amber-500 shrink-0" />
+                        <span>{lowStockVal} Low Stock</span>
+                      </span>
+                      {outOfStockVal > 0 && (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-neutral-200 dark:bg-neutral-800 text-black dark:text-neutral-100 border border-neutral-300 dark:border-neutral-700 shadow-xs">
+                          <span className="h-2 w-2 rounded-full bg-red-500 shrink-0" />
+                          <span>{outOfStockVal} Out</span>
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <div className="text-right text-[10px] font-bold space-y-0.5">
-                    <div className="text-amber-600 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">{lowStockVal} Low Stock</div>
-                    {outOfStockVal > 0 && <div className="text-red-600 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full mt-1">{outOfStockVal} Out</div>}
-                  </div>
+                  <span className="text-xs text-muted font-medium mt-1.5 block">Stock alerts requiring restock</span>
                 </div>
                 <div className="space-y-1">
                   <span className="text-[10px] text-muted uppercase font-bold tracking-wider block">Critical Materials</span>
                   {inventoryItems.filter((i) => i.quantity <= i.alertLevel).slice(0, 2).map((i) => (
-                    <div key={i._id} className="flex justify-between items-center text-[11px] border-b border-border/40 pb-1">
+                    <div key={i._id} className="flex justify-between items-center text-[11px] py-0.5">
                       <span className="truncate max-w-[130px] font-medium text-foreground">{i.name}</span>
                       <span className={`font-bold ${i.quantity === 0 ? "text-red-500" : "text-amber-500"}`}>
                         {i.quantity} {i.unit}
@@ -1160,7 +1164,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                       <p className="text-[11px] text-muted">Permanent historical records and downloadable monthly statement archives</p>
                     </div>
                   </div>
-                  <span className="text-[10px] font-bold px-3 py-1 rounded-full bg-border/40 text-muted self-start sm:self-auto border border-border/50">
+                  <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-neutral-200 dark:bg-neutral-800 text-black dark:text-neutral-100 border border-neutral-300 dark:border-neutral-700 self-start sm:self-auto">
                     {statementArchives.filter((a) => a.type === "all").length} Records Saved
                   </span>
                 </div>
@@ -1231,11 +1235,11 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               </h2>
             </div>
             {user?.role === "admin" ? (
-              <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-border/40 text-muted border border-border/50">
+              <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-neutral-200 dark:bg-neutral-800 text-black dark:text-neutral-100 border border-neutral-300 dark:border-neutral-700">
                 {staffPerformance.length} Staff
               </span>
             ) : (
-              <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/20">
+              <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-neutral-200 dark:bg-neutral-800 text-black dark:text-neutral-100 border border-neutral-300 dark:border-neutral-700">
                 {staffPendingTasks.length} Pending
               </span>
             )}
@@ -1263,8 +1267,9 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                           </span>
                         </div>
                       </div>
-                      <span className="border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-emerald-500/10">
-                        {staff.completed} Done
+                      <span className="border border-neutral-300 dark:border-neutral-700 text-black dark:text-neutral-100 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-neutral-200 dark:bg-neutral-800 flex items-center gap-1.5 shadow-xs">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0" />
+                        <span>{staff.completed} Done</span>
                       </span>
                     </div>
                     {/* Completion progress bar */}
@@ -1329,13 +1334,6 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                 <h2 className="text-sm sm:text-base font-bold font-display text-foreground">
                   Activity Audit Log
                 </h2>
-              </div>
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 text-[10px] font-bold">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
-                <span>Live Feed</span>
               </div>
             </div>
 

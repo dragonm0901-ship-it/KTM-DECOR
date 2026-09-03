@@ -401,11 +401,12 @@ export const SalesExpensesTrendChart: React.FC<SalesExpensesTrendChartProps> = (
           </h2>
 
           <div className="flex items-center gap-2 mt-2">
-            <span className="text-xs sm:text-sm font-medium text-black/80">
-              {marginPercentage >= 0 ? `+${marginPercentage}%` : `${marginPercentage}%`} margin {periodLabel}
+            <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-black/15 text-black border border-black/15">
+              {marginPercentage >= 0 ? `+${marginPercentage}%` : `${marginPercentage}%`} margin
             </span>
+            <span className="text-xs sm:text-sm font-medium text-black/80">{periodLabel}</span>
             {hoveredPoint && (
-              <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-black/10 text-black border border-black/10 transition-all">
+              <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-black/15 text-black border border-black/15 transition-all">
                 {hoveredPoint.label}
               </span>
             )}
