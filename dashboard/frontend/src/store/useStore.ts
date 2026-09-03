@@ -672,14 +672,15 @@ export const useStore = create<DashboardState>()(
       channel.bind("expense_created", (newExpense: Expense) => {
         set((state) => {
           const filtered = state.expenses.filter((e) => e._id !== newExpense._id);
-          return { expenses: [newExpense, ...filtered] };
+          const list = [newExpense, ...filtered];
+          return { expenses: list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) };
         });
       });
 
       channel.bind("expense_updated", (updatedExpense: Expense) => {
         set((state) => {
-          const filtered = state.expenses.filter((e) => e._id !== updatedExpense._id);
-          return { expenses: [updatedExpense, ...filtered] };
+          const next = state.expenses.map((e) => (e._id === updatedExpense._id ? updatedExpense : e));
+          return { expenses: next.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) };
         });
       });
 
@@ -692,14 +693,15 @@ export const useStore = create<DashboardState>()(
       channel.bind("purchase_created", (newPurchase: Purchase) => {
         set((state) => {
           const filtered = state.purchases.filter((p) => p._id !== newPurchase._id);
-          return { purchases: [newPurchase, ...filtered] };
+          const list = [newPurchase, ...filtered];
+          return { purchases: list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) };
         });
       });
 
       channel.bind("purchase_updated", (updatedPurchase: Purchase) => {
         set((state) => {
-          const filtered = state.purchases.filter((p) => p._id !== updatedPurchase._id);
-          return { purchases: [updatedPurchase, ...filtered] };
+          const next = state.purchases.map((p) => (p._id === updatedPurchase._id ? updatedPurchase : p));
+          return { purchases: next.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) };
         });
       });
 
@@ -1469,7 +1471,8 @@ export const useStore = create<DashboardState>()(
       const newExpense = await res.json();
       set((state) => {
         const filtered = state.expenses.filter((e) => e._id !== newExpense._id);
-        return { expenses: [newExpense, ...filtered] };
+        const list = [newExpense, ...filtered];
+        return { expenses: list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) };
       });
     } catch (err) {
       console.error("Create expense failed:", err);
@@ -1491,8 +1494,8 @@ export const useStore = create<DashboardState>()(
       if (!res.ok) throw new Error("Expense update failed");
       const updatedExpense = await res.json();
       set((state) => {
-        const filtered = state.expenses.filter((e) => e._id !== expenseId);
-        return { expenses: [updatedExpense, ...filtered] };
+        const next = state.expenses.map((e) => (e._id === expenseId ? updatedExpense : e));
+        return { expenses: next.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) };
       });
     } catch (err) {
       console.error("Update expense failed:", err);
@@ -1545,7 +1548,8 @@ export const useStore = create<DashboardState>()(
       const newPurchase = await res.json();
       set((state) => {
         const filtered = state.purchases.filter((p) => p._id !== newPurchase._id);
-        return { purchases: [newPurchase, ...filtered] };
+        const list = [newPurchase, ...filtered];
+        return { purchases: list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) };
       });
     } catch (err) {
       console.error("Create purchase failed:", err);
@@ -1564,8 +1568,8 @@ export const useStore = create<DashboardState>()(
       if (!res.ok) throw new Error("Purchase update failed");
       const updatedPurchase = await res.json();
       set((state) => {
-        const filtered = state.purchases.filter((p) => p._id !== purchaseId);
-        return { purchases: [updatedPurchase, ...filtered] };
+        const next = state.purchases.map((p) => (p._id === purchaseId ? updatedPurchase : p));
+        return { purchases: next.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) };
       });
     } catch (err) {
       console.error("Update purchase failed:", err);
@@ -1587,8 +1591,8 @@ export const useStore = create<DashboardState>()(
       if (!res.ok) throw new Error("Purchase update failed");
       const updatedPurchase = await res.json();
       set((state) => {
-        const filtered = state.purchases.filter((p) => p._id !== purchaseId);
-        return { purchases: [updatedPurchase, ...filtered] };
+        const next = state.purchases.map((p) => (p._id === purchaseId ? updatedPurchase : p));
+        return { purchases: next.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) };
       });
     } catch (err) {
       console.error("Update purchase failed:", err);

@@ -922,11 +922,11 @@ export const OrdersTab: React.FC = () => {
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
                         {productImages.map((imgUrl, idx) => (
                           <div
                             key={`prod-preview-${idx}`}
-                            className="relative h-16 rounded-xl border border-border overflow-hidden bg-background group shadow-xs"
+                            className="relative h-20 rounded-xl border border-border overflow-hidden bg-background group shadow-xs"
                           >
                             <img src={imgUrl} alt={`Product ${idx + 1}`} className="h-full w-full object-cover" />
                             <span className="absolute bottom-0 left-0 right-0 bg-black/70 text-[7px] font-bold text-white text-center py-0.5">
@@ -946,13 +946,13 @@ export const OrdersTab: React.FC = () => {
                         ))}
 
                         {user?.role === "admin" && productImages.length < 6 && (
-                          <label className="h-16 flex flex-col items-center justify-center border-2 border-dashed border-border/80 hover:border-accent hover:bg-accent/[0.03] rounded-xl cursor-pointer transition-all text-center p-1 group">
+                          <label className="h-20 flex flex-col items-center justify-center border-2 border-dashed border-border/80 hover:border-accent hover:bg-accent/[0.03] rounded-xl cursor-pointer transition-all text-center p-1 group">
                             <Upload size={14} className="text-accent group-hover:scale-110 transition-transform mb-0.5" />
-                            <span className="text-[8px] font-bold text-muted group-hover:text-foreground leading-tight">
+                            <span className="text-[9px] font-bold text-muted group-hover:text-foreground leading-tight">
                               Add Photo
                             </span>
-                            <span className="text-[6px] text-muted/60">
-                              (Max {6 - productImages.length} left)
+                            <span className="text-[7px] text-muted/60 mt-0.5">
+                              (Max {6 - productImages.length})
                             </span>
                             <input
                               type="file"
@@ -967,7 +967,7 @@ export const OrdersTab: React.FC = () => {
                     </div>
 
                     {/* Location/Site Photos (Max 4) */}
-                    <div className="space-y-2 pt-1 border-t border-border/50">
+                    <div className="space-y-2 pt-2 border-t border-border/50">
                       <div className="flex justify-between items-center">
                         <label className="text-[10px] font-bold text-muted uppercase tracking-wider flex items-center gap-1.5">
                           <MapPin size={12} className="text-accent" />
@@ -980,11 +980,11 @@ export const OrdersTab: React.FC = () => {
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
                         {locationImages.map((imgUrl, idx) => (
                           <div
                             key={`loc-preview-${idx}`}
-                            className="relative h-16 rounded-xl border border-border overflow-hidden bg-background group shadow-xs"
+                            className="relative h-20 rounded-xl border border-border overflow-hidden bg-background group shadow-xs"
                           >
                             <img src={imgUrl} alt={`Site ${idx + 1}`} className="h-full w-full object-cover" />
                             <span className="absolute bottom-0 left-0 right-0 bg-black/70 text-[7px] font-bold text-white text-center py-0.5">
@@ -1004,13 +1004,13 @@ export const OrdersTab: React.FC = () => {
                         ))}
 
                         {user?.role === "admin" && locationImages.length < 4 && (
-                          <label className="h-16 flex flex-col items-center justify-center border-2 border-dashed border-border/80 hover:border-accent hover:bg-accent/[0.03] rounded-xl cursor-pointer transition-all text-center p-1 group">
+                          <label className="h-20 flex flex-col items-center justify-center border-2 border-dashed border-border/80 hover:border-accent hover:bg-accent/[0.03] rounded-xl cursor-pointer transition-all text-center p-1 group">
                             <Upload size={14} className="text-accent group-hover:scale-110 transition-transform mb-0.5" />
-                            <span className="text-[8px] font-bold text-muted group-hover:text-foreground leading-tight">
-                              Add Site Photo
+                            <span className="text-[9px] font-bold text-muted group-hover:text-foreground leading-tight">
+                              Add Photo
                             </span>
-                            <span className="text-[6px] text-muted/60">
-                              (Max {4 - locationImages.length} left)
+                            <span className="text-[7px] text-muted/60 mt-0.5">
+                              (Max {4 - locationImages.length})
                             </span>
                             <input
                               type="file"

@@ -88,18 +88,20 @@ export const ExpensesTab: React.FC = () => {
   // Calculations
   const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
 
-  // Filtered List
-  const filteredExpenses = expenses.filter((e) => {
-    const query = searchQuery.toLowerCase();
-    const matchesSearch =
-      e.title.toLowerCase().includes(query) ||
-      (e.description && e.description.toLowerCase().includes(query));
+  // Filtered List (strictly sorted chronologically by date descending)
+  const filteredExpenses = expenses
+    .filter((e) => {
+      const query = searchQuery.toLowerCase();
+      const matchesSearch =
+        e.title.toLowerCase().includes(query) ||
+        (e.description && e.description.toLowerCase().includes(query));
 
-    const normCat = getNormalizedCategory(e.category);
-    const matchesCategory = categoryFilter === "all" || normCat === categoryFilter;
+      const normCat = getNormalizedCategory(e.category);
+      const matchesCategory = categoryFilter === "all" || normCat === categoryFilter;
 
-    return matchesSearch && matchesCategory;
-  });
+      return matchesSearch && matchesCategory;
+    })
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   const handleOpenAddModal = () => {
     setEditingExpense(null);
