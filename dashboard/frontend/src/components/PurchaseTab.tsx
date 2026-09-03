@@ -74,6 +74,7 @@ export const PurchaseTab: React.FC = () => {
   const [itemsList, setItemsList] = useState<FormPurchaseItem[]>([
     { name: "", quantity: 1, unit: "pcs", price: 0 }
   ]);
+  const [totalAmount, setTotalAmount] = useState<string>("");
   const [status, setStatus] = useState<Purchase["status"]>("pending");
   const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]);
   const [formError, setFormError] = useState("");
@@ -103,6 +104,7 @@ export const PurchaseTab: React.FC = () => {
     setEditingPurchase(null);
     setSupplier("");
     setItemsList([{ name: "", quantity: 1, unit: "pcs", price: 0 }]);
+    setTotalAmount("");
     setStatus("pending");
     setDate(new Date().toISOString().split("T")[0]);
     setFormError("");
@@ -117,6 +119,7 @@ export const PurchaseTab: React.FC = () => {
         ? purchase.items.map((item) => ({ ...item }))
         : [{ name: purchase.itemDetails || "", quantity: 1, unit: "pcs", price: purchase.amount }]
     );
+    setTotalAmount(purchase.amount !== undefined && purchase.amount !== null ? purchase.amount.toString() : "");
     setStatus(purchase.status);
     setDate(new Date(purchase.date).toISOString().split("T")[0]);
     setFormError("");
@@ -136,12 +139,31 @@ export const PurchaseTab: React.FC = () => {
     const updated = [...itemsList];
     updated[index] = {
       ...updated[index],
-      [field]: field === "quantity" || field === "price" ? Number(value) || 0 : value
+      [field]: field === "quantity" || field === "price" ? (value === "" ? 0 : Number(value) || 0) : value
     };
     setItemsList(updated);
+
+    if (field === "quantity" || field === "price") {
+      const sum = updated.reduce((acc, item) => acc + (item.quantity * (item.price || 0)), 0);
+      if (sum > 0) {
+        setTotalAmount(sum.toString());
+      }
+    }
   };
 
-  const calculatedTotalAmount = itemsList.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+  const handleTotalAmountChange = (val: string) => {
+    setTotalAmount(val);
+    const num = Number(val) || 0;
+    // If only 1 item and its price is currently 0 or empty, automatically sync unit price
+    if (itemsList.length === 1 && num > 0) {
+      const qty = itemsList[0].quantity > 0 ? itemsList[0].quantity : 1;
+      const unitPrice = Math.round((num / qty) * 100) / 100;
+      setItemsList([{ ...itemsList[0], price: unitPrice }]);
+    }
+  };
+
+  const calculatedTotalAmount = itemsList.reduce((sum, item) => sum + (item.quantity * (item.price || 0)), 0);
+  const displayTotal = totalAmount !== "" ? totalAmount : (calculatedTotalAmount > 0 ? calculatedTotalAmount.toString() : "");
 
   const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -153,15 +175,36 @@ export const PurchaseTab: React.FC = () => {
       return;
     }
 
-    const invalidItem = itemsList.find(item => !item.name.trim() || item.quantity <= 0 || item.price <= 0);
-    if (invalidItem) {
-      setFormError("Please enter valid name, quantity and price for all items.");
+    const calculatedTotal = itemsList.reduce((sum, item) => sum + (item.quantity * (item.price || 0)), 0);
+    const finalAmount = Number(totalAmount) > 0 ? Number(totalAmount) : calculatedTotal;
+
+    if (finalAmount <= 0) {
+      setFormError("Please enter a total purchase amount greater than 0.");
       return;
     }
 
+    const invalidItem = itemsList.find(item => !item.name.trim() || item.quantity <= 0);
+    if (invalidItem) {
+      setFormError("Please enter a valid item description and quantity.");
+      return;
+    }
+
+    // Ensure all items have a valid price for MongoDB schema requirements
+    const sanitizedItems = itemsList.map(item => {
+      let itemPrice = Number(item.price) || 0;
+      if (itemPrice <= 0 && finalAmount > 0) {
+        const totalQty = itemsList.reduce((acc, it) => acc + (it.quantity || 1), 0);
+        itemPrice = Math.round((finalAmount / totalQty) * 100) / 100;
+      }
+      return {
+        ...item,
+        price: itemPrice
+      };
+    });
+
     // Auto generate details summary text for backward compatibility
-    const itemDetailsText = itemsList
-      .map(item => `${item.name} (${item.quantity} ${item.unit} @ Rs. ${item.price})`)
+    const itemDetailsText = sanitizedItems
+      .map(item => `${item.name} (${item.quantity} ${item.unit} @ Rs. ${item.price.toLocaleString()})`)
       .join(", ");
 
     setSubmitting(true);
@@ -171,9 +214,9 @@ export const PurchaseTab: React.FC = () => {
         await updatePurchase(editingPurchase._id, {
           supplier,
           itemDetails: itemDetailsText,
-          amount: calculatedTotalAmount,
+          amount: finalAmount,
           status,
-          items: itemsList,
+          items: sanitizedItems,
           date
         });
       } else {
@@ -181,9 +224,9 @@ export const PurchaseTab: React.FC = () => {
         await createPurchase({
           supplier,
           itemDetails: itemDetailsText,
-          amount: calculatedTotalAmount,
+          amount: finalAmount,
           status,
-          items: itemsList,
+          items: sanitizedItems,
           date
         });
       }
@@ -508,7 +551,7 @@ export const PurchaseTab: React.FC = () => {
 
       {showModal && (
         <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4 overflow-y-auto">
-          <div className="bg-card w-full max-w-2xl rounded-lg border border-border p-4 sm:p-6 shadow-2xl animate-scale-up max-h-[calc(100dvh-32px)] sm:max-h-[90vh] overflow-y-auto">
+          <div className="bg-card w-full max-w-4xl rounded-2xl border border-border p-4 sm:p-6 shadow-2xl animate-scale-up max-h-[calc(100dvh-32px)] sm:max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4 border-b border-border pb-2">
               <h2 className="text-lg font-bold font-display flex items-center gap-2">
                 <Briefcase className="text-accent" />
@@ -568,6 +611,14 @@ export const PurchaseTab: React.FC = () => {
                   </button>
                 </div>
 
+                <div className="hidden sm:grid grid-cols-12 gap-2 px-2 text-[10px] font-bold text-muted uppercase tracking-wider">
+                  <div className="col-span-5">Item Description</div>
+                  <div className="col-span-2 text-center">Qty</div>
+                  <div className="col-span-2 text-center">Unit</div>
+                  <div className="col-span-2 text-right">Unit Price</div>
+                  <div className="col-span-1"></div>
+                </div>
+
                 <div className="space-y-2">
                   {itemsList.map((item, index) => (
                     <div key={index} className="grid grid-cols-12 gap-2 items-center bg-border/20 p-2.5 rounded border border-border/40">
@@ -609,8 +660,8 @@ export const PurchaseTab: React.FC = () => {
                           onChange={(e) => handleUpdateItem(index, "price", e.target.value)}
                           placeholder="Price"
                           min="0"
+                          step="any"
                           className="w-full px-2 py-1.5 text-xs border border-border rounded bg-background focus:outline-none text-right font-bold"
-                          required
                         />
                       </div>
                       <div className="col-span-1 sm:col-span-1 text-center">
@@ -644,15 +695,27 @@ export const PurchaseTab: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1">
-                    Total Amount (Rs.)
-                  </label>
-                  <input
-                    type="text"
-                    value={`Rs. ${calculatedTotalAmount.toLocaleString()}`}
-                    readOnly
-                    className="w-full px-3 py-2 border border-border rounded bg-border/20 text-sm font-extrabold text-foreground focus:outline-none select-none"
-                  />
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider">
+                      Total Amount (Rs.) *
+                    </label>
+                    <span className="text-[10px] text-accent font-medium">Click to enter or edit</span>
+                  </div>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted select-none">
+                      Rs.
+                    </span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="any"
+                      value={displayTotal}
+                      onChange={(e) => handleTotalAmountChange(e.target.value)}
+                      placeholder="0"
+                      required
+                      className="w-full pl-9 pr-3 py-2 border border-border rounded bg-background text-sm font-extrabold text-foreground focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent"
+                    />
+                  </div>
                 </div>
               </div>
 

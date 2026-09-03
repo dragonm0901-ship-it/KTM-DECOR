@@ -675,8 +675,8 @@ export const OrdersTab: React.FC = () => {
 
       {/* Creation/Editing Modal */}
       {showModal && (
-        <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm pt-10 sm:pt-0 px-2 pb-6 sm:p-4 overflow-y-auto">
-          <div className="bg-card w-full max-w-2xl rounded-lg border border-border p-3 sm:p-6 shadow-2xl animate-scale-up mt-1 mb-4 sm:my-4 max-h-[40vh] sm:max-h-[90vh] overflow-y-auto">
+        <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm pt-6 sm:pt-0 px-2 pb-6 sm:p-4 overflow-y-auto">
+          <div className="bg-card w-full max-w-4xl lg:max-w-5xl rounded-2xl border border-border p-4 sm:p-7 shadow-2xl animate-scale-up my-4 max-h-[92vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6 border-b border-border pb-3">
               <h2 className="text-lg font-bold font-display flex items-center gap-2">
                 <Package className="text-accent" />
@@ -834,8 +834,8 @@ export const OrdersTab: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Order Date, Delivery Date & Assignee Selection */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {/* Order Date & Delivery Date */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1.5">
                         Order Date (अर्डर मिति) *
@@ -849,7 +849,7 @@ export const OrdersTab: React.FC = () => {
                     </div>
                     <div>
                       <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1.5">
-                        Delivery Target (डेलिभरी) *
+                        Delivery Target (डेलिभरी मिति) *
                       </label>
                       <NepaliDatePicker
                         value={deliveryDate}
@@ -858,6 +858,10 @@ export const OrdersTab: React.FC = () => {
                         required
                       />
                     </div>
+                  </div>
+
+                  {/* Assign Project Lead & Order Stage */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1.5">
                         Assign Project Lead
@@ -865,7 +869,7 @@ export const OrdersTab: React.FC = () => {
                       <select
                         value={assigneeId}
                         onChange={(e) => setAssigneeId(e.target.value)}
-                        className="w-full px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm font-semibold cursor-pointer disabled:opacity-75 disabled:bg-border/10"
+                        className="w-full px-3 py-2.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm font-semibold cursor-pointer disabled:opacity-75 disabled:bg-border/10"
                         disabled={user?.role !== "admin"}
                       >
                         <option value="">Select Assignee</option>
@@ -878,27 +882,29 @@ export const OrdersTab: React.FC = () => {
                           ))}
                       </select>
                     </div>
+                    {editingOrder ? (
+                      <div>
+                        <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1.5">
+                          Order Stage (Progress Status)
+                        </label>
+                        <select
+                          value={stage}
+                          onChange={(e) => setStage(e.target.value as Order["stage"])}
+                          className="w-full px-3 py-2.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm font-semibold cursor-pointer"
+                        >
+                          <option value="design">Design Process</option>
+                          <option value="manufacturing">Manufacturing Process</option>
+                          <option value="completed">Completed</option>
+                          <option value="delivered">Delivered</option>
+                          <option value="paid">Paid</option>
+                        </select>
+                      </div>
+                    ) : (
+                      <div className="hidden sm:flex flex-col justify-center text-[11px] text-muted pt-4 leading-relaxed">
+                        <span>💡 <span className="font-semibold text-foreground">Lead Assignment:</span> Assigning staff syncs this order to their personal daily task board immediately.</span>
+                      </div>
+                    )}
                   </div>
-
-                  {/* Order Stage Selection (Only when editing) */}
-                  {editingOrder && (
-                    <div>
-                      <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1.5">
-                        Order Stage (Progress Status)
-                      </label>
-                      <select
-                        value={stage}
-                        onChange={(e) => setStage(e.target.value as Order["stage"])}
-                        className="w-full px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm font-semibold cursor-pointer"
-                      >
-                        <option value="design">Design Process</option>
-                        <option value="manufacturing">Manufacturing Process</option>
-                        <option value="completed">Completed</option>
-                        <option value="delivered">Delivered</option>
-                        <option value="paid">Paid</option>
-                      </select>
-                    </div>
-                  )}
 
                   {/* Multi-Image Uploads System */}
                   <div className="space-y-4 pt-1">
