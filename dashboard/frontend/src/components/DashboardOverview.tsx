@@ -564,89 +564,94 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
       {user?.role === "admin" ? (
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Total Sales Card */}
-            <div className="bg-card border border-border/80 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all rounded-2xl p-5 flex flex-col justify-between">
-              <div className="flex items-start justify-between">
+            {/* Total Sales Card (Signature Sunset Gradient Hero Card) */}
+            <div
+              className="relative rounded-[28px] p-6 shadow-xl shadow-orange-500/10 overflow-hidden flex flex-col justify-between transition-all hover:scale-[1.01]"
+              style={{
+                background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
+              }}
+            >
+              <div className="flex items-start justify-between relative z-10">
                 <div className="space-y-1">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs text-muted font-bold uppercase tracking-wider block">Total Sales</span>
-                    <span className="text-[9px] font-semibold text-muted bg-muted/20 px-1.5 py-0.5 rounded border border-border/50">Product Only</span>
+                    <span className="text-xs font-semibold text-black/85 uppercase tracking-wider block">Total Sales</span>
+                    <span className="text-[10px] font-bold text-black bg-black/10 px-2 py-0.5 rounded-full border border-black/10">Product Only</span>
                   </div>
-                  <h3 className="text-2xl sm:text-3xl font-extrabold font-display text-foreground leading-none">Rs. {totalSales.toLocaleString()}</h3>
+                  <h3 className="text-3xl sm:text-4xl font-semibold font-display text-black leading-none mt-2">
+                    Rs. {totalSales.toLocaleString()}
+                  </h3>
                 </div>
-                <div className="p-2 bg-emerald-600 text-white rounded-xl shadow-xs shrink-0">
-                  <DollarSign size={16} />
+                <div className="p-2.5 bg-black text-white rounded-2xl shadow-md shrink-0">
+                  <DollarSign size={18} />
                 </div>
               </div>
-              <div className="flex items-center justify-between mt-3">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] text-muted font-medium">Excl. delivery & fitting</span>
-                </div>
-                {renderMiniBarChart(getSparklineData("sales"), "fill-emerald-500/80 hover:fill-emerald-500 transition-colors")}
+              <div className="flex items-center justify-between mt-4 relative z-10">
+                <span className="text-xs text-black/75 font-medium">Excl. delivery & fitting</span>
+                {renderMiniBarChart(getSparklineData("sales"), "fill-black/60 hover:fill-black transition-colors")}
               </div>
             </div>
 
-            {/* Active Orders Card */}
-            <div className="bg-card border border-border/80 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all rounded-2xl p-5 flex flex-col justify-between">
+            {/* Active Orders Card (Crisp Porcelain Card) */}
+            <div className="bg-card border border-border/80 shadow-sm hover:shadow-md transition-all rounded-[28px] p-6 flex flex-col justify-between">
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
                   <span className="text-xs text-muted font-bold uppercase tracking-wider block">Active Orders</span>
-                  <h3 className="text-2xl sm:text-3xl font-extrabold font-display text-foreground leading-none">{activeOrdersCount}</h3>
+                  <h3 className="text-3xl sm:text-4xl font-semibold font-display text-foreground leading-none mt-2">{activeOrdersCount}</h3>
                 </div>
-                <div className="p-2 bg-accent text-white rounded-xl shadow-xs shrink-0">
-                  <Package size={16} />
+                <div className="p-2.5 bg-accent text-white rounded-2xl shadow-sm shrink-0">
+                  <Package size={18} />
                 </div>
               </div>
-              <div className="flex items-center justify-between mt-3">
+              <div className="flex items-center justify-between mt-4">
                 <div className="flex items-center gap-1.5">
-                  <span className="bg-accent text-white px-1.5 py-0.5 rounded text-[9px] font-bold shadow-xs">
+                  <span className="bg-[#FDF3E9] dark:bg-accent/15 text-accent border border-orange-200/50 dark:border-accent/30 px-2 py-0.5 rounded-full text-[10px] font-bold">
                     ↓ 4.8%
                   </span>
-                  <span className="text-[10px] text-muted font-medium">vs last week</span>
+                  <span className="text-xs text-muted font-medium">vs last week</span>
                 </div>
                 {renderMiniBarChart(getSparklineData("orders"), "fill-accent/80 hover:fill-accent transition-colors")}
               </div>
             </div>
 
-            {/* Pending Tasks Card */}
-            <div className="bg-card border border-border/80 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all rounded-2xl p-5 flex flex-col justify-between">
+            {/* Pending Tasks Card (Crisp Porcelain Card) */}
+            <div className="bg-card border border-border/80 shadow-sm hover:shadow-md transition-all rounded-[28px] p-6 flex flex-col justify-between">
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
                   <span className="text-xs text-muted font-bold uppercase tracking-wider block">Pending Tasks</span>
-                  <h3 className="text-2xl sm:text-3xl font-extrabold font-display text-foreground leading-none">{pendingTasks.length}</h3>
+                  <h3 className="text-3xl sm:text-4xl font-semibold font-display text-foreground leading-none mt-2">{pendingTasks.length}</h3>
                 </div>
-                <div className="p-2 bg-amber-600 text-white rounded-xl shadow-xs shrink-0">
-                  <Clock size={16} />
+                <div className="p-2.5 bg-amber-600 text-white rounded-2xl shadow-sm shrink-0">
+                  <Clock size={18} />
                 </div>
               </div>
-              <div className="flex items-center justify-between mt-3">
+              <div className="flex items-center justify-between mt-4">
                 <div className="flex items-center gap-1.5">
-                  <span className="bg-amber-600 text-white px-1.5 py-0.5 rounded text-[9px] font-bold shadow-xs">
+                  <span className="bg-amber-500/10 text-amber-600 border border-amber-500/20 px-2 py-0.5 rounded-full text-[10px] font-bold">
                     ↓ 15.2%
                   </span>
-                  <span className="text-[10px] text-muted font-medium">vs yesterday</span>
+                  <span className="text-xs text-muted font-medium">vs yesterday</span>
                 </div>
                 {renderMiniLineChart(getSparklineData("tasks"), "#d97706", "amber-spark")}
               </div>
             </div>
 
-            {/* Completed Work Card */}
-            <div className="bg-card border border-border/80 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all rounded-2xl p-5 flex flex-col justify-between">
+            {/* Completed Work Card (Crisp Porcelain Card) */}
+            <div className="bg-card border border-border/80 shadow-sm hover:shadow-md transition-all rounded-[28px] p-6 flex flex-col justify-between">
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
                   <span className="text-xs text-muted font-bold uppercase tracking-wider block">Completed Work</span>
-                  <h3 className="text-2xl sm:text-3xl font-extrabold font-display text-foreground leading-none">{completedTasksCount + approvedOrders.length}</h3>
+                  <h3 className="text-3xl sm:text-4xl font-semibold font-display text-foreground leading-none mt-2">{completedTasksCount + approvedOrders.length}</h3>
                 </div>
-                <div className="p-2 bg-blue-600 text-white rounded-xl shadow-xs shrink-0">
-                  <CheckCircle size={16} />
+                <div className="p-2.5 bg-blue-600 text-white rounded-2xl shadow-sm shrink-0">
+                  <CheckCircle size={18} />
                 </div>
               </div>
-              <div className="flex items-center justify-between mt-3">
+              <div className="flex items-center justify-between mt-4">
                 <div className="flex items-center gap-1.5">
-                  <span className="bg-blue-600 text-white px-1.5 py-0.5 rounded text-[9px] font-bold shadow-xs">
+                  <span className="bg-blue-500/10 text-blue-600 border border-blue-500/20 px-2 py-0.5 rounded-full text-[10px] font-bold">
                     ↑ 8.3%
                   </span>
-                  <span className="text-[10px] text-muted font-medium">vs last week</span>
+                  <span className="text-xs text-muted font-medium">vs last week</span>
                 </div>
                 {renderMiniLineChart(getSparklineData("completed"), "#2563eb", "blue-spark")}
               </div>
@@ -655,11 +660,11 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {/* Total Delivery Charges */}
-            <div className="bg-card border border-border/80 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all p-5 rounded-2xl flex items-center justify-between">
+            <div className="bg-card border border-border/80 shadow-sm hover:shadow-md transition-all p-6 rounded-[28px] flex items-center justify-between">
               <div className="space-y-1">
                 <span className="text-xs text-muted font-bold uppercase tracking-wider block">Total Delivery Charges</span>
-                <h3 className="text-xl sm:text-2xl font-extrabold font-display text-blue-600 dark:text-blue-400">Rs. {totalDeliveryCharges.toLocaleString()}</h3>
-                <p className="text-[10px] text-muted">Separate delivery fees (not in Total Sales)</p>
+                <h3 className="text-2xl sm:text-3xl font-semibold font-display text-blue-600 dark:text-blue-400">Rs. {totalDeliveryCharges.toLocaleString()}</h3>
+                <p className="text-xs text-muted">Separate delivery fees (not in Total Sales)</p>
               </div>
               <div className="p-3 bg-blue-600 text-white rounded-2xl shadow-xs">
                 <Truck size={22} />
@@ -667,11 +672,11 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
             </div>
 
             {/* Total Fitting Charges */}
-            <div className="bg-card border border-border/80 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all p-5 rounded-2xl flex items-center justify-between">
+            <div className="bg-card border border-border/80 shadow-sm hover:shadow-md transition-all p-6 rounded-[28px] flex items-center justify-between">
               <div className="space-y-1">
                 <span className="text-xs text-muted font-bold uppercase tracking-wider block">Total Fitting Charges</span>
-                <h3 className="text-xl sm:text-2xl font-extrabold font-display text-purple-600 dark:text-purple-400">Rs. {totalFittingCharges.toLocaleString()}</h3>
-                <p className="text-[10px] text-muted">Separate installation fees (not in Total Sales)</p>
+                <h3 className="text-2xl sm:text-3xl font-semibold font-display text-purple-600 dark:text-purple-400">Rs. {totalFittingCharges.toLocaleString()}</h3>
+                <p className="text-xs text-muted">Separate installation fees (not in Total Sales)</p>
               </div>
               <div className="p-3 bg-purple-600 text-white rounded-2xl shadow-xs">
                 <Wrench size={22} />
@@ -681,12 +686,12 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
             {/* Outstanding Receivables */}
             <div 
               onClick={() => setShowOutstandingModal(true)}
-              className="bg-card border border-border/80 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all p-5 rounded-2xl flex items-center justify-between cursor-pointer hover:border-red-500/30 hover:bg-red-500/[0.01] group"
+              className="bg-card border border-border/80 shadow-sm hover:shadow-md transition-all p-6 rounded-[28px] flex items-center justify-between cursor-pointer hover:border-red-500/30 hover:bg-red-500/[0.01] group"
             >
               <div className="space-y-1">
                 <span className="text-xs text-muted font-bold uppercase tracking-wider block group-hover:text-red-500 transition-colors">Total Outstanding Due</span>
-                <h3 className="text-xl sm:text-2xl font-extrabold font-display text-red-500">Rs. {totalDuePayment.toLocaleString()}</h3>
-                <p className="text-[10px] text-muted">Receivables remaining from active/completed orders (Click to view)</p>
+                <h3 className="text-2xl sm:text-3xl font-semibold font-display text-red-500">Rs. {totalDuePayment.toLocaleString()}</h3>
+                <p className="text-xs text-muted">Receivables remaining from active/completed orders (Click to view)</p>
               </div>
               <div className="p-3 bg-red-600 text-white rounded-2xl shadow-xs group-hover:scale-105 transition-transform">
                 <Clock size={22} />
@@ -697,57 +702,62 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
       ) : (
         // STAFF PERSONAL METRICS CARD
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-card border border-border/80 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all p-5 rounded-2xl flex items-center justify-between">
-            <div className="space-y-2">
-              <span className="text-xs text-muted font-bold uppercase tracking-wider block">Your Pending Tasks</span>
-              <h3 className="text-2xl sm:text-3xl font-extrabold font-display text-amber-500 leading-none">{staffPendingTasks.length}</h3>
+          <div
+            className="relative rounded-[28px] p-6 shadow-xl shadow-orange-500/10 overflow-hidden flex items-center justify-between transition-all hover:scale-[1.01]"
+            style={{
+              background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
+            }}
+          >
+            <div className="space-y-2 relative z-10">
+              <span className="text-xs font-semibold text-black/85 uppercase tracking-wider block">Your Pending Tasks</span>
+              <h3 className="text-3xl sm:text-4xl font-semibold font-display text-black leading-none">{staffPendingTasks.length}</h3>
               <div className="flex items-center gap-2 mt-1">
-                <span className="bg-amber-600 text-white px-1.5 py-0.5 rounded text-[9px] font-bold shadow-xs">
+                <span className="bg-black/10 text-black border border-black/10 px-2 py-0.5 rounded-full text-[10px] font-bold">
                   Active
                 </span>
-                <span className="text-[10px] text-muted font-medium">Awaiting completion</span>
+                <span className="text-xs text-black/75 font-medium">Awaiting completion</span>
               </div>
             </div>
-            <div className="flex flex-col items-end gap-2">
-              <div className="p-2.5 bg-amber-600 text-white rounded-xl shadow-xs">
+            <div className="flex flex-col items-end gap-2 relative z-10">
+              <div className="p-2.5 bg-black text-white rounded-2xl shadow-md">
                 <Clock size={20} />
               </div>
-              {renderMiniLineChart(getSparklineData("tasks"), "#d97706", "staff-tasks-spark")}
+              {renderMiniLineChart(getSparklineData("tasks"), "#000000", "staff-tasks-spark")}
             </div>
           </div>
 
-          <div className="bg-card border border-border/80 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all p-5 rounded-2xl flex items-center justify-between">
+          <div className="bg-card border border-border/80 shadow-sm hover:shadow-md transition-all p-6 rounded-[28px] flex items-center justify-between">
             <div className="space-y-2">
               <span className="text-xs text-muted font-bold uppercase tracking-wider block">Your Completed Tasks</span>
-              <h3 className="text-2xl sm:text-3xl font-extrabold font-display text-green-500 leading-none">{staffCompletedTasks.length}</h3>
+              <h3 className="text-3xl sm:text-4xl font-semibold font-display text-emerald-600 dark:text-emerald-400 leading-none">{staffCompletedTasks.length}</h3>
               <div className="flex items-center gap-2 mt-1">
-                <span className="bg-emerald-600 text-white px-1.5 py-0.5 rounded text-[9px] font-bold shadow-xs">
+                <span className="bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 px-2 py-0.5 rounded-full text-[10px] font-bold">
                   Completed
                 </span>
-                <span className="text-[10px] text-muted font-medium">Finished work items</span>
+                <span className="text-xs text-muted font-medium">Finished work items</span>
               </div>
             </div>
             <div className="flex flex-col items-end gap-2">
-              <div className="p-2.5 bg-emerald-600 text-white rounded-xl shadow-xs">
+              <div className="p-2.5 bg-emerald-600 text-white rounded-2xl shadow-sm">
                 <CheckCircle size={20} />
               </div>
               {renderMiniLineChart(getSparklineData("completed"), "#10b981", "staff-completed-spark")}
             </div>
           </div>
 
-          <div className="bg-card border border-border/80 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all p-5 rounded-2xl flex items-center justify-between">
+          <div className="bg-card border border-border/80 shadow-sm hover:shadow-md transition-all p-6 rounded-[28px] flex items-center justify-between">
             <div className="space-y-2">
               <span className="text-xs text-muted font-bold uppercase tracking-wider block">Marketing Hub</span>
-              <h3 className="text-2xl sm:text-3xl font-extrabold font-display text-blue-500 leading-none">{campaigns.length}</h3>
+              <h3 className="text-3xl sm:text-4xl font-semibold font-display text-blue-600 dark:text-blue-400 leading-none">{campaigns.length}</h3>
               <div className="flex items-center gap-2 mt-1">
-                <span className="bg-blue-600 text-white px-1.5 py-0.5 rounded text-[9px] font-bold shadow-xs">
+                <span className="bg-blue-500/10 text-blue-600 border border-blue-500/20 px-2 py-0.5 rounded-full text-[10px] font-bold">
                   Active
                 </span>
-                <span className="text-[10px] text-muted font-medium">Coordinated campaigns</span>
+                <span className="text-xs text-muted font-medium">Coordinated campaigns</span>
               </div>
             </div>
             <div className="flex flex-col items-end gap-2">
-              <div className="p-2.5 bg-blue-600 text-white rounded-xl shadow-xs">
+              <div className="p-2.5 bg-blue-600 text-white rounded-2xl shadow-sm">
                 <FileText size={20} />
               </div>
               {renderMiniBarChart([4, 5, 3, 6, 4, campaigns.length], "fill-blue-500/80 hover:fill-blue-500 transition-colors")}
@@ -761,79 +771,79 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
         <div className="space-y-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Expenses Overview Card */}
-            <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-6 flex flex-col justify-between h-[240px]">
+            <div className="bg-card border border-border/80 rounded-[28px] shadow-sm hover:shadow-md transition-all p-6 flex flex-col justify-between h-[250px]">
               <div>
-                <div className="flex items-center justify-between border-b border-border pb-2.5 mb-3">
-                  <h3 className="font-bold text-sm font-display flex items-center gap-2">
+                <div className="flex items-center justify-between border-b border-border/60 pb-2.5 mb-3">
+                  <h3 className="font-semibold text-sm font-display flex items-center gap-2">
                     <DollarSign size={16} className="text-red-500" />
                     Expenses Summary
                   </h3>
-                  <span className="text-[10px] font-bold bg-red-600 text-white px-2 py-0.5 rounded shadow-sm">
-                    Log
+                  <span className="text-[10px] font-bold bg-red-500/10 text-red-600 border border-red-500/20 px-2.5 py-0.5 rounded-full">
+                    Outflows
                   </span>
                 </div>
                 <div className="mb-3">
                   <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Total Expenses</span>
-                  <h4 className="text-xl font-extrabold text-foreground mt-0.5">Rs. {totalExpensesVal.toLocaleString()}</h4>
+                  <h4 className="text-2xl font-semibold font-display text-foreground mt-0.5">Rs. {totalExpensesVal.toLocaleString()}</h4>
                 </div>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[10px] text-muted font-semibold">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[10px] text-muted font-medium">
                   <div className="flex justify-between">
                     <span>Salary:</span>
-                    <span className="font-extrabold text-foreground">Rs. {expenseCategorySums.salary.toLocaleString()}</span>
+                    <span className="font-bold text-foreground">Rs. {expenseCategorySums.salary.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Rent:</span>
-                    <span className="font-extrabold text-foreground">Rs. {expenseCategorySums.rent.toLocaleString()}</span>
+                    <span className="font-bold text-foreground">Rs. {expenseCategorySums.rent.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Travel:</span>
-                    <span className="font-extrabold text-foreground">Rs. {expenseCategorySums.travel.toLocaleString()}</span>
+                    <span className="font-bold text-foreground">Rs. {expenseCategorySums.travel.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Food:</span>
-                    <span className="font-extrabold text-foreground">Rs. {expenseCategorySums.food.toLocaleString()}</span>
+                    <span className="font-bold text-foreground">Rs. {expenseCategorySums.food.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Misc:</span>
-                    <span className="font-extrabold text-foreground">Rs. {expenseCategorySums.miscellaneous.toLocaleString()}</span>
+                    <span className="font-bold text-foreground">Rs. {expenseCategorySums.miscellaneous.toLocaleString()}</span>
                   </div>
                 </div>
               </div>
               <button
                 onClick={() => setCurrentTab("expenses")}
-                className="text-left text-[10px] font-bold text-accent hover:text-accent-dark transition-colors mt-3"
+                className="text-left text-xs font-bold text-accent hover:text-accent-dark transition-colors mt-3"
               >
                 View Expense Log &rarr;
               </button>
             </div>
 
             {/* Purchases Tracker Card */}
-            <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-6 flex flex-col justify-between h-[240px]">
+            <div className="bg-card border border-border/80 rounded-[28px] shadow-sm hover:shadow-md transition-all p-6 flex flex-col justify-between h-[250px]">
               <div>
-                <div className="flex items-center justify-between border-b border-border pb-2.5 mb-3">
-                  <h3 className="font-bold text-sm font-display flex items-center gap-2">
+                <div className="flex items-center justify-between border-b border-border/60 pb-2.5 mb-3">
+                  <h3 className="font-semibold text-sm font-display flex items-center gap-2">
                     <Briefcase size={16} className="text-blue-500" />
                     Purchases Tracker
                   </h3>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded shadow-sm ${
-                    outstandingPurchasesVal > 0 ? "bg-amber-600 text-white" : "bg-green-600 text-white"
+                  <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                    outstandingPurchasesVal > 0 ? "bg-amber-500/10 text-amber-600 border-amber-500/20" : "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
                   }`}>
                     {outstandingPurchasesVal > 0 ? "Pending Dues" : "Settled"}
                   </span>
                 </div>
                 <div className="mb-2">
                   <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Total Purchases</span>
-                  <h4 className="text-xl font-extrabold text-foreground mt-0.5">Rs. {totalPurchasesVal.toLocaleString()}</h4>
+                  <h4 className="text-2xl font-semibold font-display text-foreground mt-0.5">Rs. {totalPurchasesVal.toLocaleString()}</h4>
                   {outstandingPurchasesVal > 0 && (
-                    <p className="text-[9px] text-red-500 font-bold mt-0.5">Rs. {outstandingPurchasesVal.toLocaleString()} outstanding dues</p>
+                    <p className="text-[10px] text-red-500 font-medium mt-0.5">Rs. {outstandingPurchasesVal.toLocaleString()} outstanding dues</p>
                   )}
                 </div>
                 <div className="space-y-1">
                   <span className="text-[9px] text-muted uppercase font-bold tracking-wider block">Recent Invoices</span>
                   {purchases.slice(0, 2).map((p) => (
                     <div key={p._id} className="flex justify-between items-center text-[10px] border-b border-border/40 pb-1">
-                      <span className="truncate max-w-[120px] font-semibold text-foreground">{p.supplier}</span>
-                      <span className="text-muted">Rs. {p.amount.toLocaleString()}</span>
+                      <span className="truncate max-w-[120px] font-medium text-foreground">{p.supplier}</span>
+                      <span className="text-muted font-semibold">Rs. {p.amount.toLocaleString()}</span>
                     </div>
                   ))}
                   {purchases.length === 0 && (
@@ -843,22 +853,22 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               </div>
               <button
                 onClick={() => setCurrentTab("purchase")}
-                className="text-left text-[10px] font-bold text-accent hover:text-accent-dark transition-colors mt-3"
+                className="text-left text-xs font-bold text-accent hover:text-accent-dark transition-colors mt-3"
               >
                 View Purchases Tracker &rarr;
               </button>
             </div>
 
             {/* Material Inventory Card */}
-            <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-6 flex flex-col justify-between h-[240px]">
+            <div className="bg-card border border-border/80 rounded-[28px] shadow-sm hover:shadow-md transition-all p-6 flex flex-col justify-between h-[250px]">
               <div>
-                <div className="flex items-center justify-between border-b border-border pb-2.5 mb-3">
-                  <h3 className="font-bold text-sm font-display flex items-center gap-2">
+                <div className="flex items-center justify-between border-b border-border/60 pb-2.5 mb-3">
+                  <h3 className="font-semibold text-sm font-display flex items-center gap-2">
                     <Package size={16} className="text-emerald-500" />
                     Material Inventory
                   </h3>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded shadow-sm ${
-                    (lowStockVal + outOfStockVal) > 0 ? "bg-red-600 text-white" : "bg-green-600 text-white"
+                  <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                    (lowStockVal + outOfStockVal) > 0 ? "bg-red-500/10 text-red-600 border-red-500/20" : "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
                   }`}>
                     {(lowStockVal + outOfStockVal) > 0 ? "Alerts" : "Ok"}
                   </span>
@@ -866,9 +876,9 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                 <div className="mb-2 flex justify-between items-center">
                   <div>
                     <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Low Stock / Out</span>
-                    <h4 className="text-xl font-extrabold text-foreground mt-0.5">{(lowStockVal + outOfStockVal)} Items</h4>
+                    <h4 className="text-2xl font-semibold font-display text-foreground mt-0.5">{(lowStockVal + outOfStockVal)} Items</h4>
                   </div>
-                  <div className="text-right text-[9px] text-muted font-bold space-y-0.5">
+                  <div className="text-right text-[10px] font-medium space-y-0.5">
                     <div className="text-amber-500">{lowStockVal} Low Stock</div>
                     <div className="text-red-500">{outOfStockVal} Out of Stock</div>
                   </div>
@@ -877,20 +887,20 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                   <span className="text-[9px] text-muted uppercase font-bold tracking-wider block">Critical Materials</span>
                   {inventoryItems.filter((i) => i.quantity <= i.alertLevel).slice(0, 2).map((i) => (
                     <div key={i._id} className="flex justify-between items-center text-[10px] border-b border-border/40 pb-1">
-                      <span className="truncate max-w-[120px] font-semibold text-foreground">{i.name}</span>
+                      <span className="truncate max-w-[120px] font-medium text-foreground">{i.name}</span>
                       <span className={`font-bold ${i.quantity === 0 ? "text-red-500" : "text-amber-500"}`}>
                         {i.quantity} {i.unit}
                       </span>
                     </div>
                   ))}
                   {inventoryItems.filter((i) => i.quantity <= i.alertLevel).length === 0 && (
-                    <span className="text-[10px] text-green-500 font-bold italic">All materials fully stocked</span>
+                    <span className="text-[10px] text-emerald-500 font-medium italic">All materials fully stocked</span>
                   )}
                 </div>
               </div>
               <button
                 onClick={() => setCurrentTab("inventory")}
-                className="text-left text-[10px] font-bold text-accent hover:text-accent-dark transition-colors mt-3"
+                className="text-left text-xs font-bold text-accent hover:text-accent-dark transition-colors mt-3"
               >
                 View Material Inventory &rarr;
               </button>
@@ -898,7 +908,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
           </div>
 
           {/* Reports & Statement Downloads */}
-          <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-6 bg-accent/[0.01]">
+          <div className="bg-card border border-border/80 rounded-[32px] shadow-sm p-6 sm:p-8">
             <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-border pb-4 mb-4 gap-4">
               <div>
                 <h3 className="font-bold text-base font-display flex items-center gap-2">
@@ -955,19 +965,24 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-              {/* Combined Statement */}
-              <div className="p-4 rounded-xl border border-border/80 bg-card hover:border-accent hover:shadow-md transition-all flex flex-col items-center justify-between text-center group">
+              {/* Combined Statement (Highlighted with Gradient Glow) */}
+              <div className="p-5 rounded-2xl border-2 border-orange-400/50 bg-gradient-to-b from-orange-500/[0.06] to-card hover:shadow-md transition-all flex flex-col items-center justify-between text-center group">
                 <div className="flex flex-col items-center">
-                  <div className="p-2.5 bg-accent text-white rounded-xl shadow-xs mb-2 group-hover:scale-105 transition-transform">
+                  <div
+                    className="p-2.5 rounded-xl shadow-xs mb-2 group-hover:scale-105 transition-transform text-black"
+                    style={{
+                      background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 100%)",
+                    }}
+                  >
                     <FileText size={18} />
                   </div>
                   <span className="text-xs font-bold text-foreground">Combined Statement</span>
-                  <span className="text-[9px] text-muted mt-0.5">Sales, expenses & procurement</span>
+                  <span className="text-[10px] text-muted mt-0.5">Sales, expenses & procurement</span>
                 </div>
                 <div className="flex items-center gap-1.5 mt-3 w-full">
                   <button
                     onClick={() => handlePreviewStatement("all")}
-                    className="flex-1 py-1 px-2 rounded-lg bg-accent/10 hover:bg-accent/20 text-accent text-[11px] font-bold transition-colors flex items-center justify-center gap-1"
+                    className="flex-1 py-1.5 px-2.5 rounded-xl bg-[#18181B] text-white hover:bg-black text-[11px] font-semibold transition-all flex items-center justify-center gap-1 shadow-xs"
                   >
                     <Eye size={12} />
                     <span>PDF</span>
@@ -975,7 +990,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                   <button
                     onClick={() => handleExport("all")}
                     disabled={exportingType !== null}
-                    className="py-1 px-2 rounded-lg border border-border bg-background hover:bg-accent/[0.05] text-[11px] font-bold text-foreground transition-colors"
+                    className="py-1.5 px-2.5 rounded-xl border border-border bg-[#FDF3E9] text-[#18181B] hover:bg-[#FEEFE2] text-[11px] font-semibold transition-all shadow-xs"
                     title="Download CSV"
                   >
                     {exportingType === "all" ? "..." : "CSV"}
@@ -984,18 +999,18 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               </div>
 
               {/* Sales Only */}
-              <div className="p-4 rounded-xl border border-border/80 bg-card hover:border-blue-500 hover:shadow-md transition-all flex flex-col items-center justify-between text-center group">
+              <div className="p-5 rounded-2xl border border-border/80 bg-card hover:border-blue-500 hover:shadow-md transition-all flex flex-col items-center justify-between text-center group">
                 <div className="flex flex-col items-center">
                   <div className="p-2.5 bg-blue-600 text-white rounded-xl shadow-xs mb-2 group-hover:scale-105 transition-transform">
                     <TrendingUp size={18} />
                   </div>
                   <span className="text-xs font-bold text-foreground">Sales Only</span>
-                  <span className="text-[9px] text-muted mt-0.5">Revenue ledger & invoices</span>
+                  <span className="text-[10px] text-muted mt-0.5">Revenue ledger & invoices</span>
                 </div>
                 <div className="flex items-center gap-1.5 mt-3 w-full">
                   <button
                     onClick={() => handlePreviewStatement("sales")}
-                    className="flex-1 py-1 px-2 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 text-[11px] font-bold transition-colors flex items-center justify-center gap-1"
+                    className="flex-1 py-1.5 px-2.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 text-[11px] font-semibold transition-all flex items-center justify-center gap-1"
                   >
                     <Eye size={12} />
                     <span>PDF</span>
@@ -1003,7 +1018,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                   <button
                     onClick={() => handleExport("sales")}
                     disabled={exportingType !== null}
-                    className="py-1 px-2 rounded-lg border border-border bg-background hover:bg-blue-500/10 text-[11px] font-bold text-foreground transition-colors"
+                    className="py-1.5 px-2.5 rounded-xl border border-border bg-background hover:bg-blue-500/10 text-[11px] font-semibold text-foreground transition-all"
                     title="Download CSV"
                   >
                     {exportingType === "sales" ? "..." : "CSV"}
@@ -1012,18 +1027,18 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               </div>
 
               {/* Expenses Only */}
-              <div className="p-4 rounded-xl border border-border/80 bg-card hover:border-red-500 hover:shadow-md transition-all flex flex-col items-center justify-between text-center group">
+              <div className="p-5 rounded-2xl border border-border/80 bg-card hover:border-red-500 hover:shadow-md transition-all flex flex-col items-center justify-between text-center group">
                 <div className="flex flex-col items-center">
                   <div className="p-2.5 bg-red-600 text-white rounded-xl shadow-xs mb-2 group-hover:scale-105 transition-transform">
                     <DollarSign size={18} />
                   </div>
                   <span className="text-xs font-bold text-foreground">Expenses Only</span>
-                  <span className="text-[9px] text-muted mt-0.5">Salaries, rent & utilities</span>
+                  <span className="text-[10px] text-muted mt-0.5">Salaries, rent & utilities</span>
                 </div>
                 <div className="flex items-center gap-1.5 mt-3 w-full">
                   <button
                     onClick={() => handlePreviewStatement("expenses")}
-                    className="flex-1 py-1 px-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-600 text-[11px] font-bold transition-colors flex items-center justify-center gap-1"
+                    className="flex-1 py-1.5 px-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 text-[11px] font-semibold transition-all flex items-center justify-center gap-1"
                   >
                     <Eye size={12} />
                     <span>PDF</span>
@@ -1031,7 +1046,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                   <button
                     onClick={() => handleExport("expenses")}
                     disabled={exportingType !== null}
-                    className="py-1 px-2 rounded-lg border border-border bg-background hover:bg-red-500/10 text-[11px] font-bold text-foreground transition-colors"
+                    className="py-1.5 px-2.5 rounded-xl border border-border bg-background hover:bg-red-500/10 text-[11px] font-semibold text-foreground transition-all"
                     title="Download CSV"
                   >
                     {exportingType === "expenses" ? "..." : "CSV"}
@@ -1040,18 +1055,18 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               </div>
 
               {/* Purchases Only */}
-              <div className="p-4 rounded-xl border border-border/80 bg-card hover:border-amber-500 hover:shadow-md transition-all flex flex-col items-center justify-between text-center group">
+              <div className="p-5 rounded-2xl border border-border/80 bg-card hover:border-amber-500 hover:shadow-md transition-all flex flex-col items-center justify-between text-center group">
                 <div className="flex flex-col items-center">
                   <div className="p-2.5 bg-amber-600 text-white rounded-xl shadow-xs mb-2 group-hover:scale-105 transition-transform">
                     <Briefcase size={18} />
                   </div>
                   <span className="text-xs font-bold text-foreground">Purchases Only</span>
-                  <span className="text-[9px] text-muted mt-0.5">Raw materials & procurement</span>
+                  <span className="text-[10px] text-muted mt-0.5">Raw materials & procurement</span>
                 </div>
                 <div className="flex items-center gap-1.5 mt-3 w-full">
                   <button
                     onClick={() => handlePreviewStatement("purchases")}
-                    className="flex-1 py-1 px-2 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 text-[11px] font-bold transition-colors flex items-center justify-center gap-1"
+                    className="flex-1 py-1.5 px-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 text-[11px] font-semibold transition-all flex items-center justify-center gap-1"
                   >
                     <Eye size={12} />
                     <span>PDF</span>
@@ -1059,7 +1074,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                   <button
                     onClick={() => handleExport("purchases")}
                     disabled={exportingType !== null}
-                    className="py-1 px-2 rounded-lg border border-border bg-background hover:bg-amber-500/10 text-[11px] font-bold text-foreground transition-colors"
+                    className="py-1.5 px-2.5 rounded-xl border border-border bg-background hover:bg-amber-500/10 text-[11px] font-semibold text-foreground transition-all"
                     title="Download CSV"
                   >
                     {exportingType === "purchases" ? "..." : "CSV"}
@@ -1068,18 +1083,18 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               </div>
 
               {/* Inventory Catalog */}
-              <div className="p-4 rounded-xl border border-border/80 bg-card hover:border-emerald-500 hover:shadow-md transition-all flex flex-col items-center justify-between text-center group sm:col-span-2 lg:col-span-1">
+              <div className="p-5 rounded-2xl border border-border/80 bg-card hover:border-emerald-500 hover:shadow-md transition-all flex flex-col items-center justify-between text-center group sm:col-span-2 lg:col-span-1">
                 <div className="flex flex-col items-center">
                   <div className="p-2.5 bg-emerald-600 text-white rounded-xl shadow-xs mb-2 group-hover:scale-105 transition-transform">
                     <Package size={18} />
                   </div>
                   <span className="text-xs font-bold text-foreground">Inventory Catalog</span>
-                  <span className="text-[9px] text-muted mt-0.5">Raw materials & stocks</span>
+                  <span className="text-[10px] text-muted mt-0.5">Raw materials & stocks</span>
                 </div>
                 <button
                   onClick={() => handleExport("inventory")}
                   disabled={exportingType !== null}
-                  className="w-full mt-3 py-1 px-2 rounded-lg border border-border bg-background hover:bg-emerald-500/10 text-[11px] font-bold text-foreground transition-colors"
+                  className="w-full mt-3 py-1.5 px-2.5 rounded-xl border border-border bg-background hover:bg-emerald-500/10 text-[11px] font-semibold text-foreground transition-all shadow-xs"
                 >
                   {exportingType === "inventory" ? "Exporting..." : "Export CSV"}
                 </button>

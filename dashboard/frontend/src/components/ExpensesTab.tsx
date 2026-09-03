@@ -509,48 +509,53 @@ export const ExpensesTab: React.FC = () => {
 
       {/* Pie Chart & Overall summary layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Total Overall Expenses Panel */}
-        <div className="bg-card border border-border/80 p-6 rounded-2xl shadow-sm flex flex-col justify-between h-[220px]">
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-lg bg-red-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
-              <DollarSign size={22} />
+        {/* Total Overall Expenses Panel (Signature Sunset Gradient Hero Card) */}
+        <div
+          className="relative rounded-[28px] p-6 shadow-xl shadow-orange-500/10 overflow-hidden flex flex-col justify-between min-h-[240px] text-black transition-all hover:scale-[1.01]"
+          style={{
+            background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
+          }}
+        >
+          <div className="flex items-center gap-4 relative z-10">
+            <div className="h-12 w-12 rounded-2xl bg-black flex items-center justify-center text-white flex-shrink-0 shadow-md">
+              <DollarSign size={24} />
             </div>
             <div>
-              <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Total Overall Expenses</span>
-              <h3 className="text-2xl font-extrabold mt-1 text-foreground font-display">Rs. {totalExpenses.toLocaleString()}</h3>
-              <p className="text-[9px] text-muted mt-0.5">{expenses.length} logs recorded</p>
+              <span className="text-xs font-semibold text-black/85 uppercase tracking-wider">Total Overall Expenses</span>
+              <h3 className="text-3xl sm:text-4xl font-semibold font-display text-black mt-1 leading-none">Rs. {totalExpenses.toLocaleString()}</h3>
+              <p className="text-xs text-black/75 mt-1 font-medium">{expenses.length} logs recorded</p>
             </div>
           </div>
 
-          <div className="border-t border-border/60 pt-4 mt-2">
-            <span className="text-[10px] text-muted uppercase font-bold tracking-wider block mb-2">Category distribution</span>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[10px] font-semibold text-muted">
+          <div className="border-t border-black/10 pt-4 mt-2 relative z-10">
+            <span className="text-[10px] text-black/85 uppercase font-bold tracking-wider block mb-2">Category distribution</span>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[11px] font-medium text-black/80">
               <div className="flex justify-between items-center">
-                <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-purple-600" /> Salary</span>
-                <span className="text-foreground">Rs. {salarySum.toLocaleString()}</span>
+                <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-black/50" /> Salary</span>
+                <span className="font-bold text-black">Rs. {salarySum.toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-pink-600" /> Rent</span>
-                <span className="text-foreground">Rs. {rentSum.toLocaleString()}</span>
+                <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-black/50" /> Rent</span>
+                <span className="font-bold text-black">Rs. {rentSum.toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-blue-600" /> Travel</span>
-                <span className="text-foreground">Rs. {travelSum.toLocaleString()}</span>
+                <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-black/50" /> Travel</span>
+                <span className="font-bold text-black">Rs. {travelSum.toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-amber-600" /> Food</span>
-                <span className="text-foreground">Rs. {foodSum.toLocaleString()}</span>
+                <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-black/50" /> Food</span>
+                <span className="font-bold text-black">Rs. {foodSum.toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-zinc-600" /> Misc</span>
-                <span className="text-foreground">Rs. {miscSum.toLocaleString()}</span>
+                <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-black/50" /> Misc</span>
+                <span className="font-bold text-black">Rs. {miscSum.toLocaleString()}</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Category Breakdown Donut Chart Panel */}
-        <div className="bg-card border border-border/80 p-5 rounded-2xl shadow-sm flex items-center justify-around lg:col-span-2 h-[220px]">
+        {/* Category Breakdown Donut Chart Panel (Crisp Porcelain Card) */}
+        <div className="bg-card border border-border/80 p-6 rounded-[28px] shadow-sm hover:shadow-md transition-all flex items-center justify-around lg:col-span-2 min-h-[240px]">
           <div className="flex flex-col justify-center">
             <span className="text-[10px] text-muted uppercase font-bold tracking-wider mb-2">Expense Categories</span>
             <div className="space-y-2">

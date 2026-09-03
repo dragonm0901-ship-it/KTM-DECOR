@@ -411,25 +411,32 @@ export const PurchaseTab: React.FC = () => {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-6 flex items-center gap-4">
-          <div className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center text-white flex-shrink-0 shadow-sm">
-            <Briefcase size={22} />
+        {/* Total Purchases Cost (Signature Sunset Gradient Hero Card) */}
+        <div
+          className="relative rounded-[28px] p-6 shadow-xl shadow-orange-500/10 overflow-hidden flex items-center justify-between transition-all hover:scale-[1.01]"
+          style={{
+            background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
+          }}
+        >
+          <div className="relative z-10 space-y-1">
+            <span className="text-xs font-semibold text-black/85 uppercase tracking-wider block">Total Purchases Cost</span>
+            <h3 className="text-3xl sm:text-4xl font-semibold font-display text-black leading-none mt-1">Rs. {totalPurchases.toLocaleString()}</h3>
+            <p className="text-xs text-black/75 font-medium mt-1">{purchases.length} vendor invoices</p>
           </div>
-          <div>
-            <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Total Purchases Cost</span>
-            <h3 className="text-xl font-extrabold mt-1 text-foreground font-display">Rs. {totalPurchases.toLocaleString()}</h3>
-            <p className="text-[9px] text-muted mt-0.5 font-medium">{purchases.length} vendor invoices</p>
+          <div className="p-3 bg-black text-white rounded-2xl shadow-md shrink-0 relative z-10">
+            <Briefcase size={24} />
           </div>
         </div>
 
-        <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-6 flex items-center gap-4">
-          <div className="h-12 w-12 rounded-xl bg-red-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
-            <SlidersHorizontal size={22} className="rotate-90" />
+        {/* Outstanding Vendor Dues (Crisp Porcelain Card) */}
+        <div className="bg-card border border-border/80 shadow-sm hover:shadow-md transition-all p-6 rounded-[28px] flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-xs text-muted font-bold uppercase tracking-wider block">Outstanding Vendor Dues</span>
+            <h3 className="text-3xl sm:text-4xl font-semibold font-display text-red-500 leading-none mt-1">Rs. {pendingPurchases.toLocaleString()}</h3>
+            <p className="text-xs text-muted mt-1">{purchases.filter((p) => p.status === "pending").length} unpaid invoices</p>
           </div>
-          <div>
-            <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Outstanding Vendor Dues</span>
-            <h3 className="text-xl font-extrabold mt-1 text-red-500 font-display">Rs. {pendingPurchases.toLocaleString()}</h3>
-            <p className="text-[9px] text-muted mt-0.5 font-medium">{purchases.filter((p) => p.status === "pending").length} unpaid invoices</p>
+          <div className="p-3 bg-red-600 text-white rounded-2xl shadow-xs shrink-0">
+            <SlidersHorizontal size={24} className="rotate-90 text-white" />
           </div>
         </div>
       </div>

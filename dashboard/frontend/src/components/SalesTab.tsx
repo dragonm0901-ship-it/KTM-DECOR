@@ -325,25 +325,32 @@ export const SalesTab: React.FC = () => {
 
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <div className="border shadow-sm p-5 rounded-2xl flex items-center gap-4 bg-green-600/[0.02] border-green-500/20">
-          <div className="h-12 w-12 rounded-lg bg-green-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
-            <TrendingUp size={22} />
+        {/* Total Sales (Signature Sunset Gradient Hero Card) */}
+        <div
+          className="relative rounded-[28px] p-6 shadow-xl shadow-orange-500/10 overflow-hidden flex items-center justify-between transition-all hover:scale-[1.01]"
+          style={{
+            background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
+          }}
+        >
+          <div className="relative z-10 space-y-1">
+            <span className="text-xs font-semibold text-black/85 uppercase tracking-wider block">Total Sales (Product Revenue)</span>
+            <h3 className="text-3xl sm:text-4xl font-semibold font-display text-black leading-none mt-1">Rs. {combinedTotal.toLocaleString()}</h3>
+            <p className="text-xs text-black/75 font-medium mt-1">Excludes delivery & fitting charges</p>
           </div>
-          <div>
-            <span className="text-[10px] text-green-500 uppercase font-bold tracking-wider">Total Sales (Product Revenue)</span>
-            <h3 className="text-xl font-bold mt-1 text-green-500 font-display">Rs. {combinedTotal.toLocaleString()}</h3>
-            <p className="text-[9px] text-muted mt-0.5">Excludes delivery & fitting charges</p>
+          <div className="p-3 bg-black text-white rounded-2xl shadow-md shrink-0 relative z-10">
+            <TrendingUp size={24} />
           </div>
         </div>
 
-        <div className="border shadow-sm p-5 rounded-2xl flex items-center gap-4 bg-red-600/[0.02] border-red-500/20">
-          <div className="h-12 w-12 rounded-lg bg-red-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
-            <DollarSign size={22} className="text-white" />
+        {/* Total Outstanding Dues (Crisp Porcelain Card) */}
+        <div className="bg-card border border-border/80 shadow-sm hover:shadow-md transition-all p-6 rounded-[28px] flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-xs text-muted font-bold uppercase tracking-wider block">Total Outstanding Dues</span>
+            <h3 className="text-3xl sm:text-4xl font-semibold font-display text-red-500 leading-none mt-1">Rs. {totalDuePayment.toLocaleString()}</h3>
+            <p className="text-xs text-muted mt-1">{orders.filter(o => o.duePayment > 0).length} pending accounts</p>
           </div>
-          <div>
-            <span className="text-[10px] text-red-500 uppercase font-bold tracking-wider">Total Outstanding Dues</span>
-            <h3 className="text-xl font-bold mt-1 text-red-500 font-display">Rs. {totalDuePayment.toLocaleString()}</h3>
-            <p className="text-[9px] text-muted mt-0.5">{orders.filter(o => o.duePayment > 0).length} pending accounts</p>
+          <div className="p-3 bg-red-600 text-white rounded-2xl shadow-xs shrink-0">
+            <DollarSign size={24} className="text-white" />
           </div>
         </div>
       </div>
