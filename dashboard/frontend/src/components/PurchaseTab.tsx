@@ -11,6 +11,8 @@ import {
   Edit2,
   Eye
 } from "./ui/solar-icons";
+import { Printer, Download } from "lucide-react";
+import { StatementPreviewModal } from "./StatementPreviewModal";
 import { NepaliDatePicker } from "./ui/NepaliDatePicker";
 import {
   NEPALI_MONTHS,
@@ -38,8 +40,15 @@ export const PurchaseTab: React.FC = () => {
     exportStatement,
     statementArchives,
     fetchStatementArchives,
-    downloadArchive
+    downloadArchive,
+    fetchStatementData,
+    fetchArchiveData
   } = useStore();
+
+  // Statement PDF Preview Modal States
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
+  const [previewData, setPreviewData] = useState<any>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   useEffect(() => {
     if (user?.role === "admin") {
@@ -53,6 +62,34 @@ export const PurchaseTab: React.FC = () => {
   const [exportMonth, setExportMonth] = useState(currentBs.month.toString());
   const [exportYear, setExportYear] = useState(currentBs.year.toString());
   const [exporting, setExporting] = useState(false);
+
+  const handlePreviewClick = async () => {
+    try {
+      setPreviewLoading(true);
+      setPreviewModalOpen(true);
+      const data = await fetchStatementData("purchases", exportMonth, exportYear);
+      setPreviewData(data);
+    } catch (err) {
+      alert("Failed to load purchases statement: " + (err instanceof Error ? err.message : String(err)));
+      setPreviewModalOpen(false);
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  const handlePreviewArchive = async (archiveId: string) => {
+    try {
+      setPreviewLoading(true);
+      setPreviewModalOpen(true);
+      const data = await fetchArchiveData(archiveId);
+      setPreviewData(data);
+    } catch (err) {
+      alert("Failed to load archived purchases statement: " + (err instanceof Error ? err.message : String(err)));
+      setPreviewModalOpen(false);
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
 
   const handleExportClick = async () => {
     setExporting(true);
@@ -310,6 +347,14 @@ export const PurchaseTab: React.FC = () => {
               ))}
             </select>
             <button
+              onClick={handlePreviewClick}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#FE914C] text-white text-[11px] rounded font-bold hover:bg-[#E2752D] transition-all shadow-xs cursor-pointer"
+              title="Preview and Print PDF Purchases Statement"
+            >
+              <Printer size={13} />
+              <span>Preview PDF</span>
+            </button>
+            <button
               onClick={handleExportClick}
               disabled={exporting}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-accent/90 text-white text-[11px] rounded font-bold hover:bg-accent-dark transition-all disabled:opacity-50"
@@ -333,20 +378,32 @@ export const PurchaseTab: React.FC = () => {
         <div className="bg-card border border-border p-4 rounded-lg">
           <h3 className="text-xs font-bold text-muted uppercase tracking-wider mb-3 flex items-center gap-2">
             <Calendar size={14} className="text-accent" />
-            Archived Monthly Purchases Statements (CSV)
+            Archived Monthly Purchases Statements (PDF & CSV)
           </h3>
           <div className="flex flex-wrap gap-2">
             {statementArchives
               .filter((a) => a.type === "purchases")
               .map((archive) => (
-                <button
+                <div
                   key={archive._id}
-                  onClick={() => downloadArchive(archive._id, archive.filename)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded border border-border bg-background hover:bg-accent/[0.04] hover:border-accent/30 text-xs font-bold transition-all"
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded border border-border bg-background hover:bg-accent/[0.04] hover:border-accent/30 text-xs font-bold transition-all"
                 >
-                  <Briefcase size={12} className="text-accent" />
-                  {formatArchiveStatementLabel(archive)}
-                </button>
+                  <button
+                    onClick={() => handlePreviewArchive(archive._id)}
+                    className="flex items-center gap-1.5 text-foreground hover:text-accent transition-colors"
+                    title="Preview / Print PDF"
+                  >
+                    <Briefcase size={12} className="text-accent" />
+                    <span>{formatArchiveStatementLabel(archive)}</span>
+                  </button>
+                  <button
+                    onClick={() => downloadArchive(archive._id, archive.filename)}
+                    className="text-muted hover:text-accent p-1 ml-1 rounded hover:bg-accent/10 transition-colors"
+                    title="Download CSV"
+                  >
+                    <Download size={12} />
+                  </button>
+                </div>
               ))}
           </div>
         </div>
@@ -851,6 +908,15 @@ export const PurchaseTab: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Statement PDF Preview Modal */}
+      <StatementPreviewModal
+        isOpen={previewModalOpen}
+        onClose={() => setPreviewModalOpen(false)}
+        data={previewData}
+        loading={previewLoading}
+        onDownloadCsv={handleExportClick}
+      />
     </div>
   );
 };

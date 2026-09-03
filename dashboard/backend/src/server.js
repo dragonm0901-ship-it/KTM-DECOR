@@ -22,7 +22,7 @@ import { connectDB } from "./config/db.js";
 import { triggerPusher } from "./config/pusher.js";
 import { logActivity } from "./services/activityLogger.js";
 import { runSeeds, seedUsers } from "./services/seedService.js";
-import { buildStatementWorkbook } from "./services/exportService.js";
+import { buildStatementWorkbook, getStatementData } from "./services/exportService.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { initCache, cacheGet, cacheSet, cacheDeletePattern } from "./services/cacheService.js";
 
@@ -2228,6 +2228,33 @@ app.get("/api/cron/generate-statements", async (req, res) => {
   try {
     await generateMissingNepaliMonthStatements(4);
     res.json({ message: "Nepali monthly statements checked and generated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Get structured statement data for interactive/printable PDF preview modal (Admin only)
+app.get("/api/export/statement-data", protect, admin, async (req, res) => {
+  const currentBsYear = new NepaliDate().getYear().toString();
+  const { type = "all", month = "all", year = currentBsYear } = req.query;
+
+  try {
+    const data = await getStatementData(type, month, year);
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Get structured statement data for an archive by ID (Admin only)
+app.get("/api/export/archive-data/:id", protect, admin, async (req, res) => {
+  try {
+    const statement = await MonthlyStatement.findById(req.params.id);
+    if (!statement) {
+      return res.status(404).json({ message: "Statement archive not found" });
+    }
+    const data = await getStatementData(statement.type, statement.month.toString(), statement.year.toString());
+    res.json(data);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

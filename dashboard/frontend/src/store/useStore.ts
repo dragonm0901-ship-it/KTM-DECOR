@@ -393,6 +393,8 @@ interface DashboardState {
   statementArchives: any[];
   fetchStatementArchives: () => Promise<void>;
   downloadArchive: (id: string, filename: string) => Promise<void>;
+  fetchStatementData: (type: string, month: string, year: string) => Promise<any>;
+  fetchArchiveData: (id: string) => Promise<any>;
 }
 
 // Helpers
@@ -1937,6 +1939,34 @@ export const useStore = create<DashboardState>()(
       window.URL.revokeObjectURL(url);
     } catch (err) {
       console.error("Download archive failed:", err);
+      throw err;
+    }
+  },
+
+  fetchStatementData: async (type, month, year) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/export/statement-data?type=${type}&month=${month}&year=${year}`, {
+        headers: getHeaders(token),
+      });
+      if (!res.ok) throw new Error("Failed to fetch statement data");
+      return await res.json();
+    } catch (err) {
+      console.error("fetchStatementData failed:", err);
+      throw err;
+    }
+  },
+
+  fetchArchiveData: async (id) => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/export/archive-data/${id}`, {
+        headers: getHeaders(token),
+      });
+      if (!res.ok) throw new Error("Failed to fetch archive statement data");
+      return await res.json();
+    } catch (err) {
+      console.error("fetchArchiveData failed:", err);
       throw err;
     }
   },

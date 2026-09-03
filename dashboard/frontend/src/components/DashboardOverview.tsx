@@ -21,7 +21,9 @@ import {
   Truck,
   Wrench
 } from "./ui/solar-icons";
+import { Printer, Download } from "lucide-react";
 import { OrderDetailModal } from "./OrderDetailModal";
+import { StatementPreviewModal } from "./StatementPreviewModal";
 import {
   formatNepali,
   formatNepaliShort,
@@ -61,7 +63,9 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
     exportInventory,
     statementArchives,
     fetchStatementArchives,
-    downloadArchive
+    downloadArchive,
+    fetchStatementData,
+    fetchArchiveData
   } = useStore();
 
   const [noteText, setNoteText] = useState("");
@@ -69,6 +73,11 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
   const [fabOpen, setFabOpen] = useState(false);
   const [hoveredPoint, setHoveredPoint] = useState<{ x: number; y: number; label: string; value: number } | null>(null);
   const [timeFilter, setTimeFilter] = useState<"days" | "week" | "month">("month");
+
+  // Statement PDF Preview Modal States
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
+  const [previewData, setPreviewData] = useState<any>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   // Outstanding Due Modal States
   const [showOutstandingModal, setShowOutstandingModal] = useState(false);
@@ -86,6 +95,34 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
       fetchStatementArchives();
     }
   }, [user, fetchStatementArchives]);
+
+  const handlePreviewStatement = async (type: string) => {
+    try {
+      setPreviewLoading(true);
+      setPreviewModalOpen(true);
+      const data = await fetchStatementData(type, exportMonth, exportYear);
+      setPreviewData(data);
+    } catch (err) {
+      alert("Failed to load statement: " + (err instanceof Error ? err.message : String(err)));
+      setPreviewModalOpen(false);
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  const handlePreviewArchive = async (archiveId: string) => {
+    try {
+      setPreviewLoading(true);
+      setPreviewModalOpen(true);
+      const data = await fetchArchiveData(archiveId);
+      setPreviewData(data);
+    } catch (err) {
+      alert("Failed to load archive statement: " + (err instanceof Error ? err.message : String(err)));
+      setPreviewModalOpen(false);
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
 
   const handleExport = async (type: string) => {
     setExportingType(type);
@@ -959,8 +996,8 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                 </p>
               </div>
 
-              {/* Date Filters (Nepali BS) */}
-              <div className="flex items-center gap-3">
+              {/* Date Filters (Nepali BS) & PDF Preview */}
+              <div className="flex flex-wrap items-end gap-3">
                 <div className="flex flex-col">
                   <span className="text-[10px] text-muted uppercase font-bold tracking-wider mb-1">Nepali Month</span>
                   <select
@@ -991,74 +1028,148 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                     ))}
                   </select>
                 </div>
+
+                <button
+                  onClick={() => handlePreviewStatement("all")}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#FE914C] hover:bg-[#E2752D] text-white rounded-lg text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
+                  title="Open printable statement preview modal"
+                >
+                  <Printer size={14} />
+                  <span>Preview / Print PDF</span>
+                </button>
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-              <button
-                onClick={() => handleExport("all")}
-                disabled={exportingType !== null}
-                className="flex flex-col items-center justify-center p-4 rounded-xl border border-border/80 bg-card hover:border-accent hover:shadow-md transition-all text-center group"
-              >
-                <div className="p-2.5 bg-accent text-white rounded-xl shadow-xs mb-2 group-hover:scale-105 transition-transform">
-                  <FileText size={18} />
+              {/* Combined Statement */}
+              <div className="p-4 rounded-xl border border-border/80 bg-card hover:border-accent hover:shadow-md transition-all flex flex-col items-center justify-between text-center group">
+                <div className="flex flex-col items-center">
+                  <div className="p-2.5 bg-accent text-white rounded-xl shadow-xs mb-2 group-hover:scale-105 transition-transform">
+                    <FileText size={18} />
+                  </div>
+                  <span className="text-xs font-bold text-foreground">Combined Statement</span>
+                  <span className="text-[9px] text-muted mt-0.5">Sales, expenses & procurement</span>
                 </div>
-                <span className="text-xs font-bold text-foreground">Combined Statement</span>
-                <span className="text-[9px] text-muted mt-1">All sales, expenses, and purchases</span>
-                {exportingType === "all" && <span className="text-[9px] text-accent font-bold mt-1 animate-pulse">Exporting...</span>}
-              </button>
+                <div className="flex items-center gap-1.5 mt-3 w-full">
+                  <button
+                    onClick={() => handlePreviewStatement("all")}
+                    className="flex-1 py-1 px-2 rounded-lg bg-accent/10 hover:bg-accent/20 text-accent text-[11px] font-bold transition-colors flex items-center justify-center gap-1"
+                  >
+                    <Eye size={12} />
+                    <span>PDF</span>
+                  </button>
+                  <button
+                    onClick={() => handleExport("all")}
+                    disabled={exportingType !== null}
+                    className="py-1 px-2 rounded-lg border border-border bg-background hover:bg-accent/[0.05] text-[11px] font-bold text-foreground transition-colors"
+                    title="Download CSV"
+                  >
+                    {exportingType === "all" ? "..." : "CSV"}
+                  </button>
+                </div>
+              </div>
 
-              <button
-                onClick={() => handleExport("sales")}
-                disabled={exportingType !== null}
-                className="flex flex-col items-center justify-center p-4 rounded-xl border border-border/80 bg-card hover:border-blue-500 hover:shadow-md transition-all text-center group"
-              >
-                <div className="p-2.5 bg-blue-600 text-white rounded-xl shadow-xs mb-2 group-hover:scale-105 transition-transform">
-                  <TrendingUp size={18} />
+              {/* Sales Only */}
+              <div className="p-4 rounded-xl border border-border/80 bg-card hover:border-blue-500 hover:shadow-md transition-all flex flex-col items-center justify-between text-center group">
+                <div className="flex flex-col items-center">
+                  <div className="p-2.5 bg-blue-600 text-white rounded-xl shadow-xs mb-2 group-hover:scale-105 transition-transform">
+                    <TrendingUp size={18} />
+                  </div>
+                  <span className="text-xs font-bold text-foreground">Sales Only</span>
+                  <span className="text-[9px] text-muted mt-0.5">Revenue ledger & invoices</span>
                 </div>
-                <span className="text-xs font-bold text-foreground">Sales Only</span>
-                <span className="text-[9px] text-muted mt-1">CSV file of sales ledger</span>
-                {exportingType === "sales" && <span className="text-[9px] text-blue-500 font-bold mt-1 animate-pulse">Exporting...</span>}
-              </button>
+                <div className="flex items-center gap-1.5 mt-3 w-full">
+                  <button
+                    onClick={() => handlePreviewStatement("sales")}
+                    className="flex-1 py-1 px-2 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 text-[11px] font-bold transition-colors flex items-center justify-center gap-1"
+                  >
+                    <Eye size={12} />
+                    <span>PDF</span>
+                  </button>
+                  <button
+                    onClick={() => handleExport("sales")}
+                    disabled={exportingType !== null}
+                    className="py-1 px-2 rounded-lg border border-border bg-background hover:bg-blue-500/10 text-[11px] font-bold text-foreground transition-colors"
+                    title="Download CSV"
+                  >
+                    {exportingType === "sales" ? "..." : "CSV"}
+                  </button>
+                </div>
+              </div>
 
-              <button
-                onClick={() => handleExport("expenses")}
-                disabled={exportingType !== null}
-                className="flex flex-col items-center justify-center p-4 rounded-xl border border-border/80 bg-card hover:border-red-500 hover:shadow-md transition-all text-center group"
-              >
-                <div className="p-2.5 bg-red-600 text-white rounded-xl shadow-xs mb-2 group-hover:scale-105 transition-transform">
-                  <DollarSign size={18} />
+              {/* Expenses Only */}
+              <div className="p-4 rounded-xl border border-border/80 bg-card hover:border-red-500 hover:shadow-md transition-all flex flex-col items-center justify-between text-center group">
+                <div className="flex flex-col items-center">
+                  <div className="p-2.5 bg-red-600 text-white rounded-xl shadow-xs mb-2 group-hover:scale-105 transition-transform">
+                    <DollarSign size={18} />
+                  </div>
+                  <span className="text-xs font-bold text-foreground">Expenses Only</span>
+                  <span className="text-[9px] text-muted mt-0.5">Salaries, rent & utilities</span>
                 </div>
-                <span className="text-xs font-bold text-foreground">Expenses Only</span>
-                <span className="text-[9px] text-muted mt-1">CSV file of expenses log</span>
-                {exportingType === "expenses" && <span className="text-[9px] text-red-500 font-bold mt-1 animate-pulse">Exporting...</span>}
-              </button>
+                <div className="flex items-center gap-1.5 mt-3 w-full">
+                  <button
+                    onClick={() => handlePreviewStatement("expenses")}
+                    className="flex-1 py-1 px-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-600 text-[11px] font-bold transition-colors flex items-center justify-center gap-1"
+                  >
+                    <Eye size={12} />
+                    <span>PDF</span>
+                  </button>
+                  <button
+                    onClick={() => handleExport("expenses")}
+                    disabled={exportingType !== null}
+                    className="py-1 px-2 rounded-lg border border-border bg-background hover:bg-red-500/10 text-[11px] font-bold text-foreground transition-colors"
+                    title="Download CSV"
+                  >
+                    {exportingType === "expenses" ? "..." : "CSV"}
+                  </button>
+                </div>
+              </div>
 
-              <button
-                onClick={() => handleExport("purchases")}
-                disabled={exportingType !== null}
-                className="flex flex-col items-center justify-center p-4 rounded-xl border border-border/80 bg-card hover:border-amber-500 hover:shadow-md transition-all text-center group"
-              >
-                <div className="p-2.5 bg-amber-600 text-white rounded-xl shadow-xs mb-2 group-hover:scale-105 transition-transform">
-                  <Briefcase size={18} />
+              {/* Purchases Only */}
+              <div className="p-4 rounded-xl border border-border/80 bg-card hover:border-amber-500 hover:shadow-md transition-all flex flex-col items-center justify-between text-center group">
+                <div className="flex flex-col items-center">
+                  <div className="p-2.5 bg-amber-600 text-white rounded-xl shadow-xs mb-2 group-hover:scale-105 transition-transform">
+                    <Briefcase size={18} />
+                  </div>
+                  <span className="text-xs font-bold text-foreground">Purchases Only</span>
+                  <span className="text-[9px] text-muted mt-0.5">Raw materials & procurement</span>
                 </div>
-                <span className="text-xs font-bold text-foreground">Purchases Only</span>
-                <span className="text-[9px] text-muted mt-1">CSV file of material purchases</span>
-                {exportingType === "purchases" && <span className="text-[9px] text-amber-500 font-bold mt-1 animate-pulse">Exporting...</span>}
-              </button>
+                <div className="flex items-center gap-1.5 mt-3 w-full">
+                  <button
+                    onClick={() => handlePreviewStatement("purchases")}
+                    className="flex-1 py-1 px-2 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 text-[11px] font-bold transition-colors flex items-center justify-center gap-1"
+                  >
+                    <Eye size={12} />
+                    <span>PDF</span>
+                  </button>
+                  <button
+                    onClick={() => handleExport("purchases")}
+                    disabled={exportingType !== null}
+                    className="py-1 px-2 rounded-lg border border-border bg-background hover:bg-amber-500/10 text-[11px] font-bold text-foreground transition-colors"
+                    title="Download CSV"
+                  >
+                    {exportingType === "purchases" ? "..." : "CSV"}
+                  </button>
+                </div>
+              </div>
 
-              <button
-                onClick={() => handleExport("inventory")}
-                disabled={exportingType !== null}
-                className="flex flex-col items-center justify-center p-4 rounded-xl border border-border/80 bg-card hover:border-emerald-500 hover:shadow-md transition-all text-center group sm:col-span-2 lg:col-span-1"
-              >
-                <div className="p-2.5 bg-emerald-600 text-white rounded-xl shadow-xs mb-2 group-hover:scale-105 transition-transform">
-                  <Package size={18} />
+              {/* Inventory Catalog */}
+              <div className="p-4 rounded-xl border border-border/80 bg-card hover:border-emerald-500 hover:shadow-md transition-all flex flex-col items-center justify-between text-center group sm:col-span-2 lg:col-span-1">
+                <div className="flex flex-col items-center">
+                  <div className="p-2.5 bg-emerald-600 text-white rounded-xl shadow-xs mb-2 group-hover:scale-105 transition-transform">
+                    <Package size={18} />
+                  </div>
+                  <span className="text-xs font-bold text-foreground">Inventory Catalog</span>
+                  <span className="text-[9px] text-muted mt-0.5">Raw materials & stocks</span>
                 </div>
-                <span className="text-xs font-bold text-foreground">Inventory Catalog</span>
-                <span className="text-[9px] text-muted mt-1">CSV file of raw materials</span>
-                {exportingType === "inventory" && <span className="text-[9px] text-emerald-500 font-bold mt-1 animate-pulse">Exporting...</span>}
-              </button>
+                <button
+                  onClick={() => handleExport("inventory")}
+                  disabled={exportingType !== null}
+                  className="w-full mt-3 py-1 px-2 rounded-lg border border-border bg-background hover:bg-emerald-500/10 text-[11px] font-bold text-foreground transition-colors"
+                >
+                  {exportingType === "inventory" ? "Exporting..." : "Export CSV"}
+                </button>
+              </div>
             </div>
 
             {/* Archived Monthly Combined Statements */}
@@ -1066,29 +1177,42 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               <div className="mt-6 border-t border-border pt-4">
                 <h4 className="text-xs font-bold text-muted uppercase tracking-wider mb-3 flex items-center gap-2">
                   <Calendar size={14} className="text-accent" />
-                  Archived Monthly Combined Statements (CSV)
+                  Archived Monthly Combined Statements (PDF & CSV)
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                   {statementArchives
                     .filter((a) => a.type === "all")
                     .map((archive) => (
-                      <button
+                      <div
                         key={archive._id}
-                        onClick={() => downloadArchive(archive._id, archive.filename)}
-                        className="flex items-center gap-3 p-3 rounded-xl border border-border/80 bg-card hover:border-accent/40 hover:shadow-sm transition-all text-left group"
+                        className="flex items-center justify-between p-3 rounded-xl border border-border/80 bg-card hover:border-accent/40 hover:shadow-sm transition-all group"
                       >
-                        <div className="p-2 bg-accent text-white rounded-lg shadow-xs group-hover:scale-105 transition-transform">
-                          <FileText size={14} />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-xs font-bold text-foreground truncate">
-                            Combined Statement
-                          </p>
-                          <p className="text-[10px] text-muted font-medium mt-0.5">
-                            {formatArchiveStatementLabel(archive)}
-                          </p>
-                        </div>
-                      </button>
+                        <button
+                          onClick={() => handlePreviewArchive(archive._id)}
+                          className="flex items-center gap-3 min-w-0 text-left flex-1"
+                          title="Preview / Print PDF"
+                        >
+                          <div className="p-2 bg-accent text-white rounded-lg shadow-xs group-hover:scale-105 transition-transform">
+                            <FileText size={14} />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-foreground truncate">
+                              Combined Statement
+                            </p>
+                            <p className="text-[10px] text-muted font-medium mt-0.5">
+                              {formatArchiveStatementLabel(archive)}
+                            </p>
+                          </div>
+                        </button>
+
+                        <button
+                          onClick={() => downloadArchive(archive._id, archive.filename)}
+                          className="p-1.5 text-muted hover:text-accent rounded-lg hover:bg-accent/10 transition-colors ml-2"
+                          title="Download CSV file"
+                        >
+                          <Download size={14} />
+                        </button>
+                      </div>
                     ))}
                 </div>
               </div>
@@ -1654,6 +1778,17 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
       <OrderDetailModal
         order={selectedOrderForDetails}
         onClose={() => setSelectedOrderForDetails(null)}
+      />
+
+      {/* Statement PDF Preview Modal */}
+      <StatementPreviewModal
+        isOpen={previewModalOpen}
+        onClose={() => setPreviewModalOpen(false)}
+        data={previewData}
+        loading={previewLoading}
+        onDownloadCsv={() => {
+          if (previewData) handleExport(previewData.type);
+        }}
       />
     </div>
   );

@@ -30,9 +30,9 @@ async function run() {
   await mongoose.connect("mongodb://localhost:27017/ktm_decor_dashboard");
   console.log("Connected to MongoDB.");
 
-  // Clean up old Gregorian statements (year < 2070)
-  const delResult = await MonthlyStatement.deleteMany({ year: { $lt: 2070 } });
-  console.log(`Deleted ${delResult.deletedCount} Gregorian calendar statements.`);
+  // Clear all previous statements to refresh them with the new corporate layout
+  const delResult = await MonthlyStatement.deleteMany({});
+  console.log(`Cleared ${delResult.deletedCount} previous statements for fresh generation.`);
 
   const types = ["sales", "expenses", "purchases", "all"];
   for (let offset = 1; offset <= 4; offset++) {
