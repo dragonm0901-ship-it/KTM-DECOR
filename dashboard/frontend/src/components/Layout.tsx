@@ -147,7 +147,12 @@ export const Layout: React.FC<LayoutProps> = ({
             alt="KTM DECOR"
             className="h-8 w-auto object-contain dark:invert dark:hue-rotate-180 ml-1 md:ml-0"
           />
-          <span className="text-[10px] border border-accent/30 text-accent px-2 py-0.5 rounded font-bold uppercase tracking-wider ml-1 hidden sm:inline-block">
+          <span
+            style={{
+              background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
+            }}
+            className="text-[10px] text-black px-2.5 py-0.5 rounded-lg font-bold uppercase tracking-wider ml-1 hidden sm:inline-block shadow-sm shadow-orange-500/15 select-none"
+          >
             Dashboard
           </span>
         </div>

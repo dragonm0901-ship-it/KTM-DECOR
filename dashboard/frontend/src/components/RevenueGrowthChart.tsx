@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef } from "react";
+import { useStore } from "../store/useStore";
 import { formatNepaliShort } from "../utils/nepaliDate";
 
 interface RevenueGrowthChartProps {
@@ -18,6 +19,8 @@ export const RevenueGrowthChart: React.FC<RevenueGrowthChartProps> = ({
   title = "Revenue Over Time",
   className = "",
 }) => {
+  const { theme } = useStore();
+  const strokeColor = theme === "dark" ? "#F4F4F5" : "#FFFFFF";
   const [timeframe, setTimeframe] = useState<Timeframe>("Month");
   const [hoveredPoint, setHoveredPoint] = useState<{ x: number; y: number; label: string; value: number } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -323,9 +326,9 @@ export const RevenueGrowthChart: React.FC<RevenueGrowthChartProps> = ({
         >
           <defs>
             <linearGradient id="white-underglow" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.22" />
-              <stop offset="65%" stopColor="#FFFFFF" stopOpacity="0.06" />
-              <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0.0" />
+              <stop offset="0%" stopColor={strokeColor} stopOpacity="0.22" />
+              <stop offset="65%" stopColor={strokeColor} stopOpacity="0.06" />
+              <stop offset="100%" stopColor={strokeColor} stopOpacity="0.0" />
             </linearGradient>
 
             <filter id="soft-glow" x="-20%" y="-20%" width="140%" height="140%">
@@ -348,7 +351,7 @@ export const RevenueGrowthChart: React.FC<RevenueGrowthChartProps> = ({
             <path
               d={linePath}
               fill="none"
-              stroke="#FFFFFF"
+              stroke={strokeColor}
               strokeWidth="3.5"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -365,7 +368,7 @@ export const RevenueGrowthChart: React.FC<RevenueGrowthChartProps> = ({
                 y1={0}
                 x2={hoveredPoint.x}
                 y2={svgHeight}
-                stroke="#FFFFFF"
+                stroke={strokeColor}
                 strokeWidth="1.6"
                 strokeDasharray="4 4"
                 strokeOpacity="0.65"
@@ -375,7 +378,7 @@ export const RevenueGrowthChart: React.FC<RevenueGrowthChartProps> = ({
                 cx={hoveredPoint.x}
                 cy={hoveredPoint.y}
                 r="10"
-                fill="#FFFFFF"
+                fill={strokeColor}
                 fillOpacity="0.35"
                 className="animate-pulse"
               />
@@ -384,7 +387,7 @@ export const RevenueGrowthChart: React.FC<RevenueGrowthChartProps> = ({
                 cx={hoveredPoint.x}
                 cy={hoveredPoint.y}
                 r="5.5"
-                fill="#FFFFFF"
+                fill={strokeColor}
                 stroke="#18181B"
                 strokeWidth="2.5"
               />

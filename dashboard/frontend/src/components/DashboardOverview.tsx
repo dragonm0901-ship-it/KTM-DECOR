@@ -47,6 +47,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
   openCampaignModal
 }) => {
   const {
+    theme,
     user,
     tasks,
     campaigns,
@@ -418,7 +419,14 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
     );
   };
 
-  const renderMiniLineChart = (data: number[], strokeColor: string, fillGradientId: string) => {
+  const renderMiniLineChart = (
+    data: number[],
+    strokeColor: string,
+    fillGradientId: string,
+    darkStrokeColor?: string
+  ) => {
+    const isDark = theme === "dark";
+    const effectiveStroke = isDark && darkStrokeColor ? darkStrokeColor : strokeColor;
     const max = Math.max(...data, 1);
     const min = Math.min(...data, 0);
     const range = max - min;
@@ -438,17 +446,18 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
       lineD += ` C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${p.x} ${p.y}`;
     }
     const areaD = `${lineD} L ${points[points.length - 1].x} 38 L ${points[0].x} 38 Z`;
+    const gradId = `${fillGradientId}-${isDark ? "dark" : "light"}`;
     return (
       <svg className="w-16 h-10 overflow-visible" viewBox="0 0 64 40">
         <defs>
-          <linearGradient id={fillGradientId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={strokeColor} stopOpacity="0.25" />
-            <stop offset="100%" stopColor={strokeColor} stopOpacity="0.0" />
+          <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={effectiveStroke} stopOpacity="0.3" />
+            <stop offset="100%" stopColor={effectiveStroke} stopOpacity="0.0" />
           </linearGradient>
         </defs>
-        <path d={areaD} fill={`url(#${fillGradientId})`} />
-        <path d={lineD} fill="none" stroke={strokeColor} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-        <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r="3" fill={strokeColor} />
+        <path d={areaD} fill={`url(#${gradId})`} />
+        <path d={lineD} fill="none" stroke={effectiveStroke} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r="3" fill={effectiveStroke} />
       </svg>
     );
   };
@@ -589,7 +598,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               </div>
               <div className="flex items-center justify-between mt-4 relative z-10">
                 <span className="text-xs text-black/75 font-medium">Excl. delivery & fitting</span>
-                {renderMiniBarChart(getSparklineData("sales"), "fill-black/60 hover:fill-black transition-colors")}
+                {renderMiniLineChart(getSparklineData("sales"), "#000000", "sales-spark", "#F4F4F5")}
               </div>
             </div>
 
@@ -614,7 +623,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                   </span>
                   <span className="text-xs text-muted font-medium">vs last week</span>
                 </div>
-                {renderMiniBarChart(getSparklineData("orders"), "fill-accent/80 hover:fill-accent transition-colors")}
+                {renderMiniLineChart(getSparklineData("orders"), "#3B82F6", "orders-spark", "#FFFFFF")}
               </div>
             </div>
 
