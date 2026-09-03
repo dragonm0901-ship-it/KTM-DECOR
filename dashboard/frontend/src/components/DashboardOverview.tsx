@@ -796,144 +796,133 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
       {user?.role === "admin" && (
         <div className="space-y-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Expenses Overview Card (Signature Sunset Gradient Style) */}
-            <div
-              className="relative rounded-[28px] p-6 shadow-xl shadow-orange-500/10 overflow-hidden flex flex-col justify-between min-h-[260px] transition-all hover:scale-[1.01] text-black"
-              style={{
-                background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
-              }}
-            >
-              <div className="relative z-10">
-                <div className="flex items-center justify-between border-b border-black/10 pb-2.5 mb-3">
-                  <span className="text-xs font-semibold text-black/85 uppercase tracking-wider block">Expenses Summary</span>
-                  <span className="text-[10px] font-bold bg-black/10 text-black border border-black/10 px-2 py-0.5 rounded-full">
+            {/* Expenses Overview Card (Porcelain White Card) */}
+            <div className="bg-card border border-border/80 rounded-[28px] shadow-sm hover:shadow-md transition-all p-6 flex flex-col justify-between min-h-[260px]">
+              <div>
+                <div className="flex items-center justify-between border-b border-border/60 pb-2.5 mb-3">
+                  <span className="text-xs font-bold text-muted uppercase tracking-wider block">Expenses Summary</span>
+                  <span className="text-[10px] font-bold bg-red-500/10 text-red-600 border border-red-500/20 px-2.5 py-0.5 rounded-full">
                     Outflows
                   </span>
                 </div>
                 <div className="mb-3">
-                  <h4 className="text-3xl sm:text-4xl font-semibold font-display text-black leading-none">
+                  <h4 className="text-3xl sm:text-4xl font-semibold font-display text-foreground leading-none">
                     Rs. {totalExpensesVal.toLocaleString()}
                   </h4>
-                  <span className="text-xs text-black/75 font-medium mt-1 block">Total operating expenditures</span>
+                  <span className="text-xs text-muted font-medium mt-1 block">Total operating expenditures</span>
                 </div>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[11px] font-medium text-black/80">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[11px] font-medium text-muted">
                   <div className="flex justify-between">
                     <span>Salary:</span>
-                    <span className="font-bold text-black">Rs. {expenseCategorySums.salary.toLocaleString()}</span>
+                    <span className="font-bold text-foreground">Rs. {expenseCategorySums.salary.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Rent:</span>
-                    <span className="font-bold text-black">Rs. {expenseCategorySums.rent.toLocaleString()}</span>
+                    <span className="font-bold text-foreground">Rs. {expenseCategorySums.rent.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Travel:</span>
-                    <span className="font-bold text-black">Rs. {expenseCategorySums.travel.toLocaleString()}</span>
+                    <span className="font-bold text-foreground">Rs. {expenseCategorySums.travel.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Food:</span>
-                    <span className="font-bold text-black">Rs. {expenseCategorySums.food.toLocaleString()}</span>
+                    <span className="font-bold text-foreground">Rs. {expenseCategorySums.food.toLocaleString()}</span>
                   </div>
                 </div>
               </div>
               <button
                 onClick={() => setCurrentTab("expenses")}
-                className="text-left text-xs font-bold text-black hover:opacity-80 transition-opacity mt-2 relative z-10 flex items-center gap-1 cursor-pointer"
+                className="text-left text-xs font-bold text-accent hover:text-accent-dark transition-colors mt-2 flex items-center gap-1 cursor-pointer"
               >
                 <span>View Expense Log</span>
                 <span>&rarr;</span>
               </button>
             </div>
 
-            {/* Purchases Tracker Card (Signature Sunset Gradient Style) */}
-            <div
-              className="relative rounded-[28px] p-6 shadow-xl shadow-orange-500/10 overflow-hidden flex flex-col justify-between min-h-[260px] transition-all hover:scale-[1.01] text-black"
-              style={{
-                background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
-              }}
-            >
-              <div className="relative z-10">
-                <div className="flex items-center justify-between border-b border-black/10 pb-2.5 mb-3">
-                  <span className="text-xs font-semibold text-black/85 uppercase tracking-wider block">Purchases Tracker</span>
-                  <span className="text-[10px] font-bold bg-black/10 text-black border border-black/10 px-2 py-0.5 rounded-full">
+            {/* Purchases Tracker Card (Porcelain White Card) */}
+            <div className="bg-card border border-border/80 rounded-[28px] shadow-sm hover:shadow-md transition-all p-6 flex flex-col justify-between min-h-[260px]">
+              <div>
+                <div className="flex items-center justify-between border-b border-border/60 pb-2.5 mb-3">
+                  <span className="text-xs font-bold text-muted uppercase tracking-wider block">Purchases Tracker</span>
+                  <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                    outstandingPurchasesVal > 0 ? "bg-amber-500/10 text-amber-600 border-amber-500/20" : "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                  }`}>
                     {outstandingPurchasesVal > 0 ? "Pending Dues" : "Settled"}
                   </span>
                 </div>
                 <div className="mb-3">
-                  <h4 className="text-3xl sm:text-4xl font-semibold font-display text-black leading-none">
+                  <h4 className="text-3xl sm:text-4xl font-semibold font-display text-foreground leading-none">
                     Rs. {totalPurchasesVal.toLocaleString()}
                   </h4>
                   {outstandingPurchasesVal > 0 ? (
-                    <span className="text-xs text-black/90 font-bold mt-1 block">Rs. {outstandingPurchasesVal.toLocaleString()} pending dues</span>
+                    <span className="text-xs text-red-500 font-bold mt-1 block">Rs. {outstandingPurchasesVal.toLocaleString()} pending dues</span>
                   ) : (
-                    <span className="text-xs text-black/75 font-medium mt-1 block">All vendor bills settled</span>
+                    <span className="text-xs text-muted font-medium mt-1 block">All vendor bills settled</span>
                   )}
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[10px] text-black/75 uppercase font-bold tracking-wider block">Recent Invoices</span>
+                  <span className="text-[10px] text-muted uppercase font-bold tracking-wider block">Recent Invoices</span>
                   {purchases.slice(0, 2).map((p) => (
-                    <div key={p._id} className="flex justify-between items-center text-[11px] border-b border-black/10 pb-1">
-                      <span className="truncate max-w-[130px] font-medium text-black">{p.supplier}</span>
-                      <span className="text-black font-bold">Rs. {p.amount.toLocaleString()}</span>
+                    <div key={p._id} className="flex justify-between items-center text-[11px] border-b border-border/40 pb-1">
+                      <span className="truncate max-w-[130px] font-medium text-foreground">{p.supplier}</span>
+                      <span className="text-foreground font-bold">Rs. {p.amount.toLocaleString()}</span>
                     </div>
                   ))}
                   {purchases.length === 0 && (
-                    <span className="text-[11px] text-black/75 italic">No purchases logged</span>
+                    <span className="text-[11px] text-muted italic">No purchases logged</span>
                   )}
                 </div>
               </div>
               <button
                 onClick={() => setCurrentTab("purchase")}
-                className="text-left text-xs font-bold text-black hover:opacity-80 transition-opacity mt-2 relative z-10 flex items-center gap-1 cursor-pointer"
+                className="text-left text-xs font-bold text-accent hover:text-accent-dark transition-colors mt-2 flex items-center gap-1 cursor-pointer"
               >
                 <span>View Purchases Tracker</span>
                 <span>&rarr;</span>
               </button>
             </div>
 
-            {/* Material Inventory Card (Signature Sunset Gradient Style) */}
-            <div
-              className="relative rounded-[28px] p-6 shadow-xl shadow-orange-500/10 overflow-hidden flex flex-col justify-between min-h-[260px] transition-all hover:scale-[1.01] text-black"
-              style={{
-                background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
-              }}
-            >
-              <div className="relative z-10">
-                <div className="flex items-center justify-between border-b border-black/10 pb-2.5 mb-3">
-                  <span className="text-xs font-semibold text-black/85 uppercase tracking-wider block">Material Inventory</span>
-                  <span className="text-[10px] font-bold bg-black/10 text-black border border-black/10 px-2 py-0.5 rounded-full">
+            {/* Material Inventory Card (Porcelain White Card) */}
+            <div className="bg-card border border-border/80 rounded-[28px] shadow-sm hover:shadow-md transition-all p-6 flex flex-col justify-between min-h-[260px]">
+              <div>
+                <div className="flex items-center justify-between border-b border-border/60 pb-2.5 mb-3">
+                  <span className="text-xs font-bold text-muted uppercase tracking-wider block">Material Inventory</span>
+                  <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                    (lowStockVal + outOfStockVal) > 0 ? "bg-red-500/10 text-red-600 border-red-500/20" : "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                  }`}>
                     {(lowStockVal + outOfStockVal) > 0 ? "Alerts" : "Ok"}
                   </span>
                 </div>
                 <div className="mb-3 flex justify-between items-end">
                   <div>
-                    <h4 className="text-3xl sm:text-4xl font-semibold font-display text-black leading-none">
+                    <h4 className="text-3xl sm:text-4xl font-semibold font-display text-foreground leading-none">
                       {(lowStockVal + outOfStockVal)} Items
                     </h4>
-                    <span className="text-xs text-black/75 font-medium mt-1 block">Stock alerts requiring restock</span>
+                    <span className="text-xs text-muted font-medium mt-1 block">Stock alerts requiring restock</span>
                   </div>
                   <div className="text-right text-[10px] font-bold space-y-0.5">
-                    <div className="text-black bg-black/10 px-2 py-0.5 rounded-full">{lowStockVal} Low Stock</div>
-                    {outOfStockVal > 0 && <div className="text-black bg-black/15 px-2 py-0.5 rounded-full mt-1">{outOfStockVal} Out</div>}
+                    <div className="text-amber-600 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">{lowStockVal} Low Stock</div>
+                    {outOfStockVal > 0 && <div className="text-red-600 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full mt-1">{outOfStockVal} Out</div>}
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[10px] text-black/75 uppercase font-bold tracking-wider block">Critical Materials</span>
+                  <span className="text-[10px] text-muted uppercase font-bold tracking-wider block">Critical Materials</span>
                   {inventoryItems.filter((i) => i.quantity <= i.alertLevel).slice(0, 2).map((i) => (
-                    <div key={i._id} className="flex justify-between items-center text-[11px] border-b border-black/10 pb-1">
-                      <span className="truncate max-w-[130px] font-medium text-black">{i.name}</span>
-                      <span className="font-bold text-black">
+                    <div key={i._id} className="flex justify-between items-center text-[11px] border-b border-border/40 pb-1">
+                      <span className="truncate max-w-[130px] font-medium text-foreground">{i.name}</span>
+                      <span className={`font-bold ${i.quantity === 0 ? "text-red-500" : "text-amber-500"}`}>
                         {i.quantity} {i.unit}
                       </span>
                     </div>
                   ))}
                   {inventoryItems.filter((i) => i.quantity <= i.alertLevel).length === 0 && (
-                    <span className="text-[11px] text-black font-semibold italic">All materials fully stocked</span>
+                    <span className="text-[11px] text-emerald-500 font-semibold italic">All materials fully stocked</span>
                   )}
                 </div>
               </div>
               <button
                 onClick={() => setCurrentTab("inventory")}
-                className="text-left text-xs font-bold text-black hover:opacity-80 transition-opacity mt-2 relative z-10 flex items-center gap-1 cursor-pointer"
+                className="text-left text-xs font-bold text-accent hover:text-accent-dark transition-colors mt-2 flex items-center gap-1 cursor-pointer"
               >
                 <span>View Material Inventory</span>
                 <span>&rarr;</span>
