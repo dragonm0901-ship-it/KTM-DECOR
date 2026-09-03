@@ -598,7 +598,12 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               </div>
               <div className="flex items-center justify-between mt-4 relative z-10">
                 <span className="text-xs text-black/75 font-medium">Excl. delivery & fitting</span>
-                {renderMiniLineChart(getSparklineData("sales"), "#000000", "sales-spark", "#F4F4F5")}
+                {renderMiniBarChart(
+                  getSparklineData("sales"),
+                  theme === "dark"
+                    ? "fill-[#F4F4F5] hover:fill-white transition-colors"
+                    : "fill-black/70 hover:fill-black transition-colors"
+                )}
               </div>
             </div>
 
@@ -623,7 +628,12 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                   </span>
                   <span className="text-xs text-muted font-medium">vs last week</span>
                 </div>
-                {renderMiniLineChart(getSparklineData("orders"), "#3B82F6", "orders-spark", "#FFFFFF")}
+                {renderMiniBarChart(
+                  getSparklineData("orders"),
+                  theme === "dark"
+                    ? "fill-white hover:fill-white/90 transition-colors"
+                    : "fill-blue-500/80 hover:fill-blue-600 transition-colors"
+                )}
               </div>
             </div>
 
