@@ -68,7 +68,12 @@ export const SalesTab: React.FC = () => {
   // Calculations
   const orderSalesTotal = sales
     .filter((s) => s.orderId)
-    .reduce((sum, s) => sum + s.amount, 0);
+    .reduce((sum, s) => {
+      const pPrice = (s.orderId && typeof s.orderId === "object" && "price" in s.orderId)
+        ? (Number((s.orderId as any).price) || 0)
+        : (s.amount || 0);
+      return sum + pPrice;
+    }, 0);
 
   const directSalesTotal = sales
     .filter((s) => !s.orderId)
@@ -81,13 +86,14 @@ export const SalesTab: React.FC = () => {
   const unifiedSales = sales.map((s) => {
     const isOrder = !!s.orderId;
     const orderObj = (s.orderId && typeof s.orderId === "object") ? s.orderId as Order : undefined;
+    const productPrice = (orderObj && "price" in orderObj) ? Number(orderObj.price) || 0 : s.amount;
 
     return {
       type: (isOrder ? "order" : "direct") as "order" | "direct",
       id: s._id,
       client: s.clientName,
       product: s.productName,
-      amount: s.amount,
+      amount: productPrice,
       date: s.date,
       method: s.paymentMethod,
       notes: s.notes,
@@ -313,9 +319,9 @@ export const SalesTab: React.FC = () => {
             <TrendingUp size={22} />
           </div>
           <div>
-            <span className="text-[10px] text-green-500 uppercase font-bold tracking-wider">Total Sales</span>
+            <span className="text-[10px] text-green-500 uppercase font-bold tracking-wider">Total Sales (Product Revenue)</span>
             <h3 className="text-xl font-bold mt-1 text-green-500 font-display">Rs. {combinedTotal.toLocaleString()}</h3>
-            <p className="text-[9px] text-muted mt-0.5">Approved ledger balance</p>
+            <p className="text-[9px] text-muted mt-0.5">Excludes delivery & fitting charges</p>
           </div>
         </div>
 

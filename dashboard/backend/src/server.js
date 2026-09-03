@@ -176,21 +176,20 @@ app.use((req, res, next) => {
 const PORT = process.env.PORT || 5001;
 const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI || "mongodb://localhost:27017/ktm_decor_dashboard";
 
-// Sync manual registry order to Sales ledger immediately upon creation or update
+// Sync manual registry order to Sales ledger immediately upon creation or update (Product price only - excluding delivery and fitting)
 async function syncOrderSale(order, userId) {
   try {
     if (!order.deleted) {
       // Check if sale already exists
       const existingSale = await Sale.findOne({ orderId: order._id });
-      const orderTotal = (order.totalPrice !== undefined && order.totalPrice !== null)
-        ? Number(order.totalPrice)
-        : (Number(order.price) || 0) + (Number(order.deliveryPrice) || 0) + (Number(order.installationPrice) || 0);
+      // Total sales reflects product price only (excludes delivery & installation charges as requested)
+      const productPrice = Number(order.price) || 0;
 
       if (!existingSale) {
         const sale = new Sale({
           clientName: order.customerName,
           productName: order.productName,
-          amount: orderTotal,
+          amount: productPrice,
           date: order.createdAt || new Date(),
           paymentMethod: order.paymentMethod || "cash",
           notes: order.manufacturingNotes || `Automatic sale from order: ${order.productName}`,
@@ -201,18 +200,18 @@ async function syncOrderSale(order, userId) {
         
         const populatedSale = await Sale.findById(sale._id).populate("createdBy", "name role").populate("orderId");
         triggerPusher("sale_created", populatedSale);
-        await logActivity(userId || order.createdBy, "Sale Logged", `Logged sale from order for "${order.productName}" (Rs. ${orderTotal.toLocaleString()})`);
+        await logActivity(userId || order.createdBy, "Sale Logged", `Logged sale from order for "${order.productName}" (Rs. ${productPrice.toLocaleString()})`);
       } else {
         existingSale.clientName = order.customerName;
         existingSale.productName = order.productName;
-        existingSale.amount = orderTotal;
+        existingSale.amount = productPrice;
         existingSale.paymentMethod = order.paymentMethod || "cash";
         existingSale.notes = order.manufacturingNotes || `Automatic sale from order: ${order.productName}`;
         await existingSale.save();
         
         const populatedSale = await Sale.findById(existingSale._id).populate("createdBy", "name role").populate("orderId");
         triggerPusher("sale_created", populatedSale);
-        await logActivity(userId || order.createdBy, "Sale Updated", `Updated sale details from order for "${order.productName}" (Rs. ${orderTotal.toLocaleString()})`);
+        await logActivity(userId || order.createdBy, "Sale Updated", `Updated sale details from order for "${order.productName}" (Rs. ${productPrice.toLocaleString()})`);
       }
     } else {
       // If deleted, remove any corresponding sale
@@ -228,27 +227,27 @@ async function syncOrderSale(order, userId) {
   }
 }
 
-// Backfill existing non-deleted orders into Sales on startup if not already present
+// Backfill and synchronize existing non-deleted orders into Sales with product price only
 async function backfillOrderSales() {
   try {
     const orders = await Order.find({ deleted: { $ne: true } });
     for (const order of orders) {
+      const productPrice = Number(order.price) || 0;
       const existingSale = await Sale.findOne({ orderId: order._id });
       if (!existingSale) {
-        const orderTotal = (order.totalPrice !== undefined && order.totalPrice !== null)
-          ? Number(order.totalPrice)
-          : (Number(order.price) || 0) + (Number(order.deliveryPrice) || 0) + (Number(order.installationPrice) || 0);
-
         await Sale.create({
           clientName: order.customerName,
           productName: order.productName,
-          amount: orderTotal,
+          amount: productPrice,
           date: order.createdAt || new Date(),
           paymentMethod: order.paymentMethod || "cash",
           notes: order.manufacturingNotes || `Automatic sale from order: ${order.productName}`,
           createdBy: order.createdBy,
           orderId: order._id
         });
+      } else if (existingSale.amount !== productPrice) {
+        existingSale.amount = productPrice;
+        await existingSale.save();
       }
     }
   } catch (err) {
@@ -1542,7 +1541,7 @@ app.put("/api/orders/:id/approve", protect, admin, async (req, res) => {
       .populate("assignee", "name email role");
 
     triggerPusher("order_updated", populatedOrder);
-    await logActivity(req.user._id, "Order Approved", `Approved order for "${order.productName}". Revenue Rs. ${populatedOrder.totalPrice.toLocaleString()} added to Sales.`);
+    await logActivity(req.user._id, "Order Approved", `Approved order for "${order.productName}". Product revenue Rs. ${(Number(order.price) || 0).toLocaleString()} added to Sales.`);
 
     res.json(populatedOrder);
   } catch (error) {

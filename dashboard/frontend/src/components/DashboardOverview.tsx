@@ -121,15 +121,21 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
   // Active orders are those in design, manufacturing, or completed (not yet delivered or paid)
   const activeOrdersCount = orders.filter((o) => !o.deleted && o.stage !== "delivered" && o.stage !== "paid").length;
 
-  // Dynamic Sales: Sum of total cost of all completed tasks + sales ledger entries
+  // Dynamic Sales: Sum of total cost of all completed tasks + sales ledger entries (excluding delivery and fitting)
   const taskSales = completedTasks.reduce((acc, t) => acc + (t.totalCost || 0), 0);
 
   // Safe array check for sales
   const safeSales = Array.isArray(sales) ? sales : [];
 
+  // Order sales strictly reflect product base price without delivery or fitting charges
   const orderSales = safeSales
     .filter((s) => s.orderId)
-    .reduce((acc, s) => acc + (s.amount || 0), 0);
+    .reduce((acc, s) => {
+      const pPrice = (s.orderId && typeof s.orderId === "object" && "price" in s.orderId)
+        ? (Number((s.orderId as any).price) || 0)
+        : (s.amount || 0);
+      return acc + pPrice;
+    }, 0);
 
   const directSales = safeSales
     .filter((s) => !s.orderId)
@@ -137,7 +143,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
 
   const totalSales = taskSales + orderSales + directSales;
 
-  // Delivery and Fitting charges calculated from orders
+  // Delivery and Fitting charges calculated from orders (kept separate for manual calculation)
   const totalDeliveryCharges = orders.filter((o) => !o.deleted).reduce((acc, o) => acc + (o.deliveryPrice || 0), 0);
   const totalFittingCharges = orders.filter((o) => !o.deleted).reduce((acc, o) => acc + (o.installationPrice || 0), 0);
   const totalDuePayment = orders.filter((o) => !o.deleted).reduce((acc, o) => acc + (o.duePayment || 0), 0);
@@ -590,7 +596,10 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
             <div className="bg-card border border-border/80 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all rounded-2xl p-5 flex flex-col justify-between">
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
-                  <span className="text-xs text-muted font-bold uppercase tracking-wider block">Total Sales</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs text-muted font-bold uppercase tracking-wider block">Total Sales</span>
+                    <span className="text-[9px] font-semibold text-muted bg-muted/20 px-1.5 py-0.5 rounded border border-border/50">Product Only</span>
+                  </div>
                   <h3 className="text-2xl sm:text-3xl font-extrabold font-display text-foreground leading-none">Rs. {totalSales.toLocaleString()}</h3>
                 </div>
                 <div className="p-2 bg-emerald-600 text-white rounded-xl shadow-xs shrink-0">
@@ -599,10 +608,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               </div>
               <div className="flex items-center justify-between mt-3">
                 <div className="flex items-center gap-1.5">
-                  <span className="bg-emerald-600 text-white px-1.5 py-0.5 rounded text-[9px] font-bold shadow-xs">
-                    ↑ 12.4%
-                  </span>
-                  <span className="text-[10px] text-muted font-medium">vs last month</span>
+                  <span className="text-[10px] text-muted font-medium">Excl. delivery & fitting</span>
                 </div>
                 {renderMiniBarChart(getSparklineData("sales"), "fill-emerald-500/80 hover:fill-emerald-500 transition-colors")}
               </div>
@@ -681,7 +687,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               <div className="space-y-1">
                 <span className="text-xs text-muted font-bold uppercase tracking-wider block">Total Delivery Charges</span>
                 <h3 className="text-xl sm:text-2xl font-extrabold font-display text-blue-600 dark:text-blue-400">Rs. {totalDeliveryCharges.toLocaleString()}</h3>
-                <p className="text-[10px] text-muted">Delivery fees collected from orders</p>
+                <p className="text-[10px] text-muted">Separate delivery fees (not in Total Sales)</p>
               </div>
               <div className="p-3 bg-blue-600 text-white rounded-2xl shadow-xs">
                 <Truck size={22} />
@@ -693,7 +699,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
               <div className="space-y-1">
                 <span className="text-xs text-muted font-bold uppercase tracking-wider block">Total Fitting Charges</span>
                 <h3 className="text-xl sm:text-2xl font-extrabold font-display text-purple-600 dark:text-purple-400">Rs. {totalFittingCharges.toLocaleString()}</h3>
-                <p className="text-[10px] text-muted">Installation & fitting charges collected</p>
+                <p className="text-[10px] text-muted">Separate installation fees (not in Total Sales)</p>
               </div>
               <div className="p-3 bg-purple-600 text-white rounded-2xl shadow-xs">
                 <Wrench size={22} />
