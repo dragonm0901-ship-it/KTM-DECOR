@@ -31,10 +31,12 @@ export const SalesTab: React.FC = () => {
     exportStatement,
     statementArchives,
     fetchStatementArchives,
-    downloadArchive
+    downloadArchive,
+    resyncSales
   } = useStore();
   
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [resyncing, setResyncing] = useState(false);
 
   useEffect(() => {
     if (user?.role === "admin") {
@@ -60,18 +62,43 @@ export const SalesTab: React.FC = () => {
     }
   };
 
+  const handleResyncClick = async () => {
+    if (!window.confirm("Resynchronize all historical order sales in the database with base product prices and clear Redis cache?")) {
+      return;
+    }
+    setResyncing(true);
+    try {
+      const res = await resyncSales();
+      alert(res.message || "Successfully resynced sales in database!");
+    } catch (err: any) {
+      alert("Failed to resync sales: " + (err.message || String(err)));
+    } finally {
+      setResyncing(false);
+    }
+  };
+
   // Filters
   const [searchQuery, setSearchQuery] = useState("");
   const [methodFilter, setMethodFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all"); // all, order, direct
 
+  // Map orders by ID for guaranteed accurate base price resolution
+  const ordersMap = new Map((Array.isArray(orders) ? orders : []).map((o) => [o._id.toString(), o]));
+
   // Calculations
   const orderSalesTotal = sales
     .filter((s) => s.orderId)
     .reduce((sum, s) => {
-      const pPrice = (s.orderId && typeof s.orderId === "object" && "price" in s.orderId)
-        ? (Number((s.orderId as any).price) || 0)
-        : (s.amount || 0);
+      const orderIdStr = (typeof s.orderId === "object" && s.orderId !== null)
+        ? (s.orderId as any)._id?.toString()
+        : s.orderId?.toString();
+      const matchedOrder = orderIdStr ? ordersMap.get(orderIdStr) : undefined;
+
+      const pPrice = matchedOrder
+        ? (Number(matchedOrder.price) || 0)
+        : (s.orderId && typeof s.orderId === "object" && "price" in s.orderId)
+          ? (Number((s.orderId as any).price) || 0)
+          : (Number(s.amount) || 0);
       return sum + pPrice;
     }, 0);
 
@@ -85,8 +112,16 @@ export const SalesTab: React.FC = () => {
   // Merging orders and custom sales for a unified ledger
   const unifiedSales = sales.map((s) => {
     const isOrder = !!s.orderId;
-    const orderObj = (s.orderId && typeof s.orderId === "object") ? s.orderId as Order : undefined;
-    const productPrice = (orderObj && "price" in orderObj) ? Number(orderObj.price) || 0 : s.amount;
+    const orderIdStr = (typeof s.orderId === "object" && s.orderId !== null)
+      ? (s.orderId as any)._id?.toString()
+      : s.orderId?.toString();
+    const matchedOrder = orderIdStr ? ordersMap.get(orderIdStr) : undefined;
+    const orderObj = matchedOrder || ((s.orderId && typeof s.orderId === "object") ? s.orderId as Order : undefined);
+    const productPrice = matchedOrder
+      ? (Number(matchedOrder.price) || 0)
+      : (orderObj && "price" in orderObj)
+        ? (Number(orderObj.price) || 0)
+        : s.amount;
 
     return {
       type: (isOrder ? "order" : "direct") as "order" | "direct",
@@ -285,6 +320,16 @@ export const SalesTab: React.FC = () => {
           >
             {exporting ? "Exporting..." : "Export CSV"}
           </button>
+          {user?.role === "admin" && (
+            <button
+              onClick={handleResyncClick}
+              disabled={resyncing}
+              title="Resynchronize all order sales in the database to base product prices and purge Redis cache"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-card border border-border text-foreground text-[11px] rounded-xl font-bold hover:bg-muted/40 transition-all disabled:opacity-50"
+            >
+              {resyncing ? "Syncing..." : "🔄 Resync DB"}
+            </button>
+          )}
         </div>
       </div>
 

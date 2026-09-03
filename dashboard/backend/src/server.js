@@ -473,7 +473,7 @@ app.get("/api/bootstrap", protect, async (req, res) => {
 
     // 4. Inject admin-only data (with limits)
     if (userRole === "admin") {
-      promises.sales = Sale.find({}).populate("createdBy", "name role").populate("orderId", "customerName totalAmount status").sort({ date: -1 }).limit(500).lean();
+      promises.sales = Sale.find({}).populate("createdBy", "name role").populate("orderId", "customerName price totalPrice deliveryPrice installationPrice stage status").sort({ date: -1 }).limit(500).lean();
       promises.expenses = Expense.find({}).populate("createdBy", "name role").sort({ date: -1 }).limit(500).lean();
       promises.purchases = Purchase.find({}).populate("createdBy", "name role").sort({ date: -1 }).limit(300).lean();
       promises.quotations = Quotation.find({}).populate("createdBy", "name role").sort({ date: -1 }).limit(200).lean();
@@ -1620,6 +1620,119 @@ app.delete("/api/sales/:id", protect, admin, async (req, res) => {
     triggerPusher("sale_deleted", req.params.id);
     logActivity(req.user, "Sale Deleted", `Deleted sale log for "${sale.productName}"`);
     res.json({ message: "Sale deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Admin route to resynchronize all order sales in MongoDB with base product prices (excluding delivery and fitting)
+app.post("/api/admin/resync-sales", protect, admin, async (req, res) => {
+  try {
+    const orders = await Order.find({});
+    let updatedCount = 0;
+    let createdCount = 0;
+    let deletedCount = 0;
+
+    for (const order of orders) {
+      if (order.deleted) {
+        const deletedSale = await Sale.findOneAndDelete({ orderId: order._id });
+        if (deletedSale) deletedCount++;
+      } else {
+        const productPrice = Number(order.price) || 0;
+        const existingSale = await Sale.findOne({ orderId: order._id });
+
+        if (!existingSale) {
+          await Sale.create({
+            clientName: order.customerName,
+            productName: order.productName,
+            amount: productPrice,
+            date: order.createdAt || new Date(),
+            paymentMethod: order.paymentMethod || "cash",
+            notes: order.manufacturingNotes || `Automatic sale from order: ${order.productName}`,
+            createdBy: order.createdBy,
+            orderId: order._id
+          });
+          createdCount++;
+        } else if (existingSale.amount !== productPrice) {
+          existingSale.amount = productPrice;
+          await existingSale.save();
+          updatedCount++;
+        }
+      }
+    }
+
+    // Immediately flush Redis cache for all users
+    await cacheDeletePattern("bootstrap:*");
+
+    const refreshedSales = await Sale.find({})
+      .populate("createdBy", "name role")
+      .populate("orderId", "customerName price totalPrice deliveryPrice installationPrice stage status")
+      .sort({ date: -1 })
+      .lean();
+
+    res.json({
+      message: `Successfully synchronized sales ledger: ${updatedCount} updated, ${createdCount} created, ${deletedCount} removed.`,
+      updatedCount,
+      createdCount,
+      deletedCount,
+      sales: refreshedSales
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Also support GET for convenient browser execution by admin
+app.get("/api/admin/resync-sales", protect, admin, async (req, res) => {
+  try {
+    const orders = await Order.find({});
+    let updatedCount = 0;
+    let createdCount = 0;
+    let deletedCount = 0;
+
+    for (const order of orders) {
+      if (order.deleted) {
+        const deletedSale = await Sale.findOneAndDelete({ orderId: order._id });
+        if (deletedSale) deletedCount++;
+      } else {
+        const productPrice = Number(order.price) || 0;
+        const existingSale = await Sale.findOne({ orderId: order._id });
+
+        if (!existingSale) {
+          await Sale.create({
+            clientName: order.customerName,
+            productName: order.productName,
+            amount: productPrice,
+            date: order.createdAt || new Date(),
+            paymentMethod: order.paymentMethod || "cash",
+            notes: order.manufacturingNotes || `Automatic sale from order: ${order.productName}`,
+            createdBy: order.createdBy,
+            orderId: order._id
+          });
+          createdCount++;
+        } else if (existingSale.amount !== productPrice) {
+          existingSale.amount = productPrice;
+          await existingSale.save();
+          updatedCount++;
+        }
+      }
+    }
+
+    await cacheDeletePattern("bootstrap:*");
+
+    const refreshedSales = await Sale.find({})
+      .populate("createdBy", "name role")
+      .populate("orderId", "customerName price totalPrice deliveryPrice installationPrice stage status")
+      .sort({ date: -1 })
+      .lean();
+
+    res.json({
+      message: `Successfully synchronized sales ledger: ${updatedCount} updated, ${createdCount} created, ${deletedCount} removed.`,
+      updatedCount,
+      createdCount,
+      deletedCount,
+      sales: refreshedSales
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

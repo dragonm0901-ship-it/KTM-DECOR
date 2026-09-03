@@ -354,6 +354,7 @@ interface DashboardState {
   fetchSales: () => Promise<void>;
   createSale: (data: any) => Promise<void>;
   deleteSale: (id: string) => Promise<void>;
+  resyncSales: () => Promise<any>;
 
   // Expenses
   fetchExpenses: () => Promise<void>;
@@ -1417,6 +1418,25 @@ export const useStore = create<DashboardState>()(
       }));
     } catch (err) {
       console.error("Delete sale failed:", err);
+      throw err;
+    }
+  },
+
+  resyncSales: async () => {
+    const { token } = get();
+    try {
+      const res = await fetch(`${API_URL}/api/admin/resync-sales`, {
+        method: "POST",
+        headers: getHeaders(token),
+      });
+      if (!res.ok) throw new Error("Resync sales failed");
+      const data = await res.json();
+      if (Array.isArray(data.sales)) {
+        set({ sales: data.sales });
+      }
+      return data;
+    } catch (err) {
+      console.error("Resync sales failed:", err);
       throw err;
     }
   },

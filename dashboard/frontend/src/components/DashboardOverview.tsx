@@ -127,13 +127,23 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
   // Safe array check for sales
   const safeSales = Array.isArray(sales) ? sales : [];
 
+  // Map orders by ID for guaranteed accurate base price resolution
+  const ordersMap = new Map((Array.isArray(orders) ? orders : []).map((o) => [o._id.toString(), o]));
+
   // Order sales strictly reflect product base price without delivery or fitting charges
   const orderSales = safeSales
     .filter((s) => s.orderId)
     .reduce((acc, s) => {
-      const pPrice = (s.orderId && typeof s.orderId === "object" && "price" in s.orderId)
-        ? (Number((s.orderId as any).price) || 0)
-        : (s.amount || 0);
+      const orderIdStr = (typeof s.orderId === "object" && s.orderId !== null)
+        ? (s.orderId as any)._id?.toString()
+        : s.orderId?.toString();
+      const matchedOrder = orderIdStr ? ordersMap.get(orderIdStr) : undefined;
+
+      const pPrice = matchedOrder
+        ? (Number(matchedOrder.price) || 0)
+        : (s.orderId && typeof s.orderId === "object" && "price" in s.orderId)
+          ? (Number((s.orderId as any).price) || 0)
+          : (Number(s.amount) || 0);
       return acc + pPrice;
     }, 0);
 
