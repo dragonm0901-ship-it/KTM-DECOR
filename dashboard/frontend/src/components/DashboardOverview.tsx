@@ -24,6 +24,7 @@ import {
 import { Printer, Download } from "lucide-react";
 import { OrderDetailModal } from "./OrderDetailModal";
 import { StatementPreviewModal } from "./StatementPreviewModal";
+import { RevenueGrowthChart } from "./RevenueGrowthChart";
 import {
   formatNepali,
   formatNepaliShort,
@@ -71,8 +72,6 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
   const [noteText, setNoteText] = useState("");
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [fabOpen, setFabOpen] = useState(false);
-  const [hoveredPoint, setHoveredPoint] = useState<{ x: number; y: number; label: string; value: number } | null>(null);
-  const [timeFilter, setTimeFilter] = useState<"days" | "week" | "month">("month");
 
   // Statement PDF Preview Modal States
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
@@ -314,19 +313,6 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
     return points;
   };
 
-  const getFilteredChartData = () => {
-    const allData = getSalesChartData();
-    if (timeFilter === "days") {
-      return allData.slice(-7);
-    }
-    if (timeFilter === "week") {
-      return allData.slice(-30);
-    }
-    return allData;
-  };
-
-  const chartData = getFilteredChartData();
-
   // Sparkline data helpers matching mockup design
   const getSparklineData = (type: "sales" | "orders" | "tasks" | "completed") => {
     if (type === "sales") {
@@ -463,78 +449,6 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
         <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r="3" fill={strokeColor} />
       </svg>
     );
-  };
-
-  // Render graph path config
-  const svgWidth = 600;
-  const svgHeight = 200;
-  const paddingX = 55;
-  const paddingY = 20;
-
-  const maxVal = Math.max(...chartData.map((d) => d.value), 1000);
-  
-  const getCoordinates = () => {
-    return chartData.map((d, index) => {
-      const x = paddingX + (index / (chartData.length - 1)) * (svgWidth - 2 * paddingX);
-      const y = (svgHeight - paddingY) - (d.value / maxVal) * (svgHeight - 2 * paddingY);
-      return { x, y, label: d.label, value: d.value };
-    });
-  };
-
-  const coords = getCoordinates();
-
-  let linePath = "";
-  let areaPath = "";
-
-  if (coords.length > 0) {
-    linePath = `M ${coords[0].x} ${coords[0].y}`;
-    for (let i = 1; i < coords.length; i++) {
-      const p0 = coords[i - 1];
-      const p = coords[i];
-      const cpX1 = p0.x + (p.x - p0.x) / 2;
-      const cpY1 = p0.y;
-      const cpX2 = p0.x + (p.x - p0.x) / 2;
-      const cpY2 = p.y;
-      linePath += ` C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${p.x} ${p.y}`;
-    }
-    areaPath = `${linePath} L ${coords[coords.length - 1].x} ${svgHeight - paddingY} L ${coords[0].x} ${svgHeight - paddingY} Z`;
-  }
-
-  const handleMouseMove = (e: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
-    if (coords.length === 0) return;
-    const svg = e.currentTarget;
-    const point = svg.createSVGPoint();
-    point.x = e.clientX;
-    point.y = e.clientY;
-    
-    const ctm = svg.getScreenCTM();
-    if (!ctm) return;
-    
-    const svgPoint = point.matrixTransform(ctm.inverse());
-    const mouseX = svgPoint.x;
-    
-    // Graceful margin bounds check to hide hover crosshair if cursor leaves chart content zone
-    if (mouseX < paddingX - 15 || mouseX > svgWidth - paddingX + 15) {
-      setHoveredPoint(null);
-      return;
-    }
-    
-    let closest = coords[0];
-    let minDiff = Math.abs(mouseX - coords[0].x);
-    
-    for (let i = 1; i < coords.length; i++) {
-      const diff = Math.abs(mouseX - coords[i].x);
-      if (diff < minDiff) {
-        minDiff = diff;
-        closest = coords[i];
-      }
-    }
-    
-    setHoveredPoint(closest);
-  };
-
-  const handleMouseLeave = () => {
-    setHoveredPoint(null);
   };
 
   // Sticky notes colors
@@ -1451,185 +1365,12 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
 
       {/* SALES GROWTH TREND (ADMIN ONLY - ON THE BOTTOM) */}
       {user?.role === "admin" && (
-        <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-6 relative overflow-hidden transition-all duration-300">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <TrendingUp size={18} className="text-accent" />
-                <h3 className="font-bold text-base font-display text-foreground">
-                  Sales Growth Trend
-                </h3>
-              </div>
-              <div className="flex items-baseline gap-2.5 mt-2.5">
-                <h2 className="text-3xl font-extrabold font-display text-foreground leading-none">
-                  Rs. {(hoveredPoint ? hoveredPoint.value : totalSales).toLocaleString()}
-                </h2>
-                {(() => {
-                  if (!hoveredPoint) {
-                    return (
-                      <span className="bg-green-500/10 text-green-600 border border-green-500/10 px-2 py-0.5 rounded text-[10px] font-bold">
-                        ↑ 12.4%
-                      </span>
-                    );
-                  }
-                  const idx = coords.findIndex(c => c.x === hoveredPoint.x);
-                  if (idx <= 0) return null;
-                  const prevVal = coords[idx - 1].value;
-                  if (prevVal === 0) return null;
-                  const pct = ((hoveredPoint.value - prevVal) / prevVal) * 100;
-                  return (
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
-                      pct >= 0
-                        ? "bg-green-500/10 text-green-600 border-green-500/10"
-                        : "bg-red-500/10 text-red-600 border-red-500/10"
-                    }`}>
-                      {pct >= 0 ? "+" : ""}{pct.toFixed(1)}%
-                    </span>
-                  );
-                })()}
-              </div>
-              <p className="text-[10px] text-muted font-bold tracking-wider uppercase mt-1">
-                {hoveredPoint ? `Coordinate Point: ${hoveredPoint.label}` : "Cumulative Total Sales Revenue"}
-              </p>
-            </div>
-            
-            <div className="flex items-center gap-4 text-xs font-semibold">
-              <div className="flex items-center gap-1.5 bg-muted/20 border border-border/80 p-0.5 rounded-lg">
-                <button
-                  onClick={() => setTimeFilter("days")}
-                  className={`px-3 py-1.5 text-[10px] font-extrabold rounded-md transition-all ${
-                    timeFilter === "days"
-                      ? "bg-card text-foreground shadow-sm"
-                      : "text-muted hover:text-foreground"
-                  }`}
-                >
-                  Days
-                </button>
-                <button
-                  onClick={() => setTimeFilter("week")}
-                  className={`px-3 py-1.5 text-[10px] font-extrabold rounded-md transition-all ${
-                    timeFilter === "week"
-                      ? "bg-card text-foreground shadow-sm"
-                      : "text-muted hover:text-foreground"
-                  }`}
-                >
-                  Week
-                </button>
-                <button
-                  onClick={() => setTimeFilter("month")}
-                  className={`px-3 py-1.5 text-[10px] font-extrabold rounded-md transition-all ${
-                    timeFilter === "month"
-                      ? "bg-card text-foreground shadow-sm"
-                      : "text-muted hover:text-foreground"
-                  }`}
-                >
-                  Month
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="relative w-full h-[220px]">
-            {coords.length <= 1 ? (
-              <div className="h-full flex items-center justify-center text-muted text-xs border border-dashed border-border/40 rounded-xl">
-                Add completed tasks with values to view graph progression
-              </div>
-            ) : (
-              <>
-                <svg
-                  viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-                  className="w-full h-full overflow-visible select-none"
-                  onMouseMove={handleMouseMove}
-                  onMouseLeave={handleMouseLeave}
-                >
-                  <defs>
-                    <linearGradient id="sales-gradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.25" />
-                      <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.0" />
-                    </linearGradient>
-                  </defs>
-
-                  {/* Horizontal gridlines removed for clean Vercel-style aesthetics */}
-
-                  {/* Shaded Area */}
-                  {areaPath && (
-                    <path
-                      d={areaPath}
-                      fill="url(#sales-gradient)"
-                      className="transition-all duration-300 ease-out"
-                    />
-                  )}
-
-                  {/* Bezier Path Line */}
-                  {linePath && (
-                    <path
-                      d={linePath}
-                      fill="none"
-                      stroke="var(--accent)"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      className="transition-all duration-300 ease-out"
-                    />
-                  )}
-
-                  {/* X Axis Date labels */}
-                  {coords.map((c, index) => {
-                    const showLabel = index === 0 || index === coords.length - 1 || (coords.length > 2 && index === Math.floor(coords.length / 2));
-                    if (!showLabel) return null;
-                    return (
-                      <text
-                        key={index}
-                        x={c.x}
-                        y={svgHeight - 4}
-                        fill="var(--muted)"
-                        fontSize="8"
-                        className="font-semibold text-center"
-                        textAnchor="middle"
-                      >
-                        {c.label}
-                      </text>
-                    );
-                  })}
-
-                  {/* Snapping vertical tracker line */}
-                  {hoveredPoint && (
-                    <line
-                      x1={hoveredPoint.x}
-                      y1={paddingY}
-                      x2={hoveredPoint.x}
-                      y2={svgHeight - paddingY}
-                      stroke="var(--border)"
-                      strokeWidth="1.5"
-                      strokeDasharray="3 3"
-                      className="opacity-50"
-                    />
-                  )}
-
-                  {/* Snapped Pulsating focal point dot */}
-                  {hoveredPoint && (
-                    <g>
-                      <circle
-                        cx={hoveredPoint.x}
-                        cy={hoveredPoint.y}
-                        r="8"
-                        className="fill-accent/15 stroke-accent/35 stroke-[2px] animate-pulse"
-                      />
-                      <circle
-                        cx={hoveredPoint.x}
-                        cy={hoveredPoint.y}
-                        r="4.5"
-                        fill="var(--accent)"
-                        stroke="var(--card)"
-                        strokeWidth="2"
-                        className="shadow"
-                      />
-                    </g>
-                  )}
-                </svg>
-              </>
-            )}
-          </div>
-        </div>
+        <RevenueGrowthChart
+          sales={safeSales}
+          orders={orders}
+          completedTasks={completedTasks}
+          title="Revenue Over Time"
+        />
       )}
 
       {/* FLOATING ACTION BUTTON (FAB) FOR QUICK ACTIONS */}
