@@ -8,19 +8,18 @@ import {
   X,
   Calendar,
   User,
-  TrendingUp,
   Edit2,
   Eye
 } from "./ui/solar-icons";
 import { Printer, Download } from "lucide-react";
 import { StatementPreviewModal } from "./StatementPreviewModal";
 import { NepaliDatePicker } from "./ui/NepaliDatePicker";
+import { SalesExpensesTrendChart } from "./SalesExpensesTrendChart";
 import {
   NEPALI_MONTHS,
   NEPALI_YEARS,
   getCurrentNepaliDate,
   formatNepali,
-  formatNepaliShort,
   formatArchiveStatementLabel,
 } from "../utils/nepaliDate";
 
@@ -28,6 +27,7 @@ export const ExpensesTab: React.FC = () => {
   const {
     expenses,
     sales,
+    orders,
     createExpense,
     updateExpense,
     deleteExpense,
@@ -297,113 +297,6 @@ export const ExpensesTab: React.FC = () => {
     };
   });
 
-  // ──── DOUBLE LINE GRAPH: SALES VS EXPENSES TREND ────
-  const getTrendData = () => {
-    const allDatesMap: { [key: string]: { sales: number; expenses: number } } = {};
-
-    sales.forEach((s) => {
-      const dateStr = new Date(s.date).toISOString().split("T")[0];
-      if (!allDatesMap[dateStr]) allDatesMap[dateStr] = { sales: 0, expenses: 0 };
-      allDatesMap[dateStr].sales += s.amount;
-    });
-
-    expenses.forEach((e) => {
-      const dateStr = new Date(e.date).toISOString().split("T")[0];
-      if (!allDatesMap[dateStr]) allDatesMap[dateStr] = { sales: 0, expenses: 0 };
-      allDatesMap[dateStr].expenses += e.amount;
-    });
-
-    const sortedDates = Object.keys(allDatesMap).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
-
-    let cumSales = 0;
-    let cumExpenses = 0;
-    const points = sortedDates.map((date) => {
-      cumSales += allDatesMap[date].sales;
-      cumExpenses += allDatesMap[date].expenses;
-      return {
-        date,
-        label: formatNepaliShort(date),
-        salesVal: cumSales,
-        expensesVal: cumExpenses
-      };
-    });
-
-    if (points.length === 0) {
-      points.push({ date: "Today", label: "Today", salesVal: 0, expensesVal: 0 });
-    }
-
-    return points;
-  };
-
-  const trendData = getTrendData();
-  const maxTrendVal = Math.max(...trendData.map((d) => Math.max(d.salesVal, d.expensesVal)), 1000);
-
-  const svgWidth = 600;
-  const svgHeight = 160;
-  const paddingX = 55;
-  const paddingY = 20;
-
-  const getCoordinates = () => {
-    return trendData.map((d, index) => {
-      const x = paddingX + (index / (trendData.length - 1 || 1)) * (svgWidth - 2 * paddingX);
-      const ySales = (svgHeight - paddingY) - (d.salesVal / maxTrendVal) * (svgHeight - 2 * paddingY);
-      const yExpenses = (svgHeight - paddingY) - (d.expensesVal / maxTrendVal) * (svgHeight - 2 * paddingY);
-      return { x, ySales, yExpenses, label: d.label, salesVal: d.salesVal, expensesVal: d.expensesVal };
-    });
-  };
-
-  const trendCoords = getCoordinates();
-
-  let salesLinePath = "";
-  let salesAreaPath = "";
-  let expensesLinePath = "";
-  let expensesAreaPath = "";
-
-  if (trendCoords.length > 0) {
-    salesLinePath = `M ${trendCoords[0].x} ${trendCoords[0].ySales}`;
-    expensesLinePath = `M ${trendCoords[0].x} ${trendCoords[0].yExpenses}`;
-
-    for (let i = 1; i < trendCoords.length; i++) {
-      const p0 = trendCoords[i - 1];
-      const p = trendCoords[i];
-      const cpX1 = p0.x + (p.x - p0.x) / 2;
-      const cpY1Sales = p0.ySales;
-      const cpX2 = p0.x + (p.x - p0.x) / 2;
-      const cpY2Sales = p.ySales;
-
-      salesLinePath += ` C ${cpX1} ${cpY1Sales}, ${cpX2} ${cpY2Sales}, ${p.x} ${p.ySales}`;
-
-      const cpY1Expenses = p0.yExpenses;
-      const cpY2Expenses = p.yExpenses;
-      expensesLinePath += ` C ${cpX1} ${cpY1Expenses}, ${cpX2} ${cpY2Expenses}, ${p.x} ${p.yExpenses}`;
-    }
-
-    salesAreaPath = `${salesLinePath} L ${trendCoords[trendCoords.length - 1].x} ${svgHeight - paddingY} L ${trendCoords[0].x} ${svgHeight - paddingY} Z`;
-    expensesAreaPath = `${expensesLinePath} L ${trendCoords[trendCoords.length - 1].x} ${svgHeight - paddingY} L ${trendCoords[0].x} ${svgHeight - paddingY} Z`;
-  }
-
-  const [hoveredTrendPoint, setHoveredTrendPoint] = useState<any>(null);
-
-  const handleTrendMouseMove = (e: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
-    if (trendCoords.length === 0) return;
-    const svg = e.currentTarget;
-    const rect = svg.getBoundingClientRect();
-    const mouseX = ((e.clientX - rect.left) / rect.width) * svgWidth;
-    
-    let closest = trendCoords[0];
-    let minDiff = Math.abs(mouseX - trendCoords[0].x);
-    
-    for (let i = 1; i < trendCoords.length; i++) {
-      const diff = Math.abs(mouseX - trendCoords[i].x);
-      if (diff < minDiff) {
-        minDiff = diff;
-        closest = trendCoords[i];
-      }
-    }
-    
-    setHoveredTrendPoint(closest);
-  };
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -608,186 +501,13 @@ export const ExpensesTab: React.FC = () => {
         </div>
       </div>
 
-      {/* Double Line Graph: Sales vs Expenses Trend */}
-      <div className="bg-card border border-border/80 p-5 rounded-2xl shadow-sm relative overflow-hidden transition-all duration-300">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
-          <div>
-            <h3 className="font-bold text-sm font-display flex items-center gap-1.5">
-              <TrendingUp size={16} className="text-accent" />
-              Sales & Expenses Growth Trend
-            </h3>
-            <p className="text-[10px] text-muted">Fluid double curve tracking cumulative revenue vs. costs</p>
-          </div>
-          
-          <div className="flex items-center gap-4 text-xs font-semibold">
-            <div className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-green-500" />
-              <span className="text-muted text-[10px]">Cumulative Revenue</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
-              <span className="text-muted text-[10px]">Cumulative Expenses</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="relative w-full h-[180px]">
-          {trendCoords.length <= 1 ? (
-            <div className="h-full flex items-center justify-center text-muted text-xs border border-dashed border-border/40 rounded">
-              Insufficient transaction points to render growth trends
-            </div>
-          ) : (
-            <>
-              <svg
-                viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-                className="w-full h-full overflow-visible select-none"
-                onMouseMove={handleTrendMouseMove}
-                onMouseLeave={() => setHoveredTrendPoint(null)}
-              >
-                <defs>
-                  <linearGradient id="sales-grad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#10B981" stopOpacity="0.15" />
-                    <stop offset="100%" stopColor="#10B981" stopOpacity="0.0" />
-                  </linearGradient>
-                  <linearGradient id="exp-grad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#EF4444" stopOpacity="0.15" />
-                    <stop offset="100%" stopColor="#EF4444" stopOpacity="0.0" />
-                  </linearGradient>
-                </defs>
-
-                {/* Gridlines */}
-                {[0.25, 0.5, 0.75, 1.0].map((ratio, index) => {
-                  const yVal = svgHeight - paddingY - ratio * (svgHeight - 2 * paddingY);
-                  const valLabel = Math.round(ratio * maxTrendVal);
-                  return (
-                    <g key={index} className="opacity-30">
-                      <line
-                        x1={paddingX}
-                        y1={yVal}
-                        x2={svgWidth - paddingX}
-                        y2={yVal}
-                        stroke="var(--border)"
-                        strokeWidth="1"
-                        strokeDasharray="4 4"
-                      />
-                      <text
-                        x={paddingX - 8}
-                        y={yVal + 3}
-                        fill="var(--muted)"
-                        fontSize="8"
-                        className="font-bold text-right"
-                        textAnchor="end"
-                      >
-                        Rs. {valLabel >= 1000 ? `${(valLabel / 1000).toFixed(0)}k` : valLabel}
-                      </text>
-                    </g>
-                  );
-                })}
-
-                {/* Shaded Areas */}
-                {salesAreaPath && <path d={salesAreaPath} fill="url(#sales-grad)" className="transition-all duration-300" />}
-                {expensesAreaPath && <path d={expensesAreaPath} fill="url(#exp-grad)" className="transition-all duration-300" />}
-
-                {/* Sales Bezier Line */}
-                {salesLinePath && (
-                  <path
-                    d={salesLinePath}
-                    fill="none"
-                    stroke="#10B981"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    className="transition-all duration-300"
-                  />
-                )}
-
-                {/* Expenses Bezier Line */}
-                {expensesLinePath && (
-                  <path
-                    d={expensesLinePath}
-                    fill="none"
-                    stroke="#EF4444"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    className="transition-all duration-300"
-                  />
-                )}
-
-                {/* X Axis Date labels */}
-                {trendCoords.map((c, index) => {
-                  const showLabel = index === 0 || index === trendCoords.length - 1 || (trendCoords.length > 2 && index === Math.floor(trendCoords.length / 2));
-                  if (!showLabel) return null;
-                  return (
-                    <text
-                      key={index}
-                      x={c.x}
-                      y={svgHeight - 4}
-                      fill="var(--muted)"
-                      fontSize="8"
-                      className="font-semibold"
-                      textAnchor="middle"
-                    >
-                      {c.label}
-                    </text>
-                  );
-                })}
-
-                {/* Hover line tracker */}
-                {hoveredTrendPoint && (
-                  <line
-                    x1={hoveredTrendPoint.x}
-                    y1={paddingY}
-                    x2={hoveredTrendPoint.x}
-                    y2={svgHeight - paddingY}
-                    stroke="var(--border)"
-                    strokeWidth="1.5"
-                    strokeDasharray="3 3"
-                  />
-                )}
-
-                {/* Hover circles */}
-                {hoveredTrendPoint && (
-                  <g>
-                    {/* Sales Dot */}
-                    <circle cx={hoveredTrendPoint.x} cy={hoveredTrendPoint.ySales} r="4.5" fill="#10B981" stroke="var(--card)" strokeWidth="1.5" />
-                    {/* Expenses Dot */}
-                    <circle cx={hoveredTrendPoint.x} cy={hoveredTrendPoint.yExpenses} r="4.5" fill="#EF4444" stroke="var(--card)" strokeWidth="1.5" />
-                  </g>
-                )}
-              </svg>
-
-              {/* Tooltip Popup */}
-              {hoveredTrendPoint && (
-                <div
-                  className="absolute bg-card border border-border p-2.5 rounded shadow-2xl text-[10px] pointer-events-none select-none z-30 space-y-1 min-w-[140px]"
-                  style={{
-                    left: `${(hoveredTrendPoint.x / svgWidth) * 100}%`,
-                    top: `10%`,
-                    transform: "translateX(-50%)"
-                  }}
-                >
-                  <span className="text-[8px] text-muted font-bold block uppercase tracking-wider">
-                    {hoveredTrendPoint.label}
-                  </span>
-                  <div className="flex justify-between gap-4">
-                    <span className="text-green-500 font-bold">Revenue:</span>
-                    <span className="font-extrabold text-foreground">Rs. {hoveredTrendPoint.salesVal.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between gap-4">
-                    <span className="text-red-500 font-bold">Expenses:</span>
-                    <span className="font-extrabold text-foreground">Rs. {hoveredTrendPoint.expensesVal.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between gap-4 border-t border-border pt-1 font-extrabold">
-                    <span className="text-accent">Net Margin:</span>
-                    <span className={hoveredTrendPoint.salesVal - hoveredTrendPoint.expensesVal >= 0 ? "text-green-500" : "text-red-500"}>
-                      Rs. {(hoveredTrendPoint.salesVal - hoveredTrendPoint.expensesVal).toLocaleString()}
-                    </span>
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </div>
+      {/* Sales & Expenses Growth Trend (Matching Signature Sunset Gradient Spline) */}
+      <SalesExpensesTrendChart
+        sales={sales}
+        expenses={expenses}
+        orders={orders}
+        title="Sales & Expenses Growth Trend"
+      />
 
       {/* Filter and Table */}
       <div className="bg-card border border-border/80 p-4 rounded-2xl shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">

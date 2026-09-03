@@ -25,6 +25,7 @@ import { Printer, Download } from "lucide-react";
 import { OrderDetailModal } from "./OrderDetailModal";
 import { StatementPreviewModal } from "./StatementPreviewModal";
 import { RevenueGrowthChart } from "./RevenueGrowthChart";
+import { SalesExpensesTrendChart } from "./SalesExpensesTrendChart";
 import {
   formatNepali,
   formatNepaliShort,
@@ -88,6 +89,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
   const [exportMonth, setExportMonth] = useState<string>(currentBs.month.toString());
   const [exportYear, setExportYear] = useState<string>(currentBs.year.toString());
   const [exportingType, setExportingType] = useState<string | null>(null);
+  const [overviewChartType, setOverviewChartType] = useState<"revenue" | "dual">("revenue");
 
   useEffect(() => {
     if (user?.role === "admin") {
@@ -1378,14 +1380,50 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
         </div>
       </div>
 
-      {/* SALES GROWTH TREND (ADMIN ONLY - ON THE BOTTOM) */}
+      {/* SALES & EXPENSES GROWTH TREND (ADMIN ONLY - ON THE BOTTOM) */}
       {user?.role === "admin" && (
-        <RevenueGrowthChart
-          sales={safeSales}
-          orders={orders}
-          completedTasks={completedTasks}
-          title="Revenue Over Time"
-        />
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5 p-1 bg-border/40 rounded-2xl border border-border/50">
+              <button
+                onClick={() => setOverviewChartType("revenue")}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  overviewChartType === "revenue"
+                    ? "bg-[#18181B] text-white shadow-xs"
+                    : "text-muted hover:text-foreground hover:bg-card/50"
+                }`}
+              >
+                Revenue Trend
+              </button>
+              <button
+                onClick={() => setOverviewChartType("dual")}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  overviewChartType === "dual"
+                    ? "bg-[#18181B] text-white shadow-xs"
+                    : "text-muted hover:text-foreground hover:bg-card/50"
+                }`}
+              >
+                Sales & Expenses Dual Trend
+              </button>
+            </div>
+          </div>
+
+          {overviewChartType === "dual" ? (
+            <SalesExpensesTrendChart
+              sales={safeSales}
+              expenses={expenses}
+              orders={orders}
+              title="Sales & Expenses Growth Trend"
+            />
+          ) : (
+            <RevenueGrowthChart
+              sales={safeSales}
+              orders={orders}
+              completedTasks={completedTasks}
+              title="Revenue Over Time"
+            />
+          )}
+        </div>
       )}
 
       {/* FLOATING ACTION BUTTON (FAB) FOR QUICK ACTIONS */}
