@@ -10,7 +10,8 @@ import {
   Calendar,
   Eye,
   CheckCircle,
-  Clock
+  Clock,
+  RotateCcw
 } from "./ui/solar-icons";
 import { OrderDetailModal } from "./OrderDetailModal";
 import {
@@ -325,9 +326,10 @@ export const SalesTab: React.FC = () => {
               onClick={handleResyncClick}
               disabled={resyncing}
               title="Resynchronize all order sales in the database to base product prices and purge Redis cache"
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-card border border-border text-foreground text-[11px] rounded-xl font-bold hover:bg-muted/40 transition-all disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-card border border-border text-foreground text-[11px] rounded-xl font-bold hover:bg-muted/40 transition-all disabled:opacity-50 cursor-pointer shadow-xs"
             >
-              {resyncing ? "Syncing..." : "🔄 Resync DB"}
+              <RotateCcw size={13} className={`text-accent ${resyncing ? "animate-spin" : ""}`} />
+              <span>{resyncing ? "Syncing..." : "Resync DB"}</span>
             </button>
           )}
         </div>
