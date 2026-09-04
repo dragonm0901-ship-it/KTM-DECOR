@@ -139,14 +139,6 @@ export const Layout: React.FC<LayoutProps> = ({
       : []),
   ];
 
-  const getTabLabel = (id: string): string => {
-    if (id === "overview") return "";
-    for (const cat of navigationCategories) {
-      const found = cat.items.find((item) => item.id === id);
-      if (found) return found.label;
-    }
-    return id.charAt(0).toUpperCase() + id.slice(1);
-  };
 
   return (
     <div className="h-screen flex bg-background text-foreground transition-colors duration-300 overflow-hidden font-sans">
@@ -320,7 +312,7 @@ export const Layout: React.FC<LayoutProps> = ({
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden bg-background">
         {/* Top Utility Bar (Integrated into Content Header) */}
         <div className="px-5 sm:px-8 pt-5 pb-3 flex items-center justify-between gap-4 flex-shrink-0">
-          {/* Left: Mobile hamburger menu trigger & Dynamic Page Title (No "Overview" text) */}
+          {/* Left: Mobile hamburger menu trigger */}
           <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() => setMobileMenuOpen(true)}
@@ -329,11 +321,6 @@ export const Layout: React.FC<LayoutProps> = ({
             >
               <Menu size={18} />
             </button>
-            {currentTab !== "overview" && (
-              <h1 className="text-2xl sm:text-3xl font-bold font-display text-foreground tracking-tight truncate">
-                {getTabLabel(currentTab)}
-              </h1>
-            )}
           </div>
 
           {/* Right: Search + Notifications + Theme Toggle + User Avatar */}
