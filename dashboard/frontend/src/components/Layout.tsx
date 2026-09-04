@@ -27,7 +27,6 @@ import {
 import {
   Search,
   Settings,
-  HelpCircle,
   PanelLeftClose,
   PanelLeft,
   ChevronsUpDown,
@@ -62,7 +61,6 @@ export const Layout: React.FC<LayoutProps> = ({
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
   const [announcementMsg, setAnnouncementMsg] = useState("");
   const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
-  const [showHelpModal, setShowHelpModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const notifRef = useRef<HTMLDivElement>(null);
 
@@ -143,7 +141,7 @@ export const Layout: React.FC<LayoutProps> = ({
   ];
 
   const getTabLabel = (id: string): string => {
-    if (id === "overview") return "Overview";
+    if (id === "overview") return "";
     for (const cat of navigationCategories) {
       const found = cat.items.find((item) => item.id === id);
       if (found) return found.label;
@@ -155,24 +153,24 @@ export const Layout: React.FC<LayoutProps> = ({
     <div className="h-screen flex bg-background text-foreground transition-colors duration-300 overflow-hidden font-sans">
       {/* DESKTOP ASIDE (SIDEBAR) */}
       <aside
-        className={`hidden md:flex flex-col bg-card border-r border-border/70 transition-all duration-300 h-screen select-none relative z-30 ${
+        className={`hidden md:flex flex-col bg-card border-r border-border/70 transition-[width] duration-300 ease-in-out h-screen select-none relative z-30 overflow-hidden ${
           sidebarOpen ? "w-64" : "w-20"
         }`}
       >
-        {/* Top Header of Aside: Brand Logo + Sidebar Toggle */}
-        <div className="flex items-center justify-between px-5 py-5 border-b border-border/40">
+        {/* Top Header of Aside: Brand Logo + Sidebar Toggle (No horizontal line) */}
+        <div className="flex items-center justify-between px-5 py-5">
           {sidebarOpen ? (
             <>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 overflow-hidden">
                 <img
                   src="/admin/logo/ktm%20decor.svg"
                   alt="KTM DECOR"
-                  className="h-8 w-auto object-contain dark:invert dark:hue-rotate-180"
+                  className="h-8 w-auto object-contain dark:invert dark:hue-rotate-180 transition-all duration-300 ease-in-out"
                 />
               </div>
               <button
                 onClick={() => setSidebarOpen(false)}
-                className="p-1.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 text-muted hover:text-foreground transition-colors cursor-pointer"
+                className="p-1.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 text-muted hover:text-foreground transition-all duration-300 ease-in-out cursor-pointer shrink-0"
                 title="Collapse Sidebar"
                 aria-label="Collapse Sidebar"
               >
@@ -181,12 +179,14 @@ export const Layout: React.FC<LayoutProps> = ({
             </>
           ) : (
             <div className="flex flex-col items-center gap-3 w-full">
-              <div className="h-8 w-8 rounded-xl bg-accent text-white font-bold flex items-center justify-center text-xs shadow-xs">
-                KD
-              </div>
+              <img
+                src="/admin/logo/ktm%20decor.svg"
+                alt="KTM DECOR"
+                className="h-6 w-auto max-w-[40px] object-contain dark:invert dark:hue-rotate-180 transition-all duration-300 ease-in-out"
+              />
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="p-1.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 text-muted hover:text-foreground transition-colors cursor-pointer"
+                className="p-1.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 text-muted hover:text-foreground transition-all duration-300 ease-in-out cursor-pointer"
                 title="Expand Sidebar"
                 aria-label="Expand Sidebar"
               >
@@ -197,15 +197,15 @@ export const Layout: React.FC<LayoutProps> = ({
         </div>
 
         {/* Navigation Items List */}
-        <div className="flex-1 py-4 px-3 space-y-3 overflow-y-auto overflow-x-hidden">
+        <div className="flex-1 py-3 px-3 space-y-3 overflow-y-auto overflow-x-hidden">
           {navigationCategories.map((cat, catIdx) => (
             <div key={cat.title} className="space-y-1">
               {sidebarOpen ? (
-                <div className="text-[10px] font-bold text-muted/50 uppercase tracking-widest px-3 mb-1 mt-3 first:mt-0 select-none">
+                <div className="text-[10px] font-bold text-muted/50 uppercase tracking-widest px-3 mb-1 mt-3 first:mt-0 select-none transition-opacity duration-300 ease-in-out">
                   {cat.title}
                 </div>
               ) : (
-                catIdx > 0 && <div className="border-t border-border/60 my-2.5" />
+                catIdx > 0 && <div className="border-t border-border/40 my-2" />
               )}
               {cat.items.map((item) => {
                 const Icon = item.icon;
@@ -222,7 +222,7 @@ export const Layout: React.FC<LayoutProps> = ({
                           }
                         : undefined
                     }
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-medium transition-all group relative cursor-pointer ${
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-medium transition-all duration-300 ease-in-out group relative cursor-pointer ${
                       isActive
                         ? "text-black font-bold shadow-md shadow-orange-500/15"
                         : "text-muted hover:text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800/60"
@@ -231,15 +231,21 @@ export const Layout: React.FC<LayoutProps> = ({
                   >
                     <Icon
                       size={19}
-                      className={`shrink-0 ${
+                      className={`shrink-0 transition-colors duration-200 ${
                         isActive
                           ? "text-black"
                           : "text-muted group-hover:text-foreground"
                       }`}
                     />
-                    {sidebarOpen && (
-                      <span className="truncate">{item.label}</span>
-                    )}
+                    <span
+                      className={`truncate transition-all duration-300 ease-in-out ${
+                        sidebarOpen
+                          ? "opacity-100 max-w-[160px]"
+                          : "opacity-0 max-w-0 pointer-events-none"
+                      }`}
+                    >
+                      {item.label}
+                    </span>
 
                     {/* Tooltip when collapsed */}
                     {!sidebarOpen && (
@@ -254,43 +260,43 @@ export const Layout: React.FC<LayoutProps> = ({
           ))}
         </div>
 
-        {/* Bottom Section: Setting, Help & Support, Workspace Pill */}
-        <div className="p-3 border-t border-border/60 space-y-1">
+        {/* Bottom Section: Setting, Workspace Pill (No horizontal line, No Help & Support) */}
+        <div className="p-3 space-y-1">
           {/* Setting Link */}
           <button
             onClick={() => setCurrentTab("staff-management")}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-2xl text-xs font-medium text-muted hover:text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800/60 transition-all cursor-pointer ${
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-2xl text-xs font-medium text-muted hover:text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800/60 transition-all duration-300 ease-in-out cursor-pointer ${
               !sidebarOpen ? "justify-center px-0" : ""
             }`}
             title="Setting"
           >
             <Settings size={18} className="shrink-0 text-muted" />
-            {sidebarOpen && <span>Setting</span>}
+            <span
+              className={`truncate transition-all duration-300 ease-in-out ${
+                sidebarOpen
+                  ? "opacity-100 max-w-[160px]"
+                  : "opacity-0 max-w-0 pointer-events-none"
+              }`}
+            >
+              Setting
+            </span>
           </button>
 
-          {/* Help & Support Link */}
-          <button
-            onClick={() => setShowHelpModal(true)}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-2xl text-xs font-medium text-muted hover:text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800/60 transition-all cursor-pointer ${
-              !sidebarOpen ? "justify-center px-0" : ""
-            }`}
-            title="Help & Support"
-          >
-            <HelpCircle size={18} className="shrink-0 text-muted" />
-            {sidebarOpen && <span>Help & Support</span>}
-          </button>
-
-          {/* Workspace Pill Card (like Startup Inc. card in image) */}
+          {/* Workspace Pill Card (Identical to reference image, KTM DECOR logo) */}
           <div
-            className={`mt-2 rounded-2xl bg-neutral-100 dark:bg-neutral-800/60 border border-border/70 p-2 flex items-center justify-between gap-2.5 transition-all hover:bg-neutral-200/60 dark:hover:bg-neutral-800 select-none ${
+            className={`mt-1.5 rounded-2xl bg-neutral-100 dark:bg-neutral-800/60 border border-border/70 p-2 flex items-center justify-between gap-2.5 transition-all duration-300 ease-in-out hover:bg-neutral-200/60 dark:hover:bg-neutral-800 select-none ${
               !sidebarOpen ? "justify-center p-1.5" : ""
             }`}
           >
             {sidebarOpen ? (
               <>
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="h-8 w-8 rounded-xl bg-blue-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs">
-                    KD
+                  <div className="h-8 w-8 rounded-xl bg-white dark:bg-neutral-800 p-1 border border-border/60 flex items-center justify-center shrink-0 shadow-xs">
+                    <img
+                      src="/admin/logo/ktm%20decor.svg"
+                      alt="KTM DECOR"
+                      className="h-5 w-auto object-contain dark:invert dark:hue-rotate-180"
+                    />
                   </div>
                   <div className="min-w-0">
                     <span className="text-[10px] text-muted font-medium block leading-none">
@@ -316,10 +322,14 @@ export const Layout: React.FC<LayoutProps> = ({
             ) : (
               <button
                 onClick={logout}
-                title="Logout (KD Workspace)"
-                className="h-8 w-8 rounded-xl bg-blue-600 hover:bg-red-600 text-white font-bold text-xs flex items-center justify-center transition-colors shadow-xs cursor-pointer"
+                title="Logout (KTM DECOR)"
+                className="h-8 w-8 rounded-xl p-1 bg-white dark:bg-neutral-800 hover:bg-red-500/10 border border-border/60 flex items-center justify-center transition-all duration-300 ease-in-out shadow-xs cursor-pointer"
               >
-                KD
+                <img
+                  src="/admin/logo/ktm%20decor.svg"
+                  alt="KTM DECOR"
+                  className="h-4.5 w-auto object-contain dark:invert dark:hue-rotate-180"
+                />
               </button>
             )}
           </div>
@@ -330,7 +340,7 @@ export const Layout: React.FC<LayoutProps> = ({
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden bg-background">
         {/* Top Utility Bar (Integrated into Content Header) */}
         <div className="px-5 sm:px-8 pt-5 pb-3 flex items-center justify-between gap-4 flex-shrink-0">
-          {/* Left: Mobile hamburger menu trigger & Dynamic Page Title */}
+          {/* Left: Mobile hamburger menu trigger & Dynamic Page Title (No "Overview" text) */}
           <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() => setMobileMenuOpen(true)}
@@ -339,9 +349,11 @@ export const Layout: React.FC<LayoutProps> = ({
             >
               <Menu size={18} />
             </button>
-            <h1 className="text-2xl sm:text-3xl font-bold font-display text-foreground tracking-tight truncate">
-              {getTabLabel(currentTab)}
-            </h1>
+            {currentTab !== "overview" && (
+              <h1 className="text-2xl sm:text-3xl font-bold font-display text-foreground tracking-tight truncate">
+                {getTabLabel(currentTab)}
+              </h1>
+            )}
           </div>
 
           {/* Right: Search + Notifications + Theme Toggle + User Avatar */}
@@ -373,7 +385,7 @@ export const Layout: React.FC<LayoutProps> = ({
               </div>
             )}
 
-            {/* Pill Search Input (identical to the image) */}
+            {/* Pill Search Input */}
             <div className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-card border border-border/80 text-muted shadow-2xs focus-within:border-accent/60 transition-colors w-48 md:w-60">
               <Search size={14} className="text-muted shrink-0" />
               <input
@@ -540,7 +552,7 @@ export const Layout: React.FC<LayoutProps> = ({
               {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
             </button>
 
-            {/* User Profile Avatar Circle (like in the image) */}
+            {/* User Profile Avatar Circle */}
             <div
               onClick={() => {
                 if (user?.role === "admin") {
@@ -712,62 +724,6 @@ export const Layout: React.FC<LayoutProps> = ({
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
-
-      {/* HELP & SUPPORT MODAL */}
-      {showHelpModal && (
-        <div className="modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
-          <div className="bg-card w-full max-w-md rounded-3xl border border-border p-6 shadow-2xl animate-scale-up space-y-4">
-            <div className="flex items-center justify-between border-b border-border pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-accent/10 text-accent">
-                  <HelpCircle size={20} />
-                </div>
-                <div>
-                  <h3 className="font-bold text-base font-display text-foreground">
-                    Help & Support
-                  </h3>
-                  <p className="text-xs text-muted">KTM DECOR System Assistance</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowHelpModal(false)}
-                className="p-1 rounded-lg text-muted hover:text-foreground cursor-pointer"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="space-y-3 text-xs text-muted">
-              <div className="p-3.5 rounded-2xl bg-neutral-100 dark:bg-neutral-800/60 border border-border/70 space-y-1">
-                <span className="font-bold text-foreground text-xs block">
-                  Support Hotline & Inquiries
-                </span>
-                <p>Phone: +977 9800000000</p>
-                <p>Email: support@ktmdecor.com</p>
-                <p>Location: Kathmandu, Nepal</p>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-neutral-100 dark:bg-neutral-800/60 border border-border/70 space-y-1">
-                <span className="font-bold text-foreground text-xs block">
-                  Quick Navigation Shortcuts
-                </span>
-                <p>• Overview: Real-time KPIs, Growth Trends, Statements</p>
-                <p>• Orders: Manage and track incoming client signage orders</p>
-                <p>• Inventory: Monitor stock quantities and critical alerts</p>
-              </div>
-            </div>
-
-            <div className="pt-2 flex justify-end">
-              <button
-                onClick={() => setShowHelpModal(false)}
-                className="px-4 py-2 rounded-xl bg-accent text-white font-semibold text-xs hover:bg-accent-dark transition-colors cursor-pointer"
-              >
-                Close
-              </button>
-            </div>
           </div>
         </div>
       )}
