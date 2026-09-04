@@ -77,7 +77,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
 
   const START_HOUR = 8; // 8 AM
   const END_HOUR = 18; // 6 PM
-  const ROW_HEIGHT = 64; // px
+  const ROW_HEIGHT = 58; // px (calibrated for balanced, comfortable timetable)
 
   const currentMonthInfo = NEPALI_MONTHS[bsMonth - 1] || NEPALI_MONTHS[0];
 
@@ -310,29 +310,32 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
   return (
     <div className="space-y-6">
       {/* HEADER SECTION */}
-      <div className="bg-card border border-border/80 p-5 rounded-2xl shadow-sm flex flex-col xl:flex-row items-start xl:items-center justify-between gap-5 transition-all">
+      <div className="bg-card border border-border/80 p-4 sm:p-6 rounded-[28px] shadow-xs flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 sm:gap-5 transition-all">
         {/* Left: Nepali Date Badge & Title */}
-        <div className="flex items-center gap-3.5">
-          <div className="bg-foreground text-background dark:bg-accent dark:text-white px-4 py-2.5 rounded-xl flex flex-col items-center justify-center min-w-[70px] shadow-sm select-none">
-            <span className="text-[10px] font-extrabold uppercase tracking-widest leading-none opacity-85">
+        <div className="flex items-center gap-3 sm:gap-3.5 w-full sm:w-auto">
+          <div
+            style={{ background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)" }}
+            className="text-black px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl flex flex-col items-center justify-center min-w-[62px] sm:min-w-[72px] shadow-xs select-none shrink-0"
+          >
+            <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-widest leading-none text-black/80">
               {currentMonthInfo.short}
             </span>
-            <span className="text-2xl font-extrabold leading-none mt-1">
+            <span className="text-xl sm:text-2xl font-extrabold leading-none mt-1 text-black">
               {currentBsToday.year === bsYear && currentBsToday.month === bsMonth
                 ? currentBsToday.day
                 : "BS"}
             </span>
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-extrabold font-display leading-tight">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2.5">
+              <h2 className="text-lg sm:text-2xl font-bold font-display text-foreground leading-tight whitespace-nowrap">
                 {currentMonthInfo.name} {bsYear}
-              </h1>
-              <span className="text-xs px-2 py-0.5 rounded-md bg-accent/10 text-accent font-bold">
+              </h2>
+              <span className="text-[11px] sm:text-xs px-2 sm:px-2.5 py-0.5 rounded-full bg-neutral-200 dark:bg-neutral-800 text-black dark:text-neutral-100 border border-neutral-300 dark:border-neutral-700 font-bold shadow-2xs whitespace-nowrap shrink-0 inline-block">
                 {currentMonthInfo.nepaliName} {bsYear}
               </span>
             </div>
-            <p className="text-xs text-muted font-bold tracking-wider uppercase mt-1">
+            <p className="text-[11px] sm:text-xs text-muted font-medium mt-0.5 sm:mt-1 truncate">
               {viewMode === "month"
                 ? `Nepali Calendar • ${daysInBsMonth} Days`
                 : `${weekStartBs.monthName} ${weekStartBs.bsDay} – ${weekEndBs.monthName} ${weekEndBs.bsDay}, ${weekEndBs.bsYear} BS`}
@@ -341,49 +344,49 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
         </div>
 
         {/* Center: Navigation Controls & Mode Switcher */}
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center justify-between sm:justify-start gap-2.5 sm:gap-3 w-full xl:w-auto">
           {/* View Switcher: Month / Week */}
-          <div className="flex items-center bg-muted/20 border border-border/80 p-1 rounded-xl">
+          <div className="flex items-center bg-muted/20 border border-border/80 p-1 rounded-xl shrink-0">
             <button
               onClick={() => setViewMode("month")}
-              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+              className={`px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs font-bold rounded-lg transition-all ${
                 viewMode === "month"
                   ? "bg-card text-foreground shadow-sm"
                   : "text-muted hover:text-foreground"
               }`}
             >
-              Month (मासिक)
+              Month <span className="hidden sm:inline">(मासिक)</span>
             </button>
             <button
               onClick={() => setViewMode("week")}
-              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+              className={`px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs font-bold rounded-lg transition-all ${
                 viewMode === "week"
                   ? "bg-card text-foreground shadow-sm"
                   : "text-muted hover:text-foreground"
               }`}
             >
-              Week (साप्ताहिक)
+              Week <span className="hidden sm:inline">(साप्ताहिक)</span>
             </button>
           </div>
 
           {/* Month / Week Nav buttons */}
-          <div className="flex items-center gap-1 bg-muted/20 border border-border/80 p-1 rounded-xl">
+          <div className="flex items-center gap-1 bg-muted/20 border border-border/80 p-1 rounded-xl shrink-0">
             <button
               onClick={handlePrev}
-              className="p-1.5 rounded-lg hover:bg-card text-muted hover:text-foreground transition-all"
+              className="p-1 sm:p-1.5 rounded-lg hover:bg-card text-muted hover:text-foreground transition-all"
               aria-label="Previous"
             >
               <ChevronLeft size={16} />
             </button>
             <button
               onClick={handleGoToday}
-              className="px-3 py-1.5 text-xs font-bold rounded-lg bg-card text-foreground shadow-sm hover:bg-muted/10 transition-all"
+              className="px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs font-bold rounded-lg bg-card text-foreground shadow-sm hover:bg-muted/10 transition-all"
             >
               Today
             </button>
             <button
               onClick={handleNext}
-              className="p-1.5 rounded-lg hover:bg-card text-muted hover:text-foreground transition-all"
+              className="p-1 sm:p-1.5 rounded-lg hover:bg-card text-muted hover:text-foreground transition-all"
               aria-label="Next"
             >
               <ChevronRight size={16} />
@@ -427,25 +430,26 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
             placeholder="Search Nepali calendar events..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold"
+            className="w-full pl-10 pr-4 py-2 sm:py-2.5 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold placeholder:text-muted/60"
           />
         </div>
       </div>
 
       {/* VIEW 1: NEPALI MONTH VIEW (FULL 7-COLUMN BS GRID) */}
       {viewMode === "month" && (
-        <div className="bg-card border border-border/80 rounded-2xl shadow-sm overflow-hidden">
+        <div className="bg-card border border-border/80 rounded-[28px] shadow-xs overflow-hidden">
           {/* Weekday Headers */}
           <div className="grid grid-cols-7 border-b border-border/70 bg-muted/10">
             {NEPALI_DAYS.map((d, idx) => (
               <div
                 key={d.short}
-                className={`py-3 px-2 text-center border-r last:border-r-0 border-border/40 ${
+                className={`py-2 sm:py-3 px-1 sm:px-2 text-center border-r last:border-r-0 border-border/40 ${
                   idx === 6 ? "bg-amber-500/5 text-amber-600 dark:text-amber-400" : "text-muted"
                 }`}
               >
-                <span className="text-xs font-extrabold uppercase tracking-wider block">{d.name}</span>
-                <span className="text-[10px] font-bold opacity-80 block">{d.nepaliShort}</span>
+                <span className="text-xs font-extrabold uppercase tracking-wider hidden sm:block">{d.name}</span>
+                <span className="text-[10px] font-extrabold uppercase tracking-wider sm:hidden">{d.short}</span>
+                <span className="text-[9px] sm:text-[10px] font-bold opacity-80 block mt-0.5">{d.nepaliShort}</span>
               </div>
             ))}
           </div>
@@ -456,7 +460,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
             {Array.from({ length: firstDayOfWeekBsMonth }).map((_, i) => (
               <div
                 key={`empty-${i}`}
-                className="min-h-[90px] sm:min-h-[115px] border-b border-r border-border/30 bg-muted/5 opacity-30"
+                className="min-h-[62px] sm:min-h-[92px] lg:min-h-[105px] xl:min-h-[115px] border-b border-r border-border/30 bg-muted/5 opacity-30"
               />
             ))}
 
@@ -479,14 +483,21 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
               return (
                 <div
                   key={`day-${day}`}
-                  className={`min-h-[90px] sm:min-h-[115px] p-2 border-b border-r border-border/40 flex flex-col justify-between transition-colors group relative ${
+                  onClick={() => {
+                    if (dayEvents.length > 0) {
+                      setSelectedDayEvents({ day, events: dayEvents });
+                    }
+                  }}
+                  className={`min-h-[62px] sm:min-h-[92px] lg:min-h-[105px] xl:min-h-[115px] p-1.5 sm:p-2.5 border-b border-r border-border/40 flex flex-col justify-between transition-colors group relative ${
                     isSaturday ? "bg-amber-500/[0.02]" : "bg-card"
-                  } ${isToday ? "bg-accent/5 ring-1 ring-inset ring-accent/30" : "hover:bg-muted/10"}`}
+                  } ${isToday ? "bg-accent/5 ring-1 ring-inset ring-accent/30" : "hover:bg-muted/10"} ${
+                    dayEvents.length > 0 ? "cursor-pointer sm:cursor-default" : ""
+                  }`}
                 >
                   {/* Day Header */}
-                  <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center justify-between">
                     <span
-                      className={`text-xs font-black px-1.5 py-0.5 rounded-md ${
+                      className={`text-[11px] sm:text-xs font-black px-1 sm:px-1.5 py-0.5 rounded-md ${
                         isToday
                           ? "bg-accent text-white"
                           : isSaturday
@@ -499,33 +510,71 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
                     {dayEvents.length > 0 && (
                       <button
                         type="button"
-                        onClick={() => setSelectedDayEvents({ day, events: dayEvents })}
-                        className="text-[10px] font-extrabold text-muted hover:text-foreground bg-muted/20 px-1.5 py-0.5 rounded-md transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedDayEvents({ day, events: dayEvents });
+                        }}
+                        className="hidden sm:inline-block text-[10px] font-extrabold text-muted hover:text-foreground bg-muted/20 px-1.5 py-0.5 rounded-md transition-colors"
                       >
                         {dayEvents.length} {dayEvents.length === 1 ? "item" : "items"}
                       </button>
                     )}
                   </div>
 
-                  {/* Day Events Stack */}
-                  <div className="space-y-1 overflow-y-auto max-h-[85px] no-scrollbar">
-                    {dayEvents.slice(0, 3).map((ev) => (
+                  {/* Mobile View: Clean compact indicators without clutter (< sm) */}
+                  <div className="sm:hidden flex flex-col items-center justify-center gap-1 my-auto">
+                    {dayEvents.length > 0 && (
+                      <div className="flex items-center gap-0.5 justify-center flex-wrap max-w-full">
+                        {dayEvents.slice(0, 3).map((ev) => (
+                          <span
+                            key={ev.id}
+                            className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                              ev.type === "task"
+                                ? "bg-blue-500"
+                                : ev.type === "order"
+                                ? "bg-emerald-500"
+                                : ev.type === "field-note"
+                                ? "bg-amber-500"
+                                : ev.type === "expense"
+                                ? "bg-red-500"
+                                : "bg-purple-500"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    )}
+                    {dayEvents.length > 0 && (
+                      <span className="text-[9px] font-black px-1 rounded-full bg-muted/40 text-foreground">
+                        {dayEvents.length}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Desktop View: Rich Day Events Stack (>= sm) */}
+                  <div className="hidden sm:block space-y-1 overflow-y-auto max-h-[75px] no-scrollbar">
+                    {dayEvents.slice(0, 2).map((ev) => (
                       <div
                         key={ev.id}
-                        onClick={() => setSelectedEvent(ev)}
-                        className={`px-1.5 py-1 rounded-lg text-[10px] font-bold border truncate cursor-pointer transition-transform hover:scale-[1.02] shadow-xs ${ev.colorClass}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedEvent(ev);
+                        }}
+                        className={`px-1.5 py-0.5 rounded-lg text-[10px] font-bold border truncate cursor-pointer transition-transform hover:scale-[1.02] shadow-xs ${ev.colorClass}`}
                         title={`${ev.title}\n${ev.description}`}
                       >
                         {ev.title}
                       </div>
                     ))}
-                    {dayEvents.length > 3 && (
+                    {dayEvents.length > 2 && (
                       <button
                         type="button"
-                        onClick={() => setSelectedDayEvents({ day, events: dayEvents })}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedDayEvents({ day, events: dayEvents });
+                        }}
                         className="text-[9px] font-bold text-accent hover:underline block w-full text-left pt-0.5"
                       >
-                        +{dayEvents.length - 3} more...
+                        +{dayEvents.length - 2} more...
                       </button>
                     )}
                   </div>
@@ -538,105 +587,118 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
 
       {/* VIEW 2: NEPALI WEEK TIMETABLE VIEW */}
       {viewMode === "week" && (
-        <div className="bg-card border border-border/80 rounded-2xl shadow-sm overflow-hidden flex flex-col">
-          {/* Header Row: Days of Week */}
-          <div className="grid grid-cols-8 border-b border-border/70 bg-muted/10 sticky top-0 z-20">
-            {/* Time Column Header */}
-            <div className="py-3 px-2 text-center border-r border-border/40 text-muted font-bold text-xs flex items-center justify-center">
-              <Clock size={15} />
-            </div>
-
-            {weekDays.map((d) => {
-              const isSaturday = d.dayOfWeek === 6;
-              const isToday =
-                currentBsToday.year === d.bsYear &&
-                currentBsToday.month === d.bsMonth &&
-                currentBsToday.day === d.bsDay;
-
-              return (
-                <div
-                  key={d.dayOfWeek}
-                  className={`py-3 px-2 text-center border-r last:border-r-0 border-border/40 ${
-                    isSaturday ? "bg-amber-500/5 text-amber-600 dark:text-amber-400" : "text-muted"
-                  } ${isToday ? "bg-accent/5 font-black" : ""}`}
-                >
-                  <span className="text-[11px] font-extrabold uppercase tracking-wider block">
-                    {NEPALI_DAYS[d.dayOfWeek].name}
-                  </span>
-                  <div className="flex items-center justify-center gap-1 mt-0.5">
-                    <span
-                      className={`text-xs font-black px-1.5 py-0.5 rounded-md ${
-                        isToday ? "bg-accent text-white" : "text-foreground"
-                      }`}
-                    >
-                      {d.bsDay}
-                    </span>
-                    <span className="text-[10px] text-muted font-bold">{d.monthName}</span>
-                  </div>
-                </div>
-              );
-            })}
+        <div className="bg-card border border-border/80 rounded-[28px] shadow-xs overflow-hidden flex flex-col">
+          {/* Mobile Swipe Hint */}
+          <div className="sm:hidden flex items-center justify-between px-4 py-2 border-b border-border/60 bg-muted/5 text-[11px] font-bold text-muted">
+            <span>← Swipe horizontally across days →</span>
+            <span className="text-accent font-extrabold">7 Days</span>
           </div>
 
-          {/* Week Hours Grid */}
-          <div className="relative overflow-y-auto max-h-[600px]">
-            {/* Red Live Tracker Line */}
-            {isRedLineVisible && (
-              <div
-                className="absolute left-[12.5%] right-0 border-t-2 border-red-500 z-30 pointer-events-none flex items-center shadow-sm"
-                style={{ top: `${redLineTop}px` }}
-              >
-                <span className="h-2.5 w-2.5 rounded-full bg-red-500 -ml-1.5 ring-2 ring-white dark:ring-zinc-900" />
-                <span className="bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-md ml-1 shadow-sm">
-                  NOW
-                </span>
-              </div>
-            )}
-
-            {hours.map((hour) => (
-              <div
-                key={hour}
-                className="grid grid-cols-8 border-b border-border/40"
-                style={{ height: `${ROW_HEIGHT}px` }}
-              >
-                {/* Hour Label */}
-                <div className="border-r border-border/40 p-2 text-right text-[11px] font-bold text-muted select-none flex items-start justify-end">
-                  {formatHour(hour)}
+          <div className="overflow-x-auto select-none touch-pan-x no-scrollbar md:overflow-x-visible">
+            <div className="min-w-[680px] md:min-w-full">
+              {/* Header Row: Days of Week */}
+              <div className="grid grid-cols-8 border-b border-border/70 bg-muted/10 sticky top-0 z-20">
+                {/* Time Column Header (sticky left on horizontal scroll) */}
+                <div className="py-3 px-2 text-center border-r border-border/40 text-muted font-bold text-xs flex items-center justify-center sticky left-0 z-30 bg-muted/95 backdrop-blur-xs">
+                  <Clock size={15} />
                 </div>
 
-                {/* 7 Day Slot Cells */}
                 {weekDays.map((d) => {
-                  // Find events matching this BS date and hour
-                  const slotEvents = filteredEvents.filter(
-                    (ev) =>
-                      ev.bsYear === d.bsYear &&
-                      ev.bsMonth === d.bsMonth &&
-                      ev.bsDay === d.bsDay &&
-                      ev.displayHour === hour
-                  );
+                  const isSaturday = d.dayOfWeek === 6;
+                  const isToday =
+                    currentBsToday.year === d.bsYear &&
+                    currentBsToday.month === d.bsMonth &&
+                    currentBsToday.day === d.bsDay;
 
                   return (
                     <div
-                      key={`${d.dayOfWeek}-${hour}`}
-                      className={`border-r last:border-r-0 border-border/30 p-1 relative group hover:bg-muted/10 transition-colors ${
-                        d.dayOfWeek === 6 ? "bg-amber-500/[0.02]" : ""
-                      }`}
+                      key={d.dayOfWeek}
+                      className={`py-3 px-2 text-center border-r last:border-r-0 border-border/40 ${
+                        isSaturday ? "bg-amber-500/5 text-amber-600 dark:text-amber-400" : "text-muted"
+                      } ${isToday ? "bg-accent/5 font-black" : ""}`}
                     >
-                      {slotEvents.map((ev) => (
-                        <div
-                          key={ev.id}
-                          onClick={() => setSelectedEvent(ev)}
-                          className={`p-1.5 rounded-lg border text-[10px] font-bold cursor-pointer truncate shadow-xs transition-transform hover:scale-[1.02] mb-1 ${ev.colorClass}`}
-                          title={`${ev.title}\n${ev.description}`}
+                      <span className="text-[11px] font-extrabold uppercase tracking-wider hidden sm:block">
+                        {NEPALI_DAYS[d.dayOfWeek].name}
+                      </span>
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider block sm:hidden">
+                        {NEPALI_DAYS[d.dayOfWeek].short}
+                      </span>
+                      <div className="flex items-center justify-center gap-1 mt-0.5">
+                        <span
+                          className={`text-xs font-black px-1.5 py-0.5 rounded-md ${
+                            isToday ? "bg-accent text-white" : "text-foreground"
+                          }`}
                         >
-                          {ev.title}
-                        </div>
-                      ))}
+                          {d.bsDay}
+                        </span>
+                        <span className="text-[10px] text-muted font-bold">{d.monthName}</span>
+                      </div>
                     </div>
                   );
                 })}
               </div>
-            ))}
+
+              {/* Week Hours Grid */}
+              <div className="relative overflow-y-auto max-h-[520px]">
+                {/* Red Live Tracker Line */}
+                {isRedLineVisible && (
+                  <div
+                    className="absolute left-[12.5%] right-0 border-t-2 border-red-500 z-20 pointer-events-none flex items-center shadow-sm"
+                    style={{ top: `${redLineTop}px` }}
+                  >
+                    <span className="h-2.5 w-2.5 rounded-full bg-red-500 -ml-1.5 ring-2 ring-white dark:ring-zinc-900" />
+                    <span className="bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-md ml-1 shadow-sm">
+                      NOW
+                    </span>
+                  </div>
+                )}
+
+                {hours.map((hour) => (
+                  <div
+                    key={hour}
+                    className="grid grid-cols-8 border-b border-border/40"
+                    style={{ height: `${ROW_HEIGHT}px` }}
+                  >
+                    {/* Hour Label (sticky left on horizontal scroll) */}
+                    <div className="border-r border-border/40 p-2 text-right text-[11px] font-bold text-muted select-none flex items-start justify-end sticky left-0 z-10 bg-card/95 backdrop-blur-xs">
+                      {formatHour(hour)}
+                    </div>
+
+                    {/* 7 Day Slot Cells */}
+                    {weekDays.map((d) => {
+                      // Find events matching this BS date and hour
+                      const slotEvents = filteredEvents.filter(
+                        (ev) =>
+                          ev.bsYear === d.bsYear &&
+                          ev.bsMonth === d.bsMonth &&
+                          ev.bsDay === d.bsDay &&
+                          ev.displayHour === hour
+                      );
+
+                      return (
+                        <div
+                          key={`${d.dayOfWeek}-${hour}`}
+                          className={`border-r last:border-r-0 border-border/30 p-1 relative group hover:bg-muted/10 transition-colors ${
+                            d.dayOfWeek === 6 ? "bg-amber-500/[0.02]" : ""
+                          }`}
+                        >
+                          {slotEvents.map((ev) => (
+                            <div
+                              key={ev.id}
+                              onClick={() => setSelectedEvent(ev)}
+                              className={`p-1.5 rounded-lg border text-[10px] font-bold cursor-pointer truncate shadow-xs transition-transform hover:scale-[1.02] mb-1 ${ev.colorClass}`}
+                              title={`${ev.title}\n${ev.description}`}
+                            >
+                              {ev.title}
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -644,14 +706,14 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
       {/* EVENT DETAILS MODAL */}
       {selectedEvent && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-card border border-border rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+          <div className="bg-card border border-border/80 rounded-[28px] max-w-md w-full p-6 sm:p-7 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between border-b border-border/60 pb-3">
-              <span className={`px-2.5 py-1 rounded-lg text-xs font-black uppercase ${selectedEvent.badgeClass}`}>
+              <span className={`px-2.5 py-1 rounded-full text-xs font-black uppercase ${selectedEvent.badgeClass}`}>
                 {selectedEvent.type.replace("-", " ")}
               </span>
               <button
                 onClick={() => setSelectedEvent(null)}
-                className="p-1 rounded-lg hover:bg-muted/20 text-muted hover:text-foreground transition-colors"
+                className="p-1.5 rounded-xl hover:bg-muted/20 text-muted hover:text-foreground transition-colors"
               >
                 <X size={18} />
               </button>
@@ -664,7 +726,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
               </p>
             </div>
 
-            <div className="p-3.5 bg-muted/15 rounded-xl border border-border/60 text-xs font-medium text-foreground whitespace-pre-line leading-relaxed">
+            <div className="p-4 bg-muted/15 rounded-2xl border border-border/60 text-xs font-medium text-foreground whitespace-pre-line leading-relaxed">
               {selectedEvent.description}
             </div>
 
@@ -679,14 +741,15 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
                   if (selectedEvent.type === "sale") setCurrentTab("sales");
                   setSelectedEvent(null);
                 }}
-                className="px-4 py-2 bg-accent text-white font-bold rounded-xl text-xs hover:bg-accent/90 transition-all shadow-sm"
+                style={{ background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)" }}
+                className="px-4 py-2.5 text-black font-bold rounded-xl text-xs hover:opacity-95 transition-all shadow-xs"
               >
                 Go to {selectedEvent.type.replace("-", " ")} Tab
               </button>
               <button
                 type="button"
                 onClick={() => setSelectedEvent(null)}
-                className="px-4 py-2 border border-border bg-card text-foreground font-bold rounded-xl text-xs hover:bg-muted/20 transition-all"
+                className="px-4 py-2.5 border border-border/80 bg-card text-foreground font-bold rounded-xl text-xs hover:bg-muted/20 transition-all"
               >
                 Close
               </button>
@@ -698,7 +761,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
       {/* DAY EVENTS LIST MODAL */}
       {selectedDayEvents && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-card border border-border rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+          <div className="bg-card border border-border/80 rounded-[28px] max-w-lg w-full p-6 sm:p-7 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between border-b border-border/60 pb-3">
               <div>
                 <h3 className="text-base font-extrabold text-foreground">
@@ -710,7 +773,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
               </div>
               <button
                 onClick={() => setSelectedDayEvents(null)}
-                className="p-1 rounded-lg hover:bg-muted/20 text-muted hover:text-foreground transition-colors"
+                className="p-1.5 rounded-xl hover:bg-muted/20 text-muted hover:text-foreground transition-colors"
               >
                 <X size={18} />
               </button>
@@ -724,18 +787,18 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
                     setSelectedDayEvents(null);
                     setSelectedEvent(ev);
                   }}
-                  className={`p-3 rounded-xl border text-xs cursor-pointer transition-all hover:scale-[1.01] ${ev.colorClass}`}
+                  className={`p-3 rounded-2xl border text-xs cursor-pointer transition-all hover:scale-[1.01] ${ev.colorClass}`}
                 >
                   <div className="flex items-center justify-between mb-1">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${ev.badgeClass}`}>
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${ev.badgeClass}`}>
                       {ev.type}
                     </span>
-                    <span className="text-[10px] font-bold text-muted">
+                    <span className="text-[10px] font-bold opacity-80">
                       {formatNepaliWithTime(ev.date).split("at ")[1] || ""}
                     </span>
                   </div>
                   <h4 className="font-bold text-sm text-foreground">{ev.title}</h4>
-                  <p className="text-[11px] text-muted mt-1 truncate">{ev.description}</p>
+                  <p className="text-[11px] opacity-80 mt-1 truncate">{ev.description}</p>
                 </div>
               ))}
             </div>
@@ -744,7 +807,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ setCurrentTab }) => {
               <button
                 type="button"
                 onClick={() => setSelectedDayEvents(null)}
-                className="px-4 py-2 border border-border bg-card text-foreground font-bold rounded-xl text-xs hover:bg-muted/20 transition-all"
+                className="px-4 py-2.5 border border-border/80 bg-card text-foreground font-bold rounded-xl text-xs hover:bg-muted/20 transition-all"
               >
                 Close
               </button>

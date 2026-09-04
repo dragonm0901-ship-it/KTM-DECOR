@@ -70,18 +70,21 @@ export const StatementPreviewModal: React.FC<StatementPreviewModalProps> = ({
         }
       `}</style>
 
-      <div className="bg-card w-full max-w-4xl rounded-2xl border border-border/80 shadow-2xl animate-scale-up my-4 max-h-[calc(100dvh-32px)] sm:max-h-[95vh] flex flex-col overflow-hidden">
+      <div className="bg-card w-full max-w-4xl rounded-[28px] border border-border/80 shadow-2xl animate-scale-up my-4 max-h-[calc(100dvh-32px)] sm:max-h-[95vh] flex flex-col overflow-hidden">
         {/* Modal Controls (Screen Only) */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-card/80 backdrop-blur-md screen-only">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-accent/10 text-accent">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border/60 bg-card/80 backdrop-blur-md screen-only">
+          <div className="flex items-center gap-3">
+            <div
+              style={{ background: "linear-gradient(135deg, #60A5FA 0%, #3B82F6 50%, #1D4ED8 100%)" }}
+              className="p-2 text-white rounded-xl shadow-xs shrink-0"
+            >
               <FileText size={18} />
             </div>
             <div>
               <h2 className="text-sm font-bold text-foreground">
                 {data ? getDocTitle(data.type) : "Financial Statement Preview"}
               </h2>
-              <p className="text-[11px] text-muted">
+              <p className="text-[11px] text-muted font-medium">
                 {data ? `Period: ${data.cleanPeriodLabel} (BS)` : "Loading statement..."}
               </p>
             </div>
@@ -91,7 +94,7 @@ export const StatementPreviewModal: React.FC<StatementPreviewModalProps> = ({
             {onDownloadCsv && (
               <button
                 onClick={onDownloadCsv}
-                className="flex items-center gap-1.5 py-1.5 px-3 rounded-lg border border-border bg-background hover:bg-accent/[0.05] hover:border-accent/30 text-xs font-semibold text-foreground transition-colors"
+                className="flex items-center gap-1.5 py-1.5 px-3 rounded-xl border border-border/80 bg-background hover:bg-muted/20 text-xs font-bold text-foreground transition-all shadow-2xs"
                 title="Download CSV file"
               >
                 <Download size={14} className="text-accent" />
@@ -102,7 +105,8 @@ export const StatementPreviewModal: React.FC<StatementPreviewModalProps> = ({
             <button
               onClick={handlePrint}
               disabled={loading || !data}
-              className="flex items-center gap-1.5 py-1.5 px-4 bg-[#FE914C] hover:bg-[#E2752D] text-white rounded-lg text-xs font-bold transition-all shadow-sm active:scale-95 disabled:opacity-50"
+              style={{ background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)" }}
+              className="flex items-center gap-1.5 py-1.5 px-4 text-black rounded-xl text-xs font-bold transition-all shadow-md shadow-orange-500/15 active:scale-95 disabled:opacity-50 hover:opacity-95"
             >
               <Printer size={14} />
               <span>Print / Save PDF</span>
@@ -110,7 +114,7 @@ export const StatementPreviewModal: React.FC<StatementPreviewModalProps> = ({
 
             <button
               onClick={onClose}
-              className="p-1.5 text-muted hover:text-foreground rounded-lg hover:bg-muted/10 transition-colors ml-1"
+              className="p-1.5 text-muted hover:text-foreground rounded-xl hover:bg-muted/20 transition-all ml-1"
             >
               <X size={18} />
             </button>

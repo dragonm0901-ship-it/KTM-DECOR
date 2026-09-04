@@ -403,15 +403,22 @@ export const QuotationTab: React.FC = () => {
       `}</style>
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-card p-5 rounded-2xl border border-border/80 shadow-sm">
-        <div>
-          <h1 className="text-2xl font-bold font-display flex items-center gap-2">
-            <FileText className="text-accent" />
-            Quotations Manager
-          </h1>
-          <p className="text-xs text-muted mt-1">
-            Build, print, and send formal price estimations for custom neon designs and backlit signs.
-          </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-card p-5 sm:p-6 rounded-[28px] border border-border/80 shadow-xs">
+        <div className="flex items-center gap-3.5">
+          <div
+            style={{ background: "linear-gradient(135deg, #60A5FA 0%, #3B82F6 50%, #1D4ED8 100%)" }}
+            className="p-3 text-white rounded-2xl shadow-md shadow-blue-500/20 shrink-0"
+          >
+            <FileText size={22} />
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold font-display text-foreground leading-tight">
+              Quotations Manager
+            </h1>
+            <p className="text-xs text-muted font-medium mt-0.5">
+              Build, print, and send formal price estimations for custom neon designs and backlit signs.
+            </p>
+          </div>
         </div>
 
         <button
@@ -436,7 +443,7 @@ export const QuotationTab: React.FC = () => {
           style={{
             background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
           }}
-          className="flex items-center justify-center gap-1.5 py-2.5 px-4 text-black rounded-xl font-bold text-xs transition-all shadow-md shadow-orange-500/20 hover:scale-[1.02] active:scale-95 self-start sm:self-auto cursor-pointer"
+          className="flex items-center justify-center gap-1.5 py-2.5 px-5 text-black rounded-2xl font-bold text-xs transition-all shadow-md shadow-orange-500/20 hover:scale-[1.02] active:scale-95 self-start sm:self-auto cursor-pointer h-10"
         >
           <Plus size={16} />
           Create Quotation
@@ -444,41 +451,50 @@ export const QuotationTab: React.FC = () => {
       </div>
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="bg-card border border-border/80 shadow-sm p-5 rounded-2xl flex items-center gap-4">
-          <div className="h-12 w-12 rounded-lg bg-accent flex items-center justify-center text-white flex-shrink-0 shadow-sm">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        <div className="bg-card border border-border/80 shadow-xs p-6 rounded-[28px] flex items-center gap-4 hover:shadow-md transition-all">
+          <div
+            style={{ background: "linear-gradient(135deg, #60A5FA 0%, #3B82F6 50%, #1D4ED8 100%)" }}
+            className="h-12 w-12 rounded-2xl text-white flex items-center justify-center flex-shrink-0 shadow-md shadow-blue-500/20"
+          >
             <FileText size={22} />
           </div>
           <div>
             <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Total Generated</span>
-            <h3 className="text-lg font-bold mt-1 text-foreground font-display">{quotations.length} Estimations</h3>
-            <p className="text-[9px] text-muted mt-0.5">Quotations & proposals</p>
+            <h3 className="text-xl font-bold mt-1 text-foreground font-display">{quotations.length} Estimations</h3>
+            <p className="text-[10px] text-muted mt-0.5 font-medium">Quotations & proposals</p>
           </div>
         </div>
 
-        <div className="bg-card border border-border/80 shadow-sm p-5 rounded-2xl flex items-center gap-4">
-          <div className="h-12 w-12 rounded-lg bg-green-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
+        <div className="bg-card border border-border/80 shadow-xs p-6 rounded-[28px] flex items-center gap-4 hover:shadow-md transition-all">
+          <div
+            style={{ background: "linear-gradient(135deg, #34D399 0%, #10B981 50%, #059669 100%)" }}
+            className="h-12 w-12 rounded-2xl text-white flex items-center justify-center flex-shrink-0 shadow-md shadow-emerald-500/20"
+          >
             <CheckCircle size={22} />
           </div>
           <div>
             <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Accepted Quotes</span>
-            <h3 className="text-lg font-bold mt-1 text-green-500 font-display">
+            <h3 className="text-xl font-bold mt-1 text-green-500 font-display">
               {quotations.filter((q) => q.status === "accepted").length} Approved
             </h3>
-            <p className="text-[9px] text-muted mt-0.5">Converted to active pipeline</p>
+            <p className="text-[10px] text-muted mt-0.5 font-medium">Converted to active pipeline</p>
           </div>
         </div>
 
-        <div className="bg-card border border-border/80 shadow-sm p-5 rounded-2xl flex items-center gap-4">
-          <div className="h-12 w-12 rounded-lg bg-blue-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
+        <div className="bg-card border border-border/80 shadow-xs p-6 rounded-[28px] flex items-center gap-4 hover:shadow-md transition-all">
+          <div
+            style={{ background: "linear-gradient(135deg, #FBBF24 0%, #F59E0B 50%, #D97706 100%)" }}
+            className="h-12 w-12 rounded-2xl text-white flex items-center justify-center flex-shrink-0 shadow-md shadow-amber-500/20"
+          >
             <DollarSign size={22} />
           </div>
           <div>
             <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Total Value Proposed</span>
-            <h3 className="text-lg font-bold mt-1 text-foreground font-display">
+            <h3 className="text-xl font-bold mt-1 text-foreground font-display">
               Rs. {quotations.reduce((sum, q) => sum + q.grandTotal, 0).toLocaleString()}
             </h3>
-            <p className="text-[9px] text-muted mt-0.5">Value of all draft & sent quotes</p>
+            <p className="text-[10px] text-muted mt-0.5 font-medium">Value of all draft & sent quotes</p>
           </div>
         </div>
       </div>
@@ -605,15 +621,20 @@ export const QuotationTab: React.FC = () => {
       {/* Creation Modal */}
       {showCreateModal && (
         <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm pt-10 sm:pt-0 px-2 pb-6 sm:p-4 overflow-y-auto">
-          <div className="bg-card w-full max-w-4xl rounded-2xl border border-border/80 p-3 sm:p-6 shadow-2xl animate-scale-up mt-1 mb-4 sm:my-4 max-h-[40vh] sm:max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4 border-b border-border pb-2">
-              <h2 className="text-lg font-bold font-display flex items-center gap-2">
-                <FileText className="text-accent" />
+          <div className="bg-card w-full max-w-4xl rounded-[28px] border border-border/80 p-5 sm:p-7 shadow-2xl animate-scale-up mt-1 mb-4 sm:my-4 max-h-[85vh] sm:max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-5 border-b border-border/60 pb-3">
+              <h2 className="text-base sm:text-lg font-bold font-display flex items-center gap-2.5">
+                <div
+                  style={{ background: "linear-gradient(135deg, #60A5FA 0%, #3B82F6 50%, #1D4ED8 100%)" }}
+                  className="p-2 text-white rounded-xl shadow-xs shrink-0"
+                >
+                  <FileText size={18} />
+                </div>
                 {editingQuotationId ? "Edit Price Proposal Estimation" : "Generate Price Proposal Estimation"}
               </h2>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="text-muted hover:text-foreground"
+                className="text-muted hover:text-foreground p-1.5 rounded-xl hover:bg-muted/20 transition-all"
               >
                 <X size={20} />
               </button>
@@ -914,13 +935,18 @@ export const QuotationTab: React.FC = () => {
 
       {/* Invoice Estimations Printable PDF Preview Modal */}
       {selectedQuotation && (
-        <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4 overflow-y-auto">
-          <div className="bg-card w-full max-w-3xl rounded-2xl border border-border/80 p-3 sm:p-6 shadow-2xl animate-scale-up my-4 max-h-[calc(100dvh-32px)] sm:max-h-[95vh] overflow-y-auto">
+        <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4 pt-16 sm:p-4 overflow-y-auto">
+          <div className="bg-card w-full max-w-3xl rounded-[28px] border border-border/80 p-5 sm:p-7 shadow-2xl animate-scale-up my-4 max-h-[calc(100dvh-32px)] sm:max-h-[95vh] overflow-y-auto">
             
             {/* Modal Controls */}
-            <div className="flex items-center justify-between mb-4 border-b border-border pb-2 screen-only">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-muted flex items-center gap-1.5">
-                <FileText size={16} />
+            <div className="flex items-center justify-between mb-4 border-b border-border/60 pb-3 screen-only">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-muted flex items-center gap-2">
+                <div
+                  style={{ background: "linear-gradient(135deg, #60A5FA 0%, #3B82F6 50%, #1D4ED8 100%)" }}
+                  className="p-1.5 text-white rounded-lg shadow-xs shrink-0"
+                >
+                  <FileText size={14} />
+                </div>
                 Quotation Preview
               </h2>
               <div className="flex items-center gap-2">

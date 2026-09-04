@@ -309,15 +309,22 @@ export const PurchaseTab: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-card p-4 rounded-lg border border-border">
-        <div>
-          <h1 className="text-2xl font-bold font-display flex items-center gap-2">
-            <Briefcase className="text-accent" />
-            Purchases Tracker
-          </h1>
-          <p className="text-xs text-muted mt-1">
-            Log raw material stock orders, imports, and payments made to suppliers and vendors.
-          </p>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-card p-5 sm:p-6 rounded-[28px] border border-border/80 shadow-xs">
+        <div className="flex items-center gap-3.5">
+          <div
+            style={{ background: "linear-gradient(135deg, #60A5FA 0%, #3B82F6 50%, #1D4ED8 100%)" }}
+            className="p-3 text-white rounded-2xl shadow-md shadow-blue-500/20 shrink-0"
+          >
+            <Briefcase size={22} />
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold font-display text-foreground leading-tight">
+              Purchases Tracker
+            </h1>
+            <p className="text-xs text-muted font-medium mt-0.5">
+              Log raw material stock orders, imports, and payments made to suppliers and vendors.
+            </p>
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-3 self-start md:self-auto">
@@ -435,20 +442,23 @@ export const PurchaseTab: React.FC = () => {
         </div>
 
         {/* Outstanding Vendor Dues (Crisp Porcelain Card) */}
-        <div className="bg-card border border-border/80 shadow-sm hover:shadow-md transition-all p-6 rounded-[28px] flex items-center justify-between">
+        <div className="bg-card border border-border/80 shadow-xs hover:shadow-md transition-all p-6 rounded-[28px] flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-xs text-muted font-bold uppercase tracking-wider block">Outstanding Vendor Dues</span>
-            <h3 className="text-3xl sm:text-4xl font-semibold font-display text-red-500 leading-none mt-1">Rs. {pendingPurchases.toLocaleString()}</h3>
-            <p className="text-xs text-muted mt-1">{purchases.filter((p) => p.status === "pending").length} unpaid invoices</p>
+            <span className="text-[10px] text-muted font-bold uppercase tracking-wider block">Outstanding Vendor Dues</span>
+            <h3 className="text-3xl sm:text-4xl font-bold font-display text-red-500 leading-none mt-1">Rs. {pendingPurchases.toLocaleString()}</h3>
+            <p className="text-[10px] text-muted mt-1 font-medium">{purchases.filter((p) => p.status === "pending").length} unpaid invoices</p>
           </div>
-          <div className="p-3 bg-red-600 text-white rounded-2xl shadow-xs shrink-0">
-            <SlidersHorizontal size={24} className="rotate-90 text-white" />
+          <div
+            style={{ background: "linear-gradient(135deg, #F87171 0%, #EF4444 50%, #DC2626 100%)" }}
+            className="p-3 text-white rounded-2xl shadow-md shadow-red-500/20 shrink-0"
+          >
+            <SlidersHorizontal size={24} className="rotate-90" />
           </div>
         </div>
       </div>
 
       {/* Filter and Table */}
-      <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-5 flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="bg-card border border-border/80 rounded-[28px] shadow-xs p-5 flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="relative w-full md:w-80">
           <input
             type="text"
@@ -476,7 +486,7 @@ export const PurchaseTab: React.FC = () => {
       </div>
 
       {/* Purchases Table */}
-      <div className="bg-card border border-border/80 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-card border border-border/80 rounded-[28px] shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse min-w-[850px]">
             <thead>
@@ -621,16 +631,21 @@ export const PurchaseTab: React.FC = () => {
       </div>
 
       {showModal && (
-        <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4 overflow-y-auto">
-          <div className="bg-card w-full max-w-4xl rounded-2xl border border-border p-4 sm:p-6 shadow-2xl animate-scale-up max-h-[calc(100dvh-32px)] sm:max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4 border-b border-border pb-2">
-              <h2 className="text-lg font-bold font-display flex items-center gap-2">
-                <Briefcase className="text-accent" />
+        <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4 pt-16 sm:p-4 overflow-y-auto">
+          <div className="bg-card w-full max-w-4xl rounded-[28px] border border-border/80 p-5 sm:p-7 shadow-2xl animate-scale-up max-h-[85vh] sm:max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-5 border-b border-border/60 pb-3">
+              <h2 className="text-base sm:text-lg font-bold font-display flex items-center gap-2.5">
+                <div
+                  style={{ background: "linear-gradient(135deg, #60A5FA 0%, #3B82F6 50%, #1D4ED8 100%)" }}
+                  className="p-2 text-white rounded-xl shadow-xs shrink-0"
+                >
+                  <Briefcase size={18} />
+                </div>
                 {editingPurchase ? "Edit Purchase Invoice" : "Log Supplier Purchase"}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="text-muted hover:text-foreground"
+                className="text-muted hover:text-foreground p-1.5 rounded-xl hover:bg-muted/20 transition-all"
               >
                 <X size={20} />
               </button>

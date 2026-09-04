@@ -140,38 +140,38 @@ export const App: React.FC = () => {
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-accent/5 blur-3xl" />
 
         <div className="w-full max-w-sm md:max-w-lg z-10 space-y-8">
-          <div className="text-center space-y-4 flex flex-col items-center">
+          <div className="text-center space-y-3 flex flex-col items-center">
             <img
               src="/admin/logo/ktm%20decor.svg"
               alt="KTM DECOR"
-              className="h-20 w-auto object-contain dark:invert dark:hue-rotate-180 transition-transform duration-300 hover:scale-105"
+              className="h-16 md:h-20 w-auto object-contain dark:invert dark:hue-rotate-180 transition-transform duration-300 hover:scale-105"
             />
-            <p className="text-sm font-bold uppercase tracking-widest text-accent">
+            <span className="inline-block px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-neutral-200 dark:bg-neutral-800 text-black dark:text-neutral-100 border border-neutral-300 dark:border-neutral-700 shadow-2xs">
               Admin & Staff Work Station
-            </p>
+            </span>
           </div>
 
-          <div className="glass-panel p-6 md:p-12 rounded-2xl border border-border shadow-2xl space-y-8 bg-card/90 backdrop-blur-md">
-            <div className="space-y-2 text-center pb-2 border-b border-border/50">
-              <h2 className="text-2xl font-extrabold font-display text-foreground tracking-tight flex items-center justify-center gap-2.5">
-                <LogIn size={26} className="text-accent animate-pulse" />
+          <div className="p-7 sm:p-10 md:p-12 rounded-[32px] border border-border/80 shadow-2xl space-y-7 bg-card">
+            <div className="space-y-1.5 text-center pb-2">
+              <h2 className="text-2xl sm:text-3xl font-bold font-display text-foreground tracking-tight flex items-center justify-center gap-2.5">
+                <LogIn size={24} className="text-accent" />
                 Sign In
               </h2>
-              <p className="text-xs text-muted font-medium uppercase tracking-wider">
-                KTM DECOR Enterprise Work Station
+              <p className="text-xs text-muted font-medium">
+                Enter your credentials to access your daily workstation
               </p>
             </div>
 
             {loginError && (
-              <div className="p-4 text-xs bg-red-500/10 border border-red-500/20 text-red-500 rounded-lg font-bold flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-red-500 block shrink-0" />
+              <div className="p-3.5 text-xs bg-red-500/10 border border-red-500/25 text-red-500 rounded-2xl font-bold flex items-center gap-2.5 shadow-2xs">
+                <span className="w-2 h-2 rounded-full bg-red-500 block shrink-0" />
                 <span>{loginError}</span>
               </div>
             )}
 
-            <form onSubmit={handleLoginSubmit} className="space-y-6">
+            <form onSubmit={handleLoginSubmit} className="space-y-5">
               <div className="space-y-2">
-                <label className="block text-xs font-bold text-muted uppercase tracking-widest">
+                <label className="block text-xs font-bold text-muted uppercase tracking-wider">
                   Email Address
                 </label>
                 <div className="relative group">
@@ -183,7 +183,7 @@ export const App: React.FC = () => {
                     autoCapitalize="none"
                     autoCorrect="off"
                     spellCheck="false"
-                    className="w-full pl-12 pr-4 py-3.5 border border-border rounded-lg bg-background/50 focus:bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-base transition-all duration-200"
+                    className="w-full pl-12 pr-4 py-3.5 border border-border/80 rounded-2xl bg-background/60 focus:bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-sm transition-all duration-200 shadow-2xs"
                     placeholder="yourname@ktmdecor.com"
                     required
                   />
@@ -191,7 +191,7 @@ export const App: React.FC = () => {
               </div>
 
               <div className="space-y-2">
-                <label className="block text-xs font-bold text-muted uppercase tracking-widest">
+                <label className="block text-xs font-bold text-muted uppercase tracking-wider">
                   Password
                 </label>
                 <div className="relative group">
@@ -200,7 +200,7 @@ export const App: React.FC = () => {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3.5 border border-border rounded-lg bg-background/50 focus:bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-base transition-all duration-200"
+                    className="w-full pl-12 pr-4 py-3.5 border border-border/80 rounded-2xl bg-background/60 focus:bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-sm transition-all duration-200 shadow-2xs"
                     placeholder="••••••••"
                     required
                   />
@@ -208,7 +208,7 @@ export const App: React.FC = () => {
               </div>
 
               <div className="flex items-center justify-between text-xs pt-1">
-                <label className="flex items-center gap-2 cursor-pointer font-semibold text-muted hover:text-foreground select-none">
+                <label className="flex items-center gap-2 cursor-pointer font-medium text-muted hover:text-foreground select-none">
                   <input 
                     type="checkbox" 
                     className="w-4 h-4 rounded border-border text-accent focus:ring-accent/30 accent-accent cursor-pointer"
@@ -223,11 +223,14 @@ export const App: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 bg-accent hover:bg-accent-dark text-white rounded-lg font-bold text-base transition-all shadow-lg hover:shadow-accent/30 flex items-center justify-center gap-2 disabled:opacity-50 active:scale-[0.98]"
+                style={{
+                  background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
+                }}
+                className="w-full py-3.5 text-black font-bold rounded-2xl text-sm transition-all shadow-md shadow-orange-500/20 hover:opacity-95 flex items-center justify-center gap-2 disabled:opacity-50 active:scale-[0.98] cursor-pointer"
               >
                 {loading ? (
                   <>
-                    <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
                     <span>Authenticating...</span>
                   </>
                 ) : (

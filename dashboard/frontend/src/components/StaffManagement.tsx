@@ -812,32 +812,67 @@ export const StaffManagement: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* 1. BRAND HEADER */}
-      <div className="bg-card border border-border/80 p-5 rounded-2xl shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-black font-display text-foreground tracking-tight flex items-center gap-2">
-            <UserIcon className="text-accent animate-pulse" size={26} />
-            {isAdmin ? "Staff Management" : "Attendance"}
-          </h1>
-          <p className="text-xs text-muted font-bold uppercase tracking-wider mt-1">
-            {isAdmin ? "Company Payroll, Attendance Logs, & Staff Profiles" : `Attendance Log Dashboard • ${activeStaff?.name || "Staff"}`}
-          </p>
-        </div>
+      {/* 1. TOP CONTROLS & DATE SELECTOR */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        {/* Admin Navigation Tabs */}
+        {isAdmin ? (
+          <div className="flex flex-wrap items-center gap-1.5 bg-muted/20 border border-border/80 p-1 rounded-xl">
+            <button
+              onClick={() => setAdminTab("payroll")}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                adminTab === "payroll"
+                  ? "bg-card text-foreground shadow-xs"
+                  : "text-muted hover:text-foreground"
+              }`}
+            >
+              <DollarSign size={15} />
+              <span>Payroll & Roster</span>
+            </button>
+            <button
+              onClick={() => setAdminTab("calendar")}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                adminTab === "calendar"
+                  ? "bg-card text-foreground shadow-xs"
+                  : "text-muted hover:text-foreground"
+              }`}
+            >
+              <Calendar size={15} />
+              <span>Staff Calendars</span>
+            </button>
+            <button
+              onClick={() => setAdminTab("bulk")}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                adminTab === "bulk"
+                  ? "bg-card text-foreground shadow-xs"
+                  : "text-muted hover:text-foreground"
+              }`}
+            >
+              <PlusCircle size={15} />
+              <span>Bulk Attendance</span>
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <span className="text-xs px-3 py-1 rounded-full bg-neutral-200 dark:bg-neutral-800 text-black dark:text-neutral-100 border border-neutral-300 dark:border-neutral-700 font-bold shadow-2xs">
+              {activeStaff?.name || "Staff"}
+            </span>
+          </div>
+        )}
 
         {/* Global Month/Year selector */}
-        <div className="flex items-center gap-1.5 bg-muted/20 border border-border/80 p-1 rounded-xl w-full sm:w-auto">
+        <div className="flex items-center gap-1 bg-muted/20 border border-border/80 p-1 rounded-xl">
           <button
             onClick={handlePrevMonth}
-            className="p-2 rounded-lg hover:bg-card text-muted hover:text-foreground transition-all"
+            className="p-1.5 rounded-lg hover:bg-card text-muted hover:text-foreground transition-all"
             aria-label="Previous month"
           >
             <ChevronLeft size={16} />
           </button>
-          <div className="flex gap-2">
+          <div className="flex gap-1">
             <select
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-              className="px-2 py-1 bg-transparent text-xs font-bold text-foreground border-none cursor-pointer focus:outline-none"
+              className="px-2.5 py-1 bg-card rounded-lg text-xs font-bold text-foreground border border-border/60 cursor-pointer focus:outline-none shadow-2xs"
             >
               {months.map((m) => (
                 <option key={m.value} value={m.value} className="bg-card">
@@ -848,7 +883,7 @@ export const StaffManagement: React.FC = () => {
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-              className="px-2 py-1 bg-transparent text-xs font-bold text-foreground border-none cursor-pointer focus:outline-none"
+              className="px-2.5 py-1 bg-card rounded-lg text-xs font-bold text-foreground border border-border/60 cursor-pointer focus:outline-none shadow-2xs"
             >
               {years.map((y) => (
                 <option key={y} value={y} className="bg-card">
@@ -859,7 +894,7 @@ export const StaffManagement: React.FC = () => {
           </div>
           <button
             onClick={handleNextMonth}
-            className="p-2 rounded-lg hover:bg-card text-muted hover:text-foreground transition-all"
+            className="p-1.5 rounded-lg hover:bg-card text-muted hover:text-foreground transition-all"
             aria-label="Next month"
           >
             <ChevronRight size={16} />
@@ -872,14 +907,17 @@ export const StaffManagement: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Quick Check-In / Check-Out Widget */}
           <div className="lg:col-span-1 space-y-6">
-            <div className="glass-panel p-6 rounded-2xl border border-border bg-card/85 backdrop-blur shadow-sm space-y-6 text-center">
-              <h2 className="text-base font-bold font-display uppercase tracking-widest text-muted border-b border-border/50 pb-3">
+            <div className="p-6 rounded-[28px] border border-border/80 bg-card shadow-xs space-y-6 text-center">
+              <h2 className="text-xs font-extrabold uppercase tracking-widest text-muted border-b border-border/50 pb-3">
                 Today's Work Log
               </h2>
               
               <div className="py-4 space-y-3 flex flex-col items-center">
-                <div className="p-4 bg-muted/15 rounded-full border border-border/60">
-                  <Clock size={40} className="text-accent animate-pulse" />
+                <div
+                  style={{ background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)" }}
+                  className="p-4 text-black rounded-2xl shadow-md shadow-orange-500/20"
+                >
+                  <Clock size={36} className="animate-pulse" />
                 </div>
                 
                 {todayLog ? (
@@ -887,15 +925,15 @@ export const StaffManagement: React.FC = () => {
                     <span className="text-xs font-extrabold uppercase px-3 py-1 rounded-full bg-green-500/10 border border-green-500/25 text-green-500">
                       Logged Present
                     </span>
-                    <p className="text-[10px] text-muted font-semibold tracking-wide uppercase mt-2">
+                    <p className="text-[11px] text-muted font-semibold tracking-wide mt-2">
                       Check-In: {new Date(todayLog.checkIn || "").toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                     </p>
                     {todayLog.checkOut ? (
-                      <p className="text-[10px] text-muted font-semibold tracking-wide uppercase">
+                      <p className="text-[11px] text-muted font-semibold tracking-wide">
                         Check-Out: {new Date(todayLog.checkOut).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                       </p>
                     ) : (
-                      <p className="text-[10px] text-accent font-extrabold tracking-wide uppercase">
+                      <p className="text-[11px] text-accent font-extrabold tracking-wide">
                         On Duty (Not Checked Out)
                       </p>
                     )}
@@ -917,7 +955,8 @@ export const StaffManagement: React.FC = () => {
                 {!todayLog && (
                   <button
                     onClick={handleQuickCheckIn}
-                    className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold text-sm shadow-md hover:shadow-green-500/15 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                    style={{ background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)" }}
+                    className="w-full py-3 text-black rounded-2xl font-bold text-xs shadow-md shadow-orange-500/15 transition-all active:scale-[0.98] flex items-center justify-center gap-2 hover:opacity-95"
                   >
                     <CheckCircle2 size={18} />
                     <span>Check In for Today</span>
@@ -927,7 +966,8 @@ export const StaffManagement: React.FC = () => {
                 {todayLog && !todayLog.checkOut && (
                   <button
                     onClick={handleQuickCheckOut}
-                    className="w-full py-3 bg-accent hover:bg-accent-dark text-white rounded-xl font-bold text-sm shadow-md hover:shadow-accent/15 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                    style={{ background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)" }}
+                    className="w-full py-3 text-black rounded-2xl font-bold text-xs shadow-md shadow-orange-500/15 transition-all active:scale-[0.98] flex items-center justify-center gap-2 hover:opacity-95"
                   >
                     <Clock size={18} />
                     <span>Check Out (End Shift)</span>
@@ -935,7 +975,7 @@ export const StaffManagement: React.FC = () => {
                 )}
 
                 {todayLog && todayLog.checkOut && (
-                  <div className="py-2.5 bg-green-500/5 border border-green-500/15 rounded-xl text-green-500 text-xs font-bold flex items-center justify-center gap-2">
+                  <div className="py-2.5 bg-green-500/10 border border-green-500/20 rounded-2xl text-green-600 dark:text-green-400 text-xs font-bold flex items-center justify-center gap-2">
                     <CheckCircle2 size={16} />
                     Shift Completed Successfully
                   </div>
@@ -944,8 +984,8 @@ export const StaffManagement: React.FC = () => {
             </div>
 
             {/* User Payout Tracker Widget */}
-            <div className="glass-panel p-6 rounded-2xl border border-border bg-card/85 space-y-4">
-              <h2 className="text-base font-bold font-display uppercase tracking-widest text-muted border-b border-border/50 pb-3 text-center">
+            <div className="p-6 rounded-[28px] border border-border/80 bg-card shadow-xs space-y-4">
+              <h2 className="text-xs font-extrabold uppercase tracking-widest text-muted border-b border-border/50 pb-3 text-center">
                 Salary Overview
               </h2>
               {(() => {
@@ -996,7 +1036,7 @@ export const StaffManagement: React.FC = () => {
                       <span className="text-accent">{stats.workingDaysPercent.toFixed(1)}%</span>
                     </div>
 
-                    <div className="bg-muted/15 p-4 rounded-xl border border-border/60 flex justify-between items-center mt-4">
+                    <div className="bg-muted/15 p-4 rounded-2xl border border-border/60 flex justify-between items-center mt-4">
                       <div className="text-left">
                         <p className="text-[10px] text-muted font-extrabold uppercase tracking-widest">
                           {salaryRecord ? "Official Payout" : "Estimated Payout"}
@@ -1005,7 +1045,7 @@ export const StaffManagement: React.FC = () => {
                           Rs. {salaryRecord ? salaryRecord.finalSalary.toLocaleString() : Math.max(0, Math.round(calculatedSalary)).toLocaleString()}
                         </p>
                       </div>
-                      <span className={`text-[10px] font-bold px-2.5 py-1.5 rounded-lg border shadow-sm uppercase tracking-wider ${
+                      <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border shadow-2xs uppercase tracking-wider ${
                         salaryRecord
                           ? salaryRecord.status === "paid"
                             ? "bg-green-500/10 text-green-500 border-green-500/20"
@@ -1021,7 +1061,7 @@ export const StaffManagement: React.FC = () => {
                     </div>
 
                     {salaryRecord?.notes && (
-                      <div className="bg-muted/5 p-3 rounded-xl border border-border/50 text-[11px] text-muted italic">
+                      <div className="bg-muted/10 p-3 rounded-2xl border border-border/50 text-[11px] text-muted italic">
                         <span className="font-bold uppercase text-[9px] block not-italic tracking-wider text-muted/70 mb-0.5">Payroll Notes:</span>
                         "{salaryRecord.notes}"
                       </div>
@@ -1039,16 +1079,16 @@ export const StaffManagement: React.FC = () => {
           </div>
 
           {/* Monthly Calendar View */}
-          <div className="lg:col-span-2 bg-card border border-border rounded-2xl shadow-sm p-4 sm:p-6 space-y-4">
+          <div className="lg:col-span-2 bg-card border border-border/80 rounded-[28px] shadow-xs p-5 sm:p-7 space-y-4">
             <div className="flex justify-between items-center border-b border-border/60 pb-3">
               <h3 className="font-bold text-base font-display">
                 Attendance Calendar - {months.find(m => m.value === selectedMonth)?.name} {selectedYear}
               </h3>
               <div className="flex gap-2.5 sm:gap-4 text-[9px] sm:text-[10px] font-bold uppercase text-muted">
-                <span className="flex items-center gap-1"><span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-green-500" /> Pres</span>
-                <span className="flex items-center gap-1"><span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-orange-500" /> Half</span>
-                <span className="flex items-center gap-1"><span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-amber-500" /> Leave</span>
-                <span className="flex items-center gap-1"><span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-red-500" /> Abs</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500" /> Pres</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-orange-500" /> Half</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-500" /> Leave</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500" /> Abs</span>
               </div>
             </div>
 
@@ -1075,82 +1115,52 @@ export const StaffManagement: React.FC = () => {
       {/* ─── ADMIN MANAGEMENT VIEW ─── */}
       {isAdmin && (
         <div className="space-y-6">
-          {/* Admin Navigation Tabs */}
-          <div className="flex border-b border-border gap-2">
-            <button
-              onClick={() => setAdminTab("payroll")}
-              className={`pb-3 px-4 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
-                adminTab === "payroll"
-                  ? "border-accent text-accent font-black"
-                  : "border-transparent text-muted hover:text-foreground"
-              }`}
-            >
-              <DollarSign size={16} />
-              Payroll & Staff Roster
-            </button>
-            <button
-              onClick={() => setAdminTab("calendar")}
-              className={`pb-3 px-4 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
-                adminTab === "calendar"
-                  ? "border-accent text-accent font-black"
-                  : "border-transparent text-muted hover:text-foreground"
-              }`}
-            >
-              <Calendar size={16} />
-              Detailed Staff Calendars
-            </button>
-            <button
-              onClick={() => setAdminTab("bulk")}
-              className={`pb-3 px-4 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
-                adminTab === "bulk"
-                  ? "border-accent text-accent font-black"
-                  : "border-transparent text-muted hover:text-foreground"
-              }`}
-            >
-              <PlusCircle size={16} />
-              Bulk Log Attendance
-            </button>
-          </div>
 
           {/* TAB 1: PAYROLL & STAFF ROSTER */}
           {adminTab === "payroll" && (
             <div className="space-y-6">
               {/* Monthly Overview Summary Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="glass-panel p-5 rounded-2xl border border-border flex justify-between items-center bg-card/85">
+                <div className="bg-card border border-border/80 p-6 rounded-[28px] shadow-xs flex justify-between items-center transition-all hover:shadow-md">
                   <div className="space-y-1">
-                    <p className="text-[10px] text-muted font-extrabold uppercase tracking-widest">
+                    <p className="text-[11px] text-muted font-bold uppercase tracking-wider">
                       Total Staff Count
                     </p>
-                    <p className="text-2xl font-black text-foreground tracking-tight">
+                    <p className="text-2xl font-bold font-display text-foreground tracking-tight">
                       {staffList.length} Active Staff
                     </p>
                   </div>
-                  <div className="p-3 bg-accent/10 rounded-xl">
-                    <UserIcon className="text-accent" size={24} />
+                  <div
+                    style={{ background: "linear-gradient(135deg, #60A5FA 0%, #3B82F6 50%, #1D4ED8 100%)" }}
+                    className="p-3 sm:p-3.5 text-white rounded-2xl shadow-md shadow-blue-500/20 shrink-0"
+                  >
+                    <UserIcon size={24} />
                   </div>
                 </div>
 
-                <div className="glass-panel p-5 rounded-2xl border border-border flex justify-between items-center bg-card/85">
+                <div className="bg-card border border-border/80 p-6 rounded-[28px] shadow-xs flex justify-between items-center transition-all hover:shadow-md">
                   {(() => {
                     const totalBase = staffList.reduce((acc, s) => acc + (s.baseSalary || 30000), 0);
                     return (
                       <div className="space-y-1">
-                        <p className="text-[10px] text-muted font-extrabold uppercase tracking-widest">
+                        <p className="text-[11px] text-muted font-bold uppercase tracking-wider">
                           Base Monthly Payroll
                         </p>
-                        <p className="text-2xl font-black text-foreground tracking-tight">
+                        <p className="text-2xl font-bold font-display text-foreground tracking-tight">
                           Rs. {totalBase.toLocaleString()}
                         </p>
                       </div>
                     );
                   })()}
-                  <div className="p-3 bg-green-500/10 rounded-xl">
-                    <DollarSign className="text-green-500" size={24} />
+                  <div
+                    style={{ background: "linear-gradient(135deg, #34D399 0%, #10B981 50%, #059669 100%)" }}
+                    className="p-3 sm:p-3.5 text-white rounded-2xl shadow-md shadow-emerald-500/20 shrink-0"
+                  >
+                    <DollarSign size={24} />
                   </div>
                 </div>
 
-                <div className="glass-panel p-5 rounded-2xl border border-border flex justify-between items-center bg-card/85">
+                <div className="bg-card border border-border/80 p-6 rounded-[28px] shadow-xs flex justify-between items-center transition-all hover:shadow-md">
                   {(() => {
                     let totalPayout = 0;
                     staffList.forEach(s => {
@@ -1162,25 +1172,28 @@ export const StaffManagement: React.FC = () => {
 
                     return (
                       <div className="space-y-1">
-                        <p className="text-[10px] text-muted font-extrabold uppercase tracking-widest">
+                        <p className="text-[11px] text-muted font-bold uppercase tracking-wider">
                           Calculated Payout ({months.find(m => m.value === selectedMonth)?.name})
                         </p>
-                        <p className="text-2xl font-black text-accent tracking-tight">
+                        <p className="text-2xl font-bold font-display text-foreground tracking-tight">
                           Rs. {Math.max(0, Math.round(totalPayout)).toLocaleString()}
                         </p>
                       </div>
                     );
                   })()}
-                  <div className="p-3 bg-amber-500/10 rounded-xl">
-                    <TrendingUp className="text-amber-500" size={24} />
+                  <div
+                    style={{ background: "linear-gradient(135deg, #FBBF24 0%, #F59E0B 50%, #D97706 100%)" }}
+                    className="p-3 sm:p-3.5 text-white rounded-2xl shadow-md shadow-amber-500/20 shrink-0"
+                  >
+                    <TrendingUp size={24} />
                   </div>
                 </div>
               </div>
 
               {/* Roster & Salary Payout Table */}
-              <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden p-4 sm:p-6">
+              <div className="bg-card border border-border/80 rounded-[28px] shadow-xs overflow-hidden p-6 sm:p-7">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-border/60 pb-4 mb-4">
-                  <h3 className="font-bold text-base font-display">
+                  <h3 className="font-bold text-base font-display text-foreground">
                     Staff Attendance & Salary Calculations
                   </h3>
                   <button
@@ -1204,7 +1217,8 @@ export const StaffManagement: React.FC = () => {
                       a.click();
                       a.remove();
                     }}
-                    className="px-3.5 py-2 bg-accent hover:bg-accent-dark text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-accent/15 flex items-center gap-2"
+                    style={{ background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)" }}
+                    className="px-4 py-2 text-black rounded-xl text-xs font-bold transition-all shadow-md shadow-orange-500/15 flex items-center gap-2 hover:opacity-95 cursor-pointer"
                   >
                     <FileText size={14} />
                     Export CSV Statement
@@ -1214,15 +1228,15 @@ export const StaffManagement: React.FC = () => {
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="border-b border-border/80 text-[10px] font-extrabold uppercase tracking-widest text-muted">
-                        <th className="py-3 px-4">Staff Member</th>
-                        <th className="py-3 px-4">Base Salary</th>
-                        <th className="py-3 px-4 text-center">Working Days</th>
-                        <th className="py-3 px-4 text-center">Days Worked</th>
-                        <th className="py-3 px-4 text-center">Days Off</th>
-                        <th className="py-3 px-4 text-center">Attendance %</th>
-                        <th className="py-3 px-4 text-right">Calculated Salary</th>
-                        <th className="py-3 px-4 text-right">Actions</th>
+                      <tr className="bg-muted/10 border-b border-border/70 text-[10px] font-bold uppercase tracking-wider text-muted">
+                        <th className="py-3.5 px-4">Staff Member</th>
+                        <th className="py-3.5 px-4">Base Salary</th>
+                        <th className="py-3.5 px-4 text-center">Working Days</th>
+                        <th className="py-3.5 px-4 text-center">Days Worked</th>
+                        <th className="py-3.5 px-4 text-center">Days Off</th>
+                        <th className="py-3.5 px-4 text-center">Attendance %</th>
+                        <th className="py-3.5 px-4 text-right">Calculated Salary</th>
+                        <th className="py-3.5 px-4 text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border/60 text-xs font-semibold">
@@ -1238,7 +1252,7 @@ export const StaffManagement: React.FC = () => {
                         });
 
                         return (
-                          <tr key={s._id} className="hover:bg-border/20 transition-colors">
+                          <tr key={s._id} className="hover:bg-muted/10 transition-colors">
                             <td className="py-3.5 px-4">
                               <p className="font-bold text-sm text-foreground">{s.name}</p>
                             </td>
@@ -1255,7 +1269,7 @@ export const StaffManagement: React.FC = () => {
                               {salaryRecord ? salaryRecord.absentDays : stats.offDays}
                             </td>
                             <td className="py-3.5 px-4 text-center font-bold">
-                              <span className={`px-2 py-0.5 rounded text-[10px] ${
+                              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                                 stats.workingDaysPercent >= 90
                                   ? "bg-green-500/10 text-green-500"
                                   : stats.workingDaysPercent >= 75
@@ -1272,23 +1286,23 @@ export const StaffManagement: React.FC = () => {
                               <div className="mt-1 flex justify-end">
                                 {salaryRecord ? (
                                   salaryRecord.status === "paid" ? (
-                                    <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-green-500/10 text-green-500 border border-green-500/20">
+                                    <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-green-500/10 text-green-500 border border-green-500/20">
                                       Paid ({salaryRecord.paymentMethod})
                                     </span>
                                   ) : (
-                                    <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                                    <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-500 border border-amber-500/20">
                                       Pending
                                     </span>
                                   )
                                 ) : (
-                                  <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-zinc-500/10 text-zinc-500 border border-zinc-500/20">
+                                  <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-muted/20 text-muted border border-border/60">
                                     Unprocessed
                                   </span>
                                 )}
                               </div>
                             </td>
                             <td className="py-3.5 px-4">
-                              <div className="flex items-center justify-end gap-2">
+                              <div className="flex items-center justify-end gap-1.5">
                                 {salaryRecord ? (
                                   <>
                                     {salaryRecord.status === "pending" && (
@@ -1300,30 +1314,30 @@ export const StaffManagement: React.FC = () => {
                                             handleQuickPaySalary(salaryRecord, normMethod as any);
                                           }
                                         }}
-                                        className="px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-[10px] font-bold uppercase transition-all"
+                                        className="px-2.5 py-1 bg-green-600 hover:bg-green-700 text-white rounded-lg text-[10px] font-bold uppercase transition-all"
                                       >
                                         Pay
                                       </button>
                                     )}
                                     <button
                                       onClick={() => openEditSalaryModal(salaryRecord)}
-                                      className="p-1.5 hover:bg-muted text-accent hover:text-accent-dark rounded transition-all"
+                                      className="p-1.5 hover:bg-muted/20 text-accent rounded-xl transition-all"
                                       title="Edit Salary Details"
                                     >
-                                      <Edit2 size={14} />
+                                      <Edit2 size={13} />
                                     </button>
                                     <button
                                       onClick={() => handleDeleteSalaryRecord(salaryRecord._id)}
-                                      className="p-1.5 hover:bg-red-500/10 text-red-500 hover:text-red-700 rounded transition-all"
+                                      className="p-1.5 hover:bg-red-500/10 text-red-500 rounded-xl transition-all"
                                       title="Delete Salary Record"
                                     >
-                                      <Trash2 size={14} />
+                                      <Trash2 size={13} />
                                     </button>
                                   </>
                                 ) : (
                                   <button
                                     onClick={() => openCreateSalaryModal(s)}
-                                    className="px-3 py-1.5 bg-accent hover:bg-accent-dark text-white rounded-lg text-[10px] font-bold uppercase transition-all"
+                                    className="px-3 py-1.5 bg-accent hover:bg-accent-dark text-white rounded-xl text-[10px] font-bold uppercase transition-all"
                                   >
                                     Generate
                                   </button>
@@ -1333,7 +1347,7 @@ export const StaffManagement: React.FC = () => {
                                     setSelectedAdminStaffId(s._id);
                                     setAdminTab("calendar");
                                   }}
-                                  className="px-2.5 py-1.5 bg-muted/20 hover:bg-border text-muted hover:text-foreground rounded-lg text-[10px] font-bold uppercase transition-all"
+                                  className="px-2.5 py-1.5 bg-muted/20 hover:bg-muted/30 text-muted hover:text-foreground rounded-xl text-[10px] font-bold uppercase transition-all"
                                   title="View Detailed Calendar"
                                 >
                                   Calendar
@@ -1349,16 +1363,16 @@ export const StaffManagement: React.FC = () => {
               </div>
 
               {/* Daily Check-In Activity & Times Feed */}
-              <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden p-4 sm:p-6 mt-6">
+              <div className="bg-card border border-border/80 rounded-[28px] shadow-xs overflow-hidden p-6 sm:p-7 mt-6">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-border/60 pb-4 mb-4">
                   <div>
-                    <h3 className="font-bold text-base font-display">Daily Activity & Check-In Feed</h3>
-                    <p className="text-[11px] text-muted font-semibold uppercase mt-0.5 tracking-wider">
+                    <h3 className="font-bold text-base font-display text-foreground">Daily Activity & Check-In Feed</h3>
+                    <p className="text-[11px] text-muted font-semibold mt-0.5">
                       Verify check-in and check-out timestamps submitted by staff members
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <label className="text-xs font-bold text-muted uppercase tracking-widest">Select BS Date:</label>
+                    <label className="text-xs font-bold text-muted uppercase tracking-wider">Select BS Date:</label>
                     <div className="w-48">
                       <NepaliDatePicker
                         value={activityDate}
@@ -1392,12 +1406,12 @@ export const StaffManagement: React.FC = () => {
                     }
 
                     return (
-                      <div key={`activity-${s._id}`} className={`p-4 rounded-xl border flex flex-col justify-between space-y-3 transition-all hover:shadow-sm ${log ? "bg-muted/5 border-border" : "bg-muted/10 border-border/40 opacity-70"}`}>
+                      <div key={`activity-${s._id}`} className={`p-4 rounded-2xl border flex flex-col justify-between space-y-3 transition-all hover:shadow-xs ${log ? "bg-card border-border/80" : "bg-muted/5 border-border/40 opacity-70"}`}>
                         <div className="flex justify-between items-start">
                           <div>
                             <h4 className="font-bold text-sm text-foreground">{s.name}</h4>
                           </div>
-                          <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider border ${badgeColor}`}>
+                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${badgeColor}`}>
                             {statusBadge}
                           </span>
                         </div>
@@ -1432,7 +1446,7 @@ export const StaffManagement: React.FC = () => {
                               </span>
                             </div>
                             {log.notes && (
-                              <p className="text-[10px] text-muted/95 italic bg-card p-1.5 rounded border border-border mt-1 shrink-0 truncate">
+                              <p className="text-[10px] text-muted/95 italic bg-muted/10 p-2 rounded-xl border border-border/60 mt-1 shrink-0 truncate">
                                 "{log.notes}"
                               </p>
                             )}
@@ -1463,23 +1477,23 @@ export const StaffManagement: React.FC = () => {
                 </div>
               </div>
               {/* Processed Salary Log (History) */}
-              <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden p-4 sm:p-6 mt-6">
+              <div className="bg-card border border-border/80 rounded-[28px] shadow-xs overflow-hidden p-6 sm:p-7 mt-6">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-border/60 pb-4 mb-4">
                   <div>
-                    <h3 className="font-bold text-base font-display">Processed Salary Logs</h3>
-                    <p className="text-[11px] text-muted font-semibold uppercase mt-0.5 tracking-wider">
+                    <h3 className="font-bold text-base font-display text-foreground">Processed Salary Logs</h3>
+                    <p className="text-[11px] text-muted font-semibold mt-0.5">
                       Search and manage historically processed staff salary records
                     </p>
                   </div>
                   
-                  <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                  <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
                     {/* Search Input */}
                     <div className="relative w-full sm:w-48">
                       <input
                         type="text"
                         value={historySearchQuery}
                         onChange={(e) => setHistorySearchQuery(e.target.value)}
-                        className="w-full px-3 py-1.5 border border-border rounded-xl bg-background/50 focus:outline-none focus:ring-1 focus:ring-accent text-xs font-semibold"
+                        className="w-full px-3.5 py-2 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold placeholder:text-muted/60"
                         placeholder="Search employee..."
                       />
                     </div>
@@ -1488,7 +1502,7 @@ export const StaffManagement: React.FC = () => {
                     <select
                       value={historyStatusFilter}
                       onChange={(e) => setHistoryStatusFilter(e.target.value)}
-                      className="px-2 py-1.5 border border-border rounded-xl bg-background text-xs font-semibold cursor-pointer focus:outline-none"
+                      className="px-3 py-2 border border-border/80 rounded-2xl bg-background/60 text-xs font-semibold cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent/20"
                     >
                       <option value="all">All Statuses</option>
                       <option value="paid">Paid</option>
@@ -1499,7 +1513,7 @@ export const StaffManagement: React.FC = () => {
                     <select
                       value={historyMonthFilter}
                       onChange={(e) => setHistoryMonthFilter(e.target.value)}
-                      className="px-2 py-1.5 border border-border rounded-xl bg-background text-xs font-semibold cursor-pointer focus:outline-none"
+                      className="px-3 py-2 border border-border/80 rounded-2xl bg-background/60 text-xs font-semibold cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent/20"
                     >
                       <option value="all">All Months</option>
                       {months.map((m) => (
@@ -1513,7 +1527,7 @@ export const StaffManagement: React.FC = () => {
                     <select
                       value={historyYearFilter}
                       onChange={(e) => setHistoryYearFilter(e.target.value)}
-                      className="px-2 py-1.5 border border-border rounded-xl bg-background text-xs font-semibold cursor-pointer focus:outline-none"
+                      className="px-3 py-2 border border-border/80 rounded-2xl bg-background/60 text-xs font-semibold cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent/20"
                     >
                       <option value="all">All Years</option>
                       <option value="2025">2025</option>
@@ -1537,16 +1551,16 @@ export const StaffManagement: React.FC = () => {
                     <div className="overflow-x-auto">
                       <table className="w-full text-left border-collapse min-w-[700px]">
                         <thead>
-                          <tr className="border-b border-border/80 text-[10px] font-extrabold uppercase tracking-widest text-muted">
-                            <th className="py-2.5 px-3">Period</th>
-                            <th className="py-2.5 px-3">Employee</th>
-                            <th className="py-2.5 px-3 text-right">Base Salary</th>
-                            <th className="py-2.5 px-3 text-right">Bonus</th>
-                            <th className="py-2.5 px-3 text-right">Deductions</th>
-                            <th className="py-2.5 px-3 text-right">Final Amount</th>
-                            <th className="py-2.5 px-3 text-center">Status</th>
-                            <th className="py-2.5 px-3">Payment Info</th>
-                            <th className="py-2.5 px-3 text-right">Actions</th>
+                          <tr className="bg-muted/10 border-b border-border/70 text-[10px] font-bold uppercase tracking-wider text-muted">
+                            <th className="py-3 px-3.5">Period</th>
+                            <th className="py-3 px-3.5">Employee</th>
+                            <th className="py-3 px-3.5 text-right">Base Salary</th>
+                            <th className="py-3 px-3.5 text-right">Bonus</th>
+                            <th className="py-3 px-3.5 text-right">Deductions</th>
+                            <th className="py-3 px-3.5 text-right">Final Amount</th>
+                            <th className="py-3 px-3.5 text-center">Status</th>
+                            <th className="py-3 px-3.5">Payment Info</th>
+                            <th className="py-3 px-3.5 text-right">Actions</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-border/60 text-xs font-semibold text-foreground">
@@ -1560,22 +1574,22 @@ export const StaffManagement: React.FC = () => {
                             filteredSalaries.map((sal) => {
                               const monthName = months.find((m) => m.value === sal.month)?.name || `Month ${sal.month}`;
                               return (
-                                <tr key={sal._id} className="hover:bg-border/20 transition-colors">
-                                  <td className="py-3 px-3 font-bold">
+                                <tr key={sal._id} className="hover:bg-muted/10 transition-colors">
+                                  <td className="py-3 px-3.5 font-bold">
                                     {monthName} {sal.year}
                                   </td>
-                                  <td className="py-3 px-3">
+                                  <td className="py-3 px-3.5">
                                     <p className="font-bold text-foreground">{sal.user?.name || "Staff"}</p>
-                                    <p className="text-[9px] text-muted">{sal.user?.email || ""}</p>
+                                    <p className="text-[10px] text-muted">{sal.user?.email || ""}</p>
                                   </td>
-                                  <td className="py-3 px-3 text-right">Rs. {sal.baseSalary.toLocaleString()}</td>
-                                  <td className="py-3 px-3 text-right text-green-500">+Rs. {sal.bonus.toLocaleString()}</td>
-                                  <td className="py-3 px-3 text-right text-red-500">-Rs. {sal.deductions.toLocaleString()}</td>
-                                  <td className="py-3 px-3 text-right font-black text-sm text-foreground">
+                                  <td className="py-3 px-3.5 text-right">Rs. {sal.baseSalary.toLocaleString()}</td>
+                                  <td className="py-3 px-3.5 text-right text-green-500">+Rs. {sal.bonus.toLocaleString()}</td>
+                                  <td className="py-3 px-3.5 text-right text-red-500">-Rs. {sal.deductions.toLocaleString()}</td>
+                                  <td className="py-3 px-3.5 text-right font-black text-sm text-foreground">
                                     Rs. {sal.finalSalary.toLocaleString()}
                                   </td>
-                                  <td className="py-3 px-3 text-center">
-                                    <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${
+                                  <td className="py-3 px-3.5 text-center">
+                                    <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
                                       sal.status === "paid"
                                         ? "bg-green-500/10 text-green-500 border border-green-500/20"
                                         : "bg-amber-500/10 text-amber-500 border border-amber-500/20"
@@ -1583,7 +1597,7 @@ export const StaffManagement: React.FC = () => {
                                       {sal.status}
                                     </span>
                                   </td>
-                                  <td className="py-3 px-3 text-muted text-[10px]">
+                                  <td className="py-3 px-3.5 text-muted text-[10px]">
                                     {sal.status === "paid" ? (
                                       <>
                                         <p className="font-bold text-foreground uppercase text-[9px] tracking-wider">{sal.paymentMethod?.replace("_", " ")}</p>
@@ -1593,18 +1607,18 @@ export const StaffManagement: React.FC = () => {
                                       "—"
                                     )}
                                   </td>
-                                  <td className="py-3 px-3 text-right">
+                                  <td className="py-3 px-3.5 text-right">
                                     <div className="flex items-center justify-end gap-1.5">
                                       <button
                                         onClick={() => openEditSalaryModal(sal)}
-                                        className="p-1 hover:bg-muted text-accent rounded transition-all"
+                                        className="p-1.5 hover:bg-muted/20 text-accent rounded-xl transition-all"
                                         title="Edit Salary Logs"
                                       >
                                         <Edit2 size={13} />
                                       </button>
                                       <button
                                         onClick={() => handleDeleteSalaryRecord(sal._id)}
-                                        className="p-1 hover:bg-red-500/10 text-red-500 rounded transition-all"
+                                        className="p-1.5 hover:bg-red-500/10 text-red-500 rounded-xl transition-all"
                                         title="Delete Salary Log"
                                       >
                                         <Trash2 size={13} />
@@ -1629,8 +1643,8 @@ export const StaffManagement: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Staff Selector Left Side */}
               <div className="lg:col-span-1 space-y-4">
-                <div className="glass-panel p-5 rounded-2xl border border-border bg-card/85 space-y-4">
-                  <h3 className="text-sm font-extrabold uppercase tracking-widest text-muted border-b border-border/50 pb-2">
+                <div className="p-6 rounded-[28px] border border-border/80 bg-card shadow-xs space-y-4">
+                  <h3 className="text-xs font-extrabold uppercase tracking-widest text-muted border-b border-border/50 pb-2.5">
                     Select Staff Member
                   </h3>
                   <div className="space-y-1.5 max-h-[300px] overflow-y-auto">
@@ -1638,10 +1652,10 @@ export const StaffManagement: React.FC = () => {
                       <button
                         key={s._id}
                         onClick={() => setSelectedAdminStaffId(s._id)}
-                        className={`w-full text-left px-3.5 py-3 rounded-xl border text-xs font-bold transition-all flex justify-between items-center ${
+                        className={`w-full text-left px-4 py-3 rounded-2xl border text-xs font-bold transition-all flex justify-between items-center ${
                           selectedAdminStaffId === s._id
-                            ? "bg-accent/10 border-accent/25 text-accent"
-                            : "border-transparent hover:bg-border/30 text-muted hover:text-foreground"
+                            ? "bg-accent/10 border-accent/25 text-accent shadow-2xs"
+                            : "border-transparent hover:bg-muted/20 text-muted hover:text-foreground"
                         }`}
                       >
                         <div>
@@ -1655,8 +1669,8 @@ export const StaffManagement: React.FC = () => {
 
                 {/* Monthly summary for selected user */}
                 {selectedStaffUser && (
-                  <div className="glass-panel p-5 rounded-2xl border border-border bg-card/85 space-y-4">
-                    <h3 className="text-sm font-extrabold uppercase tracking-widest text-muted border-b border-border/50 pb-2">
+                  <div className="p-6 rounded-[28px] border border-border/80 bg-card shadow-xs space-y-4">
+                    <h3 className="text-xs font-extrabold uppercase tracking-widest text-muted border-b border-border/50 pb-2.5">
                       {selectedStaffUser.name}'s Summary
                     </h3>
                     {(() => {
@@ -1683,16 +1697,16 @@ export const StaffManagement: React.FC = () => {
                             <span>Attendance %:</span>
                             <span className="font-bold text-accent">{stats.workingDaysPercent.toFixed(1)}%</span>
                           </div>
-                          <div className="bg-muted/10 p-3.5 rounded-xl border border-border/60 flex justify-between items-center mt-3">
+                          <div className="bg-muted/15 p-4 rounded-2xl border border-border/60 flex justify-between items-center mt-3">
                             <div className="text-left">
-                              <p className="text-[9px] font-extrabold text-muted uppercase tracking-widest">
+                              <p className="text-[10px] font-extrabold text-muted uppercase tracking-widest">
                                 Monthly Wage
                               </p>
                               <p className="text-base font-black text-foreground">
                                 Rs. {Math.max(0, Math.round(calculatedSalary)).toLocaleString()}
                               </p>
                             </div>
-                            <span className="text-[9px] font-extrabold text-red-500 bg-card border border-border px-2 py-1 rounded uppercase tracking-wider shrink-0">
+                            <span className="text-[10px] font-extrabold text-red-500 bg-card border border-border px-2.5 py-1 rounded-full uppercase tracking-wider shrink-0">
                               -{stats.offDays} Days
                             </span>
                           </div>
@@ -1704,16 +1718,16 @@ export const StaffManagement: React.FC = () => {
               </div>
 
               {/* Monthly Calendar View Right Side */}
-              <div className="lg:col-span-2 bg-card border border-border rounded-2xl shadow-sm p-4 sm:p-6 space-y-4">
+              <div className="lg:col-span-2 bg-card border border-border/80 rounded-[28px] shadow-xs p-6 sm:p-7 space-y-4">
                 <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b border-border/60 pb-3">
-                  <h3 className="font-bold text-base font-display">
+                  <h3 className="font-bold text-base font-display text-foreground">
                     Calendar Log - {selectedStaffUser?.name || "Staff"}
                   </h3>
                   <div className="flex gap-2.5 sm:gap-3 text-[9px] font-extrabold uppercase text-muted">
-                    <span className="flex items-center gap-1"><span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-green-500" /> Pres</span>
-                    <span className="flex items-center gap-1"><span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-orange-500" /> Half</span>
-                    <span className="flex items-center gap-1"><span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-amber-500" /> Leave</span>
-                    <span className="flex items-center gap-1"><span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-red-500" /> Abs</span>
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500" /> Pres</span>
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-orange-500" /> Half</span>
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-500" /> Leave</span>
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500" /> Abs</span>
                   </div>
                 </div>
 
@@ -1739,23 +1753,23 @@ export const StaffManagement: React.FC = () => {
 
           {/* TAB 3: BULK ATTENDANCE LOGGER */}
           {adminTab === "bulk" && (
-            <div className="bg-card border border-border rounded-2xl shadow-sm p-5 sm:p-8 max-w-4xl mx-auto space-y-6">
-              <div className="border-b border-border pb-4">
-                <h3 className="font-bold text-lg font-display">Bulk Daily Attendance Logger</h3>
-                <p className="text-xs text-muted font-semibold mt-1 uppercase tracking-wider">
+            <div className="bg-card border border-border/80 rounded-[28px] shadow-xs p-6 sm:p-8 max-w-4xl mx-auto space-y-6">
+              <div className="border-b border-border/60 pb-4">
+                <h3 className="font-bold text-lg font-display text-foreground">Bulk Daily Attendance Logger</h3>
+                <p className="text-xs text-muted font-medium mt-1">
                   Log attendance for all 9 staff members simultaneously for a single calendar day
                 </p>
               </div>
 
               {bulkSuccessMsg && (
-                <div className="p-4 text-xs bg-green-500/10 border border-green-500/20 text-green-500 rounded-lg font-bold flex items-center gap-2">
+                <div className="p-4 text-xs bg-green-500/10 border border-green-500/20 text-green-500 rounded-2xl font-bold flex items-center gap-2">
                   <CheckCircle2 size={16} />
                   <span>{bulkSuccessMsg}</span>
                 </div>
               )}
 
               {errorMsg && (
-                <div className="p-4 text-xs bg-red-500/10 border border-red-500/20 text-red-500 rounded-lg font-bold flex items-center gap-2">
+                <div className="p-4 text-xs bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl font-bold flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-red-500 block shrink-0" />
                   <span>{errorMsg}</span>
                 </div>
@@ -1763,7 +1777,7 @@ export const StaffManagement: React.FC = () => {
 
               <form onSubmit={handleBulkSubmit} className="space-y-6">
                 <div className="max-w-xs space-y-2">
-                  <label className="block text-xs font-bold text-muted uppercase tracking-widest">
+                  <label className="block text-xs font-bold text-muted uppercase tracking-wider">
                     Log Date (BS)
                   </label>
                   <NepaliDatePicker
@@ -1774,7 +1788,7 @@ export const StaffManagement: React.FC = () => {
                 </div>
 
                 <div className="space-y-3">
-                  <div className="grid grid-cols-12 gap-3 text-[10px] font-extrabold uppercase tracking-widest text-muted border-b border-border/80 pb-2">
+                  <div className="grid grid-cols-12 gap-3 text-[10px] font-bold uppercase tracking-wider text-muted border-b border-border/70 pb-2">
                     <span className="col-span-4">Staff Member</span>
                     <span className="col-span-4 text-center">Attendance Status</span>
                     <span className="col-span-4">Notes / Remarks</span>
@@ -1784,7 +1798,7 @@ export const StaffManagement: React.FC = () => {
                     {staffList.map((staff) => (
                       <div key={staff._id} className="grid grid-cols-12 gap-3 items-center pt-3">
                         <div className="col-span-4">
-                          <p className="text-sm font-bold">{staff.name}</p>
+                          <p className="text-sm font-bold text-foreground">{staff.name}</p>
                         </div>
                         
                         <div className="col-span-4 flex justify-center">
@@ -1794,7 +1808,7 @@ export const StaffManagement: React.FC = () => {
                               const newStatus = e.target.value as "present" | "absent" | "half_day" | "leave";
                               setBulkStatusMap(prev => ({ ...prev, [staff._id]: newStatus }));
                             }}
-                            className="px-2 py-1.5 border border-border rounded-lg bg-background text-xs font-bold cursor-pointer w-full max-w-[150px] focus:outline-none focus:ring-1 focus:ring-accent"
+                            className="px-3 py-2 border border-border/80 rounded-2xl bg-background/60 text-xs font-bold cursor-pointer w-full max-w-[150px] focus:outline-none focus:ring-2 focus:ring-accent/20"
                           >
                             <option value="present">Present</option>
                             <option value="half_day">Half Day</option>
@@ -1811,7 +1825,7 @@ export const StaffManagement: React.FC = () => {
                             onChange={(e) => {
                               setBulkNotesMap(prev => ({ ...prev, [staff._id]: e.target.value }));
                             }}
-                            className="w-full px-3 py-1.5 border border-border rounded-lg bg-background focus:outline-none focus:ring-1 focus:ring-accent text-xs font-semibold"
+                            className="w-full px-3.5 py-2 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 text-xs font-semibold placeholder:text-muted/60"
                           />
                         </div>
                       </div>
@@ -1819,10 +1833,11 @@ export const StaffManagement: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex justify-end pt-4 border-t border-border">
+                <div className="flex justify-end pt-4 border-t border-border/60">
                   <button
                     type="submit"
-                    className="px-6 py-3 bg-accent hover:bg-accent-dark text-white rounded-xl font-bold text-xs transition-all shadow-md shadow-accent/15 uppercase tracking-wider flex items-center gap-2"
+                    style={{ background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)" }}
+                    className="px-6 py-2.5 text-black rounded-xl font-bold text-xs transition-all shadow-md shadow-orange-500/15 uppercase tracking-wider flex items-center gap-2 hover:opacity-95 cursor-pointer"
                   >
                     <CheckCircle2 size={16} />
                     Submit Bulk Logs
@@ -1836,24 +1851,29 @@ export const StaffManagement: React.FC = () => {
 
       {/* ─── LOG / EDIT ATTENDANCE MODAL ─── */}
       {showEditModal && (
-        <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4 pt-20 sm:p-4 overflow-y-auto">
-          <div className="bg-card w-full max-w-md rounded-2xl border border-border p-6 shadow-2xl animate-scale-up max-h-[85vh] overflow-y-auto relative">
+        <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-xs p-4 pt-20 sm:p-4 overflow-y-auto">
+          <div className="bg-card w-full max-w-md rounded-[28px] border border-border/80 p-6 sm:p-7 shadow-2xl animate-scale-up max-h-[85vh] overflow-y-auto relative space-y-4">
             <button
               onClick={() => setShowEditModal(false)}
-              className="absolute top-4 right-4 p-1 rounded-full hover:bg-border text-muted hover:text-foreground transition-all"
+              className="absolute top-5 right-5 p-1.5 rounded-xl hover:bg-muted/20 text-muted hover:text-foreground transition-all"
             >
               <X size={18} />
             </button>
 
-            <div className="flex items-center gap-2 mb-4 border-b border-border pb-2.5">
-              <Calendar className="text-accent" size={20} />
-              <h2 className="text-base font-bold font-display">
+            <div className="flex items-center gap-2.5 border-b border-border/60 pb-3">
+              <div
+                style={{ background: "linear-gradient(135deg, #60A5FA 0%, #3B82F6 50%, #1D4ED8 100%)" }}
+                className="p-2 text-white rounded-xl shadow-xs shrink-0"
+              >
+                <Calendar size={18} />
+              </div>
+              <h2 className="text-base font-bold font-display text-foreground">
                 {editingLog ? "Modify Attendance Log" : "New Attendance Entry"}
               </h2>
             </div>
 
             {errorMsg && (
-              <div className="p-3 mb-4 text-xs bg-red-500/10 border border-red-500/20 text-red-500 rounded-lg font-bold flex items-center gap-2">
+              <div className="p-3 text-xs bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl font-bold flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-red-500 block shrink-0" />
                 <span>{errorMsg}</span>
               </div>
@@ -1861,28 +1881,28 @@ export const StaffManagement: React.FC = () => {
 
             <form onSubmit={handleSaveModalLog} className="space-y-4">
               {/* Date (Disabled representation) */}
-              <div className="space-y-1">
-                <label className="block text-[10px] font-bold text-muted uppercase tracking-widest">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-muted uppercase tracking-wider">
                   Log Date (BS)
                 </label>
                 <input
                   type="text"
                   value={formatNepali(modalDate)}
-                  className="w-full px-3.5 py-2.5 border border-border rounded-xl bg-muted/20 text-xs font-bold text-muted focus:outline-none select-none"
+                  className="w-full px-4 py-2.5 border border-border/80 rounded-2xl bg-muted/20 text-xs font-bold text-muted focus:outline-none select-none"
                   disabled
                 />
               </div>
 
               {/* Status Selector */}
-              <div className="space-y-1">
-                <label className="block text-[10px] font-bold text-muted uppercase tracking-widest">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-muted uppercase tracking-wider">
                   Status
                 </label>
                 {isAdmin || !editingLog ? (
                   <select
                     value={modalStatus}
                     onChange={(e) => setModalStatus(e.target.value as any)}
-                    className="w-full px-3.5 py-2.5 border border-border rounded-xl bg-background text-xs font-bold cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent"
+                    className="w-full px-4 py-2.5 border border-border/80 rounded-2xl bg-background/60 text-xs font-bold cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent/20"
                     required
                   >
                     <option value="present">Present</option>
@@ -1894,7 +1914,7 @@ export const StaffManagement: React.FC = () => {
                   <input
                     type="text"
                     value={modalStatus.toUpperCase()}
-                    className="w-full px-3.5 py-2.5 border border-border rounded-xl bg-muted/20 text-xs font-bold text-muted focus:outline-none select-none"
+                    className="w-full px-4 py-2.5 border border-border/80 rounded-2xl bg-muted/20 text-xs font-bold text-muted focus:outline-none select-none"
                     disabled
                   />
                 )}
@@ -1904,28 +1924,28 @@ export const StaffManagement: React.FC = () => {
               {(modalStatus === "present" || modalStatus === "half_day") && (() => {
                 const isTodayModal = modalDate.toDateString() === new Date().toDateString();
                 return (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <label className="block text-[10px] font-bold text-muted uppercase tracking-widest">
+                  <div className="grid grid-cols-2 gap-3.5">
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-bold text-muted uppercase tracking-wider">
                         Check-In Time
                       </label>
                       <input
                         type="time"
                         value={modalCheckIn}
                         onChange={(e) => setModalCheckIn(e.target.value)}
-                        className="w-full px-3.5 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold disabled:opacity-60"
+                        className="w-full px-4 py-2 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 text-xs font-semibold disabled:opacity-60"
                         disabled={!isAdmin && !!editingLog}
                       />
                     </div>
-                    <div className="space-y-1">
-                      <label className="block text-[10px] font-bold text-muted uppercase tracking-widest">
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-bold text-muted uppercase tracking-wider">
                         Check-Out Time
                       </label>
                       <input
                         type="time"
                         value={modalCheckOut}
                         onChange={(e) => setModalCheckOut(e.target.value)}
-                        className="w-full px-3.5 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold disabled:opacity-60"
+                        className="w-full px-4 py-2 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 text-xs font-semibold disabled:opacity-60"
                         disabled={!isAdmin && !!editingLog && (!isTodayModal || !!editingLog.checkOut)}
                       />
                     </div>
@@ -1934,26 +1954,26 @@ export const StaffManagement: React.FC = () => {
               })()}
 
               {/* Notes */}
-              <div className="space-y-1">
-                <label className="block text-[10px] font-bold text-muted uppercase tracking-widest">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-muted uppercase tracking-wider">
                   Log Notes / Remarks
                 </label>
                 <textarea
                   value={modalNotes}
                   onChange={(e) => setModalNotes(e.target.value)}
-                  className="w-full h-20 p-3.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent resize-none text-xs font-semibold disabled:opacity-60"
+                  className="w-full h-20 p-3.5 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 resize-none text-xs font-semibold placeholder:text-muted/60 disabled:opacity-60"
                   placeholder="Enter any notes (e.g. checked out early, sick leave description)"
                   disabled={!isAdmin && !!editingLog && (modalDate.toDateString() !== new Date().toDateString())}
                 />
               </div>
 
               {/* Action Buttons */}
-              <div className="flex justify-between items-center gap-3 pt-3 border-t border-border mt-6">
+              <div className="flex justify-between items-center gap-3 pt-3 border-t border-border/60 mt-4">
                 {isAdmin && editingLog ? (
                   <button
                     type="button"
                     onClick={handleDeleteLog}
-                    className="px-4 py-2 border border-red-500/20 text-red-500 hover:bg-red-500/10 rounded-xl text-xs font-bold transition-all uppercase tracking-wider"
+                    className="px-4 py-2 border border-red-500/30 text-red-500 hover:bg-red-500/10 rounded-xl text-xs font-bold transition-all"
                   >
                     Delete Log
                   </button>
@@ -1961,18 +1981,19 @@ export const StaffManagement: React.FC = () => {
                   <div />
                 )}
 
-                <div className="flex gap-2.5">
+                <div className="flex gap-2">
                   <button
                     type="button"
                     onClick={() => setShowEditModal(false)}
-                    className="px-4 py-2 border border-border rounded-xl text-xs font-bold hover:bg-muted/30 transition-all text-muted"
+                    className="px-4 py-2 border border-border/80 bg-card rounded-xl text-xs font-bold hover:bg-muted/20 transition-all text-muted"
                   >
                     {!isAdmin && !!editingLog && (modalDate.toDateString() !== new Date().toDateString()) ? "Close" : "Cancel"}
                   </button>
                   {(!(!isAdmin && !!editingLog && (modalDate.toDateString() !== new Date().toDateString()))) && (
                     <button
                       type="submit"
-                      className="px-4 py-2 bg-accent hover:bg-accent-dark text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-accent/15 uppercase tracking-wider"
+                      style={{ background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)" }}
+                      className="px-4 py-2 text-black rounded-xl text-xs font-bold transition-all shadow-md shadow-orange-500/15 hover:opacity-95"
                     >
                       Save Changes
                     </button>
@@ -1986,23 +2007,28 @@ export const StaffManagement: React.FC = () => {
 
       {/* ─── PROCESS / EDIT SALARY MODAL ─── */}
       {showSalaryModal && selectedSalaryUser && (
-        <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4 pt-20 sm:p-4 overflow-y-auto">
-          <div className="bg-card w-full max-w-md rounded-2xl border border-border p-6 shadow-2xl animate-scale-up max-h-[90vh] overflow-y-auto relative">
+        <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-xs p-4 pt-20 sm:p-4 overflow-y-auto">
+          <div className="bg-card w-full max-w-md rounded-[28px] border border-border/80 p-6 sm:p-7 shadow-2xl animate-scale-up max-h-[90vh] overflow-y-auto relative space-y-4">
             <button
               onClick={() => setShowSalaryModal(false)}
-              className="absolute top-4 right-4 p-1 rounded-full hover:bg-border text-muted hover:text-foreground transition-all"
+              className="absolute top-5 right-5 p-1.5 rounded-xl hover:bg-muted/20 text-muted hover:text-foreground transition-all"
             >
               <X size={18} />
             </button>
 
-            <div className="flex items-center gap-2 mb-4 border-b border-border pb-2.5">
-              <DollarSign className="text-accent" size={20} />
-              <h2 className="text-base font-bold font-display">
+            <div className="flex items-center gap-2.5 border-b border-border/60 pb-3">
+              <div
+                style={{ background: "linear-gradient(135deg, #34D399 0%, #10B981 50%, #059669 100%)" }}
+                className="p-2 text-white rounded-xl shadow-xs shrink-0"
+              >
+                <DollarSign size={18} />
+              </div>
+              <h2 className="text-base font-bold font-display text-foreground">
                 {editingSalaryRecord ? "Edit Processed Salary" : "Process Monthly Salary"}
               </h2>
             </div>
 
-            <div className="bg-muted/10 p-3 rounded-xl border border-border/50 text-xs font-semibold space-y-1 mb-4">
+            <div className="bg-muted/15 p-3.5 rounded-2xl border border-border/60 text-xs font-semibold space-y-1 mb-4">
               <p><span className="text-muted">Staff Member:</span> <span className="font-bold text-foreground">{selectedSalaryUser.name}</span></p>
               <p><span className="text-muted">Role:</span> <span className="font-bold text-foreground uppercase tracking-wide text-[10px]">{selectedSalaryUser.role}</span></p>
               <p>
@@ -2014,37 +2040,37 @@ export const StaffManagement: React.FC = () => {
             </div>
 
             {salaryFormError && (
-              <div className="p-3 mb-4 text-xs bg-red-500/10 border border-red-500/20 text-red-500 rounded-lg font-bold flex items-center gap-2">
+              <div className="p-3 mb-4 text-xs bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl font-bold flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-red-500 block shrink-0" />
                 <span>{salaryFormError}</span>
               </div>
             )}
 
             <form onSubmit={handleSaveSalary} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="block text-[10px] font-bold text-muted uppercase tracking-widest">
+              <div className="grid grid-cols-2 gap-3.5">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-muted uppercase tracking-wider">
                     Base Salary
                   </label>
                   <input
                     type="number"
                     value={salaryBase}
                     onChange={(e) => setSalaryBase(Number(e.target.value))}
-                    className="w-full px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold"
+                    className="w-full px-3.5 py-2 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 text-xs font-semibold"
                     required
                     min={0}
                     disabled={!!editingSalaryRecord}
                   />
                 </div>
-                <div className="space-y-1">
-                  <label className="block text-[10px] font-bold text-muted uppercase tracking-widest">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-muted uppercase tracking-wider">
                     Days Present
                   </label>
                   <input
                     type="number"
                     value={salaryPresentDays}
                     onChange={(e) => setSalaryPresentDays(Number(e.target.value))}
-                    className="w-full px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold"
+                    className="w-full px-3.5 py-2 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 text-xs font-semibold"
                     required
                     min={0}
                     disabled={!!editingSalaryRecord}
@@ -2052,72 +2078,72 @@ export const StaffManagement: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="block text-[10px] font-bold text-muted uppercase tracking-widest">
+              <div className="grid grid-cols-2 gap-3.5">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-muted uppercase tracking-wider">
                     Days Absent / Off
                   </label>
                   <input
                     type="number"
                     value={salaryAbsentDays}
                     onChange={(e) => setSalaryAbsentDays(Number(e.target.value))}
-                    className="w-full px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold"
+                    className="w-full px-3.5 py-2 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 text-xs font-semibold"
                     required
                     min={0}
                     disabled={!!editingSalaryRecord}
                   />
                 </div>
-                <div className="space-y-1">
-                  <label className="block text-[10px] font-bold text-muted uppercase tracking-widest">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-muted uppercase tracking-wider">
                     Bonus
                   </label>
                   <input
                     type="number"
                     value={salaryBonus}
                     onChange={(e) => setSalaryBonus(Number(e.target.value))}
-                    className="w-full px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold"
+                    className="w-full px-3.5 py-2 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 text-xs font-semibold"
                     min={0}
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="block text-[10px] font-bold text-muted uppercase tracking-widest">
+              <div className="grid grid-cols-2 gap-3.5">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-muted uppercase tracking-wider">
                     Deductions
                   </label>
                   <input
                     type="number"
                     value={salaryDeductions}
                     onChange={(e) => setSalaryDeductions(Number(e.target.value))}
-                    className="w-full px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold"
+                    className="w-full px-3.5 py-2 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 text-xs font-semibold"
                     min={0}
                   />
                 </div>
-                <div className="space-y-1">
-                  <label className="block text-[10px] font-bold text-muted uppercase tracking-widest">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-muted uppercase tracking-wider">
                     Final Paid Salary
                   </label>
                   <input
                     type="number"
                     value={salaryFinal}
                     onChange={(e) => setSalaryFinal(Number(e.target.value))}
-                    className="w-full px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold font-bold text-accent"
+                    className="w-full px-3.5 py-2 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 text-xs font-bold text-accent"
                     required
                     min={0}
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="block text-[10px] font-bold text-muted uppercase tracking-widest">
+              <div className="grid grid-cols-2 gap-3.5">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-muted uppercase tracking-wider">
                     Payment Status
                   </label>
                   <select
                     value={salaryStatus}
                     onChange={(e) => setSalaryStatus(e.target.value as any)}
-                    className="w-full px-3 py-2 border border-border rounded-xl bg-background text-xs font-semibold cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent"
+                    className="w-full px-3.5 py-2 border border-border/80 rounded-2xl bg-background/60 text-xs font-semibold cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent/20"
                   >
                     <option value="pending">Pending</option>
                     <option value="paid">Paid</option>
@@ -2125,14 +2151,14 @@ export const StaffManagement: React.FC = () => {
                 </div>
 
                 {salaryStatus === "paid" && (
-                  <div className="space-y-1">
-                    <label className="block text-[10px] font-bold text-muted uppercase tracking-widest">
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-bold text-muted uppercase tracking-wider">
                       Payment Method
                     </label>
                     <select
                       value={salaryPaymentMethod}
                       onChange={(e) => setSalaryPaymentMethod(e.target.value as any)}
-                      className="w-full px-3 py-2 border border-border rounded-xl bg-background text-xs font-semibold cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent"
+                      className="w-full px-3.5 py-2 border border-border/80 rounded-2xl bg-background/60 text-xs font-semibold cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent/20"
                     >
                       <option value="cash">Cash</option>
                       <option value="online_banking">Online Banking</option>
@@ -2145,8 +2171,8 @@ export const StaffManagement: React.FC = () => {
               </div>
 
               {salaryStatus === "paid" && (
-                <div className="space-y-1">
-                  <label className="block text-[10px] font-bold text-muted uppercase tracking-widest">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-muted uppercase tracking-wider">
                     Payment Date (BS)
                   </label>
                   <NepaliDatePicker
@@ -2157,24 +2183,24 @@ export const StaffManagement: React.FC = () => {
                 </div>
               )}
 
-              <div className="space-y-1">
-                <label className="block text-[10px] font-bold text-muted uppercase tracking-widest">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-muted uppercase tracking-wider">
                   Notes / Remarks
                 </label>
                 <textarea
                   value={salaryNotes}
                   onChange={(e) => setSalaryNotes(e.target.value)}
-                  className="w-full h-16 p-3 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent resize-none text-xs font-semibold"
+                  className="w-full h-16 p-3.5 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 resize-none text-xs font-semibold placeholder:text-muted/60"
                   placeholder="Enter details like bonus reason, deductions explanation, check number, etc."
                 />
               </div>
 
-              <div className="flex justify-between items-center gap-3 pt-3 border-t border-border mt-6">
+              <div className="flex justify-between items-center gap-3 pt-3 border-t border-border/60 mt-4">
                 {editingSalaryRecord ? (
                   <button
                     type="button"
                     onClick={() => handleDeleteSalaryRecord(editingSalaryRecord._id)}
-                    className="px-4 py-2 border border-red-500/20 text-red-500 hover:bg-red-500/10 rounded-xl text-xs font-bold transition-all uppercase tracking-wider"
+                    className="px-4 py-2 border border-red-500/30 text-red-500 hover:bg-red-500/10 rounded-xl text-xs font-bold transition-all"
                   >
                     Delete
                   </button>
@@ -2182,18 +2208,19 @@ export const StaffManagement: React.FC = () => {
                   <div />
                 )}
 
-                <div className="flex gap-2.5">
+                <div className="flex gap-2">
                   <button
                     type="button"
                     onClick={() => setShowSalaryModal(false)}
-                    className="px-4 py-2 border border-border rounded-xl text-xs font-bold hover:bg-muted/30 transition-all text-muted"
+                    className="px-4 py-2 border border-border/80 bg-card rounded-xl text-xs font-bold hover:bg-muted/20 transition-all text-muted"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={salarySubmitting}
-                    className="px-4 py-2 bg-accent hover:bg-accent-dark text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-accent/15 uppercase tracking-wider disabled:opacity-50"
+                    style={{ background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)" }}
+                    className="px-4 py-2 text-black rounded-xl text-xs font-bold transition-all shadow-md shadow-orange-500/15 hover:opacity-95 disabled:opacity-50 cursor-pointer"
                   >
                     {salarySubmitting ? "Saving..." : "Save Record"}
                   </button>

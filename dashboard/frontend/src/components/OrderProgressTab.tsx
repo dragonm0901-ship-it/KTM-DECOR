@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useStore, Order } from "../store/useStore";
 import {
-  Truck,
   User,
   Phone,
   Package,
@@ -151,45 +150,34 @@ export const OrderProgressTab: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold font-display flex items-center gap-2">
-          <Truck className="text-accent" />
-          Order Progress Workspace
-        </h1>
-        <p className="text-xs text-muted mt-1">
-          Track production, design, and manufacturing stages of customer signs. Admins approve completion to release sales graph revenue.
-        </p>
-      </div>
-
       {errorMsg && (
-        <div className="p-3 text-xs bg-red-600 border border-red-600 text-white rounded font-semibold animate-slide-up">
+        <div className="p-3.5 text-xs bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl font-semibold animate-slide-up">
           {errorMsg}
         </div>
       )}
 
       {/* Kanban Board Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
         {stages.map((stage) => {
           const stageOrders = orders.filter((o) => o.stage === stage.id);
 
           return (
             <div
               key={stage.id}
-              className="bg-card border border-border/80 p-5 rounded-2xl shadow-sm flex flex-col min-h-[500px]"
+              className="bg-card border border-border/80 p-5 rounded-[28px] shadow-xs flex flex-col min-h-[520px]"
             >
               {/* Stage Header */}
-              <div className="border-b border-border pb-3 mb-4">
-                <div className={`px-2.5 py-1 text-xs font-extrabold uppercase rounded border w-max mb-1.5 ${stage.color}`}>
+              <div className="border-b border-border/60 pb-3.5 mb-4">
+                <div className={`px-3 py-1 text-[11px] font-extrabold uppercase rounded-full border w-max mb-1.5 shadow-2xs ${stage.color}`}>
                   {stage.label} ({stageOrders.length})
                 </div>
                 <p className="text-[10px] text-muted leading-snug">{stage.desc}</p>
               </div>
 
               {/* Cards Container */}
-              <div className="flex-1 overflow-y-auto space-y-3 pr-1 max-h-[600px]">
+              <div className="flex-1 overflow-y-auto space-y-3 pr-1 max-h-[620px]">
                 {stageOrders.length === 0 ? (
-                  <div className="h-full border border-dashed border-border/50 rounded-2xl flex flex-col items-center justify-center text-center p-6 text-muted">
+                  <div className="h-full border border-dashed border-border/60 rounded-2xl flex flex-col items-center justify-center text-center p-6 text-muted">
                     <Package size={24} className="opacity-35 mb-1.5" />
                     <span className="text-[10px] uppercase font-bold tracking-wide">Empty Column</span>
                   </div>
@@ -201,17 +189,17 @@ export const OrderProgressTab: React.FC = () => {
                     return (
                       <div
                         key={order._id}
-                        className={`p-3.5 bg-card border rounded-md shadow-sm space-y-3 transition-all relative min-w-0 overflow-hidden ${
+                        className={`p-4 bg-card border rounded-2xl shadow-xs space-y-3 transition-all relative min-w-0 overflow-hidden hover:shadow-md hover:border-accent/40 ${
                           order.stage === "paid"
-                            ? "border-green-500/30 dark:border-green-500/20 bg-green-500/[0.01]"
+                            ? "border-green-500/30 dark:border-green-500/20 bg-green-500/[0.02]"
                             : order.stage === "delivered"
-                            ? "border-blue-500/30 dark:border-blue-500/20 bg-blue-500/[0.01]"
-                            : "border-border hover:border-accent/50"
+                            ? "border-blue-500/30 dark:border-blue-500/20 bg-blue-500/[0.02]"
+                            : "border-border/80"
                         } ${isUpdating ? "opacity-55 pointer-events-none" : ""}`}
                       >
                         {/* Urgency Badge & Deadline */}
                         <div className="flex items-center justify-between gap-1.5">
-                          <div className={`px-2 py-0.5 rounded text-center leading-tight shadow-xs ${urgency.color}`}>
+                          <div className={`px-2.5 py-0.5 rounded-full text-center leading-tight shadow-xs ${urgency.color}`}>
                             <span className="block text-[8px] uppercase font-black tracking-wider">{urgency.label}</span>
                             {urgency.subLabel && (
                               <span className="block text-[7px] font-bold opacity-95 leading-none mt-0.5">{urgency.subLabel}</span>
@@ -247,21 +235,21 @@ export const OrderProgressTab: React.FC = () => {
                             </h4>
                             <button
                               onClick={() => setSelectedViewOrder(order)}
-                              className="p-1 bg-blue-600 rounded text-white hover:bg-blue-700 transition-colors flex-shrink-0 shadow-sm"
+                              className="p-1.5 bg-card border border-border/80 rounded-xl text-foreground hover:bg-muted/20 transition-all flex-shrink-0 shadow-xs cursor-pointer"
                               title="View Details"
                             >
                               <Eye size={13} />
                             </button>
                           </div>
-                          <div className="flex flex-wrap gap-x-2 gap-y-0.5 mt-1 text-[9px] text-muted">
-                            <span>Size: <strong>{order.size}</strong></span>
+                          <div className="flex flex-wrap gap-x-2 gap-y-0.5 mt-1.5 text-[9px] text-muted">
+                            <span>Size: <strong className="text-foreground">{order.size}</strong></span>
                             <span>•</span>
-                            <span>Color: <strong>{order.color}</strong></span>
+                            <span>Color: <strong className="text-foreground">{order.color}</strong></span>
                           </div>
                         </div>
 
                         {/* Customer & Address */}
-                        <div className="p-2 bg-background border border-border/80 rounded space-y-1 text-[10px]">
+                        <div className="p-3 bg-background/60 border border-border/80 rounded-2xl space-y-1.5 text-[10px]">
                           <div className="font-semibold text-foreground flex items-center gap-1.5">
                             <User size={10} className="text-accent" />
                             {order.customerName}
@@ -270,21 +258,21 @@ export const OrderProgressTab: React.FC = () => {
                             <Phone size={8} />
                             {order.customerContact}
                           </div>
-                          <div className="text-muted flex items-start gap-1.5 border-t border-border/55 pt-1 mt-1 font-medium leading-tight">
+                          <div className="text-muted flex items-start gap-1.5 border-t border-border/55 pt-1.5 mt-1 font-medium leading-tight">
                             <MapPin size={9} className="text-accent mt-0.5 flex-shrink-0" />
                             <span className="line-clamp-2">{order.customerAddress}</span>
                           </div>
                         </div>
 
                         {order.manufacturingNotes && (
-                          <div className="p-2 bg-accent/5 border border-dashed border-accent/20 rounded text-[9px] text-muted-foreground leading-snug">
+                          <div className="p-3 bg-accent/5 border border-dashed border-accent/20 rounded-2xl text-[9px] text-muted leading-snug">
                             <strong className="text-accent uppercase text-[8px] tracking-wider block mb-0.5">Mfg Notes:</strong>
                             <p className="line-clamp-3 font-medium">{order.manufacturingNotes}</p>
                           </div>
                         )}
 
                         {/* Lead Assignee Selection */}
-                        <div className="flex items-center gap-1.5 bg-background border border-border/80 rounded px-2 py-1 min-w-0 w-full overflow-hidden">
+                        <div className="flex items-center gap-1.5 bg-background/60 border border-border/80 rounded-2xl px-2.5 py-1.5 min-w-0 w-full overflow-hidden">
                           <span className="text-muted font-bold uppercase text-[8px] tracking-wider shrink-0">Lead:</span>
                           <select
                             value={order.assignee?._id || ""}
@@ -300,7 +288,7 @@ export const OrderProgressTab: React.FC = () => {
                                 setUpdatingId(null);
                               }
                             }}
-                            className="px-1.5 py-0.5 border border-border rounded bg-card focus:outline-none focus:ring-1 focus:ring-accent text-[8.5px] font-semibold flex-1 min-w-0 w-full truncate cursor-pointer text-foreground"
+                            className="px-1.5 py-0.5 border-none bg-transparent focus:outline-none text-[9px] font-semibold flex-1 min-w-0 w-full truncate cursor-pointer text-foreground"
                           >
                             <option value="">Unassigned</option>
                             {users
@@ -314,8 +302,8 @@ export const OrderProgressTab: React.FC = () => {
                         </div>
 
                         {/* Metadata Row */}
-                        <div className="flex justify-between items-center pt-1 border-t border-border/70">
-                          <span className={`px-1.5 py-0.5 border text-[8px] font-bold rounded uppercase ${getSourceBadge(order.orderFrom)}`}>
+                        <div className="flex justify-between items-center pt-1.5 border-t border-border/60">
+                          <span className={`px-2 py-0.5 rounded-full text-[8px] font-bold uppercase shadow-2xs ${getSourceBadge(order.orderFrom)}`}>
                             {order.orderFrom}
                           </span>
                           <span className="font-bold text-accent text-[11px] flex items-center">
@@ -325,20 +313,21 @@ export const OrderProgressTab: React.FC = () => {
                         </div>
 
                         {/* Status/Actions */}
-                        <div className="space-y-2 pt-2 border-t border-border/70">
+                        <div className="space-y-2 pt-2 border-t border-border/60">
                           {/* Approval Banner for Admin */}
                           {stage.id === "completed" && (
                             <>
                               {user?.role === "admin" ? (
                                 <button
                                   onClick={() => handleApproveAndDeliver(order._id)}
-                                  className="w-full py-1.5 bg-green-600 hover:bg-green-700 text-white rounded text-[10px] font-bold transition-all flex items-center justify-center gap-1 shadow-sm shadow-green-500/10"
+                                  style={{ background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)" }}
+                                  className="w-full py-2 text-black rounded-xl text-[10px] font-bold transition-all flex items-center justify-center gap-1 shadow-md shadow-orange-500/20 hover:scale-[1.01] active:scale-95 cursor-pointer"
                                 >
-                                  <CheckCircle size={10} />
+                                  <CheckCircle size={11} />
                                   Approve & Deliver
                                 </button>
                               ) : (
-                                <div className="p-1.5 border border-dashed border-amber-500/30 bg-amber-500/5 text-amber-500 text-[9px] font-extrabold uppercase rounded text-center tracking-wide flex items-center justify-center gap-1">
+                                <div className="p-2 border border-dashed border-amber-500/30 bg-amber-500/5 text-amber-500 text-[9px] font-extrabold uppercase rounded-xl text-center tracking-wide flex items-center justify-center gap-1">
                                   <Clock size={10} />
                                   Admin Approval Pending
                                 </div>
@@ -348,13 +337,13 @@ export const OrderProgressTab: React.FC = () => {
 
                           {/* Approved state indicator */}
                           {order.approved && stage.id === "delivered" && (
-                            <div className="p-1.5 bg-blue-600 border border-blue-600 text-white text-[9px] font-bold uppercase rounded text-center tracking-wide flex items-center justify-center gap-1 shadow-sm">
+                            <div className="p-1.5 bg-blue-600 border border-blue-600 text-white text-[9px] font-bold uppercase rounded-full text-center tracking-wide flex items-center justify-center gap-1 shadow-xs">
                               <CheckCircle size={10} />
                               Delivered & Approved
                             </div>
                           )}
                           {order.approved && stage.id === "paid" && (
-                            <div className="p-1.5 bg-green-600 border border-green-600 text-white text-[9px] font-bold uppercase rounded text-center tracking-wide flex items-center justify-center gap-1 shadow-sm">
+                            <div className="p-1.5 bg-green-600 border border-green-600 text-white text-[9px] font-bold uppercase rounded-full text-center tracking-wide flex items-center justify-center gap-1 shadow-xs">
                               <CheckCircle size={10} />
                               Paid & Approved
                             </div>
@@ -365,7 +354,7 @@ export const OrderProgressTab: React.FC = () => {
                             {stage.id !== "design" && (
                               <button
                                 onClick={() => handleMove(order._id, order.stage, "back")}
-                                className="flex-1 py-1 px-2 border border-border hover:bg-border rounded text-[9px] font-bold text-muted hover:text-foreground transition-all flex items-center justify-center gap-1"
+                                className="flex-1 py-1.5 px-2.5 border border-border/80 hover:bg-muted/20 bg-card rounded-xl text-[9px] font-bold text-muted hover:text-foreground transition-all flex items-center justify-center gap-1 cursor-pointer shadow-2xs"
                                 title="Move Back"
                               >
                                 <ArrowLeft size={10} />
@@ -377,7 +366,7 @@ export const OrderProgressTab: React.FC = () => {
                             {stage.id !== "paid" && (
                               <button
                                 onClick={() => handleMove(order._id, order.stage, "forward")}
-                                className="flex-1 py-1 px-2 border border-border hover:bg-border rounded text-[9px] font-bold text-muted hover:text-foreground transition-all flex items-center justify-center gap-1"
+                                className="flex-1 py-1.5 px-2.5 border border-border/80 hover:bg-muted/20 bg-card rounded-xl text-[9px] font-bold text-muted hover:text-foreground transition-all flex items-center justify-center gap-1 cursor-pointer shadow-2xs"
                                 title="Move Forward"
                               >
                                 Next

@@ -222,15 +222,22 @@ export const SalesTab: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-card p-5 rounded-2xl border border-border/80 shadow-sm">
-        <div>
-          <h1 className="text-2xl font-bold font-display flex items-center gap-2">
-            <TrendingUp className="text-accent" />
-            Sales Ledger
-          </h1>
-          <p className="text-xs text-muted mt-1">
-            Track and monitor business revenue from sign installations and direct client sales.
-          </p>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-card p-5 sm:p-6 rounded-[28px] border border-border/80 shadow-xs">
+        <div className="flex items-center gap-3.5">
+          <div
+            style={{ background: "linear-gradient(135deg, #60A5FA 0%, #3B82F6 50%, #1D4ED8 100%)" }}
+            className="p-3 text-white rounded-2xl shadow-md shadow-blue-500/20 shrink-0"
+          >
+            <TrendingUp size={22} />
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold font-display text-foreground leading-tight">
+              Sales Ledger
+            </h1>
+            <p className="text-xs text-muted font-medium mt-0.5">
+              Track and monitor business revenue from sign installations and direct client sales.
+            </p>
+          </div>
         </div>
 
         {/* Quick Statement Download */}
@@ -292,9 +299,14 @@ export const SalesTab: React.FC = () => {
 
       {/* Archived Monthly Statements */}
       {user?.role === "admin" && statementArchives.filter((a) => a.type === "sales").length > 0 && (
-        <div className="bg-card border border-border/80 p-5 rounded-2xl shadow-sm">
+        <div className="bg-card border border-border/80 p-5 rounded-[28px] shadow-xs">
           <h3 className="text-xs font-bold text-muted uppercase tracking-wider mb-3 flex items-center gap-2">
-            <Calendar size={14} className="text-accent" />
+            <div
+              style={{ background: "linear-gradient(135deg, #60A5FA 0%, #3B82F6 50%, #1D4ED8 100%)" }}
+              className="p-1.5 text-white rounded-lg shadow-xs shrink-0"
+            >
+              <Calendar size={13} />
+            </div>
             Archived Monthly Sales Statements (PDF & CSV)
           </h3>
           <div className="flex flex-wrap gap-2">
@@ -340,20 +352,26 @@ export const SalesTab: React.FC = () => {
             <h3 className="text-3xl sm:text-4xl font-semibold font-display text-black leading-none mt-1">Rs. {combinedTotal.toLocaleString()}</h3>
             <p className="text-xs text-black/75 font-medium mt-1">Excludes delivery & fitting charges</p>
           </div>
-          <div className="p-3 bg-black text-white rounded-2xl shadow-md shrink-0 relative z-10">
+          <div
+            style={{ background: "rgba(0, 0, 0, 0.75)" }}
+            className="p-3 text-white rounded-2xl shadow-md shadow-black/30 shrink-0 relative z-10 backdrop-blur-xs"
+          >
             <TrendingUp size={24} />
           </div>
         </div>
 
         {/* Total Outstanding Dues (Crisp Porcelain Card) */}
-        <div className="bg-card border border-border/80 shadow-sm hover:shadow-md transition-all p-6 rounded-[28px] flex items-center justify-between">
+        <div className="bg-card border border-border/80 shadow-xs hover:shadow-md transition-all p-6 rounded-[28px] flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-xs text-muted font-bold uppercase tracking-wider block">Total Outstanding Dues</span>
-            <h3 className="text-3xl sm:text-4xl font-semibold font-display text-red-500 leading-none mt-1">Rs. {totalDuePayment.toLocaleString()}</h3>
-            <p className="text-xs text-muted mt-1">{orders.filter(o => o.duePayment > 0).length} pending accounts</p>
+            <span className="text-[10px] text-muted font-bold uppercase tracking-wider block">Total Outstanding Dues</span>
+            <h3 className="text-3xl sm:text-4xl font-bold font-display text-red-500 leading-none mt-1">Rs. {totalDuePayment.toLocaleString()}</h3>
+            <p className="text-[10px] text-muted mt-1 font-medium">{orders.filter(o => o.duePayment > 0).length} pending accounts</p>
           </div>
-          <div className="p-3 bg-red-600 text-white rounded-2xl shadow-xs shrink-0">
-            <DollarSign size={24} className="text-white" />
+          <div
+            style={{ background: "linear-gradient(135deg, #F87171 0%, #EF4444 50%, #DC2626 100%)" }}
+            className="p-3 text-white rounded-2xl shadow-md shadow-red-500/20 shrink-0"
+          >
+            <DollarSign size={24} />
           </div>
         </div>
       </div>
@@ -367,13 +385,18 @@ export const SalesTab: React.FC = () => {
 
       {/* Completed Sign Orders Awaiting Approval */}
       {pendingApprovalOrders.length > 0 && (
-        <div className="p-5 rounded-2xl shadow-sm border border-amber-500/20 bg-amber-500/[0.02] space-y-4">
-          <div className="flex items-center justify-between border-b border-border/60 pb-2.5">
+        <div className="p-5 sm:p-6 rounded-[28px] shadow-xs border border-amber-500/25 bg-amber-500/[0.02] space-y-4">
+          <div className="flex items-center justify-between border-b border-border/60 pb-3">
             <h3 className="font-bold text-sm font-display text-amber-500 flex items-center gap-2">
-              <Package size={16} />
+              <div
+                style={{ background: "linear-gradient(135deg, #FBBF24 0%, #F59E0B 50%, #D97706 100%)" }}
+                className="p-1.5 text-white rounded-lg shadow-xs shrink-0"
+              >
+                <Package size={14} />
+              </div>
               Completed Sign Orders Awaiting Approval ({pendingApprovalOrders.length})
             </h3>
-            <span className="text-[10px] font-semibold uppercase tracking-wider bg-amber-600 text-white px-2 py-0.5 rounded shadow-sm">
+            <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-500/15 border border-amber-500/30 text-amber-500 px-2.5 py-0.5 rounded-full shadow-2xs">
               Action Required
             </span>
           </div>
@@ -382,7 +405,7 @@ export const SalesTab: React.FC = () => {
             {pendingApprovalOrders.map((order) => (
               <div
                 key={order._id}
-                className="bg-card border border-border/80 p-4 rounded-2xl flex flex-col justify-between gap-3 shadow-sm hover:border-amber-500/30 transition-all"
+                className="bg-card border border-border/80 p-4 rounded-[22px] flex flex-col justify-between gap-3 shadow-xs hover:border-amber-500/40 transition-all"
               >
                 <div className="flex justify-between items-start gap-3">
                   <div>
@@ -396,7 +419,7 @@ export const SalesTab: React.FC = () => {
                       <span className="font-bold text-accent">Total: Rs. {order.totalPrice.toLocaleString()}</span>
                     </div>
                   </div>
-                  <span className="px-2 py-0.5 rounded text-[8px] font-extrabold bg-blue-600 border border-blue-600 text-white uppercase tracking-wider shadow-sm">
+                  <span className="px-2.5 py-0.5 rounded-full text-[8px] font-extrabold bg-blue-600 border border-blue-600 text-white uppercase tracking-wider shadow-2xs">
                     Completed Stage
                   </span>
                 </div>
@@ -421,7 +444,8 @@ export const SalesTab: React.FC = () => {
                           }
                         }
                       }}
-                      className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-xl text-[10px] font-bold transition-all flex items-center gap-1 shadow-sm shadow-green-500/10"
+                      style={{ background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)" }}
+                      className="px-3 py-1.5 text-black rounded-xl text-[10px] font-bold transition-all flex items-center gap-1 shadow-md shadow-orange-500/15 hover:opacity-95"
                     >
                       <CheckCircle size={10} />
                       Approve & Log Sale
@@ -440,26 +464,26 @@ export const SalesTab: React.FC = () => {
       )}
 
       {/* Filter and Ledger */}
-      <div className="bg-card border border-border/80 p-4 rounded-2xl shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="bg-card border border-border/80 p-4 sm:p-5 rounded-[28px] shadow-xs flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="relative w-full md:w-80">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-3 py-2 pl-9 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs"
+            className="w-full px-4 py-2.5 pl-10 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold placeholder:text-muted/60 transition-all"
             placeholder="Search by client or product..."
           />
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-muted" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" />
         </div>
 
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
           {/* Method Filter */}
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-muted font-medium">Payment:</span>
+            <span className="text-muted font-medium text-[11px]">Payment:</span>
             <select
               value={methodFilter}
               onChange={(e) => setMethodFilter(e.target.value)}
-              className="px-2.5 py-1.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer"
+              className="px-3.5 py-2 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer transition-all"
             >
               <option value="all">All Methods</option>
               <option value="cash">Cash</option>
@@ -471,11 +495,11 @@ export const SalesTab: React.FC = () => {
 
           {/* Type Filter */}
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-muted font-medium">Source:</span>
+            <span className="text-muted font-medium text-[11px]">Source:</span>
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="px-2.5 py-1.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer"
+              className="px-3.5 py-2 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer transition-all"
             >
               <option value="all">All Sources</option>
               <option value="order">Sign Orders</option>
@@ -486,38 +510,38 @@ export const SalesTab: React.FC = () => {
       </div>
 
       {/* Unified Sales Ledger Table */}
-      <div className="bg-card border border-border/80 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-card border border-border/80 rounded-[28px] shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse min-w-[800px]">
             <thead>
-              <tr className="bg-card text-muted border-b border-border uppercase font-semibold tracking-wider text-[10px]">
-                <th className="p-4">Date</th>
-                <th className="p-4">Source Category</th>
-                <th className="p-4">Client Details</th>
-                <th className="p-4">Product / Service</th>
-                <th className="p-4">Payment Method</th>
-                <th className="p-4 text-right">Amount</th>
-                <th className="p-4 text-right">Actions</th>
+              <tr className="bg-muted/10 text-muted border-b border-border/70 uppercase font-bold tracking-wider text-[10px]">
+                <th className="py-3.5 px-4">Date</th>
+                <th className="py-3.5 px-4">Source Category</th>
+                <th className="py-3.5 px-4">Client Details</th>
+                <th className="py-3.5 px-4">Product / Service</th>
+                <th className="py-3.5 px-4">Payment Method</th>
+                <th className="py-3.5 px-4 text-right">Amount</th>
+                <th className="py-3.5 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/80">
+            <tbody className="divide-y divide-border/60">
               {filteredSales.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-muted">
+                  <td colSpan={7} className="p-8 text-center text-muted font-semibold">
                     No sales records logged matching these filters.
                   </td>
                 </tr>
               ) : (
                 filteredSales.map((item) => (
-                  <tr key={item.type + item.id} className="hover:bg-border/20 transition-colors">
-                    <td className="p-4 font-semibold text-foreground text-xs">
+                  <tr key={item.type + item.id} className="hover:bg-muted/10 transition-colors">
+                    <td className="py-3.5 px-4 font-semibold text-foreground text-xs">
                       <div className="flex items-center gap-1.5">
                         <Calendar size={12} className="text-muted" />
                         {formatNepali(item.date)}
                       </div>
                     </td>
-                    <td className="p-4">
-                      <span className={`px-2 py-0.5 rounded text-[9px] font-bold border uppercase tracking-wider shadow-sm ${
+                    <td className="py-3.5 px-4">
+                      <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold border uppercase tracking-wider shadow-2xs ${
                         item.type === "order"
                           ? "bg-purple-600 border-purple-600 text-white"
                           : "bg-blue-600 border-blue-600 text-white"
@@ -525,42 +549,42 @@ export const SalesTab: React.FC = () => {
                         {item.type === "order" ? "Sign Order" : "Direct Sale"}
                       </span>
                     </td>
-                    <td className="p-4 font-bold text-foreground">
+                    <td className="py-3.5 px-4 font-bold text-foreground">
                       <div className="flex items-center gap-1.5">
-                        <User size={11} className="text-accent" />
+                        <User size={12} className="text-accent" />
                         {item.client}
                       </div>
                     </td>
-                    <td className="p-4">
+                    <td className="py-3.5 px-4">
                       <div>
                         <span className="font-semibold text-foreground">{item.product}</span>
                         {item.notes && <p className="text-[10px] text-muted truncate max-w-xs">{item.notes}</p>}
                       </div>
                     </td>
-                    <td className="p-4 font-semibold text-muted">
+                    <td className="py-3.5 px-4 font-semibold text-muted">
                       {getMethodLabel(item.method)}
                     </td>
-                    <td className="p-4 text-right font-extrabold text-foreground">
+                    <td className="py-3.5 px-4 text-right font-extrabold text-foreground">
                       Rs. {item.amount.toLocaleString()}
                     </td>
-                    <td className="p-4 text-right">
+                    <td className="py-3.5 px-4 text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         {item.type === "order" ? (
                           <button
                             onClick={() => setSelectedOrder(item.orderObj || null)}
-                            className="p-1.5 bg-blue-600 rounded text-white hover:bg-blue-700 transition-colors shadow-sm"
-                            title="View Full Order Specifications"
+                            className="p-1.5 hover:bg-muted/20 text-accent rounded-xl transition-all"
+                            title="View Linked Sign Order"
                           >
-                            <Eye size={14} />
+                            <Eye size={13} />
                           </button>
                         ) : (
                           user?.role === "admin" && (
                             <button
                               onClick={() => handleDelete(item.id)}
-                              className="p-1.5 bg-red-600 rounded text-white hover:bg-red-700 transition-colors shadow-sm"
-                              title="Delete Log"
+                              className="p-1.5 hover:bg-red-500/10 text-red-500 rounded-xl transition-all"
+                              title="Delete Sale Record"
                             >
-                              <Trash2 size={14} />
+                              <Trash2 size={13} />
                             </button>
                           )
                         )}

@@ -155,68 +155,67 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* HEADER SECTION */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold font-display">Works to Do</h1>
-          <p className="text-muted text-sm mt-1">
-            Track and synchronize your daily client activities in real-time.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
+      {/* TOP CONTROLS SECTION */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
           {/* View Toggles */}
-          <div className="flex bg-card border border-border p-1 rounded-md">
-            <button
-              onClick={() => setViewMode("kanban")}
-              className={`p-1.5 rounded transition-all ${
-                viewMode === "kanban" ? "bg-accent text-white" : "text-muted hover:text-foreground"
-              }`}
-              title="Kanban Board"
-            >
-              <Kanban size={16} />
-            </button>
+          <div className="flex bg-muted/20 border border-border/80 p-1 rounded-xl">
             <button
               onClick={() => setViewMode("list")}
-              className={`p-1.5 rounded transition-all ${
-                viewMode === "list" ? "bg-accent text-white" : "text-muted hover:text-foreground"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                viewMode === "list"
+                  ? "bg-card text-foreground shadow-xs"
+                  : "text-muted hover:text-foreground"
               }`}
               title="List View"
             >
-              <List size={16} />
+              <List size={15} />
+              <span>List</span>
+            </button>
+            <button
+              onClick={() => setViewMode("kanban")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                viewMode === "kanban"
+                  ? "bg-card text-foreground shadow-xs"
+                  : "text-muted hover:text-foreground"
+              }`}
+              title="Kanban Board"
+            >
+              <Kanban size={15} />
+              <span>Kanban</span>
             </button>
           </div>
-
-          {/* Create Button (Admins only) */}
-          {user?.role === "admin" && (
-            <button
-              onClick={openCreateModal}
-              style={{
-                background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
-              }}
-              className="flex items-center gap-1.5 px-4 py-2 text-black rounded-xl font-bold text-sm hover:scale-[1.02] active:scale-95 transition-all shadow-md shadow-orange-500/20 cursor-pointer"
-            >
-              <Plus size={16} />
-              Create Task
-            </button>
-          )}
         </div>
+
+        {/* Create Button (Admins only) */}
+        {user?.role === "admin" && (
+          <button
+            onClick={openCreateModal}
+            style={{
+              background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
+            }}
+            className="flex items-center gap-1.5 px-4 py-2 text-black rounded-2xl font-bold text-xs hover:scale-[1.02] active:scale-95 transition-all shadow-md shadow-orange-500/15 cursor-pointer"
+          >
+            <Plus size={16} />
+            <span>Create Task</span>
+          </button>
+        )}
       </div>
 
       {/* FILTER BAR */}
-      <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-5 flex flex-col sm:flex-row gap-4">
+      <div className="bg-card border border-border/80 rounded-[28px] shadow-xs p-5 flex flex-col sm:flex-row gap-3.5">
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search by task title or assignee..."
-          className="flex-1 px-4 py-2.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs transition-all duration-200"
+          className="flex-1 px-4 py-2.5 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs transition-all duration-200 placeholder:text-muted/60"
         />
 
         <select
           value={filterPriority}
           onChange={(e) => setFilterPriority(e.target.value)}
-          className="px-4 py-2.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer transition-all duration-200"
+          className="px-4 py-2.5 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer transition-all duration-200"
         >
           <option value="all">All Priorities</option>
           <option value="high">High Priority</option>
@@ -228,7 +227,7 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
           <select
             value={showAllStaffTasks ? "all" : "mine"}
             onChange={(e) => setShowAllStaffTasks(e.target.value === "all")}
-            className="px-4 py-2.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer transition-all duration-200"
+            className="px-4 py-2.5 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer transition-all duration-200"
           >
             <option value="mine">My Tasks ({activeStaffProfile?.name.split(" ")[0] || "Select Profile"})</option>
             <option value="all">All Staff Tasks</option>
@@ -246,17 +245,17 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
                 key={col.id}
                 onDragOver={onDragOver}
                 onDrop={(e) => onDrop(e, col.id)}
-                className={`border border-border/80 rounded-2xl shadow-xs p-5 flex flex-col h-[550px] md:h-[calc(100vh-270px)] min-h-[400px] board-column w-[88vw] md:w-auto shrink-0 snap-center bg-card ${col.bg}`}
+                className={`border border-border/80 rounded-[28px] shadow-xs p-5 flex flex-col h-[550px] md:h-[calc(100vh-270px)] min-h-[400px] board-column w-[88vw] md:w-auto shrink-0 snap-center bg-card ${col.bg}`}
                 style={{
                   contentVisibility: "auto",
                   containIntrinsicSize: "auto 300px auto 600px"
                 } as React.CSSProperties}
               >
-                <div className="flex items-center justify-between mb-4 pb-2 border-b border-border/60">
+                <div className="flex items-center justify-between mb-4 pb-3 border-b border-border/60">
                   <h3 className={`font-bold font-display text-sm ${col.text}`}>
                     {col.label}
                   </h3>
-                  <span className="text-xs bg-neutral-200 dark:bg-neutral-800 text-black dark:text-neutral-100 border border-neutral-300 dark:border-neutral-700 px-2.5 py-0.5 rounded-full font-bold">
+                  <span className="text-xs bg-neutral-200 dark:bg-neutral-800 text-black dark:text-neutral-100 border border-neutral-300 dark:border-neutral-700 px-2.5 py-0.5 rounded-full font-bold shadow-2xs">
                     {colTasks.length}
                   </span>
                 </div>
@@ -267,14 +266,14 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
                       key={task._id}
                       draggable={user?.role === "admin" || task.assignee?._id === (user?.email === "staff@ktmdecor.com" ? activeStaffProfile?._id : user?._id)}
                       onDragStart={(e) => onDragStart(e, task._id)}
-                      className={`p-4 rounded-md bg-card border transition-all duration-200 cursor-grab active:cursor-grabbing hover:border-accent hover:shadow-md ${
+                      className={`p-4 rounded-2xl bg-card border transition-all duration-200 cursor-grab active:cursor-grabbing hover:border-accent hover:shadow-md ${
                         task.pinned
-                          ? "border-accent/40 shadow-sm ring-1 ring-accent/15"
-                          : "border-border"
+                          ? "border-accent/50 shadow-xs ring-1 ring-accent/20"
+                          : "border-border/80"
                       }`}
                     >
                       <div className="flex items-start justify-between gap-2">
-                        <h4 className="font-semibold text-sm leading-snug break-words flex-1 line-clamp-2">
+                        <h4 className="font-semibold text-sm leading-snug break-words flex-1 line-clamp-2 text-foreground">
                           {task.title}
                         </h4>
                         <div className="flex items-center gap-1.5">
@@ -284,7 +283,7 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
                           {user?.role === "admin" && (
                             <button
                               onClick={() => togglePinTask(task._id)}
-                              className={`p-0.5 rounded hover:bg-border transition-colors ${
+                              className={`p-1 rounded-lg hover:bg-muted/20 transition-colors ${
                                 task.pinned ? "text-accent" : "text-muted"
                               }`}
                               title={task.pinned ? "Unpin task" : "Pin task"}
@@ -301,8 +300,8 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
 
                       <div className="mt-3 flex flex-col gap-2">
                         {/* Assignee & Dates */}
-                        <div className="flex items-center justify-between text-[10px] text-muted">
-                          <span className="flex items-center gap-1 font-semibold">
+                        <div className="flex items-center justify-between text-[11px] text-muted">
+                          <span className="flex items-center gap-1 font-semibold text-foreground/80">
                             <UserIcon size={12} className="text-accent" />
                             {task.assignee?.name || "Deleted User"}
                           </span>
@@ -313,14 +312,14 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
                         </div>
 
                         {/* Controls bar */}
-                        <div className="border-t border-border/50 pt-2 mt-1 flex items-center justify-between">
+                        <div className="border-t border-border/50 pt-2.5 mt-1 flex items-center justify-between">
                           <span
-                            className={`text-[9px] px-2 py-0.5 rounded font-semibold uppercase border ${
+                            className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase border ${
                               task.priority === "high"
-                                ? "border-red-500/25 text-red-600 dark:text-red-400 font-bold"
+                                ? "border-red-500/30 text-red-600 dark:text-red-400 bg-red-500/10"
                                 : task.priority === "medium"
-                                ? "border-amber-500/25 text-amber-600 dark:text-amber-400"
-                                : "border-green-500/25 text-green-600 dark:text-green-400"
+                                ? "border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10"
+                                : "border-green-500/30 text-green-600 dark:text-green-400 bg-green-500/10"
                             }`}
                           >
                             {task.priority}
@@ -332,17 +331,17 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
                               <>
                                 <button
                                   onClick={() => openEditModal(task)}
-                                  className="p-1 rounded bg-accent text-white hover:bg-accent-dark shadow-sm"
+                                  className="p-1.5 rounded-xl bg-accent/15 text-accent hover:bg-accent hover:text-white transition-all"
                                   title="Edit"
                                 >
-                                  <Edit2 size={11} />
+                                  <Edit2 size={12} />
                                 </button>
                                 <button
                                   onClick={() => deleteTask(task._id)}
-                                  className="p-1 rounded bg-red-600 text-white hover:bg-red-700 shadow-sm"
+                                  className="p-1.5 rounded-xl bg-red-500/15 text-red-600 hover:bg-red-600 hover:text-white transition-all"
                                   title="Delete"
                                 >
-                                  <Trash2 size={11} />
+                                  <Trash2 size={12} />
                                 </button>
                               </>
                             ) : (
@@ -352,28 +351,28 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
                                   {col.id === "in_progress" && (
                                     <button
                                       onClick={() => updateTaskStatus(task._id, "todo")}
-                                      className="p-1 hover:bg-border rounded text-muted"
+                                      className="p-1.5 hover:bg-muted/20 rounded-xl text-muted"
                                       title="Move to Todo"
                                     >
-                                      <ArrowLeft size={11} />
+                                      <ArrowLeft size={12} />
                                     </button>
                                   )}
                                   {col.id === "todo" && (
                                     <button
                                       onClick={() => updateTaskStatus(task._id, "in_progress")}
-                                      className="p-1 hover:bg-border rounded text-accent"
+                                      className="p-1.5 hover:bg-muted/20 rounded-xl text-accent"
                                       title="Move to In Progress"
                                     >
-                                      <ArrowRight size={11} />
+                                      <ArrowRight size={12} />
                                     </button>
                                   )}
                                   {col.id === "in_progress" && (
                                     <button
                                       onClick={() => updateTaskStatus(task._id, "done")}
-                                      className="p-1 bg-green-600 text-white hover:bg-green-700 rounded shadow-sm"
+                                      className="p-1.5 bg-green-600 text-white hover:bg-green-700 rounded-xl shadow-xs"
                                       title="Move to Done"
                                     >
-                                      <ArrowRight size={11} />
+                                      <ArrowRight size={12} />
                                     </button>
                                   )}
                                 </div>
@@ -386,7 +385,7 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
                   ))}
 
                   {colTasks.length === 0 && (
-                    <div className="border-2 border-dashed border-border/40 rounded-lg p-8 text-center text-xs text-muted h-32 flex items-center justify-center">
+                    <div className="border border-dashed border-border/60 rounded-2xl p-8 text-center text-xs text-muted h-32 flex items-center justify-center">
                       No tasks in this list
                     </div>
                   )}
@@ -397,12 +396,12 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
         </div>
       ) : (
         /* DETAILED LIST VIEW */
-        <div className="bg-card border border-border/80 rounded-2xl shadow-sm overflow-hidden">
+        <div className="bg-card border border-border/80 rounded-[28px] shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm border-collapse min-w-[800px]">
               <thead>
-                <tr className="bg-card border-b border-border text-muted font-display font-semibold text-xs uppercase tracking-wider">
-                  <th className="p-4 w-12">Pin</th>
+                <tr className="bg-muted/10 border-b border-border/70 text-muted font-display font-semibold text-xs uppercase tracking-wider">
+                  <th className="p-4 w-12 text-center">Pin</th>
                   <th className="p-4">Task Title</th>
                   <th className="p-4">Assignee</th>
                   <th className="p-4">Due Date</th>
@@ -411,7 +410,7 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
                   {user?.role === "admin" && <th className="p-4 text-right">Actions</th>}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-y divide-border/60">
                 {filteredTasks.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="p-8 text-center text-muted">
@@ -422,29 +421,29 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
                   filteredTasks.map((task) => (
                     <tr
                       key={task._id}
-                      className={`hover:bg-accent/5 transition-colors ${
+                      className={`hover:bg-muted/10 transition-colors ${
                         task.pinned ? "bg-accent/5 dark:bg-accent/10" : ""
                       }`}
                     >
-                      <td className="p-4">
+                      <td className="p-4 text-center">
                         {user?.role === "admin" ? (
                           <button
                             onClick={() => togglePinTask(task._id)}
-                            className={`${task.pinned ? "text-accent" : "text-muted"} hover:text-accent`}
+                            className={`${task.pinned ? "text-accent" : "text-muted"} hover:text-accent p-1 rounded-lg`}
                           >
                             <Pin size={16} className={task.pinned ? "rotate-45 fill-accent" : "rotate-45"} />
                           </button>
                         ) : (
-                          task.pinned && <Pin size={16} className="text-accent fill-accent rotate-45" />
+                          task.pinned && <Pin size={16} className="text-accent fill-accent rotate-45 inline-block" />
                         )}
                       </td>
                       <td className="p-4">
-                        <div className="font-semibold">{task.title}</div>
+                        <div className="font-semibold text-foreground">{task.title}</div>
                         <div className="text-xs text-muted mt-0.5 line-clamp-1">
                           {task.description || "No description."}
                         </div>
                       </td>
-                      <td className="p-4 text-xs font-medium text-muted">
+                      <td className="p-4 text-xs font-semibold text-foreground/80">
                         {task.assignee?.name || "Deleted User"}
                       </td>
                       <td className="p-4 text-xs text-muted font-medium">
@@ -452,12 +451,12 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
                       </td>
                       <td className="p-4">
                         <span
-                          className={`text-[9px] px-2 py-0.5 rounded font-semibold uppercase border ${
+                          className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase border ${
                             task.priority === "high"
-                              ? "border-red-500/25 text-red-600 dark:text-red-400 font-bold"
+                              ? "border-red-500/30 text-red-600 dark:text-red-400 bg-red-500/10"
                               : task.priority === "medium"
-                              ? "border-amber-500/25 text-amber-600 dark:text-amber-400"
-                              : "border-green-500/25 text-green-600 dark:text-green-400"
+                              ? "border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10"
+                              : "border-green-500/30 text-green-600 dark:text-green-400 bg-green-500/10"
                           }`}
                         >
                           {task.priority}
@@ -466,12 +465,12 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
                       <td className="p-4">
                         {user?.role === "admin" || task.assignee?._id !== (user?.email === "staff@ktmdecor.com" ? activeStaffProfile?._id : user?._id) ? (
                           <span
-                            className={`text-[9px] px-2 py-0.5 rounded font-semibold uppercase border ${
+                            className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase border ${
                               task.status === "done"
-                                ? "border-green-500/25 text-green-600 dark:text-green-400"
+                                ? "border-green-500/30 text-green-600 dark:text-green-400 bg-green-500/10"
                                 : task.status === "in_progress"
-                                ? "border-amber-500/25 text-amber-600 dark:text-amber-400"
-                                : "border-border text-muted"
+                                ? "border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10"
+                                : "border-border text-muted bg-muted/10"
                             }`}
                           >
                             {task.status.replace("_", " ")}
@@ -480,7 +479,7 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
                           <select
                             value={task.status}
                             onChange={(e) => updateTaskStatus(task._id, e.target.value as Task["status"])}
-                            className="px-2 py-1 text-xs border border-border bg-card rounded"
+                            className="px-3 py-1.5 text-xs border border-border/80 bg-background/60 rounded-xl focus:outline-none focus:ring-1 focus:ring-accent"
                           >
                             <option value="todo">To Do</option>
                             <option value="in_progress">In Progress</option>
@@ -490,18 +489,18 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
                       </td>
                       {user?.role === "admin" && (
                         <td className="p-4 text-right">
-                          <div className="flex justify-end gap-2">
+                          <div className="flex justify-end gap-1.5">
                             <button
                               onClick={() => openEditModal(task)}
-                              className="p-1 text-white bg-accent hover:bg-accent-dark rounded transition-all shadow-sm"
+                              className="p-1.5 text-accent bg-accent/15 hover:bg-accent hover:text-white rounded-xl transition-all"
                             >
-                              <Edit2 size={14} />
+                              <Edit2 size={13} />
                             </button>
                             <button
                               onClick={() => deleteTask(task._id)}
-                              className="p-1 text-white bg-red-600 hover:bg-red-700 rounded transition-all shadow-sm"
+                              className="p-1.5 text-red-600 bg-red-500/15 hover:bg-red-600 hover:text-white rounded-xl transition-all"
                             >
-                              <Trash2 size={14} />
+                              <Trash2 size={13} />
                             </button>
                           </div>
                         </td>
@@ -516,57 +515,57 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
       )}
 
       {showModal && (
-        <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4 pt-20 sm:p-4 overflow-y-auto">
-          <div className="bg-card w-full max-w-md rounded-lg border border-border p-4 sm:p-6 shadow-2xl animate-scale-up max-h-[85vh] sm:max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4 border-b border-border pb-2">
-              <h2 className="text-lg font-bold font-display flex items-center gap-2">
-                {editingTask ? <Edit2 size={20} className="text-accent" /> : <Plus size={20} className="text-accent" />}
+        <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-xs p-4 pt-20 sm:p-4 overflow-y-auto">
+          <div className="bg-card w-full max-w-md rounded-[28px] border border-border/80 p-6 sm:p-7 shadow-2xl animate-scale-up max-h-[85vh] sm:max-h-[90vh] overflow-y-auto space-y-4">
+            <div className="flex items-center justify-between border-b border-border/60 pb-3">
+              <h2 className="text-base font-bold font-display flex items-center gap-2 text-foreground">
+                {editingTask ? <Edit2 size={18} className="text-accent" /> : <Plus size={18} className="text-accent" />}
                 {editingTask ? "Modify Assigned Work" : "Assign New Work"}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="text-muted hover:text-foreground"
+                className="p-1.5 rounded-xl text-muted hover:text-foreground hover:bg-muted/20 transition-colors"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
             
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4 pt-1">
               <div>
-                <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-1.5">
                   Task Title
                 </label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm"
+                  className="w-full px-4 py-2.5 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold placeholder:text-muted/60"
                   placeholder="e.g. Design Kitchen Blueprint Layout"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-1.5">
                   Description
                 </label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full h-24 p-3 border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-accent resize-none text-sm"
+                  className="w-full h-24 p-3.5 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent resize-none text-xs font-medium placeholder:text-muted/60 leading-relaxed"
                   placeholder="Detail the deliverable specifications or instructions for the staff..."
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3.5">
                 <div>
-                  <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-1.5">
                     Assignee Staff
                   </label>
                   <select
                     value={assigneeId}
                     onChange={(e) => setAssigneeId(e.target.value)}
-                    className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm"
+                    className="w-full px-3.5 py-2.5 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold"
                     required
                   >
                     {users
@@ -580,7 +579,7 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-1.5">
                     Due Date (BS)
                   </label>
                   <NepaliDatePicker
@@ -591,10 +590,8 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
                 </div>
               </div>
 
-
-
               <div>
-                <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-1.5">
                   Priority
                 </label>
                 <div className="flex gap-2">
@@ -603,14 +600,14 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
                       key={p}
                       type="button"
                       onClick={() => setPriority(p)}
-                      className={`flex-1 py-2 text-xs font-bold uppercase rounded border transition-all ${
+                      className={`flex-1 py-2 text-xs font-bold uppercase rounded-xl border transition-all ${
                         priority === p
                           ? p === "high"
-                            ? "bg-red-500 text-white border-red-500"
+                            ? "bg-red-500 text-white border-red-500 shadow-xs"
                             : p === "medium"
-                            ? "bg-amber-500 text-white border-amber-500"
-                            : "bg-green-500 text-white border-green-500"
-                          : "border-border text-muted hover:bg-border"
+                            ? "bg-amber-500 text-white border-amber-500 shadow-xs"
+                            : "bg-green-500 text-white border-green-500 shadow-xs"
+                          : "border-border/80 text-muted hover:bg-muted/20"
                       }`}
                     >
                       {p}
@@ -619,11 +616,11 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 border-t border-border pt-4 mt-2">
+              <div className="flex justify-end gap-2.5 border-t border-border/60 pt-4 mt-2">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 border border-border rounded text-sm hover:bg-border transition-colors"
+                  className="px-4 py-2.5 border border-border/80 bg-card text-foreground rounded-xl text-xs font-bold hover:bg-muted/20 transition-colors"
                 >
                   Cancel
                 </button>
@@ -632,7 +629,7 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
                   style={{
                     background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
                   }}
-                  className="px-5 py-2 text-black rounded-xl text-sm font-bold transition-all shadow-md shadow-orange-500/20 hover:scale-[1.02] active:scale-95 cursor-pointer"
+                  className="px-5 py-2.5 text-black rounded-xl text-xs font-bold transition-all shadow-md shadow-orange-500/15 hover:scale-[1.02] active:scale-95 cursor-pointer"
                 >
                   {editingTask ? "Save Task" : "Assign Task"}
                 </button>

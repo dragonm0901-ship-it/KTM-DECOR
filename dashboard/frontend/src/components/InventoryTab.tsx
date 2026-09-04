@@ -172,100 +172,97 @@ export const InventoryTab: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-card p-4 rounded-lg border border-border">
-        <div>
-          <h1 className="text-2xl font-bold font-display flex items-center gap-2">
-            <Package className="text-accent" />
-            Material Inventory
-          </h1>
-          <p className="text-xs text-muted mt-1">
-            Track stock levels of raw materials, neon colors, spacers, converters, and acrylic backboards.
-          </p>
-        </div>
+      {/* Top Actions Bar */}
+      <div className="flex items-center justify-end gap-3">
+        <button
+          onClick={handleExportClick}
+          disabled={exporting}
+          className="flex items-center justify-center gap-1.5 py-2 px-4 bg-card border border-border/80 hover:bg-muted/20 text-foreground rounded-2xl font-bold text-xs transition-all shadow-xs h-10 disabled:opacity-50 cursor-pointer"
+        >
+          <Package size={15} />
+          {exporting ? "Exporting..." : "Export CSV"}
+        </button>
 
-        <div className="flex flex-wrap items-center gap-3 self-start md:self-auto">
+        {user?.role === "admin" && (
           <button
-            onClick={handleExportClick}
-            disabled={exporting}
-            className="flex items-center justify-center gap-1.5 py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-bold text-xs transition-all h-9 disabled:opacity-50"
+            onClick={handleOpenAddModal}
+            style={{
+              background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
+            }}
+            className="flex items-center justify-center gap-1.5 py-2 px-5 text-black rounded-2xl font-bold text-xs transition-all shadow-md shadow-orange-500/20 hover:scale-[1.02] active:scale-95 h-10 cursor-pointer"
           >
-            <Package size={16} />
-            {exporting ? "Exporting..." : "Export CSV"}
+            <Plus size={16} />
+            Register Material
           </button>
-
-          {user?.role === "admin" && (
-            <button
-              onClick={handleOpenAddModal}
-              style={{
-                background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
-              }}
-              className="flex items-center justify-center gap-1.5 py-2 px-4 text-black rounded-xl font-bold text-xs transition-all shadow-md shadow-orange-500/20 hover:scale-[1.02] active:scale-95 h-9 cursor-pointer"
-            >
-              <Plus size={16} />
-              Register New Material
-            </button>
-          )}
-        </div>
+        )}
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-6 flex items-center gap-4">
-          <div className="h-12 w-12 rounded-xl bg-blue-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        <div className="bg-card border border-border/80 rounded-[28px] shadow-xs p-6 flex items-center gap-4 hover:shadow-md transition-all">
+          <div
+            style={{ background: "linear-gradient(135deg, #60A5FA 0%, #3B82F6 50%, #1D4ED8 100%)" }}
+            className="h-12 w-12 rounded-2xl text-white flex items-center justify-center flex-shrink-0 shadow-md shadow-blue-500/20"
+          >
             <Package size={22} />
           </div>
           <div>
             <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Registered Materials</span>
-            <h3 className="text-lg font-bold mt-1 text-foreground font-display">{totalItems} items</h3>
-            <p className="text-[9px] text-muted mt-0.5 font-medium">Active items in inventory</p>
+            <h3 className="text-xl font-bold mt-1 text-foreground font-display">{totalItems} items</h3>
+            <p className="text-[10px] text-muted mt-0.5 font-medium">Active items in inventory</p>
           </div>
         </div>
 
-        <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-6 flex items-center gap-4">
-          <div className="h-12 w-12 rounded-xl bg-amber-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
+        <div className="bg-card border border-border/80 rounded-[28px] shadow-xs p-6 flex items-center gap-4 hover:shadow-md transition-all">
+          <div
+            style={{ background: "linear-gradient(135deg, #FBBF24 0%, #F59E0B 50%, #D97706 100%)" }}
+            className="h-12 w-12 rounded-2xl text-white flex items-center justify-center flex-shrink-0 shadow-md shadow-amber-500/20"
+          >
             <SlidersHorizontal size={22} />
           </div>
           <div>
             <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Low Stock Alerts</span>
-            <h3 className="text-lg font-bold mt-1 text-amber-500 font-display">{lowStockItems} items</h3>
-            <p className="text-[9px] text-muted mt-0.5 font-medium">Need replenishment soon</p>
+            <h3 className="text-xl font-bold mt-1 text-amber-500 font-display">{lowStockItems} items</h3>
+            <p className="text-[10px] text-muted mt-0.5 font-medium">Need replenishment soon</p>
           </div>
         </div>
 
-        <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-6 flex items-center gap-4">
-          <div className="h-12 w-12 rounded-xl bg-red-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
+        <div className="bg-card border border-border/80 rounded-[28px] shadow-xs p-6 flex items-center gap-4 hover:shadow-md transition-all">
+          <div
+            style={{ background: "linear-gradient(135deg, #F87171 0%, #EF4444 50%, #DC2626 100%)" }}
+            className="h-12 w-12 rounded-2xl text-white flex items-center justify-center flex-shrink-0 shadow-md shadow-red-500/20"
+          >
             <Minus size={22} />
           </div>
           <div>
             <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Out of Stock</span>
-            <h3 className="text-lg font-bold mt-1 text-red-500 font-display">{outOfStockItems} items</h3>
-            <p className="text-[9px] text-muted mt-0.5 font-medium">Production blocker risk</p>
+            <h3 className="text-xl font-bold mt-1 text-red-500 font-display">{outOfStockItems} items</h3>
+            <p className="text-[10px] text-muted mt-0.5 font-medium">Production blocker risk</p>
           </div>
         </div>
       </div>
 
       {/* Filter and Table */}
-      <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-5 flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="bg-card border border-border/80 rounded-[28px] shadow-xs p-5 flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="relative w-full md:w-80">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-2.5 pl-10 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs transition-all duration-200"
+            className="w-full px-4 py-2.5 pl-10 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold placeholder:text-muted/60 transition-all"
             placeholder="Search materials by name or category..."
           />
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-muted" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" />
         </div>
 
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto text-xs font-semibold">
           {/* Category Filter */}
           <div className="flex items-center gap-2">
-            <span className="text-muted font-medium">Category:</span>
+            <span className="text-muted font-medium text-[11px]">Category:</span>
             <select
               value={selectedCategoryFilter}
               onChange={(e) => setSelectedCategoryFilter(e.target.value)}
-              className="px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer transition-all duration-200"
+              className="px-3.5 py-2 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer transition-all"
             >
               <option value="all">All Categories</option>
               {existingCategories.map((cat) => (
@@ -278,11 +275,11 @@ export const InventoryTab: React.FC = () => {
 
           {/* Stock Filter */}
           <div className="flex items-center gap-2">
-            <span className="text-muted font-medium">Stock Status:</span>
+            <span className="text-muted font-medium text-[11px]">Stock Status:</span>
             <select
               value={stockFilter}
               onChange={(e) => setStockFilter(e.target.value)}
-              className="px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer transition-all duration-200"
+              className="px-3.5 py-2 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer transition-all"
             >
               <option value="all">All Statuses</option>
               <option value="in">In Stock Only</option>
@@ -294,11 +291,11 @@ export const InventoryTab: React.FC = () => {
       </div>
 
       {/* Inventory List Table */}
-      <div className="bg-card border border-border/80 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-card border border-border/80 rounded-[28px] shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse min-w-[800px]">
             <thead>
-              <tr className="bg-card text-muted border-b border-border uppercase font-semibold tracking-wider text-[10px]">
+              <tr className="bg-muted/10 text-muted border-b border-border/70 uppercase font-bold tracking-wider text-[10px]">
                 <th className="p-4">Material Name</th>
                 <th className="p-4">Category</th>
                 <th className="p-4 text-center">Stock Level</th>
@@ -308,7 +305,7 @@ export const InventoryTab: React.FC = () => {
                 {user?.role === "admin" && <th className="p-4 text-right">Actions</th>}
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/80">
+            <tbody className="divide-y divide-border/60">
               {filteredItems.length === 0 ? (
                 <tr>
                   <td colSpan={user?.role === "admin" ? 7 : 5} className="p-8 text-center text-muted">
@@ -319,7 +316,7 @@ export const InventoryTab: React.FC = () => {
                 filteredItems.map((item) => {
                   const status = getStockStatus(item);
                   return (
-                    <tr key={item._id} className="hover:bg-border/20 transition-colors">
+                    <tr key={item._id} className="hover:bg-muted/10 transition-colors">
                       <td className="p-4 font-bold text-foreground">
                         {item.name}
                       </td>
@@ -330,7 +327,7 @@ export const InventoryTab: React.FC = () => {
                         {item.quantity} <span className="text-[10px] font-normal text-muted">{item.unit}</span>
                       </td>
                       <td className="p-4 text-center">
-                        <span className={`px-2.5 py-0.5 rounded text-[9px] font-bold border uppercase tracking-wider ${status.badge}`}>
+                        <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold border uppercase tracking-wider shadow-2xs ${status.badge}`}>
                           {status.label}
                         </span>
                       </td>
@@ -342,14 +339,14 @@ export const InventoryTab: React.FC = () => {
                           <div className="flex items-center justify-center gap-1.5">
                             <button
                               onClick={() => handleAdjustQuantity(item, -1)}
-                              className="p-1 bg-red-600 rounded text-white hover:bg-red-700 border border-red-600 transition-all shadow-sm"
+                              className="p-1.5 bg-card border border-border/80 rounded-xl text-foreground hover:bg-muted/20 transition-all shadow-2xs cursor-pointer"
                               title="Decrement stock by 1"
                             >
                               <Minus size={11} />
                             </button>
                             <button
                               onClick={() => handleAdjustQuantity(item, 1)}
-                              className="p-1 bg-green-600 rounded text-white hover:bg-green-700 border border-green-600 transition-all shadow-sm"
+                              className="p-1.5 bg-card border border-border/80 rounded-xl text-foreground hover:bg-muted/20 transition-all shadow-2xs cursor-pointer"
                               title="Increment stock by 1"
                             >
                               <Plus size={11} />
@@ -362,14 +359,14 @@ export const InventoryTab: React.FC = () => {
                           <div className="flex items-center justify-end gap-1.5">
                             <button
                               onClick={() => handleOpenEditModal(item)}
-                              className="p-1.5 bg-accent rounded text-white hover:bg-accent-dark transition-colors shadow-sm"
+                              className="p-1.5 bg-card border border-border/80 rounded-xl text-foreground hover:bg-muted/20 transition-all shadow-2xs cursor-pointer"
                               title="Edit Record"
                             >
                               <Edit2 size={13} />
                             </button>
                             <button
                               onClick={() => handleDelete(item._id)}
-                              className="p-1.5 bg-red-600 rounded text-white hover:bg-red-700 transition-colors shadow-sm"
+                              className="p-1.5 bg-card border border-border/80 rounded-xl text-red-500 hover:bg-red-500/10 transition-all shadow-2xs cursor-pointer"
                               title="Delete Record"
                             >
                               <Trash2 size={13} />
@@ -389,43 +386,48 @@ export const InventoryTab: React.FC = () => {
       {/* Add/Edit Modal */}
       {showModal && (
         <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4 pt-20 sm:p-4 overflow-y-auto">
-          <div className="bg-card w-full max-w-md rounded-lg border border-border p-6 shadow-2xl animate-scale-up max-h-[85vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4 border-b border-border pb-2">
-              <h2 className="text-lg font-bold font-display flex items-center gap-2">
-                <Package className="text-accent" />
+          <div className="bg-card w-full max-w-md rounded-[28px] border border-border/80 p-6 sm:p-7 shadow-2xl animate-scale-up max-h-[85vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-5 border-b border-border/60 pb-3">
+              <h2 className="text-base sm:text-lg font-bold font-display flex items-center gap-2.5">
+                <div
+                  style={{ background: "linear-gradient(135deg, #60A5FA 0%, #3B82F6 50%, #1D4ED8 100%)" }}
+                  className="p-2 text-white rounded-xl shadow-xs shrink-0"
+                >
+                  <Package size={18} />
+                </div>
                 {editingItem ? "Edit Material Record" : "Register New Material"}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="text-muted hover:text-foreground"
+                className="text-muted hover:text-foreground p-1.5 rounded-xl hover:bg-muted/20 transition-all"
               >
                 <X size={20} />
               </button>
             </div>
 
             {formError && (
-              <div className="mb-4 p-3 text-xs bg-red-600 border border-red-600 text-white rounded font-semibold">
+              <div className="mb-4 p-3.5 text-xs bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl font-semibold">
                 {formError}
               </div>
             )}
 
             <form onSubmit={handleAddSubmit} className="space-y-4 text-left">
               <div>
-                <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1">
+                <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1.5">
                   Material Name *
                 </label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm"
+                  className="w-full px-3.5 py-2.5 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold transition-all"
                   placeholder="e.g. Red Neon Flex Flexcoils (6mm)"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1">
+                <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1.5">
                   Category *
                 </label>
                 {isCreatingNewCategory ? (
@@ -435,14 +437,14 @@ export const InventoryTab: React.FC = () => {
                       value={newCategoryName}
                       onChange={(e) => setNewCategoryName(e.target.value)}
                       placeholder="e.g. Connectors"
-                      className="flex-1 px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm"
+                      className="flex-1 px-3.5 py-2.5 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold transition-all"
                       required
                     />
                     {existingCategories.length > 0 && (
                       <button
                         type="button"
                         onClick={() => setIsCreatingNewCategory(false)}
-                        className="px-3 border border-border rounded text-xs hover:bg-border text-muted transition-colors font-bold"
+                        className="px-4 border border-border/80 rounded-2xl text-xs hover:bg-muted/20 text-foreground transition-all font-bold cursor-pointer"
                       >
                         Cancel
                       </button>
@@ -459,7 +461,7 @@ export const InventoryTab: React.FC = () => {
                           setCategory(e.target.value);
                         }
                       }}
-                      className="flex-1 px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm font-semibold"
+                      className="flex-1 px-3.5 py-2.5 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer transition-all"
                     >
                       {existingCategories.map((cat) => (
                         <option key={cat} value={cat}>
@@ -474,28 +476,28 @@ export const InventoryTab: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1">
+                  <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1.5">
                     Stock Quantity *
                   </label>
                   <input
                     type="number"
                     value={quantity}
                     onChange={(e) => setQuantity(e.target.value)}
-                    className="w-full px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm font-bold"
+                    className="w-full px-3.5 py-2.5 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-bold transition-all"
                     placeholder="Quantity"
                     min="0"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1">
+                  <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1.5">
                     Unit Type *
                   </label>
                   <input
                     type="text"
                     value={unit}
                     onChange={(e) => setUnit(e.target.value)}
-                    className="w-full px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm"
+                    className="w-full px-3.5 py-2.5 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold transition-all"
                     placeholder="e.g. rolls, sheets, pcs"
                     required
                   />
@@ -503,32 +505,35 @@ export const InventoryTab: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1">
+                <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1.5">
                   Alert Limit *
                 </label>
                 <input
                   type="number"
                   value={alertLevel}
                   onChange={(e) => setAlertLevel(e.target.value)}
-                  className="w-full px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm font-bold"
+                  className="w-full px-3.5 py-2.5 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-bold transition-all"
                   placeholder="e.g. 5"
                   min="0"
                   required
                 />
               </div>
 
-              <div className="flex justify-end gap-3 border-t border-border pt-4 mt-4">
+              <div className="flex justify-end gap-3 border-t border-border/60 pt-4 mt-5">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 border border-border rounded text-xs hover:bg-border transition-colors font-semibold"
+                  className="px-5 py-2.5 border border-border/80 rounded-2xl text-xs hover:bg-muted/20 transition-all font-bold text-foreground cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-4 py-2 bg-accent text-white rounded text-xs hover:bg-accent-dark transition-colors shadow-md shadow-accent/15 font-bold disabled:opacity-50"
+                  style={{
+                    background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
+                  }}
+                  className="px-6 py-2.5 text-black rounded-2xl text-xs font-bold transition-all shadow-md shadow-orange-500/20 hover:scale-[1.02] active:scale-95 cursor-pointer disabled:opacity-50"
                 >
                   {submitting ? "Saving..." : editingItem ? "Save Changes" : "Register Material"}
                 </button>

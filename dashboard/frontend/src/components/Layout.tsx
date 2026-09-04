@@ -28,7 +28,6 @@ import {
   Search,
   ChevronLeft,
   ChevronRight,
-  ChevronsUpDown,
 } from "lucide-react";
 
 interface LayoutProps {
@@ -149,14 +148,18 @@ export const Layout: React.FC<LayoutProps> = ({
         }`}
       >
         {/* Top Header of Aside: Brand Logo + Sidebar Toggle (No horizontal line) */}
-        <div className="flex items-center justify-between px-5 py-5">
+        <div
+          className={`flex items-center py-5 transition-all duration-300 ease-in-out ${
+            sidebarOpen ? "justify-between px-5" : "justify-center px-0 w-full"
+          }`}
+        >
           {sidebarOpen ? (
             <>
-              <div className="flex items-center gap-2 overflow-hidden">
+              <div className="flex items-center gap-2 overflow-hidden shrink-0">
                 <img
                   src="/admin/logo/ktm%20decor.svg"
                   alt="KTM DECOR"
-                  className="h-8 w-auto object-contain dark:invert dark:hue-rotate-180 transition-all duration-300 ease-in-out"
+                  className="w-11 h-11 min-w-[44px] min-h-[44px] max-w-[44px] max-h-[44px] shrink-0 rounded-2xl border border-border/70 shadow-xs object-cover dark:invert dark:hue-rotate-180 transition-all duration-300 ease-in-out"
                 />
               </div>
               <button
@@ -173,7 +176,7 @@ export const Layout: React.FC<LayoutProps> = ({
               <img
                 src="/admin/logo/ktm%20decor.svg"
                 alt="KTM DECOR"
-                className="h-6 w-auto max-w-[40px] object-contain dark:invert dark:hue-rotate-180 transition-all duration-300 ease-in-out"
+                className="w-11 h-11 min-w-[44px] min-h-[44px] max-w-[44px] max-h-[44px] shrink-0 rounded-2xl border border-border/70 shadow-xs object-cover dark:invert dark:hue-rotate-180 transition-all duration-300 ease-in-out"
               />
               <button
                 onClick={() => setSidebarOpen(true)}
@@ -196,7 +199,7 @@ export const Layout: React.FC<LayoutProps> = ({
                   {cat.title}
                 </div>
               ) : (
-                catIdx > 0 && <div className="border-t border-border/40 my-2" />
+                catIdx > 0 && <div className="w-8 mx-auto border-t border-border/40 my-2" />
               )}
               {cat.items.map((item) => {
                 const Icon = item.icon;
@@ -213,30 +216,30 @@ export const Layout: React.FC<LayoutProps> = ({
                           }
                         : undefined
                     }
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-medium transition-all duration-300 ease-in-out group relative cursor-pointer ${
+                    className={`flex items-center rounded-2xl text-sm font-medium transition-all duration-300 ease-in-out group relative cursor-pointer ${
+                      sidebarOpen
+                        ? "w-full gap-3 px-3 py-2.5"
+                        : "w-11 h-11 mx-auto justify-center p-0"
+                    } ${
                       isActive
                         ? "text-black font-bold shadow-md shadow-orange-500/15"
                         : "text-muted hover:text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800/60"
-                    } ${!sidebarOpen ? "justify-center px-0" : ""}`}
+                    }`}
                     title={!sidebarOpen ? item.label : undefined}
                   >
                     <Icon
-                      size={19}
+                      size={20}
                       className={`shrink-0 transition-colors duration-200 ${
                         isActive
                           ? "text-black"
                           : "text-muted group-hover:text-foreground"
                       }`}
                     />
-                    <span
-                      className={`truncate transition-all duration-300 ease-in-out ${
-                        sidebarOpen
-                          ? "opacity-100 max-w-[160px]"
-                          : "opacity-0 max-w-0 pointer-events-none"
-                      }`}
-                    >
-                      {item.label}
-                    </span>
+                    {sidebarOpen && (
+                      <span className="truncate transition-all duration-300 ease-in-out opacity-100 max-w-[160px]">
+                        {item.label}
+                      </span>
+                    )}
 
                     {/* Tooltip when collapsed */}
                     {!sidebarOpen && (
@@ -251,60 +254,60 @@ export const Layout: React.FC<LayoutProps> = ({
           ))}
         </div>
 
-        {/* Bottom Section: Workspace Pill */}
-        <div className="p-3">
-
-          {/* Workspace Pill Card (Identical to reference image, KTM DECOR logo) */}
-          <div
-            className={`mt-1.5 rounded-2xl bg-neutral-100 dark:bg-neutral-800/60 border border-border/70 p-2 flex items-center justify-between gap-2.5 transition-all duration-300 ease-in-out hover:bg-neutral-200/60 dark:hover:bg-neutral-800 select-none ${
-              !sidebarOpen ? "justify-center p-1.5" : ""
-            }`}
-          >
-            {sidebarOpen ? (
-              <>
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="h-8 w-8 rounded-xl bg-white dark:bg-neutral-800 p-1 border border-border/60 flex items-center justify-center shrink-0 shadow-xs">
+        {/* Bottom Section: User & Logout */}
+        <div className={`p-3 ${!sidebarOpen ? "flex items-center justify-center" : ""}`}>
+          {sidebarOpen ? (
+            <div className="mt-1.5 rounded-2xl bg-neutral-100 dark:bg-neutral-800/60 border border-border/70 p-2.5 flex items-center justify-between gap-2.5 transition-all duration-300 ease-in-out hover:bg-neutral-200/60 dark:hover:bg-neutral-800 select-none">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="h-9 w-9 rounded-xl bg-white dark:bg-neutral-800 p-1 border border-border/60 flex items-center justify-center shrink-0 shadow-xs overflow-hidden">
+                  {(user as any)?.avatar ? (
+                    <img
+                      src={(user as any).avatar}
+                      alt={user?.name || "User"}
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+                  ) : (
                     <img
                       src="/admin/logo/ktm%20decor.svg"
                       alt="KTM DECOR"
                       className="h-5 w-auto object-contain dark:invert dark:hue-rotate-180"
                     />
-                  </div>
-                  <div className="min-w-0">
-                    <span className="text-[10px] text-muted font-medium block leading-none">
-                      Workspace
-                    </span>
-                    <span className="text-xs font-bold text-foreground block truncate leading-tight mt-0.5">
-                      KTM DECOR
-                    </span>
-                  </div>
+                  )}
                 </div>
-                <div className="flex items-center gap-1 shrink-0">
-                  <button
-                    onClick={logout}
-                    title="Logout"
-                    className="p-1 rounded-lg hover:bg-red-500/10 text-muted hover:text-red-500 transition-colors cursor-pointer"
-                    aria-label="Logout"
-                  >
-                    <LogOut size={16} />
-                  </button>
-                  <ChevronsUpDown size={15} className="text-muted/60" />
+                <div className="min-w-0">
+                  <span className="text-[10px] text-muted font-medium block leading-none capitalize truncate">
+                    {user?.role ? `${user.role}` : "Workspace"}
+                  </span>
+                  <span className="text-xs font-bold text-foreground block truncate leading-tight mt-1">
+                    {user?.name || "KTM DECOR"}
+                  </span>
                 </div>
-              </>
-            ) : (
+              </div>
               <button
                 onClick={logout}
-                title="Logout (KTM DECOR)"
-                className="h-8 w-8 rounded-xl p-1 bg-white dark:bg-neutral-800 hover:bg-red-500/10 border border-border/60 flex items-center justify-center transition-all duration-300 ease-in-out shadow-xs cursor-pointer"
+                title="Logout"
+                style={{
+                  background: "linear-gradient(135deg, #EF4444 0%, #DC2626 50%, #B91C1C 100%)",
+                }}
+                className="h-9 w-9 rounded-xl flex items-center justify-center text-white shadow-sm shadow-red-500/25 hover:shadow-md hover:shadow-red-500/40 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer shrink-0"
+                aria-label="Logout"
               >
-                <img
-                  src="/admin/logo/ktm%20decor.svg"
-                  alt="KTM DECOR"
-                  className="h-4.5 w-auto object-contain dark:invert dark:hue-rotate-180"
-                />
+                <LogOut size={17} strokeWidth={2.4} className="text-white" />
               </button>
-            )}
-          </div>
+            </div>
+          ) : (
+            <button
+              onClick={logout}
+              title={`Logout (${user?.name || "User"})`}
+              style={{
+                background: "linear-gradient(135deg, #EF4444 0%, #DC2626 50%, #B91C1C 100%)",
+              }}
+              className="w-11 h-11 rounded-2xl flex items-center justify-center text-white shadow-md shadow-red-500/25 hover:shadow-lg hover:shadow-red-500/40 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer mx-auto"
+              aria-label="Logout"
+            >
+              <LogOut size={20} strokeWidth={2.4} className="text-white" />
+            </button>
+          )}
         </div>
       </aside>
 
@@ -565,7 +568,7 @@ export const Layout: React.FC<LayoutProps> = ({
                 <img
                   src="/admin/logo/ktm%20decor.svg"
                   alt="KTM DECOR"
-                  className="h-7 w-auto object-contain dark:invert dark:hue-rotate-180"
+                  className="h-10.5 w-10.5 rounded-2xl border border-border/70 shadow-xs object-cover dark:invert dark:hue-rotate-180"
                 />
               </div>
               <button
@@ -636,9 +639,12 @@ export const Layout: React.FC<LayoutProps> = ({
                   setMobileMenuOpen(false);
                   logout();
                 }}
-                className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-bold text-red-500 hover:bg-red-500/10 transition-all cursor-pointer"
+                style={{
+                  background: "linear-gradient(135deg, #EF4444 0%, #DC2626 50%, #B91C1C 100%)",
+                }}
+                className="w-full flex items-center justify-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-bold text-white shadow-sm shadow-red-500/25 hover:shadow-md hover:shadow-red-500/35 transition-all cursor-pointer"
               >
-                <LogOut size={18} />
+                <LogOut size={18} strokeWidth={2.4} className="text-white" />
                 <span>Logout</span>
               </button>
             </div>
@@ -648,44 +654,47 @@ export const Layout: React.FC<LayoutProps> = ({
 
       {/* SYSTEM ANNOUNCEMENT MODAL */}
       {showAnnouncementModal && (
-        <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-xs p-4 pt-20 sm:p-4 overflow-y-auto">
-          <div className="bg-card w-full max-w-md rounded-2xl border border-border p-6 shadow-2xl animate-scale-up max-h-[85vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4 border-b border-border pb-2">
-              <h2 className="text-lg font-bold font-display flex items-center gap-2">
+        <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4 pt-20 sm:p-4 overflow-y-auto">
+          <div className="bg-card w-full max-w-md rounded-[28px] border border-border/80 p-6 sm:p-7 shadow-2xl animate-scale-up max-h-[85vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4 border-b border-border/60 pb-3">
+              <h2 className="text-base sm:text-lg font-bold font-display flex items-center gap-2">
                 <Megaphone className="text-accent" size={20} />
                 New System Announcement
               </h2>
               <button
                 onClick={() => setShowAnnouncementModal(false)}
-                className="text-muted hover:text-foreground cursor-pointer"
+                className="text-muted hover:text-foreground p-1.5 rounded-xl hover:bg-muted/20 transition-all cursor-pointer"
               >
                 <X size={20} />
               </button>
             </div>
             <form onSubmit={handlePostAnnouncement}>
               <div className="mb-4">
-                <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-2">
+                <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-2">
                   Announcement Message
                 </label>
                 <textarea
                   value={announcementMsg}
                   onChange={(e) => setAnnouncementMsg(e.target.value)}
-                  className="w-full h-24 p-3 border border-border rounded-xl bg-background focus:outline-none focus:ring-1 focus:ring-accent resize-none text-sm text-foreground"
+                  className="w-full h-24 p-3.5 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent resize-none text-xs text-foreground font-medium transition-all"
                   placeholder="Enter the critical announcement details here... All connected staff members will receive a live alert."
                   required
                 />
               </div>
-              <div className="flex justify-end gap-3">
+              <div className="flex justify-end gap-3 pt-2 border-t border-border/60">
                 <button
                   type="button"
                   onClick={() => setShowAnnouncementModal(false)}
-                  className="px-4 py-2 border border-border rounded-xl text-sm hover:bg-border transition-colors cursor-pointer"
+                  className="px-5 py-2.5 border border-border/80 rounded-2xl text-xs font-bold text-foreground hover:bg-muted/20 transition-all cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-accent text-white font-semibold rounded-xl text-sm hover:bg-accent-dark transition-colors shadow-md shadow-accent/15 cursor-pointer"
+                  style={{
+                    background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
+                  }}
+                  className="px-6 py-2.5 text-black font-bold rounded-2xl text-xs transition-all shadow-md shadow-orange-500/20 hover:scale-[1.02] active:scale-95 cursor-pointer"
                 >
                   Publish Announcement
                 </button>

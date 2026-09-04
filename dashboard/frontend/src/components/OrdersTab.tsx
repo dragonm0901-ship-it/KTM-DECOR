@@ -369,25 +369,15 @@ export const OrdersTab: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold font-display flex items-center gap-2">
-            <Package className="text-accent" />
-            Manual Orders Registry
-          </h1>
-          <p className="text-xs text-muted mt-1">
-            Create, update, and manage offline and online business orders for KTM DECOR.
-          </p>
-        </div>
-
+      {/* Top Controls Bar */}
+      <div className="flex items-center justify-end">
         {user?.role === "admin" && (
           <button
             onClick={openCreateModal}
             style={{
               background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
             }}
-            className="flex items-center justify-center gap-1.5 py-2.5 px-4 text-black rounded-xl font-bold text-xs transition-all shadow-md shadow-orange-500/20 hover:scale-[1.02] active:scale-95 self-start sm:self-auto cursor-pointer"
+            className="flex items-center justify-center gap-1.5 py-2.5 px-4 text-black rounded-2xl font-bold text-xs transition-all shadow-md shadow-orange-500/15 hover:scale-[1.02] active:scale-95 cursor-pointer"
           >
             <Plus size={16} />
             Post New Order
@@ -396,13 +386,13 @@ export const OrdersTab: React.FC = () => {
       </div>
 
       {/* Filter Bar */}
-      <div className="bg-card border border-border/80 rounded-2xl shadow-sm p-5 flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="bg-card border border-border/80 rounded-[28px] shadow-xs p-5 flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="relative w-full md:w-80">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-2.5 pl-10 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs transition-all duration-200"
+            className="w-full px-4 py-2.5 pl-10 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs transition-all duration-200 placeholder:text-muted/60"
             placeholder="Search by customer, address, product, or assignee..."
           />
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-muted" />
@@ -415,7 +405,7 @@ export const OrdersTab: React.FC = () => {
             <select
               value={sourceFilter}
               onChange={(e) => setSourceFilter(e.target.value)}
-              className="px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer transition-all duration-200"
+              className="px-3 py-2 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer transition-all duration-200"
             >
               <option value="all">All Sources</option>
               <option value="tiktok">Tiktok</option>
@@ -431,7 +421,7 @@ export const OrdersTab: React.FC = () => {
             <select
               value={stageFilter}
               onChange={(e) => setStageFilter(e.target.value)}
-              className="px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer transition-all duration-200"
+              className="px-3 py-2 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer transition-all duration-200"
             >
               <option value="all">All Stages</option>
               <option value="design">Design</option>
@@ -448,7 +438,7 @@ export const OrdersTab: React.FC = () => {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="px-3 py-2 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer transition-all duration-200"
+              className="px-3 py-2 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer transition-all duration-200"
             >
               <option value="createdAt_desc">Entry Date (Newest First)</option>
               <option value="createdAt_asc">Entry Date (Oldest First)</option>
@@ -462,11 +452,11 @@ export const OrdersTab: React.FC = () => {
       </div>
 
       {/* Table List */}
-      <div className="bg-card border border-border/80 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-card border border-border/80 rounded-[28px] shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse min-w-[980px]">
             <thead>
-              <tr className="bg-card text-muted border-b border-border uppercase font-semibold tracking-wider text-[10px]">
+              <tr className="bg-muted/10 text-muted border-b border-border/70 uppercase font-semibold tracking-wider text-[10px]">
                 <th className="p-4 min-w-[240px]">Product Info & Images</th>
                 <th className="p-4 min-w-[190px]">Customer & Channel</th>
                 <th className="p-4 min-w-[220px]">Delivery & Assignee</th>
@@ -679,9 +669,9 @@ export const OrdersTab: React.FC = () => {
       {/* Creation/Editing Modal */}
       {showModal && (
         <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm pt-6 sm:pt-0 px-2 pb-6 sm:p-4 overflow-y-auto">
-          <div className="bg-card w-full max-w-4xl lg:max-w-5xl rounded-2xl border border-border p-4 sm:p-7 shadow-2xl animate-scale-up my-4 max-h-[92vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6 border-b border-border pb-3">
-              <h2 className="text-lg font-bold font-display flex items-center gap-2">
+          <div className="bg-card w-full max-w-4xl lg:max-w-5xl rounded-[28px] border border-border/80 p-5 sm:p-8 shadow-2xl animate-scale-up my-4 max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6 border-b border-border/60 pb-3">
+              <h2 className="text-base sm:text-lg font-bold font-display flex items-center gap-2">
                 <Package className="text-accent" />
                 {editingOrder 
                   ? (user?.role === "admin" ? "Edit Registry Order" : "View Details / Status") 
@@ -690,14 +680,14 @@ export const OrdersTab: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="text-muted hover:text-foreground"
+                className="text-muted hover:text-foreground p-1.5 rounded-xl hover:bg-muted/20 transition-all"
               >
                 <X size={20} />
               </button>
             </div>
 
             {formError && (
-              <div className="mb-4 p-3 text-xs bg-red-500/10 border border-red-500/20 text-red-500 rounded font-semibold">
+              <div className="mb-4 p-3.5 text-xs bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl font-semibold">
                 {formError}
               </div>
             )}
@@ -707,7 +697,7 @@ export const OrdersTab: React.FC = () => {
                 
                 {/* COLUMN 1: PRODUCT INFO */}
                 <div className="space-y-4">
-                  <h3 className="text-xs font-bold text-accent uppercase tracking-wider border-b border-border pb-1">
+                  <h3 className="text-xs font-bold text-accent uppercase tracking-wider border-b border-border/60 pb-1.5">
                     1. Product & Design Details
                   </h3>
 
@@ -719,7 +709,7 @@ export const OrdersTab: React.FC = () => {
                       type="text"
                       value={productName}
                       onChange={(e) => setProductName(e.target.value)}
-                      className="w-full px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm disabled:opacity-75 disabled:bg-border/10"
+                      className="w-full px-3.5 py-2.5 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold disabled:opacity-75 disabled:bg-border/10 transition-all"
                       placeholder="e.g. Backlit LED Reception Sign"
                       required
                       disabled={user?.role !== "admin"}
@@ -735,7 +725,7 @@ export const OrdersTab: React.FC = () => {
                         type="text"
                         value={size}
                         onChange={(e) => setSize(e.target.value)}
-                        className="w-full px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm disabled:opacity-75 disabled:bg-border/10"
+                        className="w-full px-3.5 py-2.5 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold disabled:opacity-75 disabled:bg-border/10 transition-all"
                         placeholder="e.g. 2 x 3 ft"
                         required
                         disabled={user?.role !== "admin"}
@@ -749,7 +739,7 @@ export const OrdersTab: React.FC = () => {
                         type="text"
                         value={color}
                         onChange={(e) => setColor(e.target.value)}
-                        className="w-full px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm disabled:opacity-75 disabled:bg-border/10"
+                        className="w-full px-3.5 py-2.5 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold disabled:opacity-75 disabled:bg-border/10 transition-all"
                         placeholder="e.g. Warm White"
                         required
                         disabled={user?.role !== "admin"}
@@ -766,7 +756,7 @@ export const OrdersTab: React.FC = () => {
                         type="number"
                         value={price}
                         onChange={(e) => setPrice(e.target.value)}
-                        className="w-full px-2.5 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm font-bold disabled:opacity-75 disabled:bg-border/10"
+                        className="w-full px-3 py-2.5 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-bold disabled:opacity-75 disabled:bg-border/10 transition-all"
                         placeholder="Rs."
                         min="0"
                         required
@@ -781,7 +771,7 @@ export const OrdersTab: React.FC = () => {
                         type="number"
                         value={deliveryPrice}
                         onChange={(e) => setDeliveryPrice(e.target.value)}
-                        className="w-full px-2.5 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm disabled:opacity-75 disabled:bg-border/10"
+                        className="w-full px-3 py-2.5 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs disabled:opacity-75 disabled:bg-border/10 transition-all"
                         placeholder="Rs."
                         min="0"
                         disabled={user?.role !== "admin"}
@@ -795,7 +785,7 @@ export const OrdersTab: React.FC = () => {
                         type="number"
                         value={installationPrice}
                         onChange={(e) => setInstallationPrice(e.target.value)}
-                        className="w-full px-2.5 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm disabled:opacity-75 disabled:bg-border/10"
+                        className="w-full px-3 py-2.5 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs disabled:opacity-75 disabled:bg-border/10 transition-all"
                         placeholder="Rs."
                         min="0"
                         disabled={user?.role !== "admin"}
@@ -804,7 +794,7 @@ export const OrdersTab: React.FC = () => {
                   </div>
 
                   {/* Calculated total summary */}
-                  <div className="p-3 bg-accent/5 border border-accent/10 rounded flex justify-between items-center text-xs">
+                  <div className="p-3.5 bg-accent/5 border border-accent/20 rounded-2xl flex justify-between items-center text-xs">
                     <span className="font-bold text-muted uppercase tracking-wide">Estimated Order Total:</span>
                     <strong className="text-base text-accent font-display">
                       Rs. {((Number(price) || 0) + (Number(deliveryPrice) || 0) + (Number(installationPrice) || 0)).toLocaleString()}
@@ -821,7 +811,7 @@ export const OrdersTab: React.FC = () => {
                         type="number"
                         value={advancePayment}
                         onChange={(e) => setAdvancePayment(e.target.value)}
-                        className="w-full px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm font-bold text-emerald-600 dark:text-emerald-400 disabled:opacity-75 disabled:bg-border/10"
+                        className="w-full px-3.5 py-2.5 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-bold text-emerald-600 dark:text-emerald-400 disabled:opacity-75 disabled:bg-border/10 transition-all"
                         placeholder="Rs."
                         min="0"
                         disabled={user?.role !== "admin"}
@@ -831,7 +821,7 @@ export const OrdersTab: React.FC = () => {
                       <label className="block text-[10px] font-semibold text-muted uppercase tracking-wider mb-1.5">
                         Calculated Due Amount
                       </label>
-                      <div className="px-3 py-2.5 border border-border rounded bg-border/20 text-sm font-bold text-red-500">
+                      <div className="px-3.5 py-2.5 border border-border/80 rounded-2xl bg-border/20 text-xs font-bold text-red-500">
                         Rs. {Math.max(0, ((Number(price) || 0) + (Number(deliveryPrice) || 0) + (Number(installationPrice) || 0) - (Number(advancePayment) || 0))).toLocaleString()}
                       </div>
                     </div>
@@ -872,7 +862,7 @@ export const OrdersTab: React.FC = () => {
                       <select
                         value={assigneeId}
                         onChange={(e) => setAssigneeId(e.target.value)}
-                        className="w-full px-3 py-2.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm font-semibold cursor-pointer disabled:opacity-75 disabled:bg-border/10"
+                        className="w-full px-3.5 py-2.5 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer disabled:opacity-75 disabled:bg-border/10 transition-all"
                         disabled={user?.role !== "admin"}
                       >
                         <option value="">Select Assignee</option>
@@ -893,7 +883,7 @@ export const OrdersTab: React.FC = () => {
                         <select
                           value={stage}
                           onChange={(e) => setStage(e.target.value as Order["stage"])}
-                          className="w-full px-3 py-2.5 border border-border rounded-xl bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm font-semibold cursor-pointer"
+                          className="w-full px-3.5 py-2.5 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold cursor-pointer transition-all"
                         >
                           <option value="design">Design Process</option>
                           <option value="manufacturing">Manufacturing Process</option>
@@ -918,8 +908,8 @@ export const OrdersTab: React.FC = () => {
                           <Package size={12} className="text-accent" />
                           <span>Product Sign Photos</span>
                         </label>
-                        <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
-                          productImages.length === 6 ? "bg-amber-500/15 text-amber-600" : "bg-accent/10 text-accent"
+                        <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full ${
+                          productImages.length === 6 ? "bg-amber-500/15 text-amber-600" : "bg-neutral-200 dark:bg-neutral-800 text-black dark:text-neutral-100 border border-neutral-300 dark:border-neutral-700"
                         }`}>
                           {productImages.length}/6 Uploaded
                         </span>
@@ -929,7 +919,7 @@ export const OrdersTab: React.FC = () => {
                         {productImages.map((imgUrl, idx) => (
                           <div
                             key={`prod-preview-${idx}`}
-                            className="relative h-20 rounded-xl border border-border overflow-hidden bg-background group shadow-xs"
+                            className="relative h-20 rounded-2xl border border-border/80 overflow-hidden bg-background/60 group shadow-xs"
                           >
                             <img src={imgUrl} alt={`Product ${idx + 1}`} className="h-full w-full object-cover" />
                             <span className="absolute bottom-0 left-0 right-0 bg-black/70 text-[7px] font-bold text-white text-center py-0.5">
@@ -939,7 +929,7 @@ export const OrdersTab: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => handleRemoveImage(idx, "product")}
-                                className="absolute top-1 right-1 p-1 bg-black/80 hover:bg-red-600 text-white rounded-full transition-colors shadow-sm"
+                                className="absolute top-1.5 right-1.5 p-1 bg-black/80 hover:bg-red-600 text-white rounded-full transition-colors shadow-sm"
                                 title="Remove photo"
                               >
                                 <X size={10} />
@@ -949,7 +939,7 @@ export const OrdersTab: React.FC = () => {
                         ))}
 
                         {user?.role === "admin" && productImages.length < 6 && (
-                          <label className="h-20 flex flex-col items-center justify-center border-2 border-dashed border-border/80 hover:border-accent hover:bg-accent/[0.03] rounded-xl cursor-pointer transition-all text-center p-1 group">
+                          <label className="h-20 flex flex-col items-center justify-center border-2 border-dashed border-border/80 hover:border-accent hover:bg-accent/[0.03] rounded-2xl cursor-pointer transition-all text-center p-1 group">
                             <Upload size={14} className="text-accent group-hover:scale-110 transition-transform mb-0.5" />
                             <span className="text-[9px] font-bold text-muted group-hover:text-foreground leading-tight">
                               Add Photo
@@ -976,8 +966,8 @@ export const OrdersTab: React.FC = () => {
                           <MapPin size={12} className="text-accent" />
                           <span>Installation / Site Photos</span>
                         </label>
-                        <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
-                          locationImages.length === 4 ? "bg-amber-500/15 text-amber-600" : "bg-accent/10 text-accent"
+                        <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full ${
+                          locationImages.length === 4 ? "bg-amber-500/15 text-amber-600" : "bg-neutral-200 dark:bg-neutral-800 text-black dark:text-neutral-100 border border-neutral-300 dark:border-neutral-700"
                         }`}>
                           {locationImages.length}/4 Uploaded
                         </span>
@@ -987,7 +977,7 @@ export const OrdersTab: React.FC = () => {
                         {locationImages.map((imgUrl, idx) => (
                           <div
                             key={`loc-preview-${idx}`}
-                            className="relative h-20 rounded-xl border border-border overflow-hidden bg-background group shadow-xs"
+                            className="relative h-20 rounded-2xl border border-border/80 overflow-hidden bg-background/60 group shadow-xs"
                           >
                             <img src={imgUrl} alt={`Site ${idx + 1}`} className="h-full w-full object-cover" />
                             <span className="absolute bottom-0 left-0 right-0 bg-black/70 text-[7px] font-bold text-white text-center py-0.5">
@@ -997,7 +987,7 @@ export const OrdersTab: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => handleRemoveImage(idx, "location")}
-                                className="absolute top-1 right-1 p-1 bg-black/80 hover:bg-red-600 text-white rounded-full transition-colors shadow-sm"
+                                className="absolute top-1.5 right-1.5 p-1 bg-black/80 hover:bg-red-600 text-white rounded-full transition-colors shadow-sm"
                                 title="Remove photo"
                               >
                                 <X size={10} />
@@ -1007,7 +997,7 @@ export const OrdersTab: React.FC = () => {
                         ))}
 
                         {user?.role === "admin" && locationImages.length < 4 && (
-                          <label className="h-20 flex flex-col items-center justify-center border-2 border-dashed border-border/80 hover:border-accent hover:bg-accent/[0.03] rounded-xl cursor-pointer transition-all text-center p-1 group">
+                          <label className="h-20 flex flex-col items-center justify-center border-2 border-dashed border-border/80 hover:border-accent hover:bg-accent/[0.03] rounded-2xl cursor-pointer transition-all text-center p-1 group">
                             <Upload size={14} className="text-accent group-hover:scale-110 transition-transform mb-0.5" />
                             <span className="text-[9px] font-bold text-muted group-hover:text-foreground leading-tight">
                               Add Photo
@@ -1032,7 +1022,7 @@ export const OrdersTab: React.FC = () => {
 
                 {/* COLUMN 2: CUSTOMER & SOURCE */}
                 <div className="space-y-4">
-                  <h3 className="text-xs font-bold text-accent uppercase tracking-wider border-b border-border pb-1">
+                  <h3 className="text-xs font-bold text-accent uppercase tracking-wider border-b border-border/60 pb-1.5">
                     2. Client & Sales Channel
                   </h3>
 
@@ -1045,7 +1035,7 @@ export const OrdersTab: React.FC = () => {
                         type="text"
                         value={customerName}
                         onChange={(e) => setCustomerName(e.target.value)}
-                        className="w-full px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm disabled:opacity-75 disabled:bg-border/10"
+                        className="w-full px-3.5 py-2.5 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold disabled:opacity-75 disabled:bg-border/10 transition-all"
                         placeholder="e.g. Ram Prasad"
                         required
                         disabled={user?.role !== "admin"}
@@ -1059,7 +1049,7 @@ export const OrdersTab: React.FC = () => {
                         type="text"
                         value={customerContact}
                         onChange={(e) => setCustomerContact(e.target.value)}
-                        className="w-full px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm disabled:opacity-75 disabled:bg-border/10"
+                        className="w-full px-3.5 py-2.5 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold disabled:opacity-75 disabled:bg-border/10 transition-all"
                         placeholder="e.g. 9841XXXXXX"
                         required
                         disabled={user?.role !== "admin"}
@@ -1074,7 +1064,7 @@ export const OrdersTab: React.FC = () => {
                     <textarea
                       value={customerAddress}
                       onChange={(e) => setCustomerAddress(e.target.value)}
-                      className="w-full h-12 px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm resize-none disabled:opacity-75 disabled:bg-border/10"
+                      className="w-full h-14 px-3.5 py-2.5 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs resize-none disabled:opacity-75 disabled:bg-border/10 transition-all"
                       placeholder="e.g. New Baneshwor, Kathmandu"
                       required
                       disabled={user?.role !== "admin"}
@@ -1090,7 +1080,7 @@ export const OrdersTab: React.FC = () => {
                         type="email"
                         value={customerEmail}
                         onChange={(e) => setCustomerEmail(e.target.value)}
-                        className="w-full px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm disabled:opacity-75 disabled:bg-border/10"
+                        className="w-full px-3.5 py-2.5 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold disabled:opacity-75 disabled:bg-border/10 transition-all"
                         placeholder="e.g. client@domain.com"
                         disabled={user?.role !== "admin"}
                       />
@@ -1102,7 +1092,7 @@ export const OrdersTab: React.FC = () => {
                       <select
                         value={orderFrom}
                         onChange={(e) => setOrderFrom(e.target.value as any)}
-                        className="w-full px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm font-semibold disabled:opacity-75 disabled:bg-border/10 cursor-pointer"
+                        className="w-full px-3.5 py-2.5 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold disabled:opacity-75 disabled:bg-border/10 cursor-pointer transition-all"
                         required
                         disabled={user?.role !== "admin"}
                       >
@@ -1121,7 +1111,7 @@ export const OrdersTab: React.FC = () => {
                     <select
                       value={paymentMethod}
                       onChange={(e) => setPaymentMethod(e.target.value as any)}
-                      className="w-full px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm font-semibold disabled:opacity-75 disabled:bg-border/10 cursor-pointer"
+                      className="w-full px-3.5 py-2.5 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs font-semibold disabled:opacity-75 disabled:bg-border/10 cursor-pointer transition-all"
                       required
                       disabled={user?.role !== "admin"}
                     >
@@ -1139,7 +1129,7 @@ export const OrdersTab: React.FC = () => {
                     <textarea
                       value={manufacturingNotes}
                       onChange={(e) => setManufacturingNotes(e.target.value)}
-                      className="w-full h-20 px-3 py-2 border border-border rounded bg-background focus:outline-none focus:ring-1 focus:ring-accent text-sm resize-none disabled:opacity-75 disabled:bg-border/10"
+                      className="w-full h-24 px-3.5 py-2.5 border border-border/80 rounded-2xl bg-background/60 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-xs resize-none disabled:opacity-75 disabled:bg-border/10 transition-all"
                       placeholder="e.g. Bending instructions, spacing, wiring length, back support material specs..."
                       disabled={user?.role !== "admin"}
                     />
@@ -1150,11 +1140,11 @@ export const OrdersTab: React.FC = () => {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex justify-end gap-3 border-t border-border pt-4">
+              <div className="flex justify-end gap-3 border-t border-border/60 pt-4">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 border border-border rounded text-xs hover:bg-border transition-colors font-semibold"
+                  className="px-5 py-2.5 border border-border/80 rounded-2xl text-xs hover:bg-muted/20 transition-all font-bold text-foreground cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -1164,7 +1154,7 @@ export const OrdersTab: React.FC = () => {
                   style={{
                     background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
                   }}
-                  className="px-5 py-2 text-black rounded-xl text-xs font-bold transition-all shadow-md shadow-orange-500/20 hover:scale-[1.02] active:scale-95 cursor-pointer disabled:opacity-50"
+                  className="px-6 py-2.5 text-black rounded-2xl text-xs font-bold transition-all shadow-md shadow-orange-500/20 hover:scale-[1.02] active:scale-95 cursor-pointer disabled:opacity-50"
                 >
                   {submitting ? "Saving Order..." : editingOrder ? "Save Changes" : "Post Order"}
                 </button>

@@ -118,21 +118,21 @@ export const OrderPhotoGalleryModal: React.FC<OrderPhotoGalleryModalProps> = ({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      {/* Compact Light-Themed Modal Container */}
-      <div className="relative w-full max-w-3xl h-auto max-h-[82vh] flex flex-col bg-white text-gray-800 border border-gray-200/90 rounded-2xl shadow-2xl overflow-hidden animate-scale-up">
+      {/* Compact Porcelain-Themed Modal Container */}
+      <div className="relative w-full max-w-3xl h-auto max-h-[82vh] flex flex-col bg-card text-foreground border border-border/80 rounded-[28px] shadow-2xl overflow-hidden animate-scale-up">
         
-        {/* Light Header Bar */}
-        <div className="flex items-center justify-between px-4 py-3 sm:px-5 sm:py-3.5 border-b border-gray-100 bg-white shrink-0">
+        {/* Header Bar */}
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-border/60 bg-card shrink-0">
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="p-2 rounded-xl bg-accent/10 text-accent shrink-0">
+            <div className="p-2 rounded-2xl bg-accent/10 text-accent shrink-0">
               {activeTab === "product" ? <Package size={17} /> : <MapPin size={17} />}
             </div>
             <div className="truncate">
-              <h3 className="text-xs sm:text-sm font-bold truncate text-gray-900 leading-tight">
+              <h3 className="text-xs sm:text-sm font-bold truncate text-foreground leading-tight">
                 {order.productName}
               </h3>
-              <p className="text-[10px] text-gray-500 truncate mt-0.5">
-                Client: <strong className="text-gray-700">{order.customerName}</strong> • {activeTab === "product" ? "Product Design Photos" : "Installation / Site Photos"}
+              <p className="text-[10px] text-muted truncate mt-0.5">
+                Client: <strong className="text-foreground">{order.customerName}</strong> • {activeTab === "product" ? "Product Design Photos" : "Installation / Site Photos"}
               </p>
             </div>
           </div>
@@ -144,7 +144,7 @@ export const OrderPhotoGalleryModal: React.FC<OrderPhotoGalleryModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsZoomed(!isZoomed)}
-                  className="p-1.5 hover:bg-gray-100 text-gray-500 hover:text-gray-800 rounded-lg transition-all"
+                  className="p-1.5 hover:bg-muted/20 text-muted hover:text-foreground rounded-xl transition-all"
                   title={isZoomed ? "Actual Size / Fit to Screen" : "Zoom View"}
                 >
                   <Maximize2 size={15} />
@@ -152,7 +152,7 @@ export const OrderPhotoGalleryModal: React.FC<OrderPhotoGalleryModalProps> = ({
                 <button
                   type="button"
                   onClick={handleDownload}
-                  className="p-1.5 hover:bg-gray-100 text-gray-500 hover:text-gray-800 rounded-lg transition-all"
+                  className="p-1.5 hover:bg-muted/20 text-muted hover:text-foreground rounded-xl transition-all"
                   title="Download Image"
                 >
                   <Download size={15} />
@@ -162,7 +162,7 @@ export const OrderPhotoGalleryModal: React.FC<OrderPhotoGalleryModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 hover:bg-red-50 text-gray-400 hover:text-red-600 rounded-lg transition-all ml-1"
+              className="p-1.5 hover:bg-red-500/10 text-muted hover:text-red-500 rounded-xl transition-all ml-1"
               title="Close (Esc)"
             >
               <X size={17} />
@@ -171,21 +171,22 @@ export const OrderPhotoGalleryModal: React.FC<OrderPhotoGalleryModalProps> = ({
         </div>
 
         {/* Category Tabs Bar */}
-        <div className="flex items-center justify-between px-4 py-2 bg-gray-50/80 border-b border-gray-100 shrink-0 text-xs">
+        <div className="flex items-center justify-between px-5 py-2.5 bg-muted/10 border-b border-border/60 shrink-0 text-xs">
           <div className="flex gap-2">
             <button
               type="button"
               onClick={() => handleTabSwitch("product")}
-              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 text-xs ${
+              style={activeTab === "product" ? { background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)" } : undefined}
+              className={`px-3.5 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1.5 text-xs cursor-pointer ${
                 activeTab === "product"
-                  ? "bg-accent text-white shadow-xs"
-                  : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-100"
+                  ? "text-black shadow-xs"
+                  : "bg-card border border-border/80 text-muted hover:text-foreground hover:bg-muted/20"
               }`}
             >
               <Package size={13} />
               <span>Product Photos</span>
-              <span className={`px-1.5 py-0.2 rounded-full text-[9px] font-black ${
-                activeTab === "product" ? "bg-white/25 text-white" : "bg-gray-100 text-gray-600"
+              <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-black ${
+                activeTab === "product" ? "bg-black/20 text-black" : "bg-neutral-200 dark:bg-neutral-800 text-foreground"
               }`}>
                 {productImages.length}/6
               </span>
@@ -194,16 +195,17 @@ export const OrderPhotoGalleryModal: React.FC<OrderPhotoGalleryModalProps> = ({
             <button
               type="button"
               onClick={() => handleTabSwitch("location")}
-              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 text-xs ${
+              style={activeTab === "location" ? { background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)" } : undefined}
+              className={`px-3.5 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1.5 text-xs cursor-pointer ${
                 activeTab === "location"
-                  ? "bg-accent text-white shadow-xs"
-                  : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-100"
+                  ? "text-black shadow-xs"
+                  : "bg-card border border-border/80 text-muted hover:text-foreground hover:bg-muted/20"
               }`}
             >
               <MapPin size={13} />
               <span>Site Photos</span>
-              <span className={`px-1.5 py-0.2 rounded-full text-[9px] font-black ${
-                activeTab === "location" ? "bg-white/25 text-white" : "bg-gray-100 text-gray-600"
+              <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-black ${
+                activeTab === "location" ? "bg-black/20 text-black" : "bg-neutral-200 dark:bg-neutral-800 text-foreground"
               }`}>
                 {locationImages.length}/4
               </span>
@@ -211,23 +213,23 @@ export const OrderPhotoGalleryModal: React.FC<OrderPhotoGalleryModalProps> = ({
           </div>
 
           {currentList.length > 0 && (
-            <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider hidden sm:block">
+            <div className="text-[10px] font-bold text-muted uppercase tracking-wider hidden sm:block">
               Photo {currentIndex + 1} of {currentList.length}
             </div>
           )}
         </div>
 
-        {/* Main Image Stage (Clean Light Background) */}
-        <div className="relative flex-1 bg-slate-50 flex items-center justify-center p-3 sm:p-4 overflow-auto min-h-[220px]">
+        {/* Main Image Stage */}
+        <div className="relative flex-1 bg-background/60 flex items-center justify-center p-3 sm:p-4 overflow-auto min-h-[220px]">
           {currentList.length === 0 ? (
-            <div className="text-center py-10 px-4 space-y-2 text-gray-400">
-              <div className="h-11 w-11 rounded-xl bg-gray-200/60 flex items-center justify-center mx-auto text-gray-400">
+            <div className="text-center py-10 px-4 space-y-2 text-muted">
+              <div className="h-11 w-11 rounded-2xl bg-muted/20 flex items-center justify-center mx-auto text-muted">
                 {activeTab === "product" ? <Package size={20} /> : <MapPin size={20} />}
               </div>
-              <p className="text-xs font-bold uppercase tracking-wider text-gray-500">
+              <p className="text-xs font-bold uppercase tracking-wider text-foreground">
                 No {activeTab === "product" ? "product design" : "site location"} photos attached
               </p>
-              <p className="text-[10px] text-gray-400">
+              <p className="text-[10px] text-muted">
                 {activeTab === "product" ? "Up to 6 product photos can be uploaded" : "Up to 4 site photos can be uploaded"} during order entry.
               </p>
             </div>
@@ -238,7 +240,7 @@ export const OrderPhotoGalleryModal: React.FC<OrderPhotoGalleryModalProps> = ({
                 <button
                   type="button"
                   onClick={handlePrev}
-                  className="absolute left-1 sm:left-3 z-20 p-2 sm:p-2.5 rounded-full bg-white/95 hover:bg-white text-gray-700 hover:text-accent shadow-md border border-gray-200/80 transition-all hover:scale-105 active:scale-95"
+                  className="absolute left-1 sm:left-3 z-20 p-2 sm:p-2.5 rounded-full bg-card/90 hover:bg-card text-foreground hover:text-accent shadow-md border border-border/80 transition-all hover:scale-105 active:scale-95 cursor-pointer"
                   title="Previous Photo (Left Arrow)"
                 >
                   <ChevronLeft size={18} />
@@ -250,10 +252,10 @@ export const OrderPhotoGalleryModal: React.FC<OrderPhotoGalleryModalProps> = ({
                 <img
                   src={currentImage}
                   alt={`${order.productName} ${activeTab} ${currentIndex + 1}`}
-                  className={`rounded-xl object-contain transition-all duration-200 ${
+                  className={`rounded-2xl object-contain transition-all duration-200 ${
                     isZoomed
                       ? "max-h-none max-w-none cursor-zoom-out"
-                      : "max-h-[46vh] sm:max-h-[50vh] w-auto max-w-full cursor-zoom-in shadow-md border border-gray-200/70 bg-white"
+                      : "max-h-[46vh] sm:max-h-[50vh] w-auto max-w-full cursor-zoom-in shadow-md border border-border/80 bg-card"
                   }`}
                   onClick={() => setIsZoomed(!isZoomed)}
                 />
@@ -264,7 +266,7 @@ export const OrderPhotoGalleryModal: React.FC<OrderPhotoGalleryModalProps> = ({
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="absolute right-1 sm:right-3 z-20 p-2 sm:p-2.5 rounded-full bg-white/95 hover:bg-white text-gray-700 hover:text-accent shadow-md border border-gray-200/80 transition-all hover:scale-105 active:scale-95"
+                  className="absolute right-1 sm:right-3 z-20 p-2 sm:p-2.5 rounded-full bg-card/90 hover:bg-card text-foreground hover:text-accent shadow-md border border-border/80 transition-all hover:scale-105 active:scale-95 cursor-pointer"
                   title="Next Photo (Right Arrow)"
                 >
                   <ChevronRight size={18} />
@@ -276,7 +278,7 @@ export const OrderPhotoGalleryModal: React.FC<OrderPhotoGalleryModalProps> = ({
 
         {/* Bottom Thumbnail Strip */}
         {currentList.length > 1 && (
-          <div className="px-4 py-2.5 bg-white border-t border-gray-100 shrink-0 overflow-x-auto">
+          <div className="px-5 py-3 bg-card border-t border-border/60 shrink-0 overflow-x-auto">
             <div className="flex items-center justify-center gap-2 min-w-max mx-auto">
               {currentList.map((imgUrl, idx) => (
                 <button
@@ -286,14 +288,14 @@ export const OrderPhotoGalleryModal: React.FC<OrderPhotoGalleryModalProps> = ({
                     setCurrentIndex(idx);
                     setIsZoomed(false);
                   }}
-                  className={`relative h-11 w-13 sm:h-12 sm:w-14 rounded-lg overflow-hidden border-2 transition-all shrink-0 ${
+                  className={`relative h-11 w-13 sm:h-12 sm:w-14 rounded-2xl overflow-hidden border-2 transition-all shrink-0 cursor-pointer ${
                     currentIndex === idx
                       ? "border-accent scale-105 shadow-sm ring-2 ring-accent/20"
-                      : "border-gray-200 opacity-60 hover:opacity-100 hover:border-gray-300"
+                      : "border-border/80 opacity-60 hover:opacity-100 hover:border-accent/60"
                   }`}
                 >
                   <img src={imgUrl} alt={`Thumb ${idx + 1}`} className="w-full h-full object-cover" />
-                  <span className="absolute bottom-0 right-0 bg-gray-900/80 text-[7px] font-black px-1 text-white rounded-tl">
+                  <span className="absolute bottom-0 right-0 bg-black/80 text-[7px] font-black px-1 text-white rounded-tl">
                     {idx + 1}
                   </span>
                 </button>
