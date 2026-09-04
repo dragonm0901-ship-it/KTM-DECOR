@@ -26,7 +26,6 @@ import {
 } from "./ui/solar-icons";
 import {
   Search,
-  Settings,
   PanelLeftClose,
   PanelLeft,
   ChevronsUpDown,
@@ -260,27 +259,8 @@ export const Layout: React.FC<LayoutProps> = ({
           ))}
         </div>
 
-        {/* Bottom Section: Setting, Workspace Pill (No horizontal line, No Help & Support) */}
-        <div className="p-3 space-y-1">
-          {/* Setting Link */}
-          <button
-            onClick={() => setCurrentTab("staff-management")}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-2xl text-xs font-medium text-muted hover:text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800/60 transition-all duration-300 ease-in-out cursor-pointer ${
-              !sidebarOpen ? "justify-center px-0" : ""
-            }`}
-            title="Setting"
-          >
-            <Settings size={18} className="shrink-0 text-muted" />
-            <span
-              className={`truncate transition-all duration-300 ease-in-out ${
-                sidebarOpen
-                  ? "opacity-100 max-w-[160px]"
-                  : "opacity-0 max-w-0 pointer-events-none"
-              }`}
-            >
-              Setting
-            </span>
-          </button>
+        {/* Bottom Section: Workspace Pill */}
+        <div className="p-3">
 
           {/* Workspace Pill Card (Identical to reference image, KTM DECOR logo) */}
           <div
