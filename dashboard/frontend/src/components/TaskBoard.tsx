@@ -40,7 +40,7 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
     activeStaffProfile
   } = useStore();
 
-  const [viewMode, setViewMode] = useState<"kanban" | "list">("kanban");
+  const [viewMode, setViewMode] = useState<"kanban" | "list">("list");
   const [filterPriority, setFilterPriority] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [showAllStaffTasks, setShowAllStaffTasks] = useState(false);
@@ -148,9 +148,9 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
   });
 
   const columns: { id: Task["status"]; label: string; bg: string; text: string }[] = [
-    { id: "todo", label: "To Do", bg: "bg-slate-100 dark:bg-slate-900/30", text: "text-slate-800 dark:text-slate-200" },
-    { id: "in_progress", label: "In Progress", bg: "bg-amber-100/50 dark:bg-amber-950/10", text: "text-amber-800 dark:text-amber-400" },
-    { id: "done", label: "Done & Verified", bg: "bg-emerald-100/50 dark:bg-emerald-950/10", text: "text-emerald-800 dark:text-emerald-400" }
+    { id: "todo", label: "To Do", bg: "bg-card dark:bg-card", text: "text-foreground" },
+    { id: "in_progress", label: "In Progress", bg: "bg-card dark:bg-card", text: "text-foreground" },
+    { id: "done", label: "Done & Verified", bg: "bg-card dark:bg-card", text: "text-foreground" }
   ];
 
   return (
@@ -246,17 +246,17 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
                 key={col.id}
                 onDragOver={onDragOver}
                 onDrop={(e) => onDrop(e, col.id)}
-                className={`border border-border/80 rounded-2xl shadow-sm p-5 flex flex-col h-[550px] md:h-[calc(100vh-270px)] min-h-[400px] board-column w-[88vw] md:w-auto shrink-0 snap-center ${col.bg}`}
+                className={`border border-border/80 rounded-2xl shadow-xs p-5 flex flex-col h-[550px] md:h-[calc(100vh-270px)] min-h-[400px] board-column w-[88vw] md:w-auto shrink-0 snap-center bg-card ${col.bg}`}
                 style={{
                   contentVisibility: "auto",
                   containIntrinsicSize: "auto 300px auto 600px"
                 } as React.CSSProperties}
               >
-                <div className="flex items-center justify-between mb-4 pb-2 border-b border-border">
+                <div className="flex items-center justify-between mb-4 pb-2 border-b border-border/60">
                   <h3 className={`font-bold font-display text-sm ${col.text}`}>
                     {col.label}
                   </h3>
-                  <span className="text-xs bg-border px-2 py-0.5 rounded font-bold text-muted">
+                  <span className="text-xs bg-neutral-200 dark:bg-neutral-800 text-black dark:text-neutral-100 border border-neutral-300 dark:border-neutral-700 px-2.5 py-0.5 rounded-full font-bold">
                     {colTasks.length}
                   </span>
                 </div>
