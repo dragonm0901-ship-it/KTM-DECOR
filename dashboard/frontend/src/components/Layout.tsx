@@ -26,8 +26,8 @@ import {
 } from "./ui/solar-icons";
 import {
   Search,
-  PanelLeftClose,
-  PanelLeft,
+  ChevronLeft,
+  ChevronRight,
   ChevronsUpDown,
 } from "lucide-react";
 
@@ -173,7 +173,7 @@ export const Layout: React.FC<LayoutProps> = ({
                 title="Collapse Sidebar"
                 aria-label="Collapse Sidebar"
               >
-                <PanelLeftClose size={19} />
+                <ChevronLeft size={20} strokeWidth={2.8} />
               </button>
             </>
           ) : (
@@ -189,7 +189,7 @@ export const Layout: React.FC<LayoutProps> = ({
                 title="Expand Sidebar"
                 aria-label="Expand Sidebar"
               >
-                <PanelLeft size={19} />
+                <ChevronRight size={20} strokeWidth={2.8} />
               </button>
             </div>
           )}
