@@ -309,7 +309,7 @@ export const PurchaseTab: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-card p-5 sm:p-6 rounded-[28px] border border-border/80 shadow-xs">
+      <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 bg-card p-5 sm:p-6 rounded-[28px] border border-border/80 shadow-xs">
         <div className="flex items-center gap-3.5">
           <div
             style={{ background: "linear-gradient(135deg, #60A5FA 0%, #3B82F6 50%, #1D4ED8 100%)" }}
@@ -327,13 +327,14 @@ export const PurchaseTab: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 self-start md:self-auto">
+        {/* Top Buttons & Actions Toolbar (Compact and responsive without horizontal scroll) */}
+        <div className="flex flex-wrap items-center gap-2 self-stretch xl:self-auto">
           {/* Quick Statement Download */}
-          <div className="flex items-center gap-2 bg-border/20 p-2 rounded-md border border-border/40">
+          <div className="flex flex-wrap items-center gap-1.5 bg-border/20 p-1.5 rounded-xl border border-border/40">
             <select
               value={exportMonth}
               onChange={(e) => setExportMonth(e.target.value)}
-              className="bg-card border border-border text-foreground text-[11px] rounded px-2 py-1.5 focus:outline-none focus:border-accent font-semibold cursor-pointer"
+              className="bg-card border border-border text-foreground text-[11px] rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-accent font-semibold cursor-pointer h-8"
             >
               <option value="all">All Time</option>
               {NEPALI_MONTHS.map((m) => (
@@ -345,7 +346,7 @@ export const PurchaseTab: React.FC = () => {
             <select
               value={exportYear}
               onChange={(e) => setExportYear(e.target.value)}
-              className="bg-card border border-border text-foreground text-[11px] rounded px-2 py-1.5 focus:outline-none focus:border-accent font-semibold cursor-pointer"
+              className="bg-card border border-border text-foreground text-[11px] rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-accent font-semibold cursor-pointer h-8"
             >
               {NEPALI_YEARS.map((y) => (
                 <option key={y} value={y.toString()}>
@@ -358,7 +359,7 @@ export const PurchaseTab: React.FC = () => {
               style={{
                 background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
               }}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 text-black text-[11px] rounded-xl font-bold transition-all shadow-md shadow-orange-500/20 active:scale-95 cursor-pointer hover:opacity-95"
+              className="flex items-center gap-1.5 px-2.5 py-1 text-black text-[11px] rounded-lg font-bold transition-all shadow-xs active:scale-95 cursor-pointer hover:opacity-95 whitespace-nowrap h-8"
               title="Preview and Print PDF Purchases Statement"
             >
               <Printer size={13} />
@@ -367,7 +368,7 @@ export const PurchaseTab: React.FC = () => {
             <button
               onClick={handleExportClick}
               disabled={exporting}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-accent/90 text-white text-[11px] rounded-xl font-bold hover:bg-accent-dark transition-all disabled:opacity-50 cursor-pointer"
+              className="flex items-center gap-1.5 px-2.5 py-1 bg-accent text-white text-[11px] rounded-lg font-bold hover:bg-accent-dark transition-all disabled:opacity-50 cursor-pointer whitespace-nowrap h-8 shadow-xs"
             >
               {exporting ? "Exporting..." : "Export CSV"}
             </button>
@@ -378,9 +379,9 @@ export const PurchaseTab: React.FC = () => {
             style={{
               background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
             }}
-            className="flex items-center justify-center gap-1.5 py-2 px-4 text-black rounded-xl font-bold text-xs transition-all shadow-md shadow-orange-500/20 hover:scale-[1.02] active:scale-95 self-start md:self-auto h-9 cursor-pointer"
+            className="flex items-center justify-center gap-1.5 px-3 py-1 text-black rounded-xl font-bold text-xs transition-all shadow-xs hover:scale-[1.02] active:scale-95 cursor-pointer whitespace-nowrap h-8"
           >
-            <Plus size={16} />
+            <Plus size={15} />
             Log Supplier Purchase
           </button>
         </div>

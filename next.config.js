@@ -67,6 +67,10 @@ const nextConfig = {
           source: "/admin/:path*",
           destination: "http://127.0.0.1:5173/admin/:path*",
         },
+        {
+          source: "/api/:path*",
+          destination: "http://127.0.0.1:5001/api/:path*",
+        },
       ];
     }
 

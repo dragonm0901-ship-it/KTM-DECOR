@@ -19,6 +19,7 @@ interface NepaliDatePickerProps {
   className?: string;
   disabled?: boolean;
   required?: boolean;
+  align?: "left" | "right";
 }
 
 export const NepaliDatePicker: React.FC<NepaliDatePickerProps> = ({
@@ -27,6 +28,7 @@ export const NepaliDatePicker: React.FC<NepaliDatePickerProps> = ({
   placeholder = "Select Nepali date...",
   className = "",
   disabled = false,
+  align = "left",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -159,7 +161,7 @@ export const NepaliDatePicker: React.FC<NepaliDatePickerProps> = ({
 
       {/* Dropdown Calendar Popup */}
       {isOpen && (
-        <div className="absolute top-full left-0 z-50 mt-1.5 w-72 sm:w-80 bg-card border border-border/80 rounded-2xl shadow-xl p-3.5 animate-in fade-in zoom-in-95 duration-150">
+        <div className={`absolute top-full ${align === "right" ? "right-0" : "left-0"} z-50 mt-1.5 w-72 sm:w-80 max-w-[calc(100vw-2rem)] bg-card border border-border/80 rounded-2xl shadow-xl p-3.5 animate-in fade-in zoom-in-95 duration-150`}>
           {/* Header Controls */}
           <div className="flex items-center justify-between gap-1 pb-3 border-b border-border/60">
             {/* Prev Month */}

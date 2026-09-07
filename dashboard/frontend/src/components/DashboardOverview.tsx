@@ -60,7 +60,6 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
     orders,
     expenses,
     purchases,
-    inventoryItems,
     sales,
     exportStatement,
     exportInventory,
@@ -68,7 +67,10 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
     fetchStatementArchives,
     downloadArchive,
     fetchStatementData,
-    fetchArchiveData
+    fetchArchiveData,
+    fetchPurchases,
+    fetchExpenses,
+    fetchSales
   } = useStore();
 
   const [noteText, setNoteText] = useState("");
@@ -90,13 +92,22 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
   const [exportMonth, setExportMonth] = useState<string>(currentBs.month.toString());
   const [exportYear, setExportYear] = useState<string>(currentBs.year.toString());
   const [exportingType, setExportingType] = useState<string | null>(null);
-  const [overviewChartType, setOverviewChartType] = useState<"revenue" | "dual">("revenue");
+  const [overviewChartType, setOverviewChartType] = useState<"revenue" | "dual">("dual");
 
   useEffect(() => {
     if (user?.role === "admin") {
       fetchStatementArchives();
+      if (!purchases || purchases.length === 0) {
+        fetchPurchases();
+      }
+      if (!expenses || expenses.length === 0) {
+        fetchExpenses();
+      }
+      if (!sales || sales.length === 0) {
+        fetchSales();
+      }
     }
-  }, [user, fetchStatementArchives]);
+  }, [user, fetchStatementArchives, fetchPurchases, fetchExpenses, fetchSales, purchases?.length, expenses?.length, sales?.length]);
 
   const handlePreviewStatement = async (type: string) => {
     try {
@@ -205,10 +216,8 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
   // New calculations for Overview Cards
   const totalExpensesVal = expenses.reduce((sum, e) => sum + e.amount, 0);
   const totalPurchasesVal = purchases.reduce((sum, p) => sum + p.amount, 0);
+  const netProfitVal = totalSales - (totalExpensesVal + totalPurchasesVal);
   const outstandingPurchasesVal = purchases.filter((p) => p.status === "pending").reduce((sum, p) => sum + p.amount, 0);
-
-  const lowStockVal = inventoryItems.filter((i) => i.quantity <= i.alertLevel && i.quantity > 0).length;
-  const outOfStockVal = inventoryItems.filter((i) => i.quantity === 0).length;
 
   const expenseCategorySums = {
     salary: expenses.filter((e) => e.category === "salary").reduce((sum, e) => sum + e.amount, 0),
@@ -811,10 +820,58 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
         </div>
       )}
 
-      {/* FINANCIAL & INVENTORY OVERVIEW CARD SECTION */}
+      {/* FINANCIAL OVERVIEW CARD SECTION */}
       {user?.role === "admin" && (
         <div className="space-y-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
+            {/* Net Operating Profit Card (Signature Card) */}
+            <div className="bg-card border border-border/80 rounded-[28px] shadow-sm hover:shadow-md transition-all p-6 flex flex-col justify-between min-h-[260px]">
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-bold text-muted uppercase tracking-wider block">Net Operating Profit</span>
+                  <span
+                    className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                      netProfitVal >= 0
+                        ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20"
+                        : "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20"
+                    }`}
+                  >
+                    {netProfitVal >= 0 ? "Surplus" : "Deficit"}
+                  </span>
+                </div>
+                <div className="mb-3">
+                  <h4
+                    className={`text-3xl sm:text-4xl font-semibold font-display leading-none ${
+                      netProfitVal >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-red-600 dark:text-red-400"
+                    }`}
+                  >
+                    Rs. {netProfitVal.toLocaleString()}
+                  </h4>
+                </div>
+                <div className="space-y-1.5 text-[11px] font-medium text-muted">
+                  <div className="flex justify-between items-center">
+                    <span>Revenue:</span>
+                    <span className="font-bold text-foreground">Rs. {totalSales.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Expenses:</span>
+                    <span className="font-bold text-foreground">Rs. {totalExpensesVal.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Purchases:</span>
+                    <span className="font-bold text-foreground">Rs. {totalPurchasesVal.toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => handlePreviewStatement("all")}
+                className="text-left text-xs font-bold text-accent hover:text-accent-dark transition-colors mt-2 flex items-center gap-1 cursor-pointer"
+              >
+                <span>Preview Statement</span>
+                <span>&rarr;</span>
+              </button>
+            </div>
+
             {/* Expenses Overview Card (Porcelain White Card) */}
             <div className="bg-card border border-border/80 rounded-[28px] shadow-sm hover:shadow-md transition-all p-6 flex flex-col justify-between min-h-[260px]">
               <div>
@@ -895,59 +952,6 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                 className="text-left text-xs font-bold text-accent hover:text-accent-dark transition-colors mt-2 flex items-center gap-1 cursor-pointer"
               >
                 <span>View Purchases Tracker</span>
-                <span>&rarr;</span>
-              </button>
-            </div>
-
-            {/* Material Inventory Card (Porcelain White Card) */}
-            <div className="bg-card border border-border/80 rounded-[28px] shadow-sm hover:shadow-md transition-all p-6 flex flex-col justify-between min-h-[260px]">
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-bold text-muted uppercase tracking-wider block">Material Inventory</span>
-                  <span className="text-[10px] font-bold bg-neutral-200 dark:bg-neutral-800 text-black dark:text-neutral-100 border border-neutral-300 dark:border-neutral-700 px-2.5 py-0.5 rounded-full">
-                    {(lowStockVal + outOfStockVal) > 0 ? "Alerts" : "Ok"}
-                  </span>
-                </div>
-                <div className="mb-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <h4 className="text-3xl sm:text-4xl font-semibold font-display text-foreground leading-none">
-                      {(lowStockVal + outOfStockVal)} Items
-                    </h4>
-                    <div className="flex items-center gap-1.5">
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-neutral-200 dark:bg-neutral-800 text-black dark:text-neutral-100 border border-neutral-300 dark:border-neutral-700 shadow-xs">
-                        <span className="h-2 w-2 rounded-full bg-amber-500 shrink-0" />
-                        <span>{lowStockVal} Low Stock</span>
-                      </span>
-                      {outOfStockVal > 0 && (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-neutral-200 dark:bg-neutral-800 text-black dark:text-neutral-100 border border-neutral-300 dark:border-neutral-700 shadow-xs">
-                          <span className="h-2 w-2 rounded-full bg-red-500 shrink-0" />
-                          <span>{outOfStockVal} Out</span>
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <span className="text-xs text-muted font-medium mt-1.5 block">Stock alerts requiring restock</span>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-[10px] text-muted uppercase font-bold tracking-wider block">Critical Materials</span>
-                  {inventoryItems.filter((i) => i.quantity <= i.alertLevel).slice(0, 2).map((i) => (
-                    <div key={i._id} className="flex justify-between items-center text-[11px] py-0.5">
-                      <span className="truncate max-w-[130px] font-medium text-foreground">{i.name}</span>
-                      <span className={`font-bold ${i.quantity === 0 ? "text-red-500" : "text-amber-500"}`}>
-                        {i.quantity} {i.unit}
-                      </span>
-                    </div>
-                  ))}
-                  {inventoryItems.filter((i) => i.quantity <= i.alertLevel).length === 0 && (
-                    <span className="text-[11px] text-emerald-500 font-semibold italic">All materials fully stocked</span>
-                  )}
-                </div>
-              </div>
-              <button
-                onClick={() => setCurrentTab("inventory")}
-                className="text-left text-xs font-bold text-accent hover:text-accent-dark transition-colors mt-2 flex items-center gap-1 cursor-pointer"
-              >
-                <span>View Material Inventory</span>
                 <span>&rarr;</span>
               </button>
             </div>
@@ -1549,7 +1553,7 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
                     : "text-muted hover:text-foreground hover:bg-card/50"
                 }`}
               >
-                Sales & Expenses Dual Trend
+                Sales & Expenses Growth Trend
               </button>
             </div>
           </div>
@@ -1558,7 +1562,9 @@ export const DashboardOverview: React.FC<OverviewProps> = ({
             <SalesExpensesTrendChart
               sales={safeSales}
               expenses={expenses}
+              purchases={purchases}
               orders={orders}
+              completedTasks={completedTasks}
               title="Sales & Expenses Growth Trend"
             />
           ) : (

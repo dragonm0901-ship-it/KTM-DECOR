@@ -4,21 +4,38 @@ import { formatNepaliShort } from "../utils/nepaliDate";
 interface SalesExpensesTrendChartProps {
   sales: any[];
   expenses: any[];
+  purchases?: any[];
   orders?: any[];
+  completedTasks?: any[];
   title?: string;
   className?: string;
 }
 
-type Timeframe = "Week" | "Month" | "6 months" | "Year";
+type Timeframe = "Week" | "Month" | "6 months" | "Year" | "All";
+
+const safeParseDate = (d: any, fallback?: any): Date => {
+  if (d instanceof Date && !isNaN(d.getTime())) return d;
+  if (d) {
+    const parsed = new Date(d);
+    if (!isNaN(parsed.getTime())) return parsed;
+  }
+  if (fallback) {
+    const parsedFallback = new Date(fallback);
+    if (!isNaN(parsedFallback.getTime())) return parsedFallback;
+  }
+  return new Date();
+};
 
 export const SalesExpensesTrendChart: React.FC<SalesExpensesTrendChartProps> = ({
   sales = [],
   expenses = [],
+  purchases = [],
   orders = [],
+  completedTasks = [],
   title = "Sales & Expenses Growth Trend",
   className = "",
 }) => {
-  const [timeframe, setTimeframe] = useState<Timeframe>("Month");
+  const [timeframe, setTimeframe] = useState<Timeframe>("All");
   const [hoveredPoint, setHoveredPoint] = useState<{
     x: number;
     ySales: number;
@@ -26,51 +43,81 @@ export const SalesExpensesTrendChart: React.FC<SalesExpensesTrendChartProps> = (
     label: string;
     salesVal: number;
     expensesVal: number;
+    purchasesVal: number;
+    costsVal: number;
     netVal: number;
   } | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
 
-  // 1. Process all sales and expenses chronologically
-  const { allSalesItems, allExpensesItems } = useMemo(() => {
+  // 1. Process all sales, expenses, and purchases chronologically
+  const { allSalesItems, allExpensesItems, allPurchasesItems } = useMemo(() => {
     const sItems: { date: Date; value: number }[] = [];
     const eItems: { date: Date; value: number }[] = [];
+    const pItems: { date: Date; value: number }[] = [];
 
-    // Process sales records
-    sales.forEach((s) => {
-      const val = Number(s.amount) || 0;
+    // Process completed tasks revenue (aligns with homescreen sales calculation)
+    (completedTasks || []).forEach((t) => {
+      const val = Number(t.totalCost) || 0;
       if (val > 0) {
         sItems.push({
-          date: new Date(s.date),
+          date: safeParseDate(t.updatedAt, t.createdAt),
           value: val,
         });
       }
     });
 
-    // Process delivered/paid orders that might not be in sales yet
-    orders.forEach((o) => {
+    // Process direct sales records
+    (sales || []).forEach((s) => {
+      const val = Number(s.amount) || 0;
+      if (val > 0) {
+        sItems.push({
+          date: safeParseDate(s.date, s.createdAt),
+          value: val,
+        });
+      }
+    });
+
+    // Process delivered/paid orders that might not be in sales yet (avoid duplicate counting)
+    (orders || []).forEach((o) => {
       if (o.deleted) return;
       if (o.stage === "delivered" || o.stage === "paid" || o.approved) {
         const val = Number(o.totalPrice || o.price) || 0;
-        const isAlreadyInSales = sales.some(
-          (s) => (typeof s.orderId === "object" ? s.orderId?._id : s.orderId) === o._id
-        );
+        const oIdStr = o._id?.toString();
+        const isAlreadyInSales = (sales || []).some((s) => {
+          const sOrderId = (typeof s.orderId === "object" && s.orderId !== null)
+            ? (s.orderId as any)._id?.toString()
+            : s.orderId?.toString();
+          return Boolean(sOrderId && oIdStr && sOrderId === oIdStr);
+        });
+
         if (!isAlreadyInSales && val > 0) {
           sItems.push({
-            date: new Date(o.approvedAt || o.updatedAt || o.createdAt),
+            date: safeParseDate(o.approvedAt || o.updatedAt, o.createdAt),
             value: val,
           });
         }
       }
     });
 
-    // Process expenses
-    expenses.forEach((e) => {
+    // Process operating expenses
+    (expenses || []).forEach((e) => {
       const val = Number(e.amount) || 0;
       if (val > 0) {
         eItems.push({
-          date: new Date(e.date),
+          date: safeParseDate(e.date, e.createdAt),
+          value: val,
+        });
+      }
+    });
+
+    // Process supplier/material purchases
+    (purchases || []).forEach((p) => {
+      const val = Number(p.amount) || 0;
+      if (val > 0) {
+        pItems.push({
+          date: safeParseDate(p.date, p.createdAt),
           value: val,
         });
       }
@@ -78,15 +125,17 @@ export const SalesExpensesTrendChart: React.FC<SalesExpensesTrendChartProps> = (
 
     sItems.sort((a, b) => a.date.getTime() - b.date.getTime());
     eItems.sort((a, b) => a.date.getTime() - b.date.getTime());
+    pItems.sort((a, b) => a.date.getTime() - b.date.getTime());
 
-    return { allSalesItems: sItems, allExpensesItems: eItems };
-  }, [sales, expenses, orders]);
+    return { allSalesItems: sItems, allExpensesItems: eItems, allPurchasesItems: pItems };
+  }, [sales, expenses, purchases, orders, completedTasks]);
 
   // 2. Filter & aggregate points according to selected timeframe
   const {
     chartPoints,
     totalPeriodSales,
     totalPeriodExpenses,
+    totalPeriodPurchases,
     totalPeriodNet,
     marginPercentage,
     periodLabel,
@@ -94,6 +143,7 @@ export const SalesExpensesTrendChart: React.FC<SalesExpensesTrendChartProps> = (
     const now = new Date();
     let daysToInclude = 30;
     let periodName = "this month";
+    let isAllTime = false;
 
     if (timeframe === "Week") {
       daysToInclude = 7;
@@ -107,35 +157,64 @@ export const SalesExpensesTrendChart: React.FC<SalesExpensesTrendChartProps> = (
     } else if (timeframe === "Year") {
       daysToInclude = 365;
       periodName = "this year";
+    } else if (timeframe === "All") {
+      isAllTime = true;
+      periodName = "all time";
+      // Find earliest date across all items
+      const allDates = [
+        ...allSalesItems.map((i) => i.date.getTime()),
+        ...allExpensesItems.map((i) => i.date.getTime()),
+        ...allPurchasesItems.map((i) => i.date.getTime()),
+      ].filter((t) => !isNaN(t) && t > 0);
+
+      const earliestTime = allDates.length > 0 ? Math.min(...allDates) : now.getTime() - 180 * 24 * 60 * 60 * 1000;
+      const diffDays = Math.max(7, Math.ceil((now.getTime() - earliestTime) / (24 * 60 * 60 * 1000)));
+      daysToInclude = diffDays;
     }
 
-    const cutoff = new Date(now.getTime() - daysToInclude * 24 * 60 * 60 * 1000);
+    const cutoff = isAllTime ? new Date(0) : new Date(now.getTime() - daysToInclude * 24 * 60 * 60 * 1000);
 
     const curSales = allSalesItems.filter((item) => item.date >= cutoff);
     const curExpenses = allExpensesItems.filter((item) => item.date >= cutoff);
+    const curPurchases = allPurchasesItems.filter((item) => item.date >= cutoff);
 
-    const sumSales = curSales.reduce((sum, item) => sum + item.value, 0);
-    const sumExpenses = curExpenses.reduce((sum, item) => sum + item.value, 0);
-    const sumNet = sumSales - sumExpenses;
+    // Initial baseline for pre-cutoff transactions to ensure continuous cumulative tracking
+    const initialSales = isAllTime ? 0 : allSalesItems.filter((i) => i.date < cutoff).reduce((sum, i) => sum + i.value, 0);
+    const initialExpenses = isAllTime ? 0 : allExpensesItems.filter((i) => i.date < cutoff).reduce((sum, i) => sum + i.value, 0);
+    const initialPurchases = isAllTime ? 0 : allPurchasesItems.filter((i) => i.date < cutoff).reduce((sum, i) => sum + i.value, 0);
 
-    const margin = sumSales > 0 ? Math.round((sumNet / sumSales) * 100) : 18;
+    const sumSales = (isAllTime ? allSalesItems : curSales).reduce((sum, item) => sum + item.value, 0);
+    const sumExpenses = (isAllTime ? allExpensesItems : curExpenses).reduce((sum, item) => sum + item.value, 0);
+    const sumPurchases = (isAllTime ? allPurchasesItems : curPurchases).reduce((sum, item) => sum + item.value, 0);
+    const sumCosts = sumExpenses + sumPurchases;
+    // Profit = Sales - (Expenses + Purchases)
+    const sumNet = sumSales - sumCosts;
 
-    const bucketCount = timeframe === "Week" ? 8 : timeframe === "Month" ? 11 : 13;
-    const bucketDuration = (daysToInclude * 24 * 60 * 60 * 1000) / (bucketCount - 1);
+    const margin = sumSales > 0 ? Math.round((sumNet / sumSales) * 100) : 0;
+
+    const bucketCount = timeframe === "Week" ? 8 : timeframe === "Month" ? 11 : 14;
+    const effectiveStartTime = isAllTime
+      ? (allSalesItems[0]?.date || allExpensesItems[0]?.date || allPurchasesItems[0]?.date || cutoff).getTime()
+      : cutoff.getTime();
+    const totalDuration = Math.max(now.getTime() - effectiveStartTime, 24 * 60 * 60 * 1000);
+    const bucketDuration = totalDuration / (bucketCount - 1);
 
     const points: {
       label: string;
       salesVal: number;
       expensesVal: number;
+      purchasesVal: number;
+      costsVal: number;
       netVal: number;
     }[] = [];
 
-    let runningSales = 0;
-    let runningExpenses = 0;
+    let runningSales = initialSales;
+    let runningExpenses = initialExpenses;
+    let runningPurchases = initialPurchases;
 
     for (let i = 0; i < bucketCount; i++) {
-      const bucketStart = new Date(cutoff.getTime() + i * bucketDuration);
-      const bucketEnd = new Date(cutoff.getTime() + (i + 1) * bucketDuration);
+      const bucketStart = new Date(effectiveStartTime + i * bucketDuration);
+      const bucketEnd = new Date(effectiveStartTime + (i + 1) * bucketDuration);
 
       const sInBucket = curSales.filter(
         (item) => item.date >= bucketStart && item.date < bucketEnd
@@ -143,47 +222,66 @@ export const SalesExpensesTrendChart: React.FC<SalesExpensesTrendChartProps> = (
       const eInBucket = curExpenses.filter(
         (item) => item.date >= bucketStart && item.date < bucketEnd
       );
+      const pInBucket = curPurchases.filter(
+        (item) => item.date >= bucketStart && item.date < bucketEnd
+      );
 
       runningSales += sInBucket.reduce((sum, item) => sum + item.value, 0);
       runningExpenses += eInBucket.reduce((sum, item) => sum + item.value, 0);
+      runningPurchases += pInBucket.reduce((sum, item) => sum + item.value, 0);
+      const runningCosts = runningExpenses + runningPurchases;
 
       points.push({
         label: formatNepaliShort(bucketStart),
         salesVal: runningSales,
         expensesVal: runningExpenses,
-        netVal: runningSales - runningExpenses,
+        purchasesVal: runningPurchases,
+        costsVal: runningCosts,
+        netVal: runningSales - runningCosts, // Profit = Sales - (Expenses + Purchases)
       });
     }
 
-    // Baseline fallback if data points are completely 0
-    const hasSales = points.some((p) => p.salesVal > 0);
-    const hasExpenses = points.some((p) => p.expensesVal > 0);
+    // Baseline fallback ONLY if entire dataset is completely empty
+    const hasAnyRealData = allSalesItems.length > 0 || allExpensesItems.length > 0 || allPurchasesItems.length > 0;
 
-    if (!hasSales && !hasExpenses) {
+    if (!hasAnyRealData) {
       const salesMultipliers = [0.25, 0.38, 0.52, 0.58, 0.65, 0.72, 0.81, 0.88, 0.94, 0.98, 1.0];
-      const expensesMultipliers = [0.18, 0.26, 0.35, 0.42, 0.46, 0.51, 0.55, 0.61, 0.64, 0.67, 0.70];
+      const expensesMultipliers = [0.12, 0.17, 0.23, 0.28, 0.31, 0.34, 0.37, 0.41, 0.43, 0.45, 0.47];
+      const purchasesMultipliers = [0.06, 0.09, 0.12, 0.14, 0.15, 0.17, 0.18, 0.20, 0.21, 0.22, 0.23];
 
-      const baseSales = sumSales > 0 ? sumSales : 285400;
-      const baseExpenses = sumExpenses > 0 ? sumExpenses : 164200;
+      const baseSales = 285400;
+      const baseExpenses = 110000;
+      const basePurchases = 54200;
 
       points.forEach((p, idx) => {
         const sM = salesMultipliers[idx % salesMultipliers.length];
         const eM = expensesMultipliers[idx % expensesMultipliers.length];
+        const pM = purchasesMultipliers[idx % purchasesMultipliers.length];
         p.salesVal = Math.round(baseSales * sM);
         p.expensesVal = Math.round(baseExpenses * eM);
-        p.netVal = p.salesVal - p.expensesVal;
+        p.purchasesVal = Math.round(basePurchases * pM);
+        p.costsVal = p.expensesVal + p.purchasesVal;
+        p.netVal = p.salesVal - p.costsVal;
       });
     }
 
+    const finalSales = hasAnyRealData ? sumSales : (points[points.length - 1]?.salesVal || 0);
+    const finalExpenses = hasAnyRealData ? sumExpenses : (points[points.length - 1]?.expensesVal || 0);
+    const finalPurchases = hasAnyRealData ? sumPurchases : (points[points.length - 1]?.purchasesVal || 0);
+    const finalCosts = finalExpenses + finalPurchases;
+    const finalNet = finalSales - finalCosts;
+
     return {
       chartPoints: points,
-      totalPeriodSales: sumSales > 0 ? sumSales : 285400,
-      totalPeriodExpenses: sumExpenses > 0 ? sumExpenses : 164200,
-      totalPeriodNet: sumSales > 0 ? sumNet : 121200,
+      totalPeriodSales: finalSales,
+      totalPeriodExpenses: finalExpenses,
+      totalPeriodPurchases: finalPurchases,
+      totalPeriodCosts: finalCosts,
+      totalPeriodNet: finalNet,
       marginPercentage: margin,
       periodLabel: periodName,
     };
-  }, [allSalesItems, allExpensesItems, timeframe]);
+  }, [allSalesItems, allExpensesItems, allPurchasesItems, timeframe]);
 
   // 3. SVG Dimensions & Bezier Curve Calculations
   const svgWidth = 1000;
@@ -192,15 +290,15 @@ export const SalesExpensesTrendChart: React.FC<SalesExpensesTrendChartProps> = (
   const paddingBottom = 40;
 
   const maxVal = Math.max(
-    ...chartPoints.map((p) => Math.max(p.salesVal, p.expensesVal)),
+    ...chartPoints.map((p) => Math.max(p.salesVal, p.costsVal)),
     1000
   );
   const minVal = Math.min(
-    ...chartPoints.map((p) => Math.min(p.salesVal, p.expensesVal, 0))
+    ...chartPoints.map((p) => Math.min(p.salesVal, p.costsVal, 0))
   );
   const valRange = maxVal - minVal || 1;
 
-  // Normalized coordinates for both series
+  // Normalized coordinates for both series (Sales and Total Costs = Expenses + Purchases)
   const coords = useMemo(() => {
     return chartPoints.map((p, idx) => {
       const x = (idx / (chartPoints.length - 1)) * svgWidth;
@@ -209,9 +307,9 @@ export const SalesExpensesTrendChart: React.FC<SalesExpensesTrendChartProps> = (
       const ySales =
         svgHeight - paddingBottom - normSales * (svgHeight - paddingTop - paddingBottom);
 
-      const normExpenses = (p.expensesVal - minVal) / valRange;
+      const normCosts = (p.costsVal - minVal) / valRange;
       const yExpenses =
-        svgHeight - paddingBottom - normExpenses * (svgHeight - paddingTop - paddingBottom);
+        svgHeight - paddingBottom - normCosts * (svgHeight - paddingTop - paddingBottom);
 
       return {
         x,
@@ -220,6 +318,8 @@ export const SalesExpensesTrendChart: React.FC<SalesExpensesTrendChartProps> = (
         label: p.label,
         salesVal: p.salesVal,
         expensesVal: p.expensesVal,
+        purchasesVal: p.purchasesVal,
+        costsVal: p.costsVal,
         netVal: p.netVal,
       };
     });
@@ -247,7 +347,7 @@ export const SalesExpensesTrendChart: React.FC<SalesExpensesTrendChartProps> = (
       const cp2yS = p2.ySales - (p3.ySales - p1.ySales) / 6;
       sLine += ` C ${cp1x} ${cp1yS}, ${cp2x} ${cp2yS}, ${p2.x} ${p2.ySales}`;
 
-      // Expenses spline
+      // Expenses & Purchases (Total Costs) spline
       const cp1yE = p1.yExpenses + (p2.yExpenses - p0.yExpenses) / 6;
       const cp2yE = p2.yExpenses - (p3.yExpenses - p1.yExpenses) / 6;
       eLine += ` C ${cp1x} ${cp1yE}, ${cp2x} ${cp2yE}, ${p2.x} ${p2.yExpenses}`;
@@ -268,7 +368,7 @@ export const SalesExpensesTrendChart: React.FC<SalesExpensesTrendChartProps> = (
     };
   }, [coords]);
 
-  // Precise, silky-smooth mouse & touch tracking with cubic smoothstep interpolation
+  // Precise tracking with cubic smoothstep interpolation
   const updateHoverPosition = (clientX: number) => {
     if (!svgRef.current || coords.length < 2) return;
     const rect = svgRef.current.getBoundingClientRect();
@@ -298,7 +398,12 @@ export const SalesExpensesTrendChart: React.FC<SalesExpensesTrendChartProps> = (
     const interpExpensesVal = Math.round(
       p1.expensesVal + (p2.expensesVal - p1.expensesVal) * smoothT
     );
-    const interpNetVal = interpSalesVal - interpExpensesVal;
+    const interpPurchasesVal = Math.round(
+      p1.purchasesVal + (p2.purchasesVal - p1.purchasesVal) * smoothT
+    );
+    const interpCostsVal = interpExpensesVal + interpPurchasesVal;
+    // Profit = Sales - (Expenses + Purchases)
+    const interpNetVal = interpSalesVal - interpCostsVal;
     const label = t < 0.5 ? p1.label : p2.label;
 
     setHoveredPoint({
@@ -308,6 +413,8 @@ export const SalesExpensesTrendChart: React.FC<SalesExpensesTrendChartProps> = (
       label,
       salesVal: interpSalesVal,
       expensesVal: interpExpensesVal,
+      purchasesVal: interpPurchasesVal,
+      costsVal: interpCostsVal,
       netVal: interpNetVal,
     });
   };
@@ -334,6 +441,7 @@ export const SalesExpensesTrendChart: React.FC<SalesExpensesTrendChartProps> = (
 
   const displaySales = hoveredPoint ? hoveredPoint.salesVal : totalPeriodSales;
   const displayExpenses = hoveredPoint ? hoveredPoint.expensesVal : totalPeriodExpenses;
+  const displayPurchases = hoveredPoint ? hoveredPoint.purchasesVal : totalPeriodPurchases;
   const displayNet = hoveredPoint ? hoveredPoint.netVal : totalPeriodNet;
 
   // Tooltip alignment helper
@@ -368,23 +476,31 @@ export const SalesExpensesTrendChart: React.FC<SalesExpensesTrendChartProps> = (
       <div className="relative z-10 flex flex-col items-start justify-start flex-shrink-0">
         <div className="flex flex-wrap items-center justify-between gap-3 w-full">
           <div>
-            <h3 className="text-base sm:text-lg font-medium text-black/90 tracking-tight">
+            <h3 className="text-base sm:text-lg font-bold text-black/90 tracking-tight">
               {title}
             </h3>
             <p className="text-xs text-black/75 font-medium mt-0.5">
-              Dual-spline tracking of cumulative revenue versus business operating expenses
+              Revenue and business expenses trend over time
             </p>
           </div>
 
           {/* Quick Stats Pill Badges in Header */}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/30 backdrop-blur-xs border border-white/40 text-black text-xs font-semibold shadow-xs">
               <span className="h-2 w-2 rounded-full bg-white shadow-xs" />
-              <span>Revenue: Rs. {displaySales.toLocaleString()}</span>
+              <span>Sales: Rs. {displaySales.toLocaleString()}</span>
             </div>
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/15 backdrop-blur-xs border border-black/15 text-black text-xs font-semibold shadow-xs">
-              <span className="h-2 w-2 rounded-full bg-black" />
-              <span>Costs: Rs. {displayExpenses.toLocaleString()}</span>
+              <span className="h-2 w-2 rounded-full bg-orange-600" />
+              <span>Expenses: Rs. {displayExpenses.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/15 backdrop-blur-xs border border-black/15 text-black text-xs font-semibold shadow-xs">
+              <span className="h-2 w-2 rounded-full bg-amber-600" />
+              <span>Purchases: Rs. {displayPurchases.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/20 backdrop-blur-xs border border-black/25 text-black text-xs font-bold shadow-xs">
+              <span className={`h-2 w-2 rounded-full ${displayNet >= 0 ? "bg-emerald-600" : "bg-red-600"}`} />
+              <span>Net Profit: Rs. {displayNet.toLocaleString()}</span>
             </div>
           </div>
         </div>
@@ -392,19 +508,21 @@ export const SalesExpensesTrendChart: React.FC<SalesExpensesTrendChartProps> = (
         <div className="mt-3 sm:mt-4">
           <div className="flex items-baseline gap-3">
             <span className="text-xs font-bold uppercase tracking-wider text-black/70">
-              Net Profit / Operating Margin
+              Net Operating Profit
             </span>
           </div>
 
           <h2 className="text-3xl sm:text-5xl md:text-[54px] font-semibold text-black tracking-tight leading-none font-display mt-1">
-            Rs. {displayNet.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            {displayNet < 0
+              ? `-Rs. ${Math.abs(displayNet).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              : `Rs. ${displayNet.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
           </h2>
 
-          <div className="flex items-center gap-2 mt-2">
+          <div className="flex flex-wrap items-center gap-2 mt-2">
             <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-black/15 text-black border border-black/15">
               {marginPercentage >= 0 ? `+${marginPercentage}%` : `${marginPercentage}%`} margin
             </span>
-            <span className="text-xs sm:text-sm font-medium text-black/80">{periodLabel}</span>
+            <span className="text-xs sm:text-sm font-medium text-black/80 capitalize">{periodLabel}</span>
             {hoveredPoint && (
               <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-black/15 text-black border border-black/15 transition-all">
                 {hoveredPoint.label}
@@ -414,7 +532,7 @@ export const SalesExpensesTrendChart: React.FC<SalesExpensesTrendChartProps> = (
         </div>
       </div>
 
-      {/* 2. Dedicated Middle Chart Canvas: strictly bounded so it NEVER overlaps buttons */}
+      {/* 2. Dedicated Middle Chart Canvas */}
       <div className="relative w-full flex-1 min-h-[200px] sm:min-h-[230px] md:min-h-[260px] my-3 sm:my-5 overflow-visible">
         <svg
           ref={svgRef}
@@ -435,7 +553,7 @@ export const SalesExpensesTrendChart: React.FC<SalesExpensesTrendChartProps> = (
               <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0.0" />
             </linearGradient>
 
-            {/* Obsidian dark glow for Expenses */}
+            {/* Obsidian dark glow for Outflows (Expenses + Purchases) */}
             <linearGradient id="dark-underglow-dual" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#18181B" stopOpacity="0.18" />
               <stop offset="60%" stopColor="#18181B" stopOpacity="0.05" />
@@ -465,7 +583,7 @@ export const SalesExpensesTrendChart: React.FC<SalesExpensesTrendChartProps> = (
             />
           )}
 
-          {/* Expenses Line (Sleek Obsidian Spline Wave) */}
+          {/* Costs Line (Sleek Obsidian Spline Wave - Expenses + Purchases) */}
           {expensesLinePath && (
             <path
               d={expensesLinePath}
@@ -495,7 +613,6 @@ export const SalesExpensesTrendChart: React.FC<SalesExpensesTrendChartProps> = (
           {/* Interactive Crosshair & Dual Pulsing Halo Dots */}
           {hoveredPoint && (
             <g className="transition-all duration-75 pointer-events-none">
-              {/* Vertical Guide Line connecting top to bottom */}
               <line
                 x1={hoveredPoint.x}
                 y1={0}
@@ -525,7 +642,7 @@ export const SalesExpensesTrendChart: React.FC<SalesExpensesTrendChartProps> = (
                 strokeWidth="2.5"
               />
 
-              {/* 2. Expenses Halo Dot (Obsidian) */}
+              {/* 2. Total Costs Halo Dot (Obsidian) */}
               <circle
                 cx={hoveredPoint.x}
                 cy={hoveredPoint.yExpenses}
@@ -549,20 +666,20 @@ export const SalesExpensesTrendChart: React.FC<SalesExpensesTrendChartProps> = (
         {/* Floating Tooltip Pinned Directly Above the Crosshair */}
         {hoveredPoint && (
           <div
-            className="absolute z-30 pointer-events-none p-3 rounded-2xl bg-black/90 backdrop-blur-md text-white text-xs font-semibold shadow-2xl border border-white/20 transition-all duration-75 flex flex-col gap-1.5 whitespace-nowrap min-w-[170px]"
+            className="absolute z-30 pointer-events-none p-3.5 rounded-2xl bg-black/90 backdrop-blur-md text-white text-xs font-semibold shadow-2xl border border-white/20 transition-all duration-75 flex flex-col gap-1.5 whitespace-nowrap min-w-[190px]"
             style={getTooltipPositionStyle()}
           >
             <div className="flex items-center justify-between border-b border-white/15 pb-1">
               <span className="text-gray-300 font-normal text-[11px]">{hoveredPoint.label}</span>
               <span className="text-[10px] px-1.5 py-0.2 rounded bg-white/20 text-white font-bold">
-                Position
+                Cumulative Point
               </span>
             </div>
 
             <div className="flex items-center justify-between gap-4 text-white">
               <div className="flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-white" />
-                <span className="font-medium text-gray-200">Revenue:</span>
+                <span className="font-medium text-gray-200">Revenue (Sales):</span>
               </div>
               <span className="font-bold">Rs. {hoveredPoint.salesVal.toLocaleString()}</span>
             </div>
@@ -570,15 +687,31 @@ export const SalesExpensesTrendChart: React.FC<SalesExpensesTrendChartProps> = (
             <div className="flex items-center justify-between gap-4 text-white">
               <div className="flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-orange-400" />
-                <span className="font-medium text-gray-200">Expenses:</span>
+                <span className="font-medium text-gray-200">Operating Expenses:</span>
               </div>
               <span className="font-bold">Rs. {hoveredPoint.expensesVal.toLocaleString()}</span>
             </div>
 
-            <div className="flex items-center justify-between gap-4 border-t border-white/15 pt-1 mt-0.5 text-xs">
-              <span className="text-emerald-400 font-bold">Net Margin:</span>
+            <div className="flex items-center justify-between gap-4 text-white">
+              <div className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-amber-400" />
+                <span className="font-medium text-gray-200">Material Purchases:</span>
+              </div>
+              <span className="font-bold">Rs. {hoveredPoint.purchasesVal.toLocaleString()}</span>
+            </div>
+
+            <div className="flex items-center justify-between gap-4 text-gray-300 border-t border-white/10 pt-1 text-[11px]">
+              <div className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-red-400" />
+                <span className="font-medium">Total Outflows:</span>
+              </div>
+              <span className="font-bold text-white">Rs. {hoveredPoint.costsVal.toLocaleString()}</span>
+            </div>
+
+            <div className="flex items-center justify-between gap-4 border-t border-white/20 pt-1.5 mt-0.5 text-xs">
+              <span className="text-emerald-400 font-bold">Net Profit:</span>
               <span
-                className={`font-bold ${
+                className={`font-black ${
                   hoveredPoint.netVal >= 0 ? "text-emerald-400" : "text-rose-400"
                 }`}
               >
@@ -586,16 +719,15 @@ export const SalesExpensesTrendChart: React.FC<SalesExpensesTrendChartProps> = (
               </span>
             </div>
 
-            {/* Downward triangle arrow indicator */}
             <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-0.5 border-solid border-t-black/90 border-t-[6px] border-x-transparent border-x-[6px] border-b-0 w-0 h-0" />
           </div>
         )}
       </div>
 
-      {/* 3. Bottom Navigation Pill Bar: completely separated, horizontally scrollable on mobile */}
+      {/* 3. Bottom Navigation Pill Bar */}
       <div className="relative z-20 flex-shrink-0 flex items-center justify-between gap-3 overflow-x-auto no-scrollbar pt-1 pb-0.5">
         <div className="flex items-center gap-2 sm:gap-2.5">
-          {(["Week", "Month", "6 months", "Year"] as Timeframe[]).map((tf) => {
+          {(["Week", "Month", "6 months", "Year", "All"] as Timeframe[]).map((tf) => {
             const isActive = timeframe === tf;
             return (
               <button
@@ -614,14 +746,18 @@ export const SalesExpensesTrendChart: React.FC<SalesExpensesTrendChartProps> = (
         </div>
 
         {/* Legend Indicators */}
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-black/85 bg-white/20 px-3 py-1.5 rounded-xl border border-white/30 backdrop-blur-xs">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0 flex-wrap">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-black/85 bg-white/25 px-3 py-1.5 rounded-xl border border-white/30 backdrop-blur-xs">
             <span className="h-2.5 w-2.5 rounded-full bg-white shadow-xs" />
             <span>Revenue</span>
           </div>
           <div className="flex items-center gap-1.5 text-xs font-semibold text-black/85 bg-black/15 px-3 py-1.5 rounded-xl border border-black/15 backdrop-blur-xs">
             <span className="h-2.5 w-2.5 rounded-full bg-[#18181B]" />
-            <span>Expenses</span>
+            <span>Expenses & Purchases</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs font-bold text-black/90 bg-black/20 px-3 py-1.5 rounded-xl border border-black/20 backdrop-blur-xs">
+            <span className="h-2.5 w-2.5 rounded-full bg-emerald-600 shadow-xs" />
+            <span>Net Profit</span>
           </div>
         </div>
       </div>

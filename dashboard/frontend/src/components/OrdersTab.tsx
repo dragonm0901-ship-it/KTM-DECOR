@@ -668,9 +668,15 @@ export const OrdersTab: React.FC = () => {
 
       {/* Creation/Editing Modal */}
       {showModal && (
-        <div className="modal-overlay fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm pt-6 sm:pt-0 px-2 pb-6 sm:p-4 overflow-y-auto">
-          <div className="bg-card w-full max-w-4xl lg:max-w-5xl rounded-[28px] border border-border/80 p-5 sm:p-8 shadow-2xl animate-scale-up my-4 max-h-[92vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6 border-b border-border/60 pb-3">
+        <div 
+          className="modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-3 sm:p-6 overflow-hidden"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowModal(false);
+          }}
+        >
+          <div className="bg-card w-full max-w-4xl lg:max-w-5xl rounded-[28px] border border-border/80 shadow-2xl animate-scale-up max-h-[90vh] flex flex-col overflow-hidden">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-5 sm:px-8 py-4 border-b border-border/60 shrink-0 bg-card">
               <h2 className="text-base sm:text-lg font-bold font-display flex items-center gap-2">
                 <Package className="text-accent" />
                 {editingOrder 
@@ -680,19 +686,22 @@ export const OrdersTab: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="text-muted hover:text-foreground p-1.5 rounded-xl hover:bg-muted/20 transition-all"
+                className="text-muted hover:text-foreground p-1.5 rounded-xl hover:bg-muted/20 transition-all cursor-pointer"
+                title="Close"
               >
                 <X size={20} />
               </button>
             </div>
 
-            {formError && (
-              <div className="mb-4 p-3.5 text-xs bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl font-semibold">
-                {formError}
-              </div>
-            )}
+            {/* Scrollable Modal Body */}
+            <div className="p-5 sm:p-8 overflow-y-auto overflow-x-hidden flex-1 overscroll-contain">
+              {formError && (
+                <div className="mb-4 p-3.5 text-xs bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl font-semibold">
+                  {formError}
+                </div>
+              )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+              <form id="order-form" onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
                 {/* COLUMN 1: PRODUCT INFO */}
@@ -849,6 +858,7 @@ export const OrdersTab: React.FC = () => {
                         onChange={(iso) => setDeliveryDate(iso)}
                         disabled={user?.role !== "admin"}
                         required
+                        align="right"
                       />
                     </div>
                   </div>
@@ -915,7 +925,7 @@ export const OrdersTab: React.FC = () => {
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
+                      <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
                         {productImages.map((imgUrl, idx) => (
                           <div
                             key={`prod-preview-${idx}`}
@@ -973,7 +983,7 @@ export const OrdersTab: React.FC = () => {
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
+                      <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
                         {locationImages.map((imgUrl, idx) => (
                           <div
                             key={`loc-preview-${idx}`}
@@ -1139,27 +1149,30 @@ export const OrdersTab: React.FC = () => {
 
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex justify-end gap-3 border-t border-border/60 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-5 py-2.5 border border-border/80 rounded-2xl text-xs hover:bg-muted/20 transition-all font-bold text-foreground cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  style={{
-                    background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
-                  }}
-                  className="px-6 py-2.5 text-black rounded-2xl text-xs font-bold transition-all shadow-md shadow-orange-500/20 hover:scale-[1.02] active:scale-95 cursor-pointer disabled:opacity-50"
-                >
-                  {submitting ? "Saving Order..." : editingOrder ? "Save Changes" : "Post Order"}
-                </button>
-              </div>
-            </form>
+              </form>
+            </div>
+
+            {/* Pinned Modal Footer */}
+            <div className="flex items-center justify-end gap-3 px-5 sm:px-8 py-3.5 sm:py-4 border-t border-border/60 bg-card/95 backdrop-blur-xs shrink-0 rounded-b-[28px]">
+              <button
+                type="button"
+                onClick={() => setShowModal(false)}
+                className="px-5 py-2.5 border border-border/80 rounded-2xl text-xs hover:bg-muted/20 transition-all font-bold text-foreground cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                form="order-form"
+                disabled={submitting}
+                style={{
+                  background: "linear-gradient(115deg, #F7BA49 0%, #F08B4E 46%, #DE5E56 100%)",
+                }}
+                className="px-6 py-2.5 text-black rounded-2xl text-xs font-bold transition-all shadow-md shadow-orange-500/20 hover:scale-[1.02] active:scale-95 cursor-pointer disabled:opacity-50"
+              >
+                {submitting ? "Saving Order..." : editingOrder ? "Save Changes" : "Post Order"}
+              </button>
+            </div>
           </div>
         </div>
       )}

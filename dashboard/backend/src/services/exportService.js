@@ -187,9 +187,10 @@ export const getStatementData = async (type, month, year) => {
     purchases: purchases.map((p, idx) => ({
       sn: idx + 1,
       id: p._id,
-      dateBs: formatBsDate(p.date),
+      dateBs: formatBsDate(p.date || p.createdAt),
       supplier: p.supplier,
       itemDetails: p.itemDetails,
+      items: Array.isArray(p.items) ? p.items : [],
       status: (p.status || "pending").toUpperCase(),
       amount: Number(p.amount) || 0
     }))
